@@ -1,0 +1,29 @@
+{
+  "name": "@rmm/schema",
+  "version": "1.0.0",
+  "description": "Zod schemas, enums, and JSON Schema export for the Recoding Medicine Matchmaker. Framework-agnostic, zero app dependencies.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./enums": "./src/enums.ts",
+    "./profile": "./src/profile.ts",
+    "./dataset": "./src/dataset.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "export-json-schema": "tsx src/export-json-schema.ts",
+    "validate-seed": "tsx src/validate-seed.ts"
+  },
+  "dependencies": {
+    "zod": "^3.24.1",
+    "zod-to-json-schema": "^3.24.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

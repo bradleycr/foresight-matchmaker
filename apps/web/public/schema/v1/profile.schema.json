@@ -1,0 +1,1503 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://recoding-medicine.example/schema/v1/profile.schema.json",
+  "title": "Recoding Medicine Matchmaker — Profile (v1)",
+  "$ref": "#/definitions/Profile",
+  "definitions": {
+    "Profile": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "org_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "org_type": {
+              "type": "string",
+              "enum": [
+                "university",
+                "research_institute",
+                "hospital",
+                "biobank_or_registry",
+                "company",
+                "startup",
+                "incubator",
+                "individual",
+                "other"
+              ]
+            },
+            "country": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "pattern": "^[A-Z]{2}$"
+            },
+            "eligible_hq": {
+              "type": "boolean"
+            },
+            "one_liner": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "website": {
+              "type": "string",
+              "format": "uri"
+            },
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de",
+                  "fr",
+                  "nl",
+                  "es",
+                  "it",
+                  "pl",
+                  "sv",
+                  "da",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "looking_for": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "dataset_access",
+                  "ai_partner",
+                  "clinical_partner",
+                  "data_governance_support",
+                  "compute",
+                  "not_looking"
+                ]
+              },
+              "default": []
+            },
+            "application_status": {
+              "type": "string",
+              "enum": [
+                "undecided",
+                "intend_to_apply",
+                "applying_with_partner",
+                "team_complete",
+                "not_applying"
+              ]
+            },
+            "parallel_public_funding": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unsure"
+              ]
+            },
+            "attending": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "webinar_2026_08_20",
+                  "event_sept_1",
+                  "event_sept_2",
+                  "event_sept_3",
+                  "remote_only"
+                ]
+              },
+              "default": []
+            },
+            "open_to_intros": {
+              "type": "boolean",
+              "default": true
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "public",
+                "authenticated_only",
+                "hidden"
+              ],
+              "default": "public"
+            },
+            "contact_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "contact_email": {
+              "type": "string",
+              "format": "email"
+            },
+            "contact_role": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "claimed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "completeness": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "kind": {
+              "type": "string",
+              "const": "data_holder"
+            },
+            "datasets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "modality": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "imaging_mri",
+                        "imaging_ct",
+                        "imaging_xray",
+                        "imaging_histopath",
+                        "imaging_other",
+                        "genomics",
+                        "transcriptomics",
+                        "proteomics",
+                        "metabolomics",
+                        "multi_omics",
+                        "ehr_structured",
+                        "clinical_notes",
+                        "registry",
+                        "cohort_longitudinal",
+                        "waveform_ecg_eeg",
+                        "wearable_sensor",
+                        "claims",
+                        "biospecimens",
+                        "other"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "disease_area": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "oncology",
+                        "cardiovascular",
+                        "neurology",
+                        "psychiatry",
+                        "rare_disease",
+                        "infectious",
+                        "metabolic_endocrine",
+                        "respiratory",
+                        "musculoskeletal",
+                        "womens_health",
+                        "paediatrics",
+                        "geriatrics",
+                        "multi_domain",
+                        "other"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "n_subjects": {
+                    "type": "string",
+                    "enum": [
+                      "lt_1k",
+                      "1k_10k",
+                      "10k_100k",
+                      "100k_1m",
+                      "gt_1m"
+                    ]
+                  },
+                  "volume": {
+                    "type": "string",
+                    "enum": [
+                      "lt_100gb",
+                      "100gb_1tb",
+                      "1_10tb",
+                      "10_100tb",
+                      "gt_100tb"
+                    ]
+                  },
+                  "time_span_years": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  },
+                  "longitudinal": {
+                    "type": "boolean"
+                  },
+                  "annotation": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "partial",
+                      "expert_labelled",
+                      "outcome_linked"
+                    ]
+                  },
+                  "linkage": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "outcomes",
+                        "mortality",
+                        "genomics",
+                        "imaging",
+                        "medication",
+                        "none"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "standards": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "dicom",
+                        "fhir",
+                        "omop_cdm",
+                        "bids",
+                        "vcf",
+                        "hl7v2",
+                        "snomed",
+                        "proprietary",
+                        "none"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "readiness": {
+                    "type": "string",
+                    "enum": [
+                      "raw",
+                      "partially_curated",
+                      "ai_ready",
+                      "benchmark_ready"
+                    ]
+                  },
+                  "consent_basis": {
+                    "type": "string",
+                    "enum": [
+                      "broad_consent",
+                      "study_specific_consent",
+                      "public_task_art6_1e",
+                      "research_art9_2j",
+                      "fully_anonymised",
+                      "pseudonymised",
+                      "unclear"
+                    ]
+                  },
+                  "access_model": {
+                    "type": "string",
+                    "enum": [
+                      "open_download",
+                      "registered_access",
+                      "dua_required",
+                      "secure_processing_environment_only",
+                      "federated_no_movement",
+                      "synthetic_derivative_only",
+                      "undecided"
+                    ]
+                  },
+                  "data_can_leave_institution": {
+                    "type": "string",
+                    "enum": [
+                      "yes",
+                      "no",
+                      "unsure"
+                    ]
+                  },
+                  "ethics_approval": {
+                    "type": "string",
+                    "enum": [
+                      "approved",
+                      "in_progress",
+                      "not_started",
+                      "not_required"
+                    ]
+                  },
+                  "available_from": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "publicly_describable": {
+                    "type": "boolean"
+                  },
+                  "governance_notes": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "name",
+                  "modality",
+                  "disease_area",
+                  "n_subjects",
+                  "volume",
+                  "longitudinal",
+                  "annotation",
+                  "linkage",
+                  "standards",
+                  "readiness",
+                  "consent_basis",
+                  "access_model",
+                  "data_can_leave_institution",
+                  "ethics_approval",
+                  "publicly_describable"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "id",
+            "slug",
+            "org_name",
+            "org_type",
+            "country",
+            "eligible_hq",
+            "one_liner",
+            "summary",
+            "application_status",
+            "parallel_public_funding",
+            "contact_name",
+            "contact_email",
+            "created_at",
+            "updated_at",
+            "completeness",
+            "kind",
+            "datasets"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "org_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "org_type": {
+              "type": "string",
+              "enum": [
+                "university",
+                "research_institute",
+                "hospital",
+                "biobank_or_registry",
+                "company",
+                "startup",
+                "incubator",
+                "individual",
+                "other"
+              ]
+            },
+            "country": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "pattern": "^[A-Z]{2}$"
+            },
+            "eligible_hq": {
+              "type": "boolean"
+            },
+            "one_liner": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "website": {
+              "type": "string",
+              "format": "uri"
+            },
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de",
+                  "fr",
+                  "nl",
+                  "es",
+                  "it",
+                  "pl",
+                  "sv",
+                  "da",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "looking_for": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "dataset_access",
+                  "ai_partner",
+                  "clinical_partner",
+                  "data_governance_support",
+                  "compute",
+                  "not_looking"
+                ]
+              },
+              "default": []
+            },
+            "application_status": {
+              "type": "string",
+              "enum": [
+                "undecided",
+                "intend_to_apply",
+                "applying_with_partner",
+                "team_complete",
+                "not_applying"
+              ]
+            },
+            "parallel_public_funding": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unsure"
+              ]
+            },
+            "attending": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "webinar_2026_08_20",
+                  "event_sept_1",
+                  "event_sept_2",
+                  "event_sept_3",
+                  "remote_only"
+                ]
+              },
+              "default": []
+            },
+            "open_to_intros": {
+              "type": "boolean",
+              "default": true
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "public",
+                "authenticated_only",
+                "hidden"
+              ],
+              "default": "public"
+            },
+            "contact_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "contact_email": {
+              "type": "string",
+              "format": "email"
+            },
+            "contact_role": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "claimed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "completeness": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "kind": {
+              "type": "string",
+              "const": "ai_team"
+            },
+            "methods": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "foundation_models",
+                  "computer_vision",
+                  "clinical_nlp",
+                  "multimodal",
+                  "graph_knowledge",
+                  "causal_inference",
+                  "survival_longitudinal",
+                  "synthetic_data",
+                  "federated_learning",
+                  "privacy_tech",
+                  "classical_ml_biostat"
+                ]
+              },
+              "default": []
+            },
+            "application_target": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "biomarker_discovery",
+                  "diagnostics",
+                  "clinical_decision_support",
+                  "drug_repurposing",
+                  "prognosis_risk",
+                  "triage_workflow",
+                  "trial_design",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "domain_expertise": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "oncology",
+                  "cardiovascular",
+                  "neurology",
+                  "psychiatry",
+                  "rare_disease",
+                  "infectious",
+                  "metabolic_endocrine",
+                  "respiratory",
+                  "musculoskeletal",
+                  "womens_health",
+                  "paediatrics",
+                  "geriatrics",
+                  "multi_domain",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "clinical_partner": {
+              "type": "string",
+              "enum": [
+                "have",
+                "need",
+                "not_needed"
+              ]
+            },
+            "regulatory_experience": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "mdr",
+                  "ivdr",
+                  "ce_marking",
+                  "gdpr_dpia",
+                  "none"
+                ]
+              },
+              "default": []
+            },
+            "compute": {
+              "type": "string",
+              "enum": [
+                "own_cluster",
+                "cloud_budget",
+                "need_compute",
+                "unsure"
+              ]
+            },
+            "compute_scale": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "privacy_capability": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "can_work_in_tre",
+                  "federated_capable",
+                  "differential_privacy",
+                  "on_prem_only",
+                  "requires_data_export",
+                  "synthetic_only"
+                ]
+              },
+              "default": []
+            },
+            "team_size": {
+              "type": "string",
+              "enum": [
+                "1",
+                "2_5",
+                "6_15",
+                "gt_15"
+              ]
+            },
+            "track_record": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              },
+              "maxItems": 5,
+              "default": []
+            },
+            "data_needs": {
+              "type": "object",
+              "properties": {
+                "modality": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "imaging_mri",
+                      "imaging_ct",
+                      "imaging_xray",
+                      "imaging_histopath",
+                      "imaging_other",
+                      "genomics",
+                      "transcriptomics",
+                      "proteomics",
+                      "metabolomics",
+                      "multi_omics",
+                      "ehr_structured",
+                      "clinical_notes",
+                      "registry",
+                      "cohort_longitudinal",
+                      "waveform_ecg_eeg",
+                      "wearable_sensor",
+                      "claims",
+                      "biospecimens",
+                      "other"
+                    ]
+                  },
+                  "default": []
+                },
+                "disease_area": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "oncology",
+                      "cardiovascular",
+                      "neurology",
+                      "psychiatry",
+                      "rare_disease",
+                      "infectious",
+                      "metabolic_endocrine",
+                      "respiratory",
+                      "musculoskeletal",
+                      "womens_health",
+                      "paediatrics",
+                      "geriatrics",
+                      "multi_domain",
+                      "other"
+                    ]
+                  },
+                  "default": []
+                },
+                "min_n_subjects": {
+                  "type": "string",
+                  "enum": [
+                    "lt_1k",
+                    "1k_10k",
+                    "10k_100k",
+                    "100k_1m",
+                    "gt_1m"
+                  ]
+                },
+                "annotation_required": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "partial",
+                    "expert_labelled",
+                    "outcome_linked"
+                  ]
+                },
+                "linkage_required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "outcomes",
+                      "mortality",
+                      "genomics",
+                      "imaging",
+                      "medication",
+                      "none"
+                    ]
+                  },
+                  "default": []
+                },
+                "standards_preferred": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "dicom",
+                      "fhir",
+                      "omop_cdm",
+                      "bids",
+                      "vcf",
+                      "hl7v2",
+                      "snomed",
+                      "proprietary",
+                      "none"
+                    ]
+                  },
+                  "default": []
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "slug",
+            "org_name",
+            "org_type",
+            "country",
+            "eligible_hq",
+            "one_liner",
+            "summary",
+            "application_status",
+            "parallel_public_funding",
+            "contact_name",
+            "contact_email",
+            "created_at",
+            "updated_at",
+            "completeness",
+            "kind",
+            "clinical_partner",
+            "compute",
+            "team_size",
+            "data_needs"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "org_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "org_type": {
+              "type": "string",
+              "enum": [
+                "university",
+                "research_institute",
+                "hospital",
+                "biobank_or_registry",
+                "company",
+                "startup",
+                "incubator",
+                "individual",
+                "other"
+              ]
+            },
+            "country": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "pattern": "^[A-Z]{2}$"
+            },
+            "eligible_hq": {
+              "type": "boolean"
+            },
+            "one_liner": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "website": {
+              "type": "string",
+              "format": "uri"
+            },
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de",
+                  "fr",
+                  "nl",
+                  "es",
+                  "it",
+                  "pl",
+                  "sv",
+                  "da",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "looking_for": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "dataset_access",
+                  "ai_partner",
+                  "clinical_partner",
+                  "data_governance_support",
+                  "compute",
+                  "not_looking"
+                ]
+              },
+              "default": []
+            },
+            "application_status": {
+              "type": "string",
+              "enum": [
+                "undecided",
+                "intend_to_apply",
+                "applying_with_partner",
+                "team_complete",
+                "not_applying"
+              ]
+            },
+            "parallel_public_funding": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unsure"
+              ]
+            },
+            "attending": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "webinar_2026_08_20",
+                  "event_sept_1",
+                  "event_sept_2",
+                  "event_sept_3",
+                  "remote_only"
+                ]
+              },
+              "default": []
+            },
+            "open_to_intros": {
+              "type": "boolean",
+              "default": true
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "public",
+                "authenticated_only",
+                "hidden"
+              ],
+              "default": "public"
+            },
+            "contact_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "contact_email": {
+              "type": "string",
+              "format": "email"
+            },
+            "contact_role": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "claimed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "completeness": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "kind": {
+              "type": "string",
+              "const": "consortium"
+            },
+            "datasets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "modality": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "imaging_mri",
+                        "imaging_ct",
+                        "imaging_xray",
+                        "imaging_histopath",
+                        "imaging_other",
+                        "genomics",
+                        "transcriptomics",
+                        "proteomics",
+                        "metabolomics",
+                        "multi_omics",
+                        "ehr_structured",
+                        "clinical_notes",
+                        "registry",
+                        "cohort_longitudinal",
+                        "waveform_ecg_eeg",
+                        "wearable_sensor",
+                        "claims",
+                        "biospecimens",
+                        "other"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "disease_area": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "oncology",
+                        "cardiovascular",
+                        "neurology",
+                        "psychiatry",
+                        "rare_disease",
+                        "infectious",
+                        "metabolic_endocrine",
+                        "respiratory",
+                        "musculoskeletal",
+                        "womens_health",
+                        "paediatrics",
+                        "geriatrics",
+                        "multi_domain",
+                        "other"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "n_subjects": {
+                    "type": "string",
+                    "enum": [
+                      "lt_1k",
+                      "1k_10k",
+                      "10k_100k",
+                      "100k_1m",
+                      "gt_1m"
+                    ]
+                  },
+                  "volume": {
+                    "type": "string",
+                    "enum": [
+                      "lt_100gb",
+                      "100gb_1tb",
+                      "1_10tb",
+                      "10_100tb",
+                      "gt_100tb"
+                    ]
+                  },
+                  "time_span_years": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  },
+                  "longitudinal": {
+                    "type": "boolean"
+                  },
+                  "annotation": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "partial",
+                      "expert_labelled",
+                      "outcome_linked"
+                    ]
+                  },
+                  "linkage": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "outcomes",
+                        "mortality",
+                        "genomics",
+                        "imaging",
+                        "medication",
+                        "none"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "standards": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "dicom",
+                        "fhir",
+                        "omop_cdm",
+                        "bids",
+                        "vcf",
+                        "hl7v2",
+                        "snomed",
+                        "proprietary",
+                        "none"
+                      ]
+                    },
+                    "minItems": 1
+                  },
+                  "readiness": {
+                    "type": "string",
+                    "enum": [
+                      "raw",
+                      "partially_curated",
+                      "ai_ready",
+                      "benchmark_ready"
+                    ]
+                  },
+                  "consent_basis": {
+                    "type": "string",
+                    "enum": [
+                      "broad_consent",
+                      "study_specific_consent",
+                      "public_task_art6_1e",
+                      "research_art9_2j",
+                      "fully_anonymised",
+                      "pseudonymised",
+                      "unclear"
+                    ]
+                  },
+                  "access_model": {
+                    "type": "string",
+                    "enum": [
+                      "open_download",
+                      "registered_access",
+                      "dua_required",
+                      "secure_processing_environment_only",
+                      "federated_no_movement",
+                      "synthetic_derivative_only",
+                      "undecided"
+                    ]
+                  },
+                  "data_can_leave_institution": {
+                    "type": "string",
+                    "enum": [
+                      "yes",
+                      "no",
+                      "unsure"
+                    ]
+                  },
+                  "ethics_approval": {
+                    "type": "string",
+                    "enum": [
+                      "approved",
+                      "in_progress",
+                      "not_started",
+                      "not_required"
+                    ]
+                  },
+                  "available_from": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "publicly_describable": {
+                    "type": "boolean"
+                  },
+                  "governance_notes": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "name",
+                  "modality",
+                  "disease_area",
+                  "n_subjects",
+                  "volume",
+                  "longitudinal",
+                  "annotation",
+                  "linkage",
+                  "standards",
+                  "readiness",
+                  "consent_basis",
+                  "access_model",
+                  "data_can_leave_institution",
+                  "ethics_approval",
+                  "publicly_describable"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "methods": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "foundation_models",
+                  "computer_vision",
+                  "clinical_nlp",
+                  "multimodal",
+                  "graph_knowledge",
+                  "causal_inference",
+                  "survival_longitudinal",
+                  "synthetic_data",
+                  "federated_learning",
+                  "privacy_tech",
+                  "classical_ml_biostat"
+                ]
+              },
+              "default": []
+            },
+            "application_target": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "biomarker_discovery",
+                  "diagnostics",
+                  "clinical_decision_support",
+                  "drug_repurposing",
+                  "prognosis_risk",
+                  "triage_workflow",
+                  "trial_design",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "domain_expertise": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "oncology",
+                  "cardiovascular",
+                  "neurology",
+                  "psychiatry",
+                  "rare_disease",
+                  "infectious",
+                  "metabolic_endocrine",
+                  "respiratory",
+                  "musculoskeletal",
+                  "womens_health",
+                  "paediatrics",
+                  "geriatrics",
+                  "multi_domain",
+                  "other"
+                ]
+              },
+              "default": []
+            },
+            "clinical_partner": {
+              "type": "string",
+              "enum": [
+                "have",
+                "need",
+                "not_needed"
+              ]
+            },
+            "regulatory_experience": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "mdr",
+                  "ivdr",
+                  "ce_marking",
+                  "gdpr_dpia",
+                  "none"
+                ]
+              },
+              "default": []
+            },
+            "compute": {
+              "type": "string",
+              "enum": [
+                "own_cluster",
+                "cloud_budget",
+                "need_compute",
+                "unsure"
+              ]
+            },
+            "compute_scale": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "privacy_capability": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "can_work_in_tre",
+                  "federated_capable",
+                  "differential_privacy",
+                  "on_prem_only",
+                  "requires_data_export",
+                  "synthetic_only"
+                ]
+              },
+              "default": []
+            },
+            "team_size": {
+              "type": "string",
+              "enum": [
+                "1",
+                "2_5",
+                "6_15",
+                "gt_15"
+              ]
+            },
+            "track_record": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              },
+              "maxItems": 5,
+              "default": []
+            },
+            "data_needs": {
+              "type": "object",
+              "properties": {
+                "modality": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "imaging_mri",
+                      "imaging_ct",
+                      "imaging_xray",
+                      "imaging_histopath",
+                      "imaging_other",
+                      "genomics",
+                      "transcriptomics",
+                      "proteomics",
+                      "metabolomics",
+                      "multi_omics",
+                      "ehr_structured",
+                      "clinical_notes",
+                      "registry",
+                      "cohort_longitudinal",
+                      "waveform_ecg_eeg",
+                      "wearable_sensor",
+                      "claims",
+                      "biospecimens",
+                      "other"
+                    ]
+                  },
+                  "default": []
+                },
+                "disease_area": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "oncology",
+                      "cardiovascular",
+                      "neurology",
+                      "psychiatry",
+                      "rare_disease",
+                      "infectious",
+                      "metabolic_endocrine",
+                      "respiratory",
+                      "musculoskeletal",
+                      "womens_health",
+                      "paediatrics",
+                      "geriatrics",
+                      "multi_domain",
+                      "other"
+                    ]
+                  },
+                  "default": []
+                },
+                "min_n_subjects": {
+                  "type": "string",
+                  "enum": [
+                    "lt_1k",
+                    "1k_10k",
+                    "10k_100k",
+                    "100k_1m",
+                    "gt_1m"
+                  ]
+                },
+                "annotation_required": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "partial",
+                    "expert_labelled",
+                    "outcome_linked"
+                  ]
+                },
+                "linkage_required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "outcomes",
+                      "mortality",
+                      "genomics",
+                      "imaging",
+                      "medication",
+                      "none"
+                    ]
+                  },
+                  "default": []
+                },
+                "standards_preferred": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "dicom",
+                      "fhir",
+                      "omop_cdm",
+                      "bids",
+                      "vcf",
+                      "hl7v2",
+                      "snomed",
+                      "proprietary",
+                      "none"
+                    ]
+                  },
+                  "default": []
+                }
+              },
+              "additionalProperties": false
+            },
+            "still_seeking": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "dataset_access",
+                  "ai_partner",
+                  "clinical_partner",
+                  "data_governance_support",
+                  "compute",
+                  "not_looking"
+                ]
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "id",
+            "slug",
+            "org_name",
+            "org_type",
+            "country",
+            "eligible_hq",
+            "one_liner",
+            "summary",
+            "application_status",
+            "parallel_public_funding",
+            "contact_name",
+            "contact_email",
+            "created_at",
+            "updated_at",
+            "completeness",
+            "kind",
+            "datasets",
+            "clinical_partner",
+            "compute",
+            "team_size",
+            "data_needs"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

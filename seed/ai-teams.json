@@ -1,0 +1,891 @@
+[
+  {
+    "id": "a1000000-0000-4000-8000-000000000001",
+    "slug": "helix-vision-labs",
+    "org_name": "Helix Vision Labs",
+    "org_type": "startup",
+    "country": "DE",
+    "eligible_hq": true,
+    "one_liner": "Computer-vision oncology diagnostics; TRE-native, federated-capable.",
+    "summary": "A computer-vision team building tumour-detection models for MRI and CT. We work entirely inside secure processing environments and support federated training.",
+    "website": "https://example.com/helix-vision",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact M",
+    "contact_email": "team-m@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 100,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "foundation_models",
+      "multimodal"
+    ],
+    "application_target": [
+      "diagnostics",
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "oncology"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "ce_marking",
+      "gdpr_dpia"
+    ],
+    "compute": "own_cluster",
+    "compute_scale": "16x H100",
+    "privacy_capability": [
+      "can_work_in_tre",
+      "federated_capable",
+      "differential_privacy"
+    ],
+    "team_size": "6_15",
+    "track_record": [
+      "https://example.com/helix/pub1",
+      "https://example.com/helix/pub2"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_mri",
+        "imaging_ct"
+      ],
+      "disease_area": [
+        "oncology"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "dicom",
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000002",
+    "slug": "meridian-clinical-nlp",
+    "org_name": "Meridian Clinical NLP",
+    "org_type": "company",
+    "country": "IE",
+    "eligible_hq": true,
+    "one_liner": "Clinical NLP for free-text notes; on-prem and federated.",
+    "summary": "We extract structured signals from clinical notes across languages. GDPR-DPIA experienced, on-prem deployment, no data export required.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access",
+      "clinical_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact N",
+    "contact_email": "team-n@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "clinical_nlp",
+      "foundation_models"
+    ],
+    "application_target": [
+      "clinical_decision_support",
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "multi_domain"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "on_prem_only",
+      "federated_capable"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/meridian/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "clinical_notes",
+        "ehr_structured"
+      ],
+      "disease_area": [
+        "multi_domain"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "fhir",
+        "snomed"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000003",
+    "slug": "kestrel-genomics-ai",
+    "org_name": "Kestrel Genomics AI",
+    "org_type": "startup",
+    "country": "GB",
+    "eligible_hq": true,
+    "one_liner": "Rare-disease variant interpretation; federated by design.",
+    "summary": "Graph and foundation models for genomic variant interpretation in rare disease. Built for federated learning; never requires raw data export.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact O",
+    "contact_email": "team-o@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "graph_knowledge",
+      "foundation_models",
+      "federated_learning"
+    ],
+    "application_target": [
+      "diagnostics",
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "rare_disease",
+      "neurology"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "federated_capable",
+      "can_work_in_tre"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/kestrel/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "genomics",
+        "transcriptomics"
+      ],
+      "disease_area": [
+        "rare_disease"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "genomics"
+      ],
+      "standards_preferred": [
+        "vcf"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000004",
+    "slug": "cadence-cardio-ai",
+    "org_name": "Cadence Cardio AI",
+    "org_type": "startup",
+    "country": "IT",
+    "eligible_hq": true,
+    "one_liner": "ECG foundation models for arrhythmia risk; requires data export.",
+    "summary": "We build waveform foundation models for cardiovascular risk. Our current pipeline requires exporting de-identified extracts to our cloud environment.",
+    "languages": [
+      "it",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact P",
+    "contact_email": "team-p@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "foundation_models",
+      "survival_longitudinal"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "cardiovascular"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "ce_marking"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/cadence/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "waveform_ecg_eeg",
+        "ehr_structured"
+      ],
+      "disease_area": [
+        "cardiovascular"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "outcomes",
+        "mortality"
+      ],
+      "standards_preferred": [
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000005",
+    "slug": "lumen-pathology-ai",
+    "org_name": "Lumen Pathology AI",
+    "org_type": "company",
+    "country": "FR",
+    "eligible_hq": true,
+    "one_liner": "Computational pathology on whole-slide images; TRE-native.",
+    "summary": "Foundation models for computational pathology. We operate inside institutional TREs and export only model weights and derived metrics.",
+    "languages": [
+      "fr",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact Q",
+    "contact_email": "team-q@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "foundation_models"
+    ],
+    "application_target": [
+      "diagnostics",
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "oncology"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "ce_marking",
+      "ivdr"
+    ],
+    "compute": "own_cluster",
+    "compute_scale": "8x A100",
+    "privacy_capability": [
+      "can_work_in_tre",
+      "differential_privacy"
+    ],
+    "team_size": "6_15",
+    "track_record": [
+      "https://example.com/lumen/pub1",
+      "https://example.com/lumen/pub2"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_histopath"
+      ],
+      "disease_area": [
+        "oncology"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "dicom"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000006",
+    "slug": "synthase-data",
+    "org_name": "Synthase Data",
+    "org_type": "startup",
+    "country": "NL",
+    "eligible_hq": true,
+    "one_liner": "Synthetic-data generation for privacy-safe modelling.",
+    "summary": "We generate high-fidelity synthetic derivatives so partners can prototype without touching source data. Synthetic-only footprint; no export of real records.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access",
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact R",
+    "contact_email": "team-r@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data",
+      "privacy_tech"
+    ],
+    "application_target": [
+      "trial_design",
+      "clinical_decision_support"
+    ],
+    "domain_expertise": [
+      "multi_domain"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "synthetic_only",
+      "differential_privacy"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/synthase/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "ehr_structured"
+      ],
+      "disease_area": [
+        "multi_domain"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "none",
+      "linkage_required": [],
+      "standards_preferred": [
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000007",
+    "slug": "aurora-causal-health",
+    "org_name": "Aurora Causal Health",
+    "org_type": "research_institute",
+    "country": "FI",
+    "eligible_hq": true,
+    "one_liner": "Causal inference for treatment effects; federated + TRE.",
+    "summary": "A causal-inference group estimating treatment effects from observational cohorts. Federated-capable and TRE-native, GDPR-DPIA experienced.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact S",
+    "contact_email": "team-s@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "causal_inference",
+      "classical_ml_biostat",
+      "survival_longitudinal"
+    ],
+    "application_target": [
+      "drug_repurposing",
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "metabolic_endocrine",
+      "cardiovascular"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "federated_capable",
+      "can_work_in_tre"
+    ],
+    "team_size": "6_15",
+    "track_record": [
+      "https://example.com/aurora/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "ehr_structured",
+        "claims"
+      ],
+      "disease_area": [
+        "metabolic_endocrine",
+        "cardiovascular"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "outcomes",
+        "medication"
+      ],
+      "standards_preferred": [
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000008",
+    "slug": "neura-signal",
+    "org_name": "Neura Signal",
+    "org_type": "startup",
+    "country": "IL",
+    "eligible_hq": true,
+    "one_liner": "Multimodal brain-MRI + EHR for psychiatry; TRE-capable.",
+    "summary": "Multimodal models combining brain MRI with structured records for psychiatric outcome prediction. We can operate within a TRE and support federated setups.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact T",
+    "contact_email": "team-t@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "multimodal",
+      "computer_vision",
+      "foundation_models"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "clinical_decision_support"
+    ],
+    "domain_expertise": [
+      "psychiatry",
+      "neurology"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "can_work_in_tre",
+      "federated_capable"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/neura/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_mri",
+        "ehr_structured"
+      ],
+      "disease_area": [
+        "psychiatry",
+        "neurology"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "bids",
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000009",
+    "slug": "tessera-wearables-ai",
+    "org_name": "Tessera Wearables AI",
+    "org_type": "startup",
+    "country": "DK",
+    "eligible_hq": true,
+    "one_liner": "Wearable time-series risk models; requires cloud export.",
+    "summary": "We model continuous wearable sensor streams for cardiometabolic risk. Our pipeline currently needs de-identified export to our cloud.",
+    "languages": [
+      "da",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access",
+      "compute"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact U",
+    "contact_email": "team-u@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "survival_longitudinal",
+      "classical_ml_biostat"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "cardiovascular",
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "none"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "1",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "wearable_sensor",
+        "ehr_structured"
+      ],
+      "disease_area": [
+        "cardiovascular"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000000a",
+    "slug": "palantea-diagnostics",
+    "org_name": "Palantea Diagnostics",
+    "org_type": "company",
+    "country": "ES",
+    "eligible_hq": true,
+    "one_liner": "Respiratory prognosis on claims + registry data; federated.",
+    "summary": "Prognosis models for respiratory disease built on large claims and registry data. Federated-capable, GDPR-DPIA experienced, cloud budget in place.",
+    "languages": [
+      "es",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact V",
+    "contact_email": "team-v@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "classical_ml_biostat",
+      "survival_longitudinal"
+    ],
+    "application_target": [
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "respiratory"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "federated_capable",
+      "can_work_in_tre"
+    ],
+    "team_size": "6_15",
+    "track_record": [
+      "https://example.com/palantea/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "claims",
+        "registry"
+      ],
+      "disease_area": [
+        "respiratory"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "outcomes",
+        "medication"
+      ],
+      "standards_preferred": [
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000000b",
+    "slug": "orbit-paediatric-ml",
+    "org_name": "Orbit Paediatric ML",
+    "org_type": "research_institute",
+    "country": "CH",
+    "eligible_hq": true,
+    "one_liner": "Paediatric risk models across domains; on-prem federated.",
+    "summary": "Federated risk models for paediatric care. We deploy on-prem inside partner institutions and never move raw data.",
+    "languages": [
+      "de",
+      "fr",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access",
+      "clinical_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact W",
+    "contact_email": "team-w@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "federated_learning",
+      "classical_ml_biostat"
+    ],
+    "application_target": [
+      "clinical_decision_support",
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "paediatrics",
+      "multi_domain"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "federated_capable",
+      "on_prem_only"
+    ],
+    "team_size": "6_15",
+    "track_record": [
+      "https://example.com/orbit/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "ehr_structured",
+        "registry"
+      ],
+      "disease_area": [
+        "paediatrics"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "fhir",
+        "snomed"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000000c",
+    "slug": "vector-women-s-imaging",
+    "org_name": "Vector Women's Imaging",
+    "org_type": "startup",
+    "country": "SE",
+    "eligible_hq": true,
+    "one_liner": "Mammography diagnostics; benchmark-ready, TRE + export options.",
+    "summary": "Diagnostic imaging models for women's health. We can work in a TRE or with de-identified benchmark exports, whichever governance allows.",
+    "languages": [
+      "sv",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact X",
+    "contact_email": "team-x@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "foundation_models"
+    ],
+    "application_target": [
+      "diagnostics",
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "womens_health",
+      "oncology"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "ce_marking",
+      "mdr"
+    ],
+    "compute": "own_cluster",
+    "compute_scale": "4x H100",
+    "privacy_capability": [
+      "can_work_in_tre",
+      "requires_data_export"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/vector/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_xray"
+      ],
+      "disease_area": [
+        "womens_health"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "dicom"
+      ]
+    }
+  }
+]
