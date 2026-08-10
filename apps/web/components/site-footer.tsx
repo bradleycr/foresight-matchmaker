@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
+import { PartnerLogos } from "./partner-logos"
 
 /** Directory back matter: hard facts, the public contract, and the small print. */
 export async function SiteFooter() {
@@ -36,6 +37,11 @@ export async function SiteFooter() {
             </Link>
           </p>
         </div>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-3 border-t border-rule pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink">{t("footer.partners")}</p>
+        <PartnerLogos />
       </div>
     </footer>
   )

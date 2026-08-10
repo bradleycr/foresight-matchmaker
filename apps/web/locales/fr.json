@@ -57,6 +57,7 @@
   "privacy.controller_body": "[CONTROLLER TBD] — le responsable du traitement pour cette instance n'est pas encore désigné. En attendant, adressez vos demandes à l'organisation qui exploite cette instance.",
   "privacy.deletion_body": "Ce prototype n'a pas de bouton de suppression en libre-service. Écrivez au responsable (une fois désigné) depuis l'e-mail de contact du profil et indiquez le profil à supprimer. En attendant, contactez les opérateurs de cette instance. La suppression couvre le profil, son cache de correspondances et les mises en relation ouvertes ; le journal d'événements est anonymisé.",
   "footer.synthetic": "Les profils préchargés sont synthétiques (.invalid). Les inscriptions réelles ne vivent que dans la base de cette instance — voir l'avis de confidentialité.",
+  "footer.partners": "Avec",
   "form.visibility_hint": "Public : tout le monde. Authentifié uniquement : utilisateurs connectés. Masqué : non listé (les mises en relation déjà ouvertes restent possibles).",
   "outcome.error": "Enregistrement impossible. Réessayez.",
   "inbox.expires": "Répondre avant le {date}",

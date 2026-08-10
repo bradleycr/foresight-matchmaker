@@ -18,6 +18,7 @@
   "footer.about": "About this directory",
   "footer.synthetic": "Profiles seeded before launch are synthetic and use .invalid addresses. Real registrations live only in this deployment's database — see the privacy notice.",
   "footer.privacy": "Privacy notice",
+  "footer.partners": "With",
   "landing.kicker": "SPRIND challenge — Recoding Medicine",
   "landing.headline": "An AI team without a dataset cannot apply. Find the partner that makes you eligible.",
   "landing.subhead": "Demonstrable access to at least one suitable health dataset is a hard prerequisite of the Recoding Medicine challenge. This directory pairs European data holders with AI teams so that joint applications exist by 16 October 2026.",
