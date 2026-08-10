@@ -73,7 +73,10 @@ function loadBulk(seedDir: string, skipSlugs: Set<string>): Profile[] {
   const out: Profile[] = []
   for (const file of BULK_FILES) {
     const records = JSON.parse(
-      fs.readFileSync(/* turbopackIgnore: true */ path.join(seedDir, file), "utf8"),
+      fs.readFileSync(
+        /* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ seedDir, file),
+        "utf8",
+      ),
     ) as unknown[]
     for (const record of records) {
       const profile = profileSchema.parse(record)

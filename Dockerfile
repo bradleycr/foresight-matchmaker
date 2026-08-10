@@ -25,7 +25,8 @@ RUN pnpm install --frozen-lockfile
 # ---- build ----------------------------------------------------------------
 FROM deps AS build
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    STANDALONE=1
 RUN pnpm --filter @rmm/web build
 
 # ---- runtime --------------------------------------------------------------
