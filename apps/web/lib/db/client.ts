@@ -16,6 +16,11 @@ import * as tables from "./schema"
 function resolveDatabasePath(): string {
   if (process.env.DATABASE_PATH) return process.env.DATABASE_PATH
 
+  // Vercel’s filesystem is ephemeral — keep the SQLite file under /tmp so
+  // writes succeed. Data does not survive cold starts; fine for a smoke demo,
+  // not for durable production (use the Docker/VM path for that).
+  if (process.env.VERCEL) return "/tmp/rmm-app.db"
+
   let dir = process.cwd()
   for (let i = 0; i < 6; i++) {
     if (fs.existsSync(path.join(dir, "pnpm-workspace.yaml"))) break

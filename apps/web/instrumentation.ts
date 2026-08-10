@@ -8,7 +8,12 @@
  */
 export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== "nodejs") return
-  if (process.env.SEED_ON_EMPTY !== "true") return
+  // Auto-seed on Vercel preview/prod smoke deploys (ephemeral /tmp DB) and
+  // when the Docker image explicitly opts in.
+  const shouldSeed =
+    process.env.SEED_ON_EMPTY === "true" ||
+    (process.env.VERCEL === "1" && process.env.SEED_ON_EMPTY !== "false")
+  if (!shouldSeed) return
 
   const { seedIfEmpty } = await import("./lib/db/seed-core")
   try {
