@@ -75,11 +75,19 @@ Expect `200`, `200`, and `37 profiles` (or more once P1.3 regenerates the seed
 
 ## Resetting between rehearsals
 
-There is no remote "reset" button yet (that's `pnpm db:reset` / `db:demo`,
-tracked as P0.2 — those scripts run against a **local** SQLite file; they do
-not reach into Vercel's `/tmp`). Until a remote-safe reset endpoint exists,
-the reliable way to clear rehearsal junk (test registrations, intros,
-accepted/declined state) from the live deployment is to force a fresh
+`pnpm db:seed` alone is not a reset — it only upserts profiles, so intros,
+events, and the match cache accumulate rehearsal junk. Two scripts fix this,
+**but they run against a local SQLite file**, not Vercel's remote `/tmp`:
+
+- `pnpm db:reset` — truncates profiles/matches/intros/auth_tokens/events,
+  reseeds the 37 synthetic profiles, rebuilds the match cache. A pristine,
+  empty-inbox state.
+- `pnpm db:demo` — does the same reset, then pre-loads one **pending
+  received** introduction and one already-**accepted** introduction into a
+  known demo profile's inbox, so you can show the double opt-in flow
+  (including the revealed contact block) without live-typing both sides.
+
+On the actual Vercel deployment, the equivalent reset is to force a fresh
 serverless instance:
 
 ```bash
@@ -87,23 +95,32 @@ vercel deploy --prod --scope bradley-royes-projects --yes
 ```
 
 A new deployment gets a fresh `/tmp`, so `SEED_ON_EMPTY` reseeds the pristine
-37-profile directory and every rehearsal artifact is gone. This takes
-roughly 30–60 seconds; don't do it in the middle of a live demo, only
-between rehearsal runs or right before you go on.
+37-profile directory (no accepted/pending intros — that's local-only via
+`db:demo` for now; there is no remote-safe way to run `db:demo`'s intro
+seeding against the live deployment). This takes roughly 30–60 seconds;
+don't do it in the middle of a live demo, only between rehearsal runs or
+right before you go on. If you need the demo-intro state on the *deployed*
+URL specifically, run the app against `apps/web/.env` locally
+(`DATABASE_PATH` unset → local `./data/app.db`) for that part of the
+rehearsal instead.
 
 ## Signing in during the demo
 
 With `AUTH_REVEAL_LINKS=true`, `/signin` shows the magic link on screen
 immediately after you submit a seed contact email — no email account needed.
-Known-good seed sign-in emails:
 
-- `a.voss@example.invalid`
-- `j.bakhuizen@example.invalid`
+**Demo account** (after `pnpm db:demo`): `j.bakhuizen@example.invalid` —
+Stichting Regionaal Pathologie Archief Zuid (`rpaz-zuid`). Signing in as this
+profile and opening `/me/inbox` shows one pending received introduction (from
+Elbe Vision Lab) and one already-accepted introduction with a revealed
+contact block (from Fédération Neuro-IA, Lyon) — no live typing required to
+demonstrate the double opt-in flow both ways.
+
+Other known-good seed sign-in emails if you need a second party to
+demonstrate *sending* a fresh request live:
+
+- `a.voss@example.invalid` — Universitätsklinikum Nordharz
 - `holder-a@example.invalid`
-
-(Once P0.2 lands, this section will instead point at the one scripted
-`pnpm db:demo` account with a pending and an already-accepted intro
-pre-loaded, so you don't have to live-type both sides of an introduction.)
 
 ## Admin
 

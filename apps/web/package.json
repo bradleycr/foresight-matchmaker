@@ -9,7 +9,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:seed": "tsx lib/db/seed.ts"
+    "db:seed": "tsx lib/db/seed.ts",
+    "db:reset": "tsx lib/db/reset.ts",
+    "db:demo": "tsx lib/db/demo.ts"
   },
   "dependencies": {
     "@rmm/matching": "workspace:*",
