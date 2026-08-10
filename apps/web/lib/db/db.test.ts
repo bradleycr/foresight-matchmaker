@@ -5,7 +5,7 @@ process.env.DATABASE_PATH = ":memory:"
 
 import { saveProfile, listPublicProfiles, getProfilesByEmail } from "./profiles"
 import { getShortlist } from "./matches"
-import { requestIntro, respondToIntro, listIntrosFor } from "./intros"
+import { requestIntro, respondToIntro, listIntrosFor, rateLimitPer24h } from "./intros"
 
 const PRIVATE_KEYS = ["contact_name", "contact_email", "contact_role", "governance_notes"]
 
@@ -192,5 +192,34 @@ describe("intro flow", () => {
     }
     const oneMore = makeDataHolder(20, { slug: "holder-rl-final" })
     expect(requestIntro(team.id, oneMore.id, "Too many")).toEqual({ ok: false, error: "rate_limited" })
+  })
+
+  it("honours RATE_LIMIT_PER_24H from the environment", () => {
+    const original = process.env.RATE_LIMIT_PER_24H
+    process.env.RATE_LIMIT_PER_24H = "2"
+    try {
+      expect(rateLimitPer24h()).toBe(2)
+      const sender = makeAiTeam(30, { slug: "rl-config-team" })
+      const t1 = makeDataHolder(30, { slug: "rl-config-holder-1" })
+      const t2 = makeDataHolder(31, { slug: "rl-config-holder-2" })
+      const t3 = makeDataHolder(32, { slug: "rl-config-holder-3" })
+      expect(requestIntro(sender.id, t1.id, "One").ok).toBe(true)
+      expect(requestIntro(sender.id, t2.id, "Two").ok).toBe(true)
+      expect(requestIntro(sender.id, t3.id, "Three")).toEqual({ ok: false, error: "rate_limited" })
+    } finally {
+      if (original === undefined) delete process.env.RATE_LIMIT_PER_24H
+      else process.env.RATE_LIMIT_PER_24H = original
+    }
+  })
+
+  it("falls back to 5 when the environment value is unset or invalid", () => {
+    const original = process.env.RATE_LIMIT_PER_24H
+    for (const invalid of [undefined, "", "0", "-3", "not-a-number"]) {
+      if (invalid === undefined) delete process.env.RATE_LIMIT_PER_24H
+      else process.env.RATE_LIMIT_PER_24H = invalid
+      expect(rateLimitPer24h()).toBe(5)
+    }
+    if (original === undefined) delete process.env.RATE_LIMIT_PER_24H
+    else process.env.RATE_LIMIT_PER_24H = original
   })
 })

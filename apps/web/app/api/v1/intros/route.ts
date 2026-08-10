@@ -4,7 +4,7 @@ import { introRequestSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, unauthorized, notFound, tooMany } from "@/lib/api/respond"
 import { getSession } from "@/lib/auth/session"
 import { getProfileById } from "@/lib/db/profiles"
-import { listIntrosFor, requestIntro, type Intro } from "@/lib/db/intros"
+import { listIntrosFor, requestIntro, rateLimitPer24h, type Intro } from "@/lib/db/intros"
 
 export const dynamic = "force-dynamic"
 
@@ -86,7 +86,9 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (!result.ok) {
     switch (result.error) {
       case "rate_limited":
-        return tooMany("You have sent 5 introduction requests in the last 24 hours. Try again later.")
+        return tooMany(
+          `You have sent ${rateLimitPer24h()} introduction requests in the last 24 hours. Try again later.`,
+        )
       case "duplicate_pending":
         return badRequest("There is already an open introduction between you and this organisation.")
       case "self_intro":

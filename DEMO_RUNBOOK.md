@@ -37,6 +37,7 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | `AUTH_REVEAL_LINKS` | `true` | **Load-bearing.** With no SMTP configured, this is the only way anyone — including you, on stage — can sign in. Without it, magic links go to the server log only and `/signin` becomes unusable live. |
 | `SEED_ON_EMPTY` | `true` | Auto-seeds the 118 synthetic profiles on a cold `/tmp`. |
 | `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
+| `RATE_LIMIT_PER_24H` | `20` (recommended for the demo) | Outbound intro requests allowed per profile per rolling 24h. Defaults to 5, which a few rehearsal run-throughs from the same account will exhaust — set it higher for the demo so a live retry never trips `rate_limited` on stage. |
 
 `/signin` already states which delivery mode is live (`lib/auth/mail.ts` →
 `magicLinkMode()`), so if `AUTH_REVEAL_LINKS` were ever unset in production

@@ -18,7 +18,17 @@ import { logEvent } from "./events"
  */
 
 const EXPIRY_DAYS = 14
-const RATE_LIMIT_PER_24H = 5
+
+/**
+ * Outbound intro requests allowed per profile per rolling 24h. Configurable
+ * via env so a demo rehearsal (which sends far more than 5 requests from one
+ * account in a single sitting) doesn't lock the presenter out mid-run.
+ * Falls back to 5 if unset, non-numeric, or non-positive.
+ */
+export function rateLimitPer24h(): number {
+  const raw = Number.parseInt(process.env.RATE_LIMIT_PER_24H ?? "", 10)
+  return Number.isFinite(raw) && raw > 0 ? raw : 5
+}
 
 export interface Intro {
   id: string
@@ -104,13 +114,13 @@ export function requestIntro(fromId: string, toId: string, message: string): Req
   const db = getDb()
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-  // Max 5 outbound requests per profile per rolling 24h.
+  // Max N outbound requests per profile per rolling 24h — see rateLimitPer24h().
   const recent = db
     .select({ id: intros.id })
     .from(intros)
     .where(and(eq(intros.fromId, fromId), gt(intros.createdAt, since)))
     .all()
-  if (recent.length >= RATE_LIMIT_PER_24H) return { ok: false, error: "rate_limited" }
+  if (recent.length >= rateLimitPer24h()) return { ok: false, error: "rate_limited" }
 
   // One open request per pair at a time.
   const pending = db
