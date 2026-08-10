@@ -1,5 +1,5 @@
-import type { Profile, Dataset, DataNeeds, Blocker, PairingSides } from "./types.js"
-import { consortiumIsSeeking } from "./helpers.js"
+import type { Profile, Dataset, DataNeeds, Blocker, PairingSides } from "./types"
+import { consortiumIsSeeking } from "./helpers"
 
 /**
  * Hard and soft blockers for a candidate pairing.
@@ -48,7 +48,7 @@ function profileHardBlockers(p: Profile, label: "a" | "b"): Blocker[] {
   if (p.visibility === "hidden") {
     out.push({ key: `${label}.visibility_hidden`, severity: "hard", note: "This profile is hidden." })
   }
-  if (p.eligible_hq === false) {
+  if (p.eligible_hq === false && p.partner_only !== true) {
     out.push({
       key: `${label}.eligible_hq`,
       severity: "hard",
@@ -141,6 +141,19 @@ function softBlockers(sides: PairingSides): Blocker[] {
     })
   }
 
+  // Stage 1 begins early November 2026 (Pitch Day). Datasets that only become
+  // available after that date need an explicit plan — soft, not hard.
+  const STAGE_1_START = "2026-11-01"
+  const late = datasets.filter((d) => d.available_from && d.available_from > STAGE_1_START)
+  if (late.length > 0) {
+    const dates = late.map((d) => d.available_from).join(", ")
+    out.push({
+      key: "available_from_after_stage1",
+      severity: "soft",
+      note: `At least one dataset is marked available from ${dates}, after Stage 1 start (${STAGE_1_START}). Confirm the timeline before applying.`,
+    })
+  }
+
   if (aiSide.kind === "ai_team" || aiSide.kind === "consortium") {
     if (aiSide.clinical_partner === "need") {
       out.push({
@@ -151,6 +164,33 @@ function softBlockers(sides: PairingSides): Blocker[] {
     }
   }
 
+  return out
+}
+
+/** Soft blockers that apply to either side of a pair, independent of orientation. */
+function profileSoftBlockers(a: Profile, b: Profile): Blocker[] {
+  const out: Blocker[] = []
+  for (const [p, label] of [
+    [a, "a"],
+    [b, "b"],
+  ] as const) {
+    if (p.partner_only) {
+      out.push({
+        key: `${label}.partner_only`,
+        severity: "soft",
+        note:
+          "This organisation can collaborate but cannot lead an application (HQ outside the eligible region).",
+      })
+    }
+    if (p.parallel_public_funding === "unsure") {
+      out.push({
+        key: `${label}.parallel_public_funding_unsure`,
+        severity: "soft",
+        note:
+          "Parallel public funding is marked unsure — resolve this before applying; 'yes' would hard-block the match.",
+      })
+    }
+  }
   return out
 }
 
@@ -174,6 +214,20 @@ export function structuralHardBlockers(a: Profile, b: Profile, oriented: Pairing
     })
   }
 
+  // No eligible lead applicant in the pair: both sides are collaboration-only
+  // (or otherwise ineligible without partner_only). SPRIND requires at least
+  // one HQ inside the eligible region to lead.
+  const aCanLead = a.eligible_hq && !a.partner_only
+  const bCanLead = b.eligible_hq && !b.partner_only
+  if (!aCanLead && !bCanLead) {
+    out.push({
+      key: "no_eligible_lead",
+      severity: "hard",
+      note:
+        "Neither organisation can lead an application (HQ outside the eligible region or marked collaboration-only).",
+    })
+  }
+
   // Consortium not in the market.
   if (!consortiumIsSeeking(a)) {
     out.push({ key: "a.consortium_complete", severity: "hard", note: "This consortium is not currently seeking partners." })
@@ -192,7 +246,7 @@ export function structuralHardBlockers(a: Profile, b: Profile, oriented: Pairing
  * `oriented` may be null when no data/AI pairing exists.
  */
 export function computeBlockers(a: Profile, b: Profile, oriented: PairingSides | null): Blocker[] {
-  const out: Blocker[] = [...structuralHardBlockers(a, b, oriented)]
+  const out: Blocker[] = [...structuralHardBlockers(a, b, oriented), ...profileSoftBlockers(a, b)]
 
   if (oriented) {
     out.push(...accessModelBlockers(oriented.datasets, oriented.aiSide))

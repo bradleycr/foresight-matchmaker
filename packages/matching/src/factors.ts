@@ -1,150 +1,283 @@
-import type { Factor, PairingSides, Dataset, DataNeeds } from "./types.js"
-import { jaccard, overlaps } from "./helpers.js"
+import {
+  nSubjectsRank,
+  teamSizeRank,
+  ANNOTATION,
+  IMAGING_MODALITIES,
+  type Modality,
+  type DiseaseArea,
+  type Annotation,
+} from "@rmm/schema"
+import type { Factor, PairingSides, Dataset, DataNeeds, Profile } from "./types"
+import { overlaps } from "./helpers"
 
 /**
- * Soft scoring factors for an oriented pairing. Each factor contributes
- * 0..weight points; the sum of all weights is 100, so the raw score is already
- * on a 0–100 scale before blockers are applied.
+ * Soft scoring factors for an oriented pairing, exactly as specified:
  *
- * Weights (total 100):
- *   modality_fit          25  — does the data cover the modalities the team needs?
- *   disease_area_fit      20  — clinical domain overlap
- *   subjects_fit          12  — cohort large enough for the team's minimum
- *   annotation_fit        10  — labels present when the team requires them
- *   linkage_fit            8  — record linkage the team asked for
- *   standards_fit          7  — interoperability standards overlap
- *   readiness_fit         10  — how deployment-ready the data is
- *   language_fit           4  — shared working language
- *   attending_fit          4  — both at the same event (a real intro can happen)
+ *   disease_area_fit        25  Jaccard-style overlap; `multi_domain` on
+ *                               either side counts 0.5 against anything.
+ *   modality_fit            22  overlap with the imaging_* variants grouped,
+ *                               so imaging_mri vs imaging_ct earns 0.4, not 0.
+ *   access_model_fit        18  graded compatibility between the dataset's
+ *                               access constraint and the team's privacy
+ *                               capability — full marks on exact fit, partial
+ *                               when workable with effort.
+ *   scale_fit               10  full when n_subjects ≥ the team's minimum,
+ *                               half one bucket below, zero at two below.
+ *   annotation_linkage_fit  10  the team's required annotation level and
+ *                               linkage present in the dataset (5 + 5).
+ *   readiness_capacity_fit   6  raw data + a tiny team scores low; ai_ready
+ *                               scores full regardless of team size.
+ *   language_fit             5  any overlap in working languages.
+ *   colocation_fit           4  same country, or both at the same event.
+ *
+ * Weights sum to 100. Every helper returns a ratio in [0, 1]; a ratio of 0.5
+ * is the convention for "no stated preference", so unstated needs neither
+ * reward nor punish a pairing.
  */
 
-const READINESS_SCORE: Record<string, number> = {
-  ready_now: 1,
-  minor_prep: 0.75,
-  significant_prep: 0.4,
-  concept_only: 0.15,
+// ---------------------------------------------------------------------------
+// Set-overlap kernels
+// ---------------------------------------------------------------------------
+
+const IMAGING = new Set<string>(IMAGING_MODALITIES)
+
+/**
+ * Overlap of two enum sets with partial-credit rules, normalised by the
+ * larger set so a single-element cross-imaging pair earns exactly its
+ * partial credit (imaging_mri vs imaging_ct → 0.4, per the spec).
+ */
+function gradedOverlap(
+  a: readonly string[],
+  b: readonly string[],
+  partial: (x: string, other: readonly string[]) => number,
+): number {
+  if (a.length === 0 || b.length === 0) return 0
+  const setB = new Set(b)
+  let earned = 0
+  for (const x of a) {
+    if (setB.has(x)) earned += 1
+    else earned += partial(x, b)
+  }
+  return Math.min(1, earned / Math.max(a.length, b.length))
 }
 
-const N_SUBJECTS_ORDER = [
-  "lt_100",
-  "100_1k",
-  "1k_10k",
-  "10k_100k",
-  "100k_1m",
-  "gt_1m",
-] as const
-
-function nSubjectsRank(v: string | undefined): number {
-  if (!v) return -1
-  return N_SUBJECTS_ORDER.indexOf(v as (typeof N_SUBJECTS_ORDER)[number])
+/** Modality: exact matches count 1, cross-imaging pairs count 0.4. */
+export function modalityOverlap(datasetModalities: readonly Modality[], needed: readonly Modality[]): number {
+  return gradedOverlap(needed, datasetModalities, (x, other) =>
+    IMAGING.has(x) && other.some((o) => IMAGING.has(o)) ? 0.4 : 0,
+  )
 }
 
-/** Best single dataset for a given need dimension, scored 0..1. */
-function bestModalityFit(datasets: readonly Dataset[], needs: DataNeeds): number {
-  if (needs.modality.length === 0) return 0.5 // no stated need → neutral
-  let best = 0
-  for (const d of datasets) best = Math.max(best, jaccard(d.modality, needs.modality))
-  return best
+/** Disease areas: `multi_domain` on either side is a 0.5 partial match. */
+export function diseaseOverlap(datasetAreas: readonly DiseaseArea[], needed: readonly DiseaseArea[]): number {
+  return gradedOverlap(needed, datasetAreas, (_x, other) => (other.includes("multi_domain") ? 0.5 : 0))
 }
 
-function bestDiseaseFit(datasets: readonly Dataset[], needs: DataNeeds): number {
+// ---------------------------------------------------------------------------
+// Per-dimension ratios (best dataset wins where multiple exist)
+// ---------------------------------------------------------------------------
+
+function bestOver(datasets: readonly Dataset[], f: (d: Dataset) => number): number {
+  return datasets.reduce((best, d) => Math.max(best, f(d)), 0)
+}
+
+function diseaseRatio(datasets: readonly Dataset[], needs: DataNeeds, aiSide: Profile): number {
   if (needs.disease_area.length === 0) return 0.5
-  let best = 0
-  for (const d of datasets) best = Math.max(best, jaccard(d.disease_area, needs.disease_area))
-  return best
+  // The AI side's multi_domain expertise also grants the 0.5 floor.
+  const aiMultiDomain =
+    "domain_expertise" in aiSide && (aiSide.domain_expertise as string[]).includes("multi_domain")
+  const best = bestOver(datasets, (d) => diseaseOverlap(d.disease_area, needs.disease_area))
+  return aiMultiDomain ? Math.max(best, 0.5) : best
 }
 
-function subjectsFit(datasets: readonly Dataset[], needs: DataNeeds): number {
+function modalityRatio(datasets: readonly Dataset[], needs: DataNeeds): number {
+  if (needs.modality.length === 0) return 0.5
+  return bestOver(datasets, (d) => modalityOverlap(d.modality, needs.modality))
+}
+
+/**
+ * Access-model compatibility, graded — not pass/fail. Full marks when the
+ * team's capability exactly matches the holder's constraint; partial when
+ * workable with effort. The hard-block case (export-only team vs locked
+ * data) is handled in blockers.ts; here it simply earns 0.
+ */
+export function accessModelRatio(dataset: Dataset, capabilities: readonly string[]): number {
+  const caps = new Set(capabilities)
+  const locked =
+    dataset.access_model === "secure_processing_environment_only" ||
+    dataset.access_model === "federated_no_movement" ||
+    dataset.data_can_leave_institution === "no"
+
+  if (dataset.access_model === "undecided") return 0.5
+
+  if (dataset.access_model === "synthetic_derivative_only") {
+    // Synthetic derivatives travel freely; exact fit for synthetic-first teams.
+    return caps.has("synthetic_only") ? 1 : 0.8
+  }
+
+  if (!locked) {
+    // open_download / registered_access / dua_required with movable data:
+    // any capability profile can work with this.
+    return 1
+  }
+
+  // The data stays put. What can the team do about it?
+  const wantsSpe = dataset.access_model === "secure_processing_environment_only"
+  const wantsFederated = dataset.access_model === "federated_no_movement"
+
+  if (wantsSpe && caps.has("can_work_in_tre")) return 1
+  if (wantsFederated && caps.has("federated_capable")) return 1
+  // The mirror capability is workable with effort.
+  if (caps.has("can_work_in_tre") || caps.has("federated_capable")) return 0.6
+  if (caps.has("on_prem_only")) return 0.4
+  if (caps.has("differential_privacy") || caps.has("synthetic_only")) return 0.3
+  // Unknown or export-only capability against locked data.
+  return caps.has("requires_data_export") ? 0 : 0.3
+}
+
+function accessRatio(datasets: readonly Dataset[], aiSide: Profile): number {
+  const caps = "privacy_capability" in aiSide ? (aiSide.privacy_capability as string[]) : []
+  return bestOver(datasets, (d) => accessModelRatio(d, caps))
+}
+
+/** Full at or above the minimum bucket, half one below, zero at two below. */
+export function scaleRatio(datasets: readonly Dataset[], needs: DataNeeds): number {
   if (!needs.min_n_subjects) return 0.5
   const required = nSubjectsRank(needs.min_n_subjects)
-  const best = Math.max(...datasets.map((d) => nSubjectsRank(d.n_subjects)), -1)
-  if (best < 0) return 0
-  return best >= required ? 1 : Math.max(0, 1 - (required - best) * 0.34)
+  const best = Math.max(...datasets.map((d) => nSubjectsRank(d.n_subjects)))
+  if (best >= required) return 1
+  if (best === required - 1) return 0.5
+  return 0
 }
 
-function annotationFit(datasets: readonly Dataset[], needs: DataNeeds): number {
-  if (!needs.annotation_required || needs.annotation_required === "none") return 0.5
-  // A team requiring annotation is satisfied by any annotated dataset.
-  const anyAnnotated = datasets.some((d) => d.annotation !== "none")
-  return anyAnnotated ? 1 : 0
+const ANNOTATION_RANK = (a: Annotation) => ANNOTATION.indexOf(a)
+
+function annotationLinkageRatio(datasets: readonly Dataset[], needs: DataNeeds): number {
+  // Annotation half: dataset meets the required level → 1, one level short → 0.5.
+  let annotation = 0.5
+  if (needs.annotation_required && needs.annotation_required !== "none") {
+    const required = ANNOTATION_RANK(needs.annotation_required)
+    const best = Math.max(...datasets.map((d) => ANNOTATION_RANK(d.annotation)))
+    annotation = best >= required ? 1 : best === required - 1 ? 0.5 : 0
+  }
+
+  // Linkage half: the fraction of required linkages actually present.
+  let linkage = 0.5
+  if (needs.linkage_required.length > 0) {
+    const present = new Set(datasets.flatMap((d) => d.linkage))
+    const hits = needs.linkage_required.filter((l) => present.has(l)).length
+    linkage = hits / needs.linkage_required.length
+  }
+
+  return (annotation + linkage) / 2
 }
 
-function linkageFit(datasets: readonly Dataset[], needs: DataNeeds): number {
-  if (needs.linkage_required.length === 0) return 0.5
-  let best = 0
-  for (const d of datasets) best = Math.max(best, jaccard(d.linkage, needs.linkage_required))
-  return best
+/** Raw data needs hands; ai_ready is full marks regardless of team size. */
+export function readinessRatio(datasets: readonly Dataset[], aiSide: Profile): number {
+  const tiny = "team_size" in aiSide && teamSizeRank(aiSide.team_size) <= 0
+  return bestOver(datasets, (d) => {
+    switch (d.readiness) {
+      case "benchmark_ready":
+      case "ai_ready":
+        return 1
+      case "partially_curated":
+        return tiny ? 0.4 : 0.6
+      case "raw":
+        return tiny ? 0.05 : 0.3
+    }
+  })
 }
 
-function standardsFit(datasets: readonly Dataset[], needs: DataNeeds): number {
-  if (needs.standards_preferred.length === 0) return 0.5
-  let best = 0
-  for (const d of datasets) best = Math.max(best, jaccard(d.standards, needs.standards_preferred))
-  return best
+function colocationRatio(a: Profile, b: Profile): number {
+  if (a.country === b.country) return 1
+  const sharedEvent = a.attending.some((e) => e !== "remote_only" && b.attending.includes(e))
+  return sharedEvent ? 1 : 0
 }
 
-function readinessFit(datasets: readonly Dataset[]): number {
-  return Math.max(...datasets.map((d) => READINESS_SCORE[d.readiness] ?? 0), 0)
-}
+// ---------------------------------------------------------------------------
+// Assembly
+// ---------------------------------------------------------------------------
 
 function pts(weight: number, ratio: number): number {
-  return Math.round(weight * Math.max(0, Math.min(1, ratio)))
+  return Math.round(weight * Math.max(0, Math.min(1, ratio)) * 10) / 10
 }
 
 /** Compute all soft factors for an oriented pairing. */
 export function computeFactors(sides: PairingSides): Factor[] {
   const { datasets, needs, dataSide, aiSide } = sides
 
-  const modalityRatio = bestModalityFit(datasets, needs)
-  const diseaseRatio = bestDiseaseFit(datasets, needs)
-  const subjectsRatio = subjectsFit(datasets, needs)
-  const annotationRatio = annotationFit(datasets, needs)
-  const linkageRatio = linkageFit(datasets, needs)
-  const standardsRatio = standardsFit(datasets, needs)
-  const readinessRatio = readinessFit(datasets)
-  const languageRatio = overlaps(dataSide.languages, aiSide.languages) ? 1 : 0
-  const attendingRatio = overlaps(dataSide.attending, aiSide.attending) ? 1 : 0
+  const disease = diseaseRatio(datasets, needs, aiSide)
+  const modality = modalityRatio(datasets, needs)
+  const access = accessRatio(datasets, aiSide)
+  const scale = scaleRatio(datasets, needs)
+  const annotationLinkage = annotationLinkageRatio(datasets, needs)
+  const readiness = readinessRatio(datasets, aiSide)
+  const language = overlaps(dataSide.languages, aiSide.languages) ? 1 : 0
+  const colocation = colocationRatio(dataSide, aiSide)
 
   return [
-    { key: "modality_fit", weight: 25, earned: pts(25, modalityRatio), note: modalityNote(modalityRatio) },
-    { key: "disease_area_fit", weight: 20, earned: pts(20, diseaseRatio), note: diseaseNote(diseaseRatio) },
-    { key: "subjects_fit", weight: 12, earned: pts(12, subjectsRatio), note: subjectsNote(subjectsRatio) },
-    { key: "annotation_fit", weight: 10, earned: pts(10, annotationRatio), note: annotationNote(annotationRatio) },
-    { key: "linkage_fit", weight: 8, earned: pts(8, linkageRatio), note: "Record linkage overlap." },
-    { key: "standards_fit", weight: 7, earned: pts(7, standardsRatio), note: "Interoperability standards overlap." },
-    { key: "readiness_fit", weight: 10, earned: pts(10, readinessRatio), note: readinessNote(readinessRatio) },
-    { key: "language_fit", weight: 4, earned: pts(4, languageRatio), note: languageRatio ? "Shared working language." : "No shared language listed." },
-    { key: "attending_fit", weight: 4, earned: pts(4, attendingRatio), note: attendingRatio ? "Both attending a shared event." : "No shared event." },
+    { key: "disease_area_fit", weight: 25, earned: pts(25, disease), note: diseaseNote(disease) },
+    { key: "modality_fit", weight: 22, earned: pts(22, modality), note: modalityNote(modality) },
+    { key: "access_model_fit", weight: 18, earned: pts(18, access), note: accessNote(access) },
+    { key: "scale_fit", weight: 10, earned: pts(10, scale), note: scaleNote(scale) },
+    {
+      key: "annotation_linkage_fit",
+      weight: 10,
+      earned: pts(10, annotationLinkage),
+      note:
+        annotationLinkage >= 0.75
+          ? "Annotation and linkage requirements are met."
+          : annotationLinkage >= 0.4
+            ? "Annotation or linkage requirements are partially met."
+            : "The dataset lacks the annotation or linkage the team requires.",
+    },
+    {
+      key: "readiness_capacity_fit",
+      weight: 6,
+      earned: pts(6, readiness),
+      note:
+        readiness >= 1
+          ? "Data is AI-ready."
+          : readiness >= 0.4
+            ? "Data needs curation the team can plausibly absorb."
+            : "Raw data against a small team — expect significant preparation work.",
+    },
+    {
+      key: "language_fit",
+      weight: 5,
+      earned: pts(5, language),
+      note: language ? "Shared working language." : "No shared working language listed.",
+    },
+    {
+      key: "colocation_fit",
+      weight: 4,
+      earned: pts(4, colocation),
+      note: colocation ? "Same country or attending the same event." : "No shared location or event.",
+    },
   ]
 }
 
-function modalityNote(r: number): string {
-  if (r >= 0.75) return "Strong modality match with the team's stated needs."
-  if (r >= 0.34) return "Partial modality overlap."
-  if (r === 0.5) return "Team did not state a modality need."
-  return "Little or no modality overlap."
-}
 function diseaseNote(r: number): string {
   if (r >= 0.75) return "Clinical domain lines up well."
-  if (r >= 0.34) return "Some clinical domain overlap."
+  if (r >= 0.4) return "Partial clinical domain overlap."
   return "Limited clinical domain overlap."
 }
-function subjectsNote(r: number): string {
-  if (r >= 1) return "Cohort meets or exceeds the team's minimum."
-  if (r >= 0.5) return "Cohort is close to the team's minimum."
-  return "Cohort may be smaller than the team needs."
+function modalityNote(r: number): string {
+  if (r >= 0.75) return "Strong modality match with the team's stated needs."
+  if (r >= 0.35) return "Partial modality overlap (related modalities)."
+  return "Little or no modality overlap."
 }
-function annotationNote(r: number): string {
-  if (r >= 1) return "Annotated data is available as required."
-  if (r === 0.5) return "Team did not require annotation."
-  return "Team requires annotation the data does not provide."
+function accessNote(r: number): string {
+  if (r >= 1) return "The team's capability exactly matches the dataset's access constraint."
+  if (r >= 0.5) return "Workable access pathway, with some governance effort."
+  return "Access constraint and team capability are far apart."
 }
-function readinessNote(r: number): string {
-  if (r >= 0.75) return "Data is ready or needs only minor prep."
-  if (r >= 0.4) return "Data needs significant preparation."
-  return "Data is concept-only."
+function scaleNote(r: number): string {
+  if (r >= 1) return "Cohort meets or exceeds the team's minimum size."
+  if (r >= 0.5) return "Cohort is one size bucket below the team's minimum."
+  return "Cohort is well below the team's minimum size."
 }
 
 export function sumFactors(factors: readonly Factor[]): number {
-  return factors.reduce((acc, f) => acc + f.earned, 0)
+  return Math.round(factors.reduce((acc, f) => acc + f.earned, 0))
 }

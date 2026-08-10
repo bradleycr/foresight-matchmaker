@@ -1,4 +1,4 @@
-import type { Profile, Dataset, DataNeeds } from "./types.js"
+import type { Profile, Dataset, DataNeeds } from "./types"
 
 /** Does this profile carry datasets (data_holder or consortium)? */
 export function hasDatasets(p: Profile): p is Extract<Profile, { datasets: Dataset[] }> {

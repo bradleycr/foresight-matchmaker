@@ -6,6 +6,7 @@
     "org_type": "biobank_or_registry",
     "country": "DK",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Longitudinal MRI/CT oncology cohort with outcome linkage, 40k subjects.",
     "summary": "A curated oncology imaging bank linking cross-sectional MRI and CT to registry outcomes and mortality. Governed under Danish public-task provisions; available inside a secure processing environment only.",
     "website": "https://example.org/nordhavn-cib",
@@ -72,6 +73,7 @@
     "org_type": "biobank_or_registry",
     "country": "FR",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Whole-genome + transcriptomics rare-disease registry, 12k probands.",
     "summary": "National rare-disease genomics registry with VCF and expression data, linked to clinical phenotypes. Federated analysis supported; raw data does not leave the institution.",
     "languages": [
@@ -135,6 +137,7 @@
     "org_type": "hospital",
     "country": "IT",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "ECG waveforms + EHR for 90k cardiology patients, 11-year span.",
     "summary": "Structured EHR and 12-lead ECG waveforms from a tertiary cardiology centre, linked to medication and mortality. DUA-based access; anonymised extracts can leave under agreement.",
     "languages": [
@@ -199,6 +202,7 @@
     "org_type": "hospital",
     "country": "PL",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Digitised histopathology slides, oncology, 30k cases, expert-labelled.",
     "summary": "Whole-slide imaging archive for solid tumours with pathologist annotations. Registered-access model; interested in an AI partner for computational pathology.",
     "languages": [
@@ -258,6 +262,7 @@
     "org_type": "research_institute",
     "country": "AT",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Multi-omics metabolic-disease cohort, 8k subjects, deeply phenotyped.",
     "summary": "Longitudinal metabolic and endocrine cohort combining metabolomics, proteomics and structured EHR. OMOP-mapped. Open to a modelling partner for risk prediction.",
     "languages": [
@@ -322,6 +327,7 @@
     "org_type": "university",
     "country": "GB",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "BIDS-formatted brain MRI, 25k subjects, psychiatry + neurology.",
     "summary": "Research-grade structural and functional brain MRI in BIDS, spanning neurology and psychiatry cohorts. TRE-only access; strong governance team in place.",
     "languages": [
@@ -382,6 +388,7 @@
     "org_type": "research_institute",
     "country": "ES",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Population claims + registry, respiratory disease, 1.2M subjects.",
     "summary": "Large-scale insurance claims linked to a respiratory disease registry. De-identified extracts available under DUA. Seeking an AI partner for prognosis modelling.",
     "languages": [
@@ -444,6 +451,7 @@
     "org_type": "hospital",
     "country": "CH",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Paediatric multi-domain registry, 15k children, outcome-linked.",
     "summary": "A paediatric clinical registry spanning multiple domains, with structured records and clinical notes. Federated analysis preferred; raw notes stay on-prem.",
     "languages": [
@@ -509,6 +517,7 @@
     "org_type": "university",
     "country": "EE",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Wearable sensor + EHR, cardiometabolic, 20k participants.",
     "summary": "A digital-health cohort combining continuous wearable sensor streams with structured EHR for cardiometabolic risk. AI-ready feature store; open to compute-supported partners.",
     "languages": [
@@ -572,6 +581,7 @@
     "org_type": "research_institute",
     "country": "PT",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Infectious-disease cohort with genomics + clinical notes, 6k cases.",
     "summary": "Pathogen genomics linked to structured clinical outcomes and free-text notes. Early-stage curation; seeking clinical NLP and governance support.",
     "languages": [
@@ -633,6 +643,7 @@
     "org_type": "biobank_or_registry",
     "country": "SE",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Women's-health registry, imaging + EHR, 50k subjects.",
     "summary": "Registry combining mammography imaging with structured records for women's-health research. Benchmark-ready subset available; open to diagnostics AI teams.",
     "languages": [
@@ -697,6 +708,7 @@
     "org_type": "hospital",
     "country": "NL",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Geriatric EHR + claims, polypharmacy focus, 80k patients.",
     "summary": "Integrated geriatric care records with medication and claims linkage, focused on polypharmacy and frailty. TRE access; strong governance office.",
     "languages": [

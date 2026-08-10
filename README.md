@@ -1,33 +1,94 @@
-# matchmaker-sprind
+# Recoding Medicine Matchmaker
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+A directory and matchmaking prototype that pairs **European health-data holders** with **AI/ML teams** so they can apply jointly to the [SPRIND Recoding Medicine challenge](https://www.sprind.org) (application deadline: **16 October 2026**).
 
-## Built with v0
+Think of it as a phone book, not a social network: register a structured profile, browse the directory, get a deterministic ranked shortlist of counterparts, and request a **double opt-in introduction**. Contact details are revealed only after both sides agree.
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+> **All seed data is synthetic.** Every organisation, dataset, contact name, and email address under `seed/` is fabricated for demonstration purposes and does not describe any real institution. See `seed/README.md`.
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_LjAo2edtb140J5djbVOpf9RxD0lm)
+---
 
-## Getting Started
-
-First, run the development server:
+## Quick start (no external services required)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+pnpm install
+pnpm db:seed      # load the synthetic directory + build the match cache
+pnpm dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+That is the whole setup. Without SMTP configured, magic sign-in links are
+shown on screen in development (and logged to the server console). In
+production, set `SMTP_URL` — or explicitly `AUTH_REVEAL_LINKS=true` for a
+controlled demo. Sign in with any seed contact email (e.g. `a.voss@example.invalid`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To unlock `/admin`, set a secret first:
 
-## Learn More
+```bash
+echo 'ADMIN_SECRET=demo-admin-secret' >> apps/web/.env
+```
 
-To learn more, take a look at the following resources:
+### Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+```bash
+pnpm test         # schema + matching + web integration suites (Vitest)
+pnpm typecheck
+```
+
+## Deployment (Linux VM, Docker)
+
+```bash
+cp .env.example .env    # set SESSION_SECRET and ADMIN_SECRET
+docker compose up -d --build
+```
+
+The SQLite database lives in `./data` on the host (bind-mounted to `/data`). On first boot with an empty database the container seeds the synthetic directory automatically (`SEED_ON_EMPTY=true`); an existing database is never touched. No US-hosted managed database is involved — the data stays on the VM.
+
+Every environment variable is documented in [`.env.example`](.env.example).
+
+## Repository layout
+
+```
+packages/schema      Zod schemas, enums, derived fields, JSON Schema export
+packages/matching    Deterministic scoring: hard/soft blockers + weighted factors
+apps/web             Next.js 15 App Router app (UI + /api/v1 + SQLite via Drizzle)
+seed/                Synthetic demo profiles (fabricated data)
+```
+
+The UI is a pure client of the versioned API — everything the pages render comes from `/api/v1/*`.
+
+## The schema, in one paragraph
+
+A **profile** is a data holder, an AI team, or a consortium (both at once). Data holders describe one or more **datasets**: modality, disease area, subject/record scale, access model (export, secure processing environment, federated), ethics status, linkage, and annotation. AI teams describe **capabilities**: methods, domain expertise, compute, and — most importantly — `privacy_capability` (can they work inside a TRE, federate, or do they require data export?). The matcher scores pairs on disease and modality overlap, access-model compatibility, scale sufficiency, annotation/linkage fit, readiness, language, and colocation, and reports **hard blockers** (score zeroed, e.g. dataset cannot leave the institution and the team can only work on exported data) and **soft blockers** (score kept, friction surfaced) with every match.
+
+The machine-readable contract:
+
+- `GET /api/v1/schema/v1/profile.schema.json` — JSON Schema for the profile
+- `GET /api/v1/directory.json` — the full redacted public directory
+
+## Public API (v1)
+
+| Endpoint | Description |
+| --- | --- |
+| `GET /api/v1/directory.json` | Full redacted directory (no contact details, ever) |
+| `GET /api/v1/schema/v1/profile.schema.json` | JSON Schema of the profile |
+| `POST /api/v1/profiles` | Register a profile (returns a claim link) |
+| `GET /api/v1/profiles/:id` · `PATCH` | Read public profile / edit own (session) |
+| `GET /api/v1/matches` | Ranked shortlist for the signed-in profile |
+| `GET /api/v1/intros` · `POST` · `PATCH /:id` | Double opt-in introduction flow |
+| `POST /api/v1/auth/request-link` · `/claim` · `/logout` | Magic-link auth |
+| `GET /api/v1/metrics` | Reporting (admin only; `?format=csv` for export) |
+
+Redaction is enforced server-side: `contact_name`, `contact_email`, `contact_role`, and hidden-field values never appear in any public payload. Contact details travel only inside an accepted introduction.
+
+## Optional LLM features
+
+Matching, search, and ranking are fully deterministic — no LLM is ever on an interactive path. Two optional conveniences light up when `LLM_API_KEY` and `LLM_MODEL` are set (any OpenAI-compatible endpoint via `LLM_BASE_URL`):
+
+1. **Profile pre-fill** — paste a paragraph on the registration page and a draft profile is proposed for review. Never auto-published; with no LLM configured the box simply doesn't appear.
+2. **Match rationale** — each match carries a two-sentence plain-language explanation. This is assembled deterministically from the factor breakdown, so it works identically with the LLM disabled.
+
+The whole test suite passes with no LLM configured.
+
+## Privacy
+
+See [`PRIVACY.md`](PRIVACY.md). Highlights: minimal collection (one contact per organisation), no trackers, no analytics beyond an internal event log, data on the European deployment VM, and deletion on request once the controller is designated (`[CONTROLLER TBD]`).

@@ -6,8 +6,9 @@
 
 export const SCHEMA_VERSION = "v1" as const
 
-export * from "./enums.js"
-export * from "./countries.js"
-export * from "./dataset.js"
-export * from "./profile.js"
-export * from "./derive.js"
+export * from "./enums"
+export * from "./countries"
+export * from "./dataset"
+export * from "./profile"
+export * from "./derive"
+export * from "./finalize-golden"

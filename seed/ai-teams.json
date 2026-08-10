@@ -6,6 +6,7 @@
     "org_type": "startup",
     "country": "DE",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Computer-vision oncology diagnostics; TRE-native, federated-capable.",
     "summary": "A computer-vision team building tumour-detection models for MRI and CT. We work entirely inside secure processing environments and support federated training.",
     "website": "https://example.com/helix-vision",
@@ -81,11 +82,12 @@
   },
   {
     "id": "a1000000-0000-4000-8000-000000000002",
-    "slug": "meridian-clinical-nlp",
-    "org_name": "Meridian Clinical NLP",
+    "slug": "liffey-clinical-nlp",
+    "org_name": "Liffey Clinical NLP",
     "org_type": "company",
     "country": "IE",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Clinical NLP for free-text notes; on-prem and federated.",
     "summary": "We extract structured signals from clinical notes across languages. GDPR-DPIA experienced, on-prem deployment, no data export required.",
     "languages": [
@@ -131,7 +133,7 @@
     ],
     "team_size": "2_5",
     "track_record": [
-      "https://example.com/meridian/pub1"
+      "https://example.com/liffey/pub1"
     ],
     "data_needs": {
       "modality": [
@@ -159,6 +161,7 @@
     "org_type": "startup",
     "country": "GB",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Rare-disease variant interpretation; federated by design.",
     "summary": "Graph and foundation models for genomic variant interpretation in rare disease. Built for federated learning; never requires raw data export.",
     "languages": [
@@ -233,6 +236,7 @@
     "org_type": "startup",
     "country": "IT",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "ECG foundation models for arrhythmia risk; requires data export.",
     "summary": "We build waveform foundation models for cardiovascular risk. Our current pipeline requires exporting de-identified extracts to our cloud environment.",
     "languages": [
@@ -305,6 +309,7 @@
     "org_type": "company",
     "country": "FR",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Computational pathology on whole-slide images; TRE-native.",
     "summary": "Foundation models for computational pathology. We operate inside institutional TREs and export only model weights and derived metrics.",
     "languages": [
@@ -379,6 +384,7 @@
     "org_type": "startup",
     "country": "NL",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Synthetic-data generation for privacy-safe modelling.",
     "summary": "We generate high-fidelity synthetic derivatives so partners can prototype without touching source data. Synthetic-only footprint; no export of real records.",
     "languages": [
@@ -449,6 +455,7 @@
     "org_type": "research_institute",
     "country": "FI",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Causal inference for treatment effects; federated + TRE.",
     "summary": "A causal-inference group estimating treatment effects from observational cohorts. Federated-capable and TRE-native, GDPR-DPIA experienced.",
     "languages": [
@@ -525,6 +532,7 @@
     "org_type": "startup",
     "country": "IL",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Multimodal brain-MRI + EHR for psychiatry; TRE-capable.",
     "summary": "Multimodal models combining brain MRI with structured records for psychiatric outcome prediction. We can operate within a TRE and support federated setups.",
     "languages": [
@@ -601,6 +609,7 @@
     "org_type": "startup",
     "country": "DK",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Wearable time-series risk models; requires cloud export.",
     "summary": "We model continuous wearable sensor streams for cardiometabolic risk. Our pipeline currently needs de-identified export to our cloud.",
     "languages": [
@@ -672,6 +681,7 @@
     "org_type": "company",
     "country": "ES",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Respiratory prognosis on claims + registry data; federated.",
     "summary": "Prognosis models for respiratory disease built on large claims and registry data. Federated-capable, GDPR-DPIA experienced, cloud budget in place.",
     "languages": [
@@ -744,6 +754,7 @@
     "org_type": "research_institute",
     "country": "CH",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Paediatric risk models across domains; on-prem federated.",
     "summary": "Federated risk models for paediatric care. We deploy on-prem inside partner institutions and never move raw data.",
     "languages": [
@@ -820,6 +831,7 @@
     "org_type": "startup",
     "country": "SE",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Mammography diagnostics; benchmark-ready, TRE + export options.",
     "summary": "Diagnostic imaging models for women's health. We can work in a TRE or with de-identified benchmark exports, whichever governance allows.",
     "languages": [

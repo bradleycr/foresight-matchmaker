@@ -7,9 +7,20 @@ __v0_jsx-dev-runtime.ts
 .vercel/
 
 # Environment variables
+.env
 .env*.local
 
 # Common ignores
 node_modules
 .next/
 .DS_Store
+
+# Live database — never committed; repo contains zero real personal data
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# TypeScript incremental build cache
+*.tsbuildinfo

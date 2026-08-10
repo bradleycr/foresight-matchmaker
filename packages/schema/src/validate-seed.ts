@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
-import { profileSchema } from "./profile.js"
+import { profileSchema } from "./profile"
 
 /**
  * Validate every checked-in seed file against the Zod schema. Used by the

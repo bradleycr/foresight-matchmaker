@@ -1,8 +1,8 @@
-import type { Profile, ScoreResult, MatchEntry } from "./types.js"
-import { orientPairing } from "./pairing.js"
-import { computeBlockers, hasHardBlocker } from "./blockers.js"
-import { computeFactors, sumFactors } from "./factors.js"
-import { consortiumIsSeeking } from "./helpers.js"
+import type { Profile, ScoreResult, MatchEntry } from "./types"
+import { orientPairing } from "./pairing"
+import { computeBlockers, hasHardBlocker } from "./blockers"
+import { computeFactors, sumFactors } from "./factors"
+import { consortiumIsSeeking } from "./helpers"
 
 /**
  * Score an ordered pair of profiles for the SPRIND Rare-disease Matchmaker.

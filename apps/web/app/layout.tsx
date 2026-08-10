@@ -1,48 +1,48 @@
-import { Analytics } from '@vercel/analytics/next'
-import type { Metadata, Viewport } from 'next'
-import './globals.css'
+import type { Metadata, Viewport } from "next"
+import { Archivo, Archivo_Narrow } from "next/font/google"
+import { I18nProvider } from "@/lib/i18n/client"
+import { getT } from "@/lib/i18n/server"
+import { SiteHeader } from "@/components/site-header"
+import { SiteFooter } from "@/components/site-footer"
+import en from "@/locales/en.json"
+import de from "@/locales/de.json"
+import fr from "@/locales/fr.json"
+import "./globals.css"
+
+/**
+ * Two typefaces, total. Archivo carries the UI; Archivo Narrow is the
+ * condensed grotesque for the dense listing rows, with tabular numerals
+ * enabled where figures must align.
+ */
+const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo" })
+const archivoNarrow = Archivo_Narrow({ subsets: ["latin"], variable: "--font-archivo-narrow" })
+
+const dictionaries = { en, de, fr } as const
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
+  title: "Recoding Medicine Matchmaker",
+  description:
+    "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge. Application deadline: 16 October 2026.",
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  colorScheme: "light",
+  themeColor: "#faf8f2",
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { locale } = await getT()
+
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+    <html lang={locale}>
+      <body className={`${archivo.variable} ${archivoNarrow.variable} font-sans`}>
+        <I18nProvider locale={locale} dict={dictionaries[locale]} fallback={dictionaries.en}>
+          <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 sm:px-6">
+            <SiteHeader />
+            <main className="flex-1 pb-16">{children}</main>
+            <SiteFooter />
+          </div>
+        </I18nProvider>
       </body>
     </html>
   )

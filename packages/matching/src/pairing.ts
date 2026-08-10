@@ -1,5 +1,5 @@
-import type { Profile, PairingSides } from "./types.js"
-import { hasDatasets, hasAiFields } from "./helpers.js"
+import type { Profile, PairingSides } from "./types"
+import { hasDatasets, hasAiFields } from "./helpers"
 
 /**
  * Given two profiles, decide the data side and the AI side of the pairing.

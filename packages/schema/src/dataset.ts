@@ -12,7 +12,7 @@ import {
   accessModelEnum,
   ethicsApprovalEnum,
   yesNoUnsureEnum,
-} from "./enums.js"
+} from "./enums"
 
 /**
  * A dataset held by a data_holder (or embedded in a consortium).

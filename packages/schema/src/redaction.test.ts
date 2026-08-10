@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest"
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, resolve } from "node:path"
-import { profileSchema, toPublicProfile } from "./profile.js"
+import { profileSchema, toPublicProfile } from "./profile"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const SEED_DIR = resolve(__dirname, "../../../seed")

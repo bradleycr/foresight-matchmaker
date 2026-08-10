@@ -2,9 +2,9 @@ import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { zodToJsonSchema } from "zod-to-json-schema"
-import { profileSchema } from "./profile.js"
-import { datasetSchema } from "./dataset.js"
-import { SCHEMA_VERSION } from "./index.js"
+import { profileSchema } from "./profile"
+import { datasetSchema } from "./dataset"
+import { SCHEMA_VERSION } from "./index"
 
 /**
  * Generate versioned JSON Schema from the Zod definitions and write it to the

@@ -1,5 +1,5 @@
-import type { Profile } from "./profile.js"
-import { deriveEligibleHq } from "./countries.js"
+import type { Profile } from "./profile"
+import { deriveEligibleHq } from "./countries"
 
 /**
  * Server-side derivation of the computed fields. Never trust the client for

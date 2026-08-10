@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { profileSchema, type Profile } from "./profile.js"
-import { applyDerivedFields } from "./derive.js"
+import { profileSchema, type Profile } from "./profile"
+import { applyDerivedFields } from "./derive"
 
 /**
  * Generate 24 synthetic profiles (12 data holders, 12 AI teams) plus 3
@@ -508,7 +508,7 @@ const aiTeamSeeds: Raw[] = [
     },
   },
   {
-    org_name: "Meridian Clinical NLP",
+    org_name: "Liffey Clinical NLP",
     org_type: "company",
     country: "IE",
     one_liner: "Clinical NLP for free-text notes; on-prem and federated.",
@@ -529,7 +529,7 @@ const aiTeamSeeds: Raw[] = [
     compute: "cloud_budget",
     privacy_capability: ["on_prem_only", "federated_capable"],
     team_size: "2_5",
-    track_record: ["https://example.com/meridian/pub1"],
+    track_record: ["https://example.com/liffey/pub1"],
     data_needs: {
       modality: ["clinical_notes", "ehr_structured"],
       disease_area: ["multi_domain"],
@@ -1031,7 +1031,7 @@ const consortiumSeeds: Raw[] = [
 // Assembly
 // ---------------------------------------------------------------------------
 
-function finalize(raw: Raw, kind: Profile["kind"], idPrefix: string, i: number): Profile {
+function finalize(raw: Raw, kind: Profile["kind"], idPrefix: "dh" | "ai" | "co", i: number): Profile {
   const withMeta = {
     ...raw,
     kind,
@@ -1043,6 +1043,7 @@ function finalize(raw: Raw, kind: Profile["kind"], idPrefix: string, i: number):
     // Placeholders; overwritten by applyDerivedFields.
     eligible_hq: false,
     completeness: 0,
+    partner_only: false,
   } as unknown as Profile & { country: string }
 
   const derived = applyDerivedFields(withMeta)

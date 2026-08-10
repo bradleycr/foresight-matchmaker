@@ -6,6 +6,7 @@
     "org_type": "research_institute",
     "country": "DE",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Combined imaging bank + CV team; still seeking a clinical partner.",
     "summary": "A formed consortium pairing an oncology imaging bank with a computer-vision team. Team is largely complete; we are still seeking a clinical validation partner.",
     "website": "https://example.org/aoia",
@@ -113,6 +114,7 @@
     "org_type": "university",
     "country": "NL",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Complete federated cardiometabolic team — not seeking partners.",
     "summary": "A complete consortium running federated cardiometabolic research across sites. The team is complete and is included for directory visibility only.",
     "languages": [
@@ -217,6 +219,7 @@
     "org_type": "research_institute",
     "country": "FR",
     "eligible_hq": true,
+    "partner_only": false,
     "one_liner": "Genomics registry + AI team; still seeking compute and governance.",
     "summary": "A coalition combining a rare-disease genomics registry with a modelling team. We are still seeking additional compute and data-governance support.",
     "languages": [

@@ -31,7 +31,27 @@ export const ORG_TYPE = [
 export const orgTypeEnum = z.enum(ORG_TYPE)
 export type OrgType = (typeof ORG_TYPE)[number]
 
-export const LANGUAGE = ["en", "de", "fr", "nl", "es", "it", "pl", "sv", "da", "other"] as const
+export const LANGUAGE = [
+  "en",
+  "de",
+  "fr",
+  "nl",
+  "es",
+  "it",
+  "pl",
+  "sv",
+  "da",
+  // Eligible-region languages that were missing from the first cut — Israel
+  // (he), plus the rest of the EU set the golden fixtures asked us to cover.
+  "he",
+  "fi",
+  "pt",
+  "el",
+  "cs",
+  "hu",
+  "ro",
+  "other",
+] as const
 export const languageEnum = z.enum(LANGUAGE)
 export type Language = (typeof LANGUAGE)[number]
 

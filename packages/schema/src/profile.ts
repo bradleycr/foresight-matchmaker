@@ -16,8 +16,8 @@ import {
   computeEnum,
   privacyCapabilityEnum,
   teamSizeEnum,
-} from "./enums.js"
-import { datasetSchema, dataNeedsSchema } from "./dataset.js"
+} from "./enums"
+import { datasetSchema, dataNeedsSchema } from "./dataset"
 
 // ---------------------------------------------------------------------------
 // Shared fields (all kinds)
@@ -48,6 +48,13 @@ const sharedProfileFields = {
   country: z.string().length(2).regex(/^[A-Z]{2}$/, "country must be ISO 3166-1 alpha-2 uppercase"),
   /** DERIVED server-side from `country`. Never user-asserted. */
   eligible_hq: z.boolean(),
+  /**
+   * Collaboration-only listing. SPRIND allows partners outside the eligible
+   * HQ region — they cannot lead an application, but they stay visible and
+   * matchable. Distinct from `eligible_hq`: an ineligible HQ with
+   * `partner_only: false` is hard-blocked; with `partner_only: true` it is not.
+   */
+  partner_only: z.boolean().default(false),
   one_liner: z.string().min(1).max(140),
   summary: z.string().max(600),
   website: z.string().url().optional(),

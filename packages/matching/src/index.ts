@@ -1,8 +1,8 @@
-export { score, topMatches } from "./score.js"
-export { computeBlockers, hasHardBlocker } from "./blockers.js"
-export { computeFactors, sumFactors } from "./factors.js"
-export { orientPairing } from "./pairing.js"
-export { jaccard, overlaps, unique, consortiumIsSeeking, hasDatasets, hasAiFields } from "./helpers.js"
+export { score, topMatches } from "./score"
+export { computeBlockers, hasHardBlocker } from "./blockers"
+export { computeFactors, sumFactors } from "./factors"
+export { orientPairing } from "./pairing"
+export { jaccard, overlaps, unique, consortiumIsSeeking, hasDatasets, hasAiFields } from "./helpers"
 export type {
   Factor,
   Blocker,
@@ -12,4 +12,4 @@ export type {
   Profile,
   Dataset,
   DataNeeds,
-} from "./types.js"
+} from "./types"
