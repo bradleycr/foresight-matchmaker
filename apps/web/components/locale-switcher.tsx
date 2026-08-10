@@ -4,14 +4,11 @@ import { useRouter } from "next/navigation"
 import { LOCALES, LOCALE_COOKIE, type Locale } from "@/lib/i18n"
 import { useLocale } from "@/lib/i18n/client"
 
-/**
- * EN / DE / FR as plain text toggles. FR is a stub (~10% translated; the rest
- * falls back to English) — labelled so it isn't mistaken for a full locale.
- */
+/** EN / DE / FR as plain text toggles. All three are fully translated. */
 const LABELS: Record<Locale, string> = {
   en: "en",
   de: "de",
-  fr: "fr*",
+  fr: "fr",
 }
 
 export function LocaleSwitcher() {
@@ -25,7 +22,6 @@ export function LocaleSwitcher() {
           key={locale}
           type="button"
           aria-pressed={locale === active}
-          title={locale === "fr" ? "French is partially translated; missing strings fall back to English" : undefined}
           onClick={() => {
             document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=${365 * 24 * 60 * 60};samesite=lax`
             router.refresh()

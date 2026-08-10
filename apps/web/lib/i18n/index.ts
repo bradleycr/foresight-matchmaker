@@ -5,8 +5,7 @@ import fr from "@/locales/fr.json"
 /**
  * Deliberately small i18n runtime: flat-key dictionaries, {var} interpolation,
  * English fallback. Every user-facing string lives in /locales/*.json —
- * English is the default, German is fully translated, French is stubbed
- * (missing keys fall back to English).
+ * English, German, and French are all fully translated (456/456 keys each).
  */
 
 export const LOCALES = ["en", "de", "fr"] as const

@@ -1,8 +1,9 @@
 /**
  * Enum → label resolution. Every controlled-vocabulary value gets its
  * user-facing label from the locale files under `enum.<group>.<value>`.
- * If a key is missing (e.g. the French stub) the value is humanised —
- * "imaging_mri" → "Imaging MRI" beats a raw token in the UI.
+ * If a key is ever missing, the value is humanised — "imaging_mri" →
+ * "Imaging MRI" beats a raw token in the UI — as a defensive fallback, not
+ * because any shipped locale is currently incomplete.
  */
 
 type TranslateFn = (key: string, vars?: Record<string, string | number>) => string
