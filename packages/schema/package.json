@@ -15,7 +15,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "export-json-schema": "tsx src/export-json-schema.ts",
-    "validate-seed": "tsx src/validate-seed.ts"
+    "validate-seed": "tsx src/validate-seed.ts",
+    "generate-seed": "tsx src/generate-seed.ts"
   },
   "dependencies": {
     "zod": "^3.24.1",

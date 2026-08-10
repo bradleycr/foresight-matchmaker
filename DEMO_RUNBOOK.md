@@ -15,7 +15,7 @@ database.
 `DATABASE_PATH=/tmp/rmm-app.db` on Vercel is **ephemeral**: it survives across
 requests served by the same warm serverless instance, but a cold start (new
 deployment, or an instance recycled after inactivity) starts from an empty
-`/tmp` and `SEED_ON_EMPTY=true` reseeds the 37 synthetic profiles
+`/tmp` and `SEED_ON_EMPTY=true` reseeds the 118 synthetic profiles
 automatically. That means:
 
 - Anything registered live on stage can disappear if the instance recycles
@@ -35,7 +35,7 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | `SESSION_SECRET` | random, generated | Required in production — the app now refuses to boot without it (see `instrumentation.ts`). |
 | `ADMIN_SECRET` | random, generated | Unlocks `/admin`. Retrieve with `vercel env pull .env.vercel.local --environment production` (gitignored — never commit it). |
 | `AUTH_REVEAL_LINKS` | `true` | **Load-bearing.** With no SMTP configured, this is the only way anyone — including you, on stage — can sign in. Without it, magic links go to the server log only and `/signin` becomes unusable live. |
-| `SEED_ON_EMPTY` | `true` | Auto-seeds the 37 synthetic profiles on a cold `/tmp`. |
+| `SEED_ON_EMPTY` | `true` | Auto-seeds the 118 synthetic profiles on a cold `/tmp`. |
 | `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
 
 `/signin` already states which delivery mode is live (`lib/auth/mail.ts` →
@@ -70,8 +70,7 @@ curl -s -o /dev/null -w '%{http_code}\n' https://matchmaker-sprind.vercel.app/si
 curl -s https://matchmaker-sprind.vercel.app/api/v1/directory.json | python3 -c "import json,sys;d=json.load(sys.stdin);print(len(d['profiles']),'profiles')"
 ```
 
-Expect `200`, `200`, and `37 profiles` (or more once P1.3 regenerates the seed
-— update this number then).
+Expect `200`, `200`, and `118 profiles`.
 
 ## Resetting between rehearsals
 
@@ -80,7 +79,7 @@ events, and the match cache accumulate rehearsal junk. Two scripts fix this,
 **but they run against a local SQLite file**, not Vercel's remote `/tmp`:
 
 - `pnpm db:reset` — truncates profiles/matches/intros/auth_tokens/events,
-  reseeds the 37 synthetic profiles, rebuilds the match cache. A pristine,
+  reseeds the 118 synthetic profiles, rebuilds the match cache. A pristine,
   empty-inbox state.
 - `pnpm db:demo` — does the same reset, then pre-loads one **pending
   received** introduction and one already-**accepted** introduction into a
@@ -95,7 +94,7 @@ vercel deploy --prod --scope bradley-royes-projects --yes
 ```
 
 A new deployment gets a fresh `/tmp`, so `SEED_ON_EMPTY` reseeds the pristine
-37-profile directory (no accepted/pending intros — that's local-only via
+118-profile directory (no accepted/pending intros — that's local-only via
 `db:demo` for now; there is no remote-safe way to run `db:demo`'s intro
 seeding against the live deployment). This takes roughly 30–60 seconds;
 don't do it in the middle of a live demo, only between rehearsal runs or

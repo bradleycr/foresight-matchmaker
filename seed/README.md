@@ -12,8 +12,10 @@ resemblance to a real organisation is coincidental.
 | Path | Role |
 |---|---|
 | `golden/` | Hand-authored test matrix (10 profiles). Source of truth for matcher assertions. |
-| `data-holders.json` · `ai-teams.json` · `consortia.json` | Generated bulk directory filler (~27 profiles). |
+| `data-holders.json` · `ai-teams.json` · `consortia.json` | Generated bulk directory filler (108 profiles: a hand-authored core plus a larger combinatorially-generated set, spread across 33 HQ-eligible countries — plus two ineligible ones to exercise `partner_only` — and every disease area). |
 | `golden/README.md` | What each golden profile is designed to catch. |
+
+118 profiles total load into the directory: golden first, then bulk.
 
 The loader (`pnpm db:seed`) upserts **golden first**, then bulk, skipping any
 bulk slug that collides with a golden profile.

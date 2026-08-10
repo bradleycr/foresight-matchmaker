@@ -899,5 +899,2701 @@
         "dicom"
       ]
     }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000000d",
+    "slug": "boreal-ai-diagnostics",
+    "org_name": "Boreal AI Diagnostics",
+    "org_type": "company",
+    "country": "AT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic metabolic endocrine AI team for demonstration purposes.",
+    "summary": "A fabricated Boreal-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (boreal-ai-diagnostics)",
+    "contact_email": "boreal-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data",
+      "foundation_models",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "ce_marking",
+      "gdpr_dpia"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "federated_capable"
+    ],
+    "team_size": "gt_15",
+    "track_record": [
+      "https://example.com/boreal-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_other"
+      ],
+      "disease_area": [
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "medication"
+      ],
+      "standards_preferred": [
+        "vcf"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000000e",
+    "slug": "carpath-ai-diagnostics",
+    "org_name": "Carpath AI Diagnostics",
+    "org_type": "startup",
+    "country": "BE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics AI team for demonstration purposes.",
+    "summary": "A fabricated Carpath-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (carpath-ai-diagnostics)",
+    "contact_email": "carpath-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "multimodal"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "geriatrics",
+      "musculoskeletal"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [],
+    "compute": "unsure",
+    "privacy_capability": [
+      "synthetic_only"
+    ],
+    "team_size": "1",
+    "track_record": [
+      "https://example.com/carpath-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_mri",
+        "imaging_xray"
+      ],
+      "disease_area": [
+        "geriatrics",
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "lt_1k",
+      "annotation_required": "none",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "bids"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000000f",
+    "slug": "delta-ai-diagnostics",
+    "org_name": "Delta AI Diagnostics",
+    "org_type": "company",
+    "country": "BG",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic oncology AI team for demonstration purposes.",
+    "summary": "A fabricated Delta-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (delta-ai-diagnostics)",
+    "contact_email": "delta-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "multimodal"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "oncology",
+      "psychiatry"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ivdr"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/delta-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "multi_omics"
+      ],
+      "disease_area": [
+        "oncology",
+        "psychiatry"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "genomics",
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000010",
+    "slug": "ems-ai-diagnostics",
+    "org_name": "Ems AI Diagnostics",
+    "org_type": "research_institute",
+    "country": "HR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic multi domain AI team for demonstration purposes.",
+    "summary": "A fabricated Ems-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ems-ai-diagnostics)",
+    "contact_email": "ems-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "clinical_nlp",
+      "federated_learning"
+    ],
+    "application_target": [
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "multi_domain",
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ivdr"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "on_prem_only",
+      "synthetic_only"
+    ],
+    "team_size": "1",
+    "track_record": [
+      "https://example.com/ems-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "multi_domain",
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "lt_1k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "imaging",
+        "mortality"
+      ],
+      "standards_preferred": [
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000011",
+    "slug": "fjordane-ai-diagnostics",
+    "org_name": "Fjordane AI Diagnostics",
+    "org_type": "company",
+    "country": "CY",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic musculoskeletal AI team for demonstration purposes.",
+    "summary": "A fabricated Fjordane-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "el",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (fjordane-ai-diagnostics)",
+    "contact_email": "fjordane-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 86,
+    "kind": "ai_team",
+    "methods": [
+      "survival_longitudinal",
+      "federated_learning"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "musculoskeletal"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "on_prem_only",
+      "federated_capable"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "waveform_ecg_eeg",
+        "imaging_xray"
+      ],
+      "disease_area": [
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "none",
+      "linkage_required": [],
+      "standards_preferred": [
+        "fhir",
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000012",
+    "slug": "garda-ai-diagnostics",
+    "org_name": "Garda AI Diagnostics",
+    "org_type": "company",
+    "country": "CZ",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory AI team for demonstration purposes.",
+    "summary": "A fabricated Garda-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "cs",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (garda-ai-diagnostics)",
+    "contact_email": "garda-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 86,
+    "kind": "ai_team",
+    "methods": [
+      "clinical_nlp",
+      "multimodal",
+      "privacy_tech"
+    ],
+    "application_target": [
+      "diagnostics"
+    ],
+    "domain_expertise": [
+      "respiratory",
+      "womens_health"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [],
+    "compute": "unsure",
+    "privacy_capability": [
+      "federated_capable",
+      "synthetic_only"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "genomics"
+      ],
+      "disease_area": [
+        "respiratory",
+        "womens_health"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "partial",
+      "linkage_required": [],
+      "standards_preferred": [
+        "proprietary"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000013",
+    "slug": "halcyon-ai-diagnostics",
+    "org_name": "Halcyon AI Diagnostics",
+    "org_type": "company",
+    "country": "DK",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic rare disease AI team for demonstration purposes.",
+    "summary": "A fabricated Halcyon-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "da",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (halcyon-ai-diagnostics)",
+    "contact_email": "halcyon-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "foundation_models",
+      "causal_inference",
+      "privacy_tech"
+    ],
+    "application_target": [
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "rare_disease"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "gdpr_dpia",
+      "mdr"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "on_prem_only",
+      "differential_privacy"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "waveform_ecg_eeg",
+        "clinical_notes"
+      ],
+      "disease_area": [
+        "rare_disease"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "imaging",
+        "outcomes"
+      ],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000014",
+    "slug": "isarburg-ai-diagnostics",
+    "org_name": "Isarburg AI Diagnostics",
+    "org_type": "university",
+    "country": "EE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry AI team for demonstration purposes.",
+    "summary": "A fabricated Isarburg-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (isarburg-ai-diagnostics)",
+    "contact_email": "isarburg-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "privacy_tech",
+      "foundation_models"
+    ],
+    "application_target": [
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "psychiatry",
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "ivdr"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "federated_capable"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_mri",
+        "imaging_ct"
+      ],
+      "disease_area": [
+        "psychiatry",
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "genomics",
+        "outcomes"
+      ],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000015",
+    "slug": "juniper-ai-diagnostics",
+    "org_name": "Juniper AI Diagnostics",
+    "org_type": "research_institute",
+    "country": "FI",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory AI team for demonstration purposes.",
+    "summary": "A fabricated Juniper-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "fi",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (juniper-ai-diagnostics)",
+    "contact_email": "juniper-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "foundation_models"
+    ],
+    "application_target": [
+      "clinical_decision_support"
+    ],
+    "domain_expertise": [
+      "respiratory",
+      "cardiovascular"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "ivdr",
+      "ce_marking"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "1",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_xray",
+        "waveform_ecg_eeg"
+      ],
+      "disease_area": [
+        "respiratory",
+        "cardiovascular"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "genomics",
+        "medication"
+      ],
+      "standards_preferred": [
+        "vcf",
+        "hl7v2"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000016",
+    "slug": "karst-ai-diagnostics",
+    "org_name": "Karst AI Diagnostics",
+    "org_type": "startup",
+    "country": "FR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology AI team for demonstration purposes.",
+    "summary": "A fabricated Karst-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "fr",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (karst-ai-diagnostics)",
+    "contact_email": "karst-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data",
+      "privacy_tech"
+    ],
+    "application_target": [
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "neurology"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "ce_marking",
+      "mdr"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "differential_privacy"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "neurology"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "snomed",
+        "vcf"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000017",
+    "slug": "loiret-ai-diagnostics",
+    "org_name": "Loiret AI Diagnostics",
+    "org_type": "company",
+    "country": "DE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory AI team for demonstration purposes.",
+    "summary": "A fabricated Loiret-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (loiret-ai-diagnostics)",
+    "contact_email": "loiret-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "causal_inference",
+      "federated_learning",
+      "computer_vision"
+    ],
+    "application_target": [
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "respiratory"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "on_prem_only"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "wearable_sensor"
+      ],
+      "disease_area": [
+        "respiratory"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "mortality"
+      ],
+      "standards_preferred": [
+        "proprietary",
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000018",
+    "slug": "meander-ai-diagnostics",
+    "org_name": "Meander AI Diagnostics",
+    "org_type": "university",
+    "country": "GR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic multi domain AI team for demonstration purposes.",
+    "summary": "A fabricated Meander-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "el",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (meander-ai-diagnostics)",
+    "contact_email": "meander-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "multimodal",
+      "foundation_models",
+      "survival_longitudinal"
+    ],
+    "application_target": [
+      "diagnostics",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "multi_domain"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr",
+      "ce_marking"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "differential_privacy",
+      "on_prem_only"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/meander-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "genomics"
+      ],
+      "disease_area": [
+        "multi_domain"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "medication"
+      ],
+      "standards_preferred": [
+        "hl7v2",
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000019",
+    "slug": "nidaros-ai-diagnostics",
+    "org_name": "Nidaros AI Diagnostics",
+    "org_type": "research_institute",
+    "country": "HU",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular AI team for demonstration purposes.",
+    "summary": "A fabricated Nidaros-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "hu",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (nidaros-ai-diagnostics)",
+    "contact_email": "nidaros-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "survival_longitudinal",
+      "federated_learning",
+      "multimodal"
+    ],
+    "application_target": [
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "cardiovascular"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "gdpr_dpia",
+      "mdr"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/nidaros-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "metabolomics"
+      ],
+      "disease_area": [
+        "cardiovascular"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "genomics",
+        "mortality"
+      ],
+      "standards_preferred": [
+        "bids"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000001a",
+    "slug": "odra-ai-diagnostics",
+    "org_name": "Odra AI Diagnostics",
+    "org_type": "company",
+    "country": "IE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic womens health AI team for demonstration purposes.",
+    "summary": "A fabricated Odra-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (odra-ai-diagnostics)",
+    "contact_email": "odra-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 86,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data"
+    ],
+    "application_target": [
+      "clinical_decision_support"
+    ],
+    "domain_expertise": [
+      "womens_health",
+      "musculoskeletal"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [],
+    "compute": "unsure",
+    "privacy_capability": [
+      "federated_capable"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "claims"
+      ],
+      "disease_area": [
+        "womens_health",
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "lt_1k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [],
+      "standards_preferred": [
+        "fhir",
+        "vcf"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000001b",
+    "slug": "pyrenova-ai-diagnostics",
+    "org_name": "Pyrenova AI Diagnostics",
+    "org_type": "research_institute",
+    "country": "IT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic rare disease AI team for demonstration purposes.",
+    "summary": "A fabricated Pyrenova-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "it",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (pyrenova-ai-diagnostics)",
+    "contact_email": "pyrenova-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "classical_ml_biostat"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "rare_disease"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "synthetic_only",
+      "differential_privacy"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "rare_disease"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "outcomes"
+      ],
+      "standards_preferred": [
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000001c",
+    "slug": "quercia-ai-diagnostics",
+    "org_name": "Quercia AI Diagnostics",
+    "org_type": "company",
+    "country": "LV",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic musculoskeletal AI team for demonstration purposes.",
+    "summary": "A fabricated Quercia-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (quercia-ai-diagnostics)",
+    "contact_email": "quercia-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "diagnostics"
+    ],
+    "domain_expertise": [
+      "musculoskeletal"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "requires_data_export",
+      "on_prem_only"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/quercia-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "cohort_longitudinal",
+        "registry"
+      ],
+      "disease_area": [
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "none",
+      "linkage_required": [],
+      "standards_preferred": [
+        "bids"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000001d",
+    "slug": "ravenna-ai-diagnostics",
+    "org_name": "Ravenna AI Diagnostics",
+    "org_type": "research_institute",
+    "country": "LT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory AI team for demonstration purposes.",
+    "summary": "A fabricated Ravenna-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "event_sept_3",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ravenna-ai-diagnostics)",
+    "contact_email": "ravenna-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "foundation_models"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "respiratory"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ce_marking"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "synthetic_only",
+      "federated_capable"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "transcriptomics",
+        "waveform_ecg_eeg"
+      ],
+      "disease_area": [
+        "respiratory"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "partial",
+      "linkage_required": [],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000001e",
+    "slug": "savona-ai-diagnostics",
+    "org_name": "Savona AI Diagnostics",
+    "org_type": "university",
+    "country": "LU",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular AI team for demonstration purposes.",
+    "summary": "A fabricated Savona-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "fr",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (savona-ai-diagnostics)",
+    "contact_email": "savona-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "computer_vision",
+      "graph_knowledge"
+    ],
+    "application_target": [
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "cardiovascular",
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "differential_privacy",
+      "synthetic_only"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "proteomics"
+      ],
+      "disease_area": [
+        "cardiovascular",
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "imaging",
+        "genomics"
+      ],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000001f",
+    "slug": "tundra-ai-diagnostics",
+    "org_name": "Tundra AI Diagnostics",
+    "org_type": "company",
+    "country": "MT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious AI team for demonstration purposes.",
+    "summary": "A fabricated Tundra-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (tundra-ai-diagnostics)",
+    "contact_email": "tundra-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 86,
+    "kind": "ai_team",
+    "methods": [
+      "clinical_nlp",
+      "survival_longitudinal",
+      "synthetic_data"
+    ],
+    "application_target": [
+      "triage_workflow",
+      "drug_repurposing"
+    ],
+    "domain_expertise": [
+      "infectious",
+      "multi_domain"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [],
+    "compute": "unsure",
+    "privacy_capability": [
+      "synthetic_only",
+      "requires_data_export"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "biospecimens",
+        "imaging_histopath"
+      ],
+      "disease_area": [
+        "infectious",
+        "multi_domain"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "mortality",
+        "imaging"
+      ],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000020",
+    "slug": "umbra-ai-diagnostics",
+    "org_name": "Umbra AI Diagnostics",
+    "org_type": "research_institute",
+    "country": "NL",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry AI team for demonstration purposes.",
+    "summary": "A fabricated Umbra-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (umbra-ai-diagnostics)",
+    "contact_email": "umbra-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data",
+      "foundation_models"
+    ],
+    "application_target": [
+      "drug_repurposing",
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "psychiatry"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "gdpr_dpia",
+      "ce_marking"
+    ],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "requires_data_export",
+      "differential_privacy"
+    ],
+    "team_size": "1",
+    "track_record": [
+      "https://example.com/umbra-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "transcriptomics",
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "psychiatry"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "none",
+      "linkage_required": [],
+      "standards_preferred": [
+        "proprietary"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000021",
+    "slug": "vltava-ai-diagnostics",
+    "org_name": "Vltava AI Diagnostics",
+    "org_type": "startup",
+    "country": "PL",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic oncology AI team for demonstration purposes.",
+    "summary": "A fabricated Vltava-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "pl",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (vltava-ai-diagnostics)",
+    "contact_email": "vltava-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "multimodal",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "triage_workflow",
+      "diagnostics"
+    ],
+    "domain_expertise": [
+      "oncology",
+      "musculoskeletal"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "ivdr"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "metabolomics"
+      ],
+      "disease_area": [
+        "oncology",
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000022",
+    "slug": "wistula-ai-diagnostics",
+    "org_name": "Wistula AI Diagnostics",
+    "org_type": "company",
+    "country": "PT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular AI team for demonstration purposes.",
+    "summary": "A fabricated Wistula-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "pt",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (wistula-ai-diagnostics)",
+    "contact_email": "wistula-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data"
+    ],
+    "application_target": [
+      "trial_design",
+      "drug_repurposing"
+    ],
+    "domain_expertise": [
+      "cardiovascular"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr",
+      "gdpr_dpia"
+    ],
+    "compute": "unsure",
+    "privacy_capability": [
+      "synthetic_only",
+      "federated_capable"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "registry",
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "cardiovascular"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [],
+      "standards_preferred": [
+        "proprietary",
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000023",
+    "slug": "ypres-ai-diagnostics",
+    "org_name": "Ypres AI Diagnostics",
+    "org_type": "university",
+    "country": "RO",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology AI team for demonstration purposes.",
+    "summary": "A fabricated Ypres-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "ro",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ypres-ai-diagnostics)",
+    "contact_email": "ypres-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "classical_ml_biostat"
+    ],
+    "application_target": [
+      "drug_repurposing"
+    ],
+    "domain_expertise": [
+      "neurology",
+      "rare_disease"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr",
+      "gdpr_dpia"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "can_work_in_tre"
+    ],
+    "team_size": "2_5",
+    "track_record": [
+      "https://example.com/ypres-ai-diagnostics/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "waveform_ecg_eeg",
+        "metabolomics"
+      ],
+      "disease_area": [
+        "neurology",
+        "rare_disease"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "none",
+      "linkage_required": [
+        "medication",
+        "genomics"
+      ],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000024",
+    "slug": "zephyra-ai-diagnostics",
+    "org_name": "Zephyra AI Diagnostics",
+    "org_type": "company",
+    "country": "SK",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic womens health AI team for demonstration purposes.",
+    "summary": "A fabricated Zephyra-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (zephyra-ai-diagnostics)",
+    "contact_email": "zephyra-ai-diagnostics@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 86,
+    "kind": "ai_team",
+    "methods": [
+      "synthetic_data",
+      "foundation_models",
+      "federated_learning"
+    ],
+    "application_target": [
+      "triage_workflow",
+      "drug_repurposing"
+    ],
+    "domain_expertise": [
+      "womens_health",
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [],
+    "compute": "unsure",
+    "privacy_capability": [
+      "on_prem_only"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "womens_health",
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "lt_1k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "mortality"
+      ],
+      "standards_preferred": [
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000025",
+    "slug": "boreal-health-analytics-lab",
+    "org_name": "Boreal Health Analytics Lab",
+    "org_type": "company",
+    "country": "SI",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory AI team for demonstration purposes.",
+    "summary": "A fabricated Boreal-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (boreal-health-analytics-lab)",
+    "contact_email": "boreal-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "classical_ml_biostat",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "respiratory"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "mdr"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "requires_data_export",
+      "differential_privacy"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_histopath",
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "respiratory"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [],
+      "standards_preferred": [
+        "fhir"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000026",
+    "slug": "carpath-health-analytics-lab",
+    "org_name": "Carpath Health Analytics Lab",
+    "org_type": "company",
+    "country": "ES",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic musculoskeletal AI team for demonstration purposes.",
+    "summary": "A fabricated Carpath-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "es",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (carpath-health-analytics-lab)",
+    "contact_email": "carpath-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "survival_longitudinal",
+      "causal_inference",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "musculoskeletal"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ivdr",
+      "gdpr_dpia"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "can_work_in_tre"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_other",
+        "cohort_longitudinal"
+      ],
+      "disease_area": [
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [],
+      "standards_preferred": [
+        "proprietary"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000027",
+    "slug": "delta-health-analytics-lab",
+    "org_name": "Delta Health Analytics Lab",
+    "org_type": "research_institute",
+    "country": "SE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious AI team for demonstration purposes.",
+    "summary": "A fabricated Delta-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "sv",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (delta-health-analytics-lab)",
+    "contact_email": "delta-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "federated_learning",
+      "multimodal",
+      "synthetic_data"
+    ],
+    "application_target": [
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "infectious"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "mdr",
+      "ivdr"
+    ],
+    "compute": "unsure",
+    "privacy_capability": [
+      "requires_data_export",
+      "synthetic_only"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_mri",
+        "claims"
+      ],
+      "disease_area": [
+        "infectious"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [],
+      "standards_preferred": [
+        "dicom",
+        "vcf"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000028",
+    "slug": "ems-health-analytics-lab",
+    "org_name": "Ems Health Analytics Lab",
+    "org_type": "startup",
+    "country": "IS",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology AI team for demonstration purposes.",
+    "summary": "A fabricated Ems-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ems-health-analytics-lab)",
+    "contact_email": "ems-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 95,
+    "kind": "ai_team",
+    "methods": [
+      "graph_knowledge",
+      "clinical_nlp",
+      "multimodal"
+    ],
+    "application_target": [
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "neurology"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ivdr",
+      "ce_marking"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "on_prem_only"
+    ],
+    "team_size": "gt_15",
+    "track_record": [
+      "https://example.com/ems-health-analytics-lab/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "imaging_ct"
+      ],
+      "disease_area": [
+        "neurology"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "mortality"
+      ],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000029",
+    "slug": "fjordane-health-analytics-lab",
+    "org_name": "Fjordane Health Analytics Lab",
+    "org_type": "research_institute",
+    "country": "LI",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic paediatrics AI team for demonstration purposes.",
+    "summary": "A fabricated Fjordane-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (fjordane-health-analytics-lab)",
+    "contact_email": "fjordane-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "diagnostics",
+      "prognosis_risk"
+    ],
+    "domain_expertise": [
+      "paediatrics",
+      "oncology"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "ivdr",
+      "gdpr_dpia"
+    ],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "on_prem_only",
+      "requires_data_export"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "cohort_longitudinal",
+        "multi_omics"
+      ],
+      "disease_area": [
+        "paediatrics",
+        "oncology"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "none",
+      "linkage_required": [
+        "mortality",
+        "genomics"
+      ],
+      "standards_preferred": [
+        "bids",
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000002a",
+    "slug": "garda-health-analytics-lab",
+    "org_name": "Garda Health Analytics Lab",
+    "org_type": "research_institute",
+    "country": "NO",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious AI team for demonstration purposes.",
+    "summary": "A fabricated Garda-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (garda-health-analytics-lab)",
+    "contact_email": "garda-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "graph_knowledge",
+      "computer_vision"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "infectious",
+      "musculoskeletal"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "6_15",
+    "track_record": [
+      "https://example.com/garda-health-analytics-lab/pub1"
+    ],
+    "data_needs": {
+      "modality": [
+        "waveform_ecg_eeg"
+      ],
+      "disease_area": [
+        "infectious",
+        "musculoskeletal"
+      ],
+      "min_n_subjects": "100k_1m",
+      "annotation_required": "none",
+      "linkage_required": [],
+      "standards_preferred": [
+        "snomed"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000002b",
+    "slug": "halcyon-health-analytics-lab",
+    "org_name": "Halcyon Health Analytics Lab",
+    "org_type": "startup",
+    "country": "CH",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular AI team for demonstration purposes.",
+    "summary": "A fabricated Halcyon-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (halcyon-health-analytics-lab)",
+    "contact_email": "halcyon-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "graph_knowledge",
+      "synthetic_data"
+    ],
+    "application_target": [
+      "clinical_decision_support"
+    ],
+    "domain_expertise": [
+      "cardiovascular",
+      "oncology"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ce_marking"
+    ],
+    "compute": "unsure",
+    "privacy_capability": [
+      "can_work_in_tre"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "cohort_longitudinal"
+      ],
+      "disease_area": [
+        "cardiovascular",
+        "oncology"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "none",
+      "linkage_required": [
+        "medication",
+        "genomics"
+      ],
+      "standards_preferred": [
+        "fhir",
+        "hl7v2"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000002c",
+    "slug": "isarburg-health-analytics-lab",
+    "org_name": "Isarburg Health Analytics Lab",
+    "org_type": "research_institute",
+    "country": "GB",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic paediatrics AI team for demonstration purposes.",
+    "summary": "A fabricated Isarburg-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (isarburg-health-analytics-lab)",
+    "contact_email": "isarburg-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "survival_longitudinal",
+      "causal_inference"
+    ],
+    "application_target": [
+      "clinical_decision_support",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "paediatrics"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr",
+      "ce_marking"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "requires_data_export",
+      "differential_privacy"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "metabolomics"
+      ],
+      "disease_area": [
+        "paediatrics"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "imaging"
+      ],
+      "standards_preferred": [
+        "snomed",
+        "proprietary"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000002d",
+    "slug": "juniper-health-analytics-lab",
+    "org_name": "Juniper Health Analytics Lab",
+    "org_type": "company",
+    "country": "IL",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic rare disease AI team for demonstration purposes.",
+    "summary": "A fabricated Juniper-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "he",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (juniper-health-analytics-lab)",
+    "contact_email": "juniper-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "multimodal",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "rare_disease",
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "ce_marking",
+      "gdpr_dpia"
+    ],
+    "compute": "unsure",
+    "privacy_capability": [
+      "synthetic_only"
+    ],
+    "team_size": "1",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "claims"
+      ],
+      "disease_area": [
+        "rare_disease",
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "expert_labelled",
+      "linkage_required": [
+        "outcomes",
+        "imaging"
+      ],
+      "standards_preferred": [
+        "snomed"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000002e",
+    "slug": "karst-health-analytics-lab",
+    "org_name": "Karst Health Analytics Lab",
+    "org_type": "research_institute",
+    "country": "AT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious AI team for demonstration purposes.",
+    "summary": "A fabricated Karst-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (karst-health-analytics-lab)",
+    "contact_email": "karst-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "classical_ml_biostat",
+      "synthetic_data"
+    ],
+    "application_target": [
+      "diagnostics",
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "infectious"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [
+      "ivdr"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "differential_privacy",
+      "on_prem_only"
+    ],
+    "team_size": "1",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_other",
+        "ehr_structured"
+      ],
+      "disease_area": [
+        "infectious"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [],
+      "standards_preferred": []
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-00000000002f",
+    "slug": "loiret-health-analytics-lab",
+    "org_name": "Loiret Health Analytics Lab",
+    "org_type": "startup",
+    "country": "BE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic womens health AI team for demonstration purposes.",
+    "summary": "A fabricated Loiret-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (loiret-health-analytics-lab)",
+    "contact_email": "loiret-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 86,
+    "kind": "ai_team",
+    "methods": [
+      "foundation_models",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "prognosis_risk",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "womens_health"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [],
+    "compute": "unsure",
+    "privacy_capability": [
+      "synthetic_only"
+    ],
+    "team_size": "2_5",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_histopath",
+        "clinical_notes"
+      ],
+      "disease_area": [
+        "womens_health"
+      ],
+      "min_n_subjects": "gt_1m",
+      "annotation_required": "none",
+      "linkage_required": [
+        "genomics",
+        "imaging"
+      ],
+      "standards_preferred": [
+        "proprietary",
+        "bids"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000030",
+    "slug": "meander-health-analytics-lab",
+    "org_name": "Meander Health Analytics Lab",
+    "org_type": "company",
+    "country": "BG",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular AI team for demonstration purposes.",
+    "summary": "A fabricated Meander-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (meander-health-analytics-lab)",
+    "contact_email": "meander-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "privacy_tech",
+      "multimodal"
+    ],
+    "application_target": [
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "cardiovascular"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [
+      "mdr"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "synthetic_only",
+      "can_work_in_tre"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_xray"
+      ],
+      "disease_area": [
+        "cardiovascular"
+      ],
+      "min_n_subjects": "lt_1k",
+      "annotation_required": "partial",
+      "linkage_required": [
+        "genomics",
+        "medication"
+      ],
+      "standards_preferred": [
+        "bids",
+        "omop_cdm"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000031",
+    "slug": "nidaros-health-analytics-lab",
+    "org_name": "Nidaros Health Analytics Lab",
+    "org_type": "startup",
+    "country": "US",
+    "eligible_hq": false,
+    "partner_only": false,
+    "one_liner": "Synthetic multi domain AI team for demonstration purposes. (collaboration partner only — HQ outside the eligible region.)",
+    "summary": "A fabricated Nidaros-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "remote_only",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (nidaros-health-analytics-lab)",
+    "contact_email": "nidaros-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "survival_longitudinal"
+    ],
+    "application_target": [
+      "biomarker_discovery"
+    ],
+    "domain_expertise": [
+      "multi_domain"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "ce_marking"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "requires_data_export"
+    ],
+    "team_size": "1",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "multi_omics",
+        "biospecimens"
+      ],
+      "disease_area": [
+        "multi_domain"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "none",
+      "linkage_required": [
+        "medication",
+        "genomics"
+      ],
+      "standards_preferred": [
+        "dicom",
+        "vcf"
+      ]
+    }
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000032",
+    "slug": "odra-health-analytics-lab",
+    "org_name": "Odra Health Analytics Lab",
+    "org_type": "company",
+    "country": "CA",
+    "eligible_hq": false,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious AI team for demonstration purposes. (collaboration partner only — HQ outside the eligible region.)",
+    "summary": "A fabricated Odra-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "dataset_access"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (odra-health-analytics-lab)",
+    "contact_email": "odra-health-analytics-lab@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 91,
+    "kind": "ai_team",
+    "methods": [
+      "causal_inference",
+      "graph_knowledge"
+    ],
+    "application_target": [
+      "diagnostics"
+    ],
+    "domain_expertise": [
+      "infectious"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [
+      "gdpr_dpia",
+      "mdr"
+    ],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "synthetic_only",
+      "federated_capable"
+    ],
+    "team_size": "1",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "wearable_sensor",
+        "genomics"
+      ],
+      "disease_area": [
+        "infectious"
+      ],
+      "min_n_subjects": "10k_100k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": [
+        "imaging",
+        "genomics"
+      ],
+      "standards_preferred": [
+        "snomed",
+        "dicom"
+      ]
+    }
   }
 ]

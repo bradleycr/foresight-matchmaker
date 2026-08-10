@@ -318,5 +318,490 @@
       "compute",
       "data_governance_support"
     ]
+  },
+  {
+    "id": "c0000000-0000-4000-8000-000000000004",
+    "slug": "boreal-health-data-alliance",
+    "org_name": "Boreal Health Data Alliance",
+    "org_type": "research_institute",
+    "country": "AT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory consortium for demonstration purposes.",
+    "summary": "A fabricated Boreal-region consortium generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "clinical_partner",
+      "data_governance_support"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (boreal-health-data-alliance)",
+    "contact_email": "boreal-health-data-alliance@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 88,
+    "kind": "consortium",
+    "datasets": [
+      {
+        "name": "Boreal consortium dataset",
+        "modality": [
+          "cohort_longitudinal"
+        ],
+        "disease_area": [
+          "respiratory",
+          "paediatrics"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "none",
+        "linkage": [
+          "mortality",
+          "genomics"
+        ],
+        "standards": [
+          "bids"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "unclear",
+        "access_model": "secure_processing_environment_only",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ],
+    "methods": [
+      "survival_longitudinal",
+      "clinical_nlp"
+    ],
+    "application_target": [
+      "trial_design",
+      "triage_workflow"
+    ],
+    "domain_expertise": [
+      "respiratory",
+      "paediatrics"
+    ],
+    "clinical_partner": "not_needed",
+    "regulatory_experience": [],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "synthetic_only",
+      "on_prem_only"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "cohort_longitudinal"
+      ],
+      "disease_area": [
+        "respiratory",
+        "paediatrics"
+      ],
+      "min_n_subjects": "10k_100k",
+      "linkage_required": [],
+      "standards_preferred": []
+    },
+    "still_seeking": [
+      "clinical_partner",
+      "data_governance_support"
+    ]
+  },
+  {
+    "id": "c0000000-0000-4000-8000-000000000005",
+    "slug": "carpath-health-data-alliance",
+    "org_name": "Carpath Health Data Alliance",
+    "org_type": "research_institute",
+    "country": "BE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry consortium for demonstration purposes.",
+    "summary": "A fabricated Carpath-region consortium generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "clinical_partner",
+      "data_governance_support"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (carpath-health-data-alliance)",
+    "contact_email": "carpath-health-data-alliance@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 88,
+    "kind": "consortium",
+    "datasets": [
+      {
+        "name": "Carpath consortium dataset",
+        "modality": [
+          "multi_omics"
+        ],
+        "disease_area": [
+          "psychiatry",
+          "infectious"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "10_100tb",
+        "longitudinal": true,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "outcomes",
+          "mortality"
+        ],
+        "standards": [
+          "dicom",
+          "snomed"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "broad_consent",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ],
+    "methods": [
+      "federated_learning"
+    ],
+    "application_target": [
+      "trial_design"
+    ],
+    "domain_expertise": [
+      "psychiatry",
+      "infectious"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "synthetic_only"
+    ],
+    "team_size": "gt_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "multi_omics"
+      ],
+      "disease_area": [
+        "psychiatry",
+        "infectious"
+      ],
+      "min_n_subjects": "10k_100k",
+      "linkage_required": [],
+      "standards_preferred": []
+    },
+    "still_seeking": [
+      "clinical_partner",
+      "data_governance_support"
+    ]
+  },
+  {
+    "id": "c0000000-0000-4000-8000-000000000006",
+    "slug": "delta-health-data-alliance",
+    "org_name": "Delta Health Data Alliance",
+    "org_type": "research_institute",
+    "country": "BG",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic multi domain consortium for demonstration purposes.",
+    "summary": "A fabricated Delta-region consortium generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "clinical_partner",
+      "compute"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (delta-health-data-alliance)",
+    "contact_email": "delta-health-data-alliance@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 88,
+    "kind": "consortium",
+    "datasets": [
+      {
+        "name": "Delta consortium dataset",
+        "modality": [
+          "clinical_notes"
+        ],
+        "disease_area": [
+          "multi_domain"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "lt_100gb",
+        "longitudinal": false,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "mortality"
+        ],
+        "standards": [
+          "dicom"
+        ],
+        "readiness": "raw",
+        "consent_basis": "pseudonymised",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ],
+    "methods": [
+      "causal_inference"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "drug_repurposing"
+    ],
+    "domain_expertise": [
+      "multi_domain"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [],
+    "compute": "need_compute",
+    "privacy_capability": [
+      "requires_data_export",
+      "on_prem_only"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "clinical_notes"
+      ],
+      "disease_area": [
+        "multi_domain"
+      ],
+      "min_n_subjects": "1k_10k",
+      "linkage_required": [],
+      "standards_preferred": []
+    },
+    "still_seeking": [
+      "clinical_partner",
+      "compute"
+    ]
+  },
+  {
+    "id": "c0000000-0000-4000-8000-000000000007",
+    "slug": "ems-health-data-alliance",
+    "org_name": "Ems Health Data Alliance",
+    "org_type": "research_institute",
+    "country": "HR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic womens health consortium for demonstration purposes.",
+    "summary": "A fabricated Ems-region consortium generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "compute"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ems-health-data-alliance)",
+    "contact_email": "ems-health-data-alliance@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 88,
+    "kind": "consortium",
+    "datasets": [
+      {
+        "name": "Ems consortium dataset",
+        "modality": [
+          "imaging_ct",
+          "metabolomics"
+        ],
+        "disease_area": [
+          "womens_health",
+          "rare_disease"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "10_100tb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "imaging"
+        ],
+        "standards": [
+          "omop_cdm"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "study_specific_consent",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ],
+    "methods": [
+      "foundation_models"
+    ],
+    "application_target": [
+      "drug_repurposing",
+      "diagnostics"
+    ],
+    "domain_expertise": [
+      "womens_health",
+      "rare_disease"
+    ],
+    "clinical_partner": "have",
+    "regulatory_experience": [],
+    "compute": "cloud_budget",
+    "privacy_capability": [
+      "on_prem_only"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_ct",
+        "metabolomics"
+      ],
+      "disease_area": [
+        "womens_health",
+        "rare_disease"
+      ],
+      "min_n_subjects": "lt_1k",
+      "linkage_required": [],
+      "standards_preferred": []
+    },
+    "still_seeking": [
+      "compute"
+    ]
+  },
+  {
+    "id": "c0000000-0000-4000-8000-000000000008",
+    "slug": "fjordane-health-data-alliance",
+    "org_name": "Fjordane Health Data Alliance",
+    "org_type": "research_institute",
+    "country": "CY",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic metabolic endocrine consortium for demonstration purposes.",
+    "summary": "A fabricated Fjordane-region consortium generated to populate the demo directory. Not a real organisation — see /seed/README.md.",
+    "languages": [
+      "el",
+      "en"
+    ],
+    "looking_for": [
+      "compute"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (fjordane-health-data-alliance)",
+    "contact_email": "fjordane-health-data-alliance@example.invalid",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 88,
+    "kind": "consortium",
+    "datasets": [
+      {
+        "name": "Fjordane consortium dataset",
+        "modality": [
+          "imaging_other",
+          "imaging_mri"
+        ],
+        "disease_area": [
+          "metabolic_endocrine"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "lt_100gb",
+        "longitudinal": true,
+        "annotation": "none",
+        "linkage": [
+          "outcomes",
+          "imaging"
+        ],
+        "standards": [
+          "hl7v2",
+          "snomed"
+        ],
+        "readiness": "raw",
+        "consent_basis": "study_specific_consent",
+        "access_model": "open_download",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ],
+    "methods": [
+      "federated_learning"
+    ],
+    "application_target": [
+      "biomarker_discovery",
+      "diagnostics"
+    ],
+    "domain_expertise": [
+      "metabolic_endocrine"
+    ],
+    "clinical_partner": "need",
+    "regulatory_experience": [],
+    "compute": "own_cluster",
+    "privacy_capability": [
+      "federated_capable"
+    ],
+    "team_size": "6_15",
+    "track_record": [],
+    "data_needs": {
+      "modality": [
+        "imaging_other",
+        "imaging_mri"
+      ],
+      "disease_area": [
+        "metabolic_endocrine"
+      ],
+      "min_n_subjects": "1k_10k",
+      "linkage_required": [],
+      "standards_preferred": []
+    },
+    "still_seeking": [
+      "compute"
+    ]
   }
 ]

@@ -3,16 +3,43 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { profileSchema, type Profile } from "./profile"
 import { applyDerivedFields } from "./derive"
+import {
+  DISEASE_AREA,
+  MODALITY,
+  N_SUBJECTS,
+  VOLUME,
+  ANNOTATION,
+  LINKAGE,
+  STANDARDS,
+  READINESS,
+  CONSENT_BASIS,
+  ACCESS_MODEL,
+  ETHICS_APPROVAL,
+  METHODS,
+  APPLICATION_TARGET,
+  CLINICAL_PARTNER,
+  REGULATORY_EXPERIENCE,
+  COMPUTE,
+  PRIVACY_CAPABILITY,
+  TEAM_SIZE,
+  ATTENDING,
+  APPLICATION_STATUS,
+  type Language,
+  type DiseaseArea,
+} from "./enums"
 
 /**
- * Generate 24 synthetic profiles (12 data holders, 12 AI teams) plus 3
- * consortia and write them to /seed. Deterministic — the same input always
- * produces the same output, so the checked-in seed is stable and diffable.
+ * Generate a hand-authored core of richly-described profiles, then extend it
+ * with a larger, combinatorially-generated set so the directory reads as an
+ * inhabited phone book (~100-120 entries) rather than a thin demo. Every
+ * profile — hand-authored or generated — is deterministic: the same input
+ * always produces the same output, so the checked-in seed is stable and
+ * diffable, and every record is written to /seed.
  *
  * ALL DATA HERE IS FABRICATED. No real organisation, person, dataset, or
  * email address. See /seed/README.md.
  *
- * Run: pnpm --filter @rmm/schema tsx src/generate-seed.ts
+ * Run: pnpm --filter @rmm/schema exec tsx src/generate-seed.ts
  */
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -1026,6 +1053,330 @@ const consortiumSeeds: Raw[] = [
     ],
   },
 ]
+
+// ---------------------------------------------------------------------------
+// Bulk filler — combinatorial generation to fill out the directory
+// ---------------------------------------------------------------------------
+//
+// The hand-authored profiles above read well but are too few to make the
+// alphabetical index or the filter dropdowns feel inhabited. This section
+// deterministically combines a small vocabulary of fictional place names and
+// organisation nouns into unique names, spread across every HQ-eligible
+// country (plus a couple of ineligible ones, to exercise `partner_only`),
+// with dataset/capability details drawn from a seeded PRNG — never
+// `Math.random()` — so the output is stable and diffable across runs.
+
+/** Mulberry32: tiny, fast, deterministic PRNG seeded by an integer. */
+function mulberry32(seed: number): () => number {
+  let s = seed | 0
+  return () => {
+    s = (s + 0x6d2b79f5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function pick<T>(rng: () => number, arr: readonly T[]): T {
+  return arr[Math.floor(rng() * arr.length)]!
+}
+
+/** Pick between `min` and `max` (inclusive) distinct items, order preserved. */
+function pickN<T>(rng: () => number, arr: readonly T[], min: number, max: number): T[] {
+  const n = Math.min(arr.length, min + Math.floor(rng() * (max - min + 1)))
+  const pool = [...arr]
+  const out: T[] = []
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(rng() * pool.length)
+    out.push(pool.splice(idx, 1)[0]!)
+  }
+  return out
+}
+
+/** Fictional place-name fragments — never a real city, region, or river. */
+const PLACE_WORDS = [
+  "Boreal",
+  "Carpath",
+  "Delta",
+  "Ems",
+  "Fjordane",
+  "Garda",
+  "Halcyon",
+  "Isarburg",
+  "Juniper",
+  "Karst",
+  "Loiret",
+  "Meander",
+  "Nidaros",
+  "Odra",
+  "Pyrenova",
+  "Quercia",
+  "Ravenna",
+  "Savona",
+  "Tundra",
+  "Umbra",
+  "Vltava",
+  "Wistula",
+  "Ypres",
+  "Zephyra",
+] as const
+
+const DATA_HOLDER_NOUNS = [
+  "University Hospital",
+  "Regional Data Centre",
+  "National Registry",
+  "Biobank Consortium",
+  "Clinical Research Institute",
+  "Diagnostic Imaging Centre",
+  "Health Data Trust",
+  "Cancer Registry",
+  "Population Cohort Study",
+  "Medical Data Archive",
+] as const
+
+const AI_TEAM_NOUNS = [
+  "AI Diagnostics",
+  "Health Analytics Lab",
+  "Applied ML Group",
+  "Computational Medicine",
+  "Clinical Intelligence",
+  "Signal Sciences",
+  "BioAI Systems",
+  "Precision Health AI",
+  "Data Science Collective",
+  "Foundation Health Models",
+] as const
+
+const CONSORTIUM_NOUNS = [
+  "Health Data Alliance",
+  "Joint Research Initiative",
+  "Cross-Border Consortium",
+  "Precision Medicine Network",
+  "Data & AI Coalition",
+] as const
+
+/** Every HQ-eligible country (EU-27 + EFTA + UK + Israel), cycled by index. */
+const GEN_COUNTRIES = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO",
+  "CH", "GB", "IL",
+] as const
+
+/** A plausible primary language per country, from the LANGUAGE enum — "en" is always added separately. */
+const LANGUAGE_BY_COUNTRY: Record<string, Language> = {
+  AT: "de", BE: "nl", BG: "other", HR: "other", CY: "el", CZ: "cs",
+  DK: "da", EE: "other", FI: "fi", FR: "fr", DE: "de", GR: "el",
+  HU: "hu", IE: "en", IT: "it", LV: "other", LT: "other", LU: "fr",
+  MT: "other", NL: "nl", PL: "pl", PT: "pt", RO: "ro", SK: "other",
+  SI: "other", ES: "es", SE: "sv", IS: "other", LI: "de", NO: "other",
+  CH: "de", GB: "en", IL: "he",
+}
+
+function languagesFor(country: string): Language[] {
+  const local = LANGUAGE_BY_COUNTRY[country] ?? "other"
+  return local === "en" ? ["en"] : [local, "en"]
+}
+
+const ORG_TYPES_BY_KIND = {
+  data_holder: ["university", "hospital", "biobank_or_registry", "research_institute"] as const,
+  ai_team: ["startup", "company", "research_institute", "university"] as const,
+} as const
+
+/** A generated org name from a deterministic (place, noun) pair — always unique by construction. */
+function generatedName(i: number, nouns: readonly string[]): { name: string; place: string } {
+  const place = PLACE_WORDS[i % PLACE_WORDS.length]!
+  const noun = nouns[Math.floor(i / PLACE_WORDS.length) % nouns.length]!
+  return { name: `${place} ${noun}`, place }
+}
+
+function genDataHolder(i: number): Raw {
+  const rng = mulberry32(0x0d47a1 + i * 7919)
+  const { name, place } = generatedName(i, DATA_HOLDER_NOUNS)
+  const country = GEN_COUNTRIES[i % GEN_COUNTRIES.length]!
+  const diseaseAreas = pickN(rng, DISEASE_AREA.filter((d) => d !== "other"), 1, 2) as DiseaseArea[]
+  const modalities = pickN(rng, MODALITY.filter((m) => m !== "other"), 1, 2)
+  const slug = slugify(name)
+
+  return {
+    org_name: name,
+    org_type: pick(rng, ORG_TYPES_BY_KIND.data_holder),
+    country,
+    one_liner: `Synthetic ${diseaseAreas[0]!.replace(/_/g, " ")} dataset for demonstration purposes.`,
+    summary: `A fabricated ${place}-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.`,
+    languages: languagesFor(country),
+    looking_for: ["ai_partner"],
+    application_status: pick(rng, APPLICATION_STATUS.filter((s) => s !== "not_applying")),
+    parallel_public_funding: rng() < 0.08 ? "yes" : rng() < 0.15 ? "unsure" : "no",
+    attending: pickN(rng, ATTENDING, 1, 2),
+    contact_name: `Fabricated Contact (${slug})`,
+    contact_email: `${slug}@example.invalid`,
+    contact_role: "Data Protection Officer",
+    datasets: [
+      {
+        name: `${place} ${diseaseAreas[0]!.replace(/_/g, " ")} dataset`,
+        modality: modalities,
+        disease_area: diseaseAreas,
+        n_subjects: pick(rng, N_SUBJECTS),
+        volume: pick(rng, VOLUME),
+        longitudinal: rng() < 0.5,
+        annotation: pick(rng, ANNOTATION),
+        linkage: pickN(rng, LINKAGE.filter((l) => l !== "none"), 1, 2),
+        standards: pickN(rng, STANDARDS.filter((s) => s !== "none"), 1, 2),
+        readiness: pick(rng, READINESS),
+        consent_basis: pick(rng, CONSENT_BASIS),
+        access_model: pick(rng, ACCESS_MODEL.filter((a) => a !== "undecided")),
+        data_can_leave_institution: pick(rng, ["yes", "no", "unsure"] as const),
+        ethics_approval: pick(rng, ETHICS_APPROVAL),
+        publicly_describable: rng() > 0.1,
+      },
+    ],
+  }
+}
+
+function genAiTeam(i: number): Raw {
+  const rng = mulberry32(0x1a2b3c + i * 104729)
+  const { name, place } = generatedName(i, AI_TEAM_NOUNS)
+  const country = GEN_COUNTRIES[i % GEN_COUNTRIES.length]!
+  const domainAreas = pickN(rng, DISEASE_AREA.filter((d) => d !== "other"), 1, 2) as DiseaseArea[]
+  const needModalities = pickN(rng, MODALITY.filter((m) => m !== "other"), 1, 2)
+  const slug = slugify(name)
+
+  return {
+    org_name: name,
+    org_type: pick(rng, ORG_TYPES_BY_KIND.ai_team),
+    country,
+    one_liner: `Synthetic ${domainAreas[0]!.replace(/_/g, " ")} AI team for demonstration purposes.`,
+    summary: `A fabricated ${place}-region AI team generated to populate the demo directory. Not a real organisation — see /seed/README.md.`,
+    languages: languagesFor(country),
+    looking_for: ["dataset_access"],
+    application_status: pick(rng, APPLICATION_STATUS.filter((s) => s !== "not_applying")),
+    parallel_public_funding: rng() < 0.05 ? "yes" : rng() < 0.12 ? "unsure" : "no",
+    attending: pickN(rng, ATTENDING, 1, 2),
+    contact_name: `Fabricated Contact (${slug})`,
+    contact_email: `${slug}@example.invalid`,
+    methods: pickN(rng, METHODS, 1, 3),
+    application_target: pickN(rng, APPLICATION_TARGET.filter((a) => a !== "other"), 1, 2),
+    domain_expertise: domainAreas,
+    clinical_partner: pick(rng, CLINICAL_PARTNER),
+    regulatory_experience: pickN(rng, REGULATORY_EXPERIENCE.filter((r) => r !== "none"), 0, 2),
+    compute: pick(rng, COMPUTE),
+    privacy_capability: pickN(rng, PRIVACY_CAPABILITY, 1, 2),
+    team_size: pick(rng, TEAM_SIZE),
+    track_record: rng() < 0.4 ? [`https://example.com/${slug}/pub1`] : [],
+    data_needs: {
+      modality: needModalities,
+      disease_area: domainAreas,
+      min_n_subjects: pick(rng, N_SUBJECTS),
+      annotation_required: pick(rng, ANNOTATION),
+      linkage_required: pickN(rng, LINKAGE.filter((l) => l !== "none"), 0, 2),
+      standards_preferred: pickN(rng, STANDARDS.filter((s) => s !== "none"), 0, 2),
+    },
+  }
+}
+
+/** A couple of ineligible-HQ teams, to keep `partner_only` exercised beyond the one golden fixture. */
+function genPartnerOnlyAiTeam(i: number, country: "US" | "CA" | "AU"): Raw {
+  const base = genAiTeam(i)
+  return {
+    ...base,
+    country,
+    languages: ["en"],
+    partner_only: true,
+    one_liner: `${base.one_liner as string} (collaboration partner only — HQ outside the eligible region.)`,
+  }
+}
+
+function genConsortium(i: number): Raw {
+  const rng = mulberry32(0x654321 + i * 15485863)
+  const { name, place } = generatedName(i, CONSORTIUM_NOUNS)
+  const country = GEN_COUNTRIES[i % GEN_COUNTRIES.length]!
+  const diseaseAreas = pickN(rng, DISEASE_AREA.filter((d) => d !== "other"), 1, 2) as DiseaseArea[]
+  const modalities = pickN(rng, MODALITY.filter((m) => m !== "other"), 1, 2)
+  const slug = slugify(name)
+  const stillSeeking = pickN(rng, ["clinical_partner", "compute", "data_governance_support"] as const, 0, 2)
+
+  return {
+    org_name: name,
+    org_type: "research_institute",
+    country,
+    one_liner: `Synthetic ${diseaseAreas[0]!.replace(/_/g, " ")} consortium for demonstration purposes.`,
+    summary: `A fabricated ${place}-region consortium generated to populate the demo directory. Not a real organisation — see /seed/README.md.`,
+    languages: languagesFor(country),
+    looking_for: stillSeeking.length > 0 ? stillSeeking : (["not_looking"] as const),
+    application_status: stillSeeking.length > 0 ? "applying_with_partner" : "team_complete",
+    parallel_public_funding: "no",
+    attending: pickN(rng, ATTENDING, 1, 2),
+    contact_name: `Fabricated Contact (${slug})`,
+    contact_email: `${slug}@example.invalid`,
+    still_seeking: stillSeeking,
+    methods: pickN(rng, METHODS, 1, 2),
+    application_target: pickN(rng, APPLICATION_TARGET.filter((a) => a !== "other"), 1, 2),
+    domain_expertise: diseaseAreas,
+    clinical_partner: pick(rng, CLINICAL_PARTNER),
+    regulatory_experience: pickN(rng, REGULATORY_EXPERIENCE.filter((r) => r !== "none"), 0, 2),
+    compute: pick(rng, COMPUTE),
+    privacy_capability: pickN(rng, PRIVACY_CAPABILITY, 1, 2),
+    team_size: pick(rng, TEAM_SIZE.filter((s) => s !== "1")),
+    track_record: [],
+    data_needs: {
+      modality: modalities,
+      disease_area: diseaseAreas,
+      min_n_subjects: pick(rng, N_SUBJECTS),
+      linkage_required: [],
+      standards_preferred: [],
+    },
+    datasets: [
+      {
+        name: `${place} consortium dataset`,
+        modality: modalities,
+        disease_area: diseaseAreas,
+        n_subjects: pick(rng, N_SUBJECTS),
+        volume: pick(rng, VOLUME),
+        longitudinal: rng() < 0.5,
+        annotation: pick(rng, ANNOTATION),
+        linkage: pickN(rng, LINKAGE.filter((l) => l !== "none"), 1, 2),
+        standards: pickN(rng, STANDARDS.filter((s) => s !== "none"), 1, 2),
+        readiness: pick(rng, READINESS),
+        consent_basis: pick(rng, CONSENT_BASIS),
+        access_model: pick(rng, ACCESS_MODEL.filter((a) => a !== "undecided")),
+        data_can_leave_institution: pick(rng, ["yes", "no", "unsure"] as const),
+        ethics_approval: pick(rng, ETHICS_APPROVAL),
+        publicly_describable: true,
+      },
+    ],
+  }
+}
+
+const GENERATED_DATA_HOLDER_COUNT = 38
+const GENERATED_AI_TEAM_COUNT = 36
+const GENERATED_CONSORTIUM_COUNT = 5
+
+const generatedDataHolders: Raw[] = Array.from({ length: GENERATED_DATA_HOLDER_COUNT }, (_, i) => genDataHolder(i))
+const generatedAiTeams: Raw[] = [
+  ...Array.from({ length: GENERATED_AI_TEAM_COUNT }, (_, i) => genAiTeam(i)),
+  genPartnerOnlyAiTeam(GENERATED_AI_TEAM_COUNT, "US"),
+  genPartnerOnlyAiTeam(GENERATED_AI_TEAM_COUNT + 1, "CA"),
+]
+const generatedConsortia: Raw[] = Array.from({ length: GENERATED_CONSORTIUM_COUNT }, (_, i) => genConsortium(i))
+
+dataHolderSeeds.push(...generatedDataHolders)
+aiTeamSeeds.push(...generatedAiTeams)
+consortiumSeeds.push(...generatedConsortia)
+
+// Defensive: the whole point of deterministic (place, noun) pairing is that
+// names never collide. Assert it instead of silently overwriting a profile.
+function assertUniqueSlugs(seeds: Raw[], label: string): void {
+  const seen = new Set<string>()
+  for (const s of seeds) {
+    const slug = slugify(String(s.org_name))
+    if (seen.has(slug)) throw new Error(`generate-seed: duplicate slug "${slug}" in ${label}`)
+    seen.add(slug)
+  }
+}
+assertUniqueSlugs(dataHolderSeeds, "data holders")
+assertUniqueSlugs(aiTeamSeeds, "ai teams")
+assertUniqueSlugs(consortiumSeeds, "consortia")
 
 // ---------------------------------------------------------------------------
 // Assembly

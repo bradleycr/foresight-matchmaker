@@ -766,5 +766,2389 @@
         "publicly_describable": true
       }
     ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000000d",
+    "slug": "boreal-university-hospital",
+    "org_name": "Boreal University Hospital",
+    "org_type": "biobank_or_registry",
+    "country": "AT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Boreal-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (boreal-university-hospital)",
+    "contact_email": "boreal-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Boreal infectious dataset",
+        "modality": [
+          "cohort_longitudinal",
+          "imaging_mri"
+        ],
+        "disease_area": [
+          "infectious",
+          "rare_disease"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "1_10tb",
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "mortality",
+          "outcomes"
+        ],
+        "standards": [
+          "dicom",
+          "proprietary"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "research_art9_2j",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000000e",
+    "slug": "carpath-university-hospital",
+    "org_name": "Carpath University Hospital",
+    "org_type": "hospital",
+    "country": "BE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic paediatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Carpath-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "remote_only",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (carpath-university-hospital)",
+    "contact_email": "carpath-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Carpath paediatrics dataset",
+        "modality": [
+          "cohort_longitudinal",
+          "metabolomics"
+        ],
+        "disease_area": [
+          "paediatrics",
+          "psychiatry"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "gt_100tb",
+        "longitudinal": true,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "imaging",
+          "outcomes"
+        ],
+        "standards": [
+          "vcf"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "unclear",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000000f",
+    "slug": "delta-university-hospital",
+    "org_name": "Delta University Hospital",
+    "org_type": "university",
+    "country": "BG",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic womens health dataset for demonstration purposes.",
+    "summary": "A fabricated Delta-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "event_sept_3",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (delta-university-hospital)",
+    "contact_email": "delta-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Delta womens health dataset",
+        "modality": [
+          "claims",
+          "registry"
+        ],
+        "disease_area": [
+          "womens_health"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "1_10tb",
+        "longitudinal": false,
+        "annotation": "partial",
+        "linkage": [
+          "outcomes"
+        ],
+        "standards": [
+          "bids"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "pseudonymised",
+        "access_model": "open_download",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000010",
+    "slug": "ems-university-hospital",
+    "org_name": "Ems University Hospital",
+    "org_type": "hospital",
+    "country": "HR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Ems-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ems-university-hospital)",
+    "contact_email": "ems-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Ems infectious dataset",
+        "modality": [
+          "claims"
+        ],
+        "disease_area": [
+          "infectious"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "10_100tb",
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "medication"
+        ],
+        "standards": [
+          "bids",
+          "hl7v2"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "unclear",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000011",
+    "slug": "fjordane-university-hospital",
+    "org_name": "Fjordane University Hospital",
+    "org_type": "research_institute",
+    "country": "CY",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry dataset for demonstration purposes.",
+    "summary": "A fabricated Fjordane-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "el",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "event_sept_3",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (fjordane-university-hospital)",
+    "contact_email": "fjordane-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Fjordane psychiatry dataset",
+        "modality": [
+          "imaging_ct"
+        ],
+        "disease_area": [
+          "psychiatry",
+          "paediatrics"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "10_100tb",
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "imaging"
+        ],
+        "standards": [
+          "fhir"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "fully_anonymised",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000012",
+    "slug": "garda-university-hospital",
+    "org_name": "Garda University Hospital",
+    "org_type": "biobank_or_registry",
+    "country": "CZ",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry dataset for demonstration purposes.",
+    "summary": "A fabricated Garda-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "cs",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "event_sept_3",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (garda-university-hospital)",
+    "contact_email": "garda-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Garda psychiatry dataset",
+        "modality": [
+          "cohort_longitudinal",
+          "proteomics"
+        ],
+        "disease_area": [
+          "psychiatry"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "10_100tb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "mortality"
+        ],
+        "standards": [
+          "hl7v2",
+          "proprietary"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "fully_anonymised",
+        "access_model": "open_download",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000013",
+    "slug": "halcyon-university-hospital",
+    "org_name": "Halcyon University Hospital",
+    "org_type": "biobank_or_registry",
+    "country": "DK",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Halcyon-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "da",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (halcyon-university-hospital)",
+    "contact_email": "halcyon-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Halcyon infectious dataset",
+        "modality": [
+          "claims",
+          "multi_omics"
+        ],
+        "disease_area": [
+          "infectious"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "1_10tb",
+        "longitudinal": false,
+        "annotation": "none",
+        "linkage": [
+          "outcomes"
+        ],
+        "standards": [
+          "dicom",
+          "bids"
+        ],
+        "readiness": "raw",
+        "consent_basis": "study_specific_consent",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "approved",
+        "publicly_describable": false
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000014",
+    "slug": "isarburg-university-hospital",
+    "org_name": "Isarburg University Hospital",
+    "org_type": "hospital",
+    "country": "EE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Isarburg-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (isarburg-university-hospital)",
+    "contact_email": "isarburg-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Isarburg geriatrics dataset",
+        "modality": [
+          "imaging_ct"
+        ],
+        "disease_area": [
+          "geriatrics",
+          "multi_domain"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "1_10tb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "medication"
+        ],
+        "standards": [
+          "bids"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "public_task_art6_1e",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000015",
+    "slug": "juniper-university-hospital",
+    "org_name": "Juniper University Hospital",
+    "org_type": "hospital",
+    "country": "FI",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Juniper-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "fi",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (juniper-university-hospital)",
+    "contact_email": "juniper-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Juniper infectious dataset",
+        "modality": [
+          "waveform_ecg_eeg"
+        ],
+        "disease_area": [
+          "infectious"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "lt_100gb",
+        "longitudinal": false,
+        "annotation": "partial",
+        "linkage": [
+          "imaging"
+        ],
+        "standards": [
+          "bids",
+          "dicom"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "unclear",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000016",
+    "slug": "karst-university-hospital",
+    "org_name": "Karst University Hospital",
+    "org_type": "university",
+    "country": "FR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology dataset for demonstration purposes.",
+    "summary": "A fabricated Karst-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "fr",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (karst-university-hospital)",
+    "contact_email": "karst-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Karst neurology dataset",
+        "modality": [
+          "waveform_ecg_eeg",
+          "imaging_mri"
+        ],
+        "disease_area": [
+          "neurology",
+          "womens_health"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "100gb_1tb",
+        "longitudinal": false,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "medication"
+        ],
+        "standards": [
+          "omop_cdm",
+          "dicom"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "pseudonymised",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000017",
+    "slug": "loiret-university-hospital",
+    "org_name": "Loiret University Hospital",
+    "org_type": "biobank_or_registry",
+    "country": "DE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular dataset for demonstration purposes.",
+    "summary": "A fabricated Loiret-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (loiret-university-hospital)",
+    "contact_email": "loiret-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Loiret cardiovascular dataset",
+        "modality": [
+          "imaging_histopath",
+          "ehr_structured"
+        ],
+        "disease_area": [
+          "cardiovascular"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "outcomes",
+          "imaging"
+        ],
+        "standards": [
+          "proprietary"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "fully_anonymised",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000018",
+    "slug": "meander-university-hospital",
+    "org_name": "Meander University Hospital",
+    "org_type": "research_institute",
+    "country": "GR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Meander-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "el",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (meander-university-hospital)",
+    "contact_email": "meander-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Meander infectious dataset",
+        "modality": [
+          "imaging_other",
+          "waveform_ecg_eeg"
+        ],
+        "disease_area": [
+          "infectious",
+          "metabolic_endocrine"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "10_100tb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "medication"
+        ],
+        "standards": [
+          "fhir"
+        ],
+        "readiness": "raw",
+        "consent_basis": "public_task_art6_1e",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_required",
+        "publicly_describable": false
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000019",
+    "slug": "nidaros-university-hospital",
+    "org_name": "Nidaros University Hospital",
+    "org_type": "university",
+    "country": "HU",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic paediatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Nidaros-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "hu",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "event_sept_2",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (nidaros-university-hospital)",
+    "contact_email": "nidaros-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Nidaros paediatrics dataset",
+        "modality": [
+          "biospecimens"
+        ],
+        "disease_area": [
+          "paediatrics",
+          "metabolic_endocrine"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "100gb_1tb",
+        "longitudinal": false,
+        "annotation": "none",
+        "linkage": [
+          "mortality",
+          "medication"
+        ],
+        "standards": [
+          "snomed"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "study_specific_consent",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000001a",
+    "slug": "odra-university-hospital",
+    "org_name": "Odra University Hospital",
+    "org_type": "hospital",
+    "country": "IE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology dataset for demonstration purposes.",
+    "summary": "A fabricated Odra-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (odra-university-hospital)",
+    "contact_email": "odra-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Odra neurology dataset",
+        "modality": [
+          "imaging_other",
+          "biospecimens"
+        ],
+        "disease_area": [
+          "neurology",
+          "cardiovascular"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "lt_100gb",
+        "longitudinal": false,
+        "annotation": "partial",
+        "linkage": [
+          "genomics",
+          "mortality"
+        ],
+        "standards": [
+          "fhir"
+        ],
+        "readiness": "raw",
+        "consent_basis": "study_specific_consent",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000001b",
+    "slug": "pyrenova-university-hospital",
+    "org_name": "Pyrenova University Hospital",
+    "org_type": "hospital",
+    "country": "IT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic metabolic endocrine dataset for demonstration purposes.",
+    "summary": "A fabricated Pyrenova-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "it",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (pyrenova-university-hospital)",
+    "contact_email": "pyrenova-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Pyrenova metabolic endocrine dataset",
+        "modality": [
+          "ehr_structured",
+          "imaging_mri"
+        ],
+        "disease_area": [
+          "metabolic_endocrine"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "medication",
+          "genomics"
+        ],
+        "standards": [
+          "bids",
+          "hl7v2"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "broad_consent",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000001c",
+    "slug": "quercia-university-hospital",
+    "org_name": "Quercia University Hospital",
+    "org_type": "university",
+    "country": "LV",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology dataset for demonstration purposes.",
+    "summary": "A fabricated Quercia-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only",
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (quercia-university-hospital)",
+    "contact_email": "quercia-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Quercia neurology dataset",
+        "modality": [
+          "imaging_ct"
+        ],
+        "disease_area": [
+          "neurology",
+          "paediatrics"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "gt_100tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "outcomes",
+          "mortality"
+        ],
+        "standards": [
+          "hl7v2"
+        ],
+        "readiness": "raw",
+        "consent_basis": "fully_anonymised",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_required",
+        "publicly_describable": false
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000001d",
+    "slug": "ravenna-university-hospital",
+    "org_name": "Ravenna University Hospital",
+    "org_type": "hospital",
+    "country": "LT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Ravenna-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ravenna-university-hospital)",
+    "contact_email": "ravenna-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Ravenna geriatrics dataset",
+        "modality": [
+          "registry"
+        ],
+        "disease_area": [
+          "geriatrics"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "lt_100gb",
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "genomics",
+          "medication"
+        ],
+        "standards": [
+          "omop_cdm"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "unclear",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000001e",
+    "slug": "savona-university-hospital",
+    "org_name": "Savona University Hospital",
+    "org_type": "biobank_or_registry",
+    "country": "LU",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Savona-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "fr",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "yes",
+    "attending": [
+      "remote_only",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (savona-university-hospital)",
+    "contact_email": "savona-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Savona geriatrics dataset",
+        "modality": [
+          "genomics"
+        ],
+        "disease_area": [
+          "geriatrics"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "lt_100gb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "mortality"
+        ],
+        "standards": [
+          "fhir",
+          "vcf"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "research_art9_2j",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000001f",
+    "slug": "tundra-university-hospital",
+    "org_name": "Tundra University Hospital",
+    "org_type": "research_institute",
+    "country": "MT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry dataset for demonstration purposes.",
+    "summary": "A fabricated Tundra-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (tundra-university-hospital)",
+    "contact_email": "tundra-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Tundra psychiatry dataset",
+        "modality": [
+          "biospecimens",
+          "imaging_xray"
+        ],
+        "disease_area": [
+          "psychiatry",
+          "paediatrics"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "1_10tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "genomics",
+          "medication"
+        ],
+        "standards": [
+          "fhir",
+          "bids"
+        ],
+        "readiness": "raw",
+        "consent_basis": "fully_anonymised",
+        "access_model": "open_download",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000020",
+    "slug": "umbra-university-hospital",
+    "org_name": "Umbra University Hospital",
+    "org_type": "research_institute",
+    "country": "NL",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Umbra-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (umbra-university-hospital)",
+    "contact_email": "umbra-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Umbra geriatrics dataset",
+        "modality": [
+          "registry",
+          "imaging_xray"
+        ],
+        "disease_area": [
+          "geriatrics",
+          "infectious"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "gt_100tb",
+        "longitudinal": true,
+        "annotation": "none",
+        "linkage": [
+          "genomics"
+        ],
+        "standards": [
+          "fhir",
+          "bids"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "public_task_art6_1e",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000021",
+    "slug": "vltava-university-hospital",
+    "org_name": "Vltava University Hospital",
+    "org_type": "university",
+    "country": "PL",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic cardiovascular dataset for demonstration purposes.",
+    "summary": "A fabricated Vltava-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "pl",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (vltava-university-hospital)",
+    "contact_email": "vltava-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Vltava cardiovascular dataset",
+        "modality": [
+          "multi_omics"
+        ],
+        "disease_area": [
+          "cardiovascular"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "1_10tb",
+        "longitudinal": false,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "medication"
+        ],
+        "standards": [
+          "dicom",
+          "omop_cdm"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "pseudonymised",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000022",
+    "slug": "wistula-university-hospital",
+    "org_name": "Wistula University Hospital",
+    "org_type": "research_institute",
+    "country": "PT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic musculoskeletal dataset for demonstration purposes.",
+    "summary": "A fabricated Wistula-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "pt",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (wistula-university-hospital)",
+    "contact_email": "wistula-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Wistula musculoskeletal dataset",
+        "modality": [
+          "claims",
+          "ehr_structured"
+        ],
+        "disease_area": [
+          "musculoskeletal",
+          "infectious"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "10_100tb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "outcomes"
+        ],
+        "standards": [
+          "dicom"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "fully_anonymised",
+        "access_model": "secure_processing_environment_only",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "approved",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000023",
+    "slug": "ypres-university-hospital",
+    "org_name": "Ypres University Hospital",
+    "org_type": "research_institute",
+    "country": "RO",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic rare disease dataset for demonstration purposes.",
+    "summary": "A fabricated Ypres-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "ro",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ypres-university-hospital)",
+    "contact_email": "ypres-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Ypres rare disease dataset",
+        "modality": [
+          "imaging_histopath"
+        ],
+        "disease_area": [
+          "rare_disease"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "gt_100tb",
+        "longitudinal": false,
+        "annotation": "none",
+        "linkage": [
+          "imaging"
+        ],
+        "standards": [
+          "vcf",
+          "bids"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "study_specific_consent",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "approved",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000024",
+    "slug": "zephyra-university-hospital",
+    "org_name": "Zephyra University Hospital",
+    "org_type": "university",
+    "country": "SK",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic musculoskeletal dataset for demonstration purposes.",
+    "summary": "A fabricated Zephyra-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (zephyra-university-hospital)",
+    "contact_email": "zephyra-university-hospital@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Zephyra musculoskeletal dataset",
+        "modality": [
+          "multi_omics",
+          "biospecimens"
+        ],
+        "disease_area": [
+          "musculoskeletal"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "10_100tb",
+        "longitudinal": true,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "mortality"
+        ],
+        "standards": [
+          "dicom",
+          "proprietary"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "broad_consent",
+        "access_model": "open_download",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "approved",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000025",
+    "slug": "boreal-regional-data-centre",
+    "org_name": "Boreal Regional Data Centre",
+    "org_type": "research_institute",
+    "country": "SI",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Boreal-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (boreal-regional-data-centre)",
+    "contact_email": "boreal-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Boreal geriatrics dataset",
+        "modality": [
+          "multi_omics",
+          "transcriptomics"
+        ],
+        "disease_area": [
+          "geriatrics"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "lt_100gb",
+        "longitudinal": true,
+        "annotation": "none",
+        "linkage": [
+          "imaging",
+          "medication"
+        ],
+        "standards": [
+          "vcf"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "broad_consent",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000026",
+    "slug": "carpath-regional-data-centre",
+    "org_name": "Carpath Regional Data Centre",
+    "org_type": "hospital",
+    "country": "ES",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Carpath-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "es",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (carpath-regional-data-centre)",
+    "contact_email": "carpath-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Carpath infectious dataset",
+        "modality": [
+          "imaging_histopath",
+          "wearable_sensor"
+        ],
+        "disease_area": [
+          "infectious"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "imaging",
+          "medication"
+        ],
+        "standards": [
+          "bids"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "public_task_art6_1e",
+        "access_model": "open_download",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": false
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000027",
+    "slug": "delta-regional-data-centre",
+    "org_name": "Delta Regional Data Centre",
+    "org_type": "university",
+    "country": "SE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry dataset for demonstration purposes.",
+    "summary": "A fabricated Delta-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "sv",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (delta-regional-data-centre)",
+    "contact_email": "delta-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Delta psychiatry dataset",
+        "modality": [
+          "imaging_other",
+          "cohort_longitudinal"
+        ],
+        "disease_area": [
+          "psychiatry",
+          "paediatrics"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "lt_100gb",
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "imaging"
+        ],
+        "standards": [
+          "omop_cdm"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "fully_anonymised",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000028",
+    "slug": "ems-regional-data-centre",
+    "org_name": "Ems Regional Data Centre",
+    "org_type": "university",
+    "country": "IS",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic womens health dataset for demonstration purposes.",
+    "summary": "A fabricated Ems-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20",
+      "event_sept_3"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (ems-regional-data-centre)",
+    "contact_email": "ems-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Ems womens health dataset",
+        "modality": [
+          "cohort_longitudinal"
+        ],
+        "disease_area": [
+          "womens_health",
+          "metabolic_endocrine"
+        ],
+        "n_subjects": "gt_1m",
+        "volume": "100gb_1tb",
+        "longitudinal": false,
+        "annotation": "none",
+        "linkage": [
+          "imaging",
+          "medication"
+        ],
+        "standards": [
+          "vcf",
+          "dicom"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "research_art9_2j",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000029",
+    "slug": "fjordane-regional-data-centre",
+    "org_name": "Fjordane Regional Data Centre",
+    "org_type": "biobank_or_registry",
+    "country": "LI",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic respiratory dataset for demonstration purposes.",
+    "summary": "A fabricated Fjordane-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (fjordane-regional-data-centre)",
+    "contact_email": "fjordane-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Fjordane respiratory dataset",
+        "modality": [
+          "imaging_ct",
+          "multi_omics"
+        ],
+        "disease_area": [
+          "respiratory",
+          "rare_disease"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "none",
+        "linkage": [
+          "mortality",
+          "outcomes"
+        ],
+        "standards": [
+          "dicom"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "pseudonymised",
+        "access_model": "open_download",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000002a",
+    "slug": "garda-regional-data-centre",
+    "org_name": "Garda Regional Data Centre",
+    "org_type": "hospital",
+    "country": "NO",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic multi domain dataset for demonstration purposes.",
+    "summary": "A fabricated Garda-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (garda-regional-data-centre)",
+    "contact_email": "garda-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Garda multi domain dataset",
+        "modality": [
+          "metabolomics",
+          "registry"
+        ],
+        "disease_area": [
+          "multi_domain"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "imaging",
+          "mortality"
+        ],
+        "standards": [
+          "omop_cdm"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "research_art9_2j",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000002b",
+    "slug": "halcyon-regional-data-centre",
+    "org_name": "Halcyon Regional Data Centre",
+    "org_type": "university",
+    "country": "CH",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Halcyon-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (halcyon-regional-data-centre)",
+    "contact_email": "halcyon-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Halcyon infectious dataset",
+        "modality": [
+          "imaging_xray",
+          "waveform_ecg_eeg"
+        ],
+        "disease_area": [
+          "infectious",
+          "psychiatry"
+        ],
+        "n_subjects": "100k_1m",
+        "volume": "1_10tb",
+        "longitudinal": false,
+        "annotation": "outcome_linked",
+        "linkage": [
+          "mortality"
+        ],
+        "standards": [
+          "bids"
+        ],
+        "readiness": "raw",
+        "consent_basis": "study_specific_consent",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000002c",
+    "slug": "isarburg-regional-data-centre",
+    "org_name": "Isarburg Regional Data Centre",
+    "org_type": "university",
+    "country": "GB",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Isarburg-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (isarburg-regional-data-centre)",
+    "contact_email": "isarburg-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Isarburg infectious dataset",
+        "modality": [
+          "multi_omics",
+          "metabolomics"
+        ],
+        "disease_area": [
+          "infectious",
+          "oncology"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "mortality",
+          "imaging"
+        ],
+        "standards": [
+          "dicom"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "research_art9_2j",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "unsure",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000002d",
+    "slug": "juniper-regional-data-centre",
+    "org_name": "Juniper Regional Data Centre",
+    "org_type": "hospital",
+    "country": "IL",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic paediatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Juniper-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "he",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "team_complete",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (juniper-regional-data-centre)",
+    "contact_email": "juniper-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Juniper paediatrics dataset",
+        "modality": [
+          "imaging_xray",
+          "transcriptomics"
+        ],
+        "disease_area": [
+          "paediatrics"
+        ],
+        "n_subjects": "10k_100k",
+        "volume": "10_100tb",
+        "longitudinal": false,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "imaging",
+          "mortality"
+        ],
+        "standards": [
+          "snomed",
+          "vcf"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "fully_anonymised",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000002e",
+    "slug": "karst-regional-data-centre",
+    "org_name": "Karst Regional Data Centre",
+    "org_type": "hospital",
+    "country": "AT",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic psychiatry dataset for demonstration purposes.",
+    "summary": "A fabricated Karst-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "unsure",
+    "attending": [
+      "webinar_2026_08_20",
+      "remote_only"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (karst-regional-data-centre)",
+    "contact_email": "karst-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Karst psychiatry dataset",
+        "modality": [
+          "ehr_structured",
+          "metabolomics"
+        ],
+        "disease_area": [
+          "psychiatry",
+          "metabolic_endocrine"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "outcomes",
+          "imaging"
+        ],
+        "standards": [
+          "snomed",
+          "fhir"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "research_art9_2j",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "approved",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-00000000002f",
+    "slug": "loiret-regional-data-centre",
+    "org_name": "Loiret Regional Data Centre",
+    "org_type": "hospital",
+    "country": "BE",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic neurology dataset for demonstration purposes.",
+    "summary": "A fabricated Loiret-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "nl",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (loiret-regional-data-centre)",
+    "contact_email": "loiret-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Loiret neurology dataset",
+        "modality": [
+          "registry",
+          "imaging_ct"
+        ],
+        "disease_area": [
+          "neurology",
+          "geriatrics"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "expert_labelled",
+        "linkage": [
+          "medication"
+        ],
+        "standards": [
+          "bids",
+          "omop_cdm"
+        ],
+        "readiness": "benchmark_ready",
+        "consent_basis": "study_specific_consent",
+        "access_model": "federated_no_movement",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000030",
+    "slug": "meander-regional-data-centre",
+    "org_name": "Meander Regional Data Centre",
+    "org_type": "university",
+    "country": "BG",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic geriatrics dataset for demonstration purposes.",
+    "summary": "A fabricated Meander-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "event_sept_2"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (meander-regional-data-centre)",
+    "contact_email": "meander-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Meander geriatrics dataset",
+        "modality": [
+          "imaging_mri"
+        ],
+        "disease_area": [
+          "geriatrics"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "1_10tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "medication",
+          "imaging"
+        ],
+        "standards": [
+          "snomed"
+        ],
+        "readiness": "ai_ready",
+        "consent_basis": "study_specific_consent",
+        "access_model": "registered_access",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "not_started",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000031",
+    "slug": "nidaros-regional-data-centre",
+    "org_name": "Nidaros Regional Data Centre",
+    "org_type": "biobank_or_registry",
+    "country": "HR",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic infectious dataset for demonstration purposes.",
+    "summary": "A fabricated Nidaros-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "other",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "undecided",
+    "parallel_public_funding": "no",
+    "attending": [
+      "webinar_2026_08_20"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (nidaros-regional-data-centre)",
+    "contact_email": "nidaros-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Nidaros infectious dataset",
+        "modality": [
+          "multi_omics",
+          "imaging_ct"
+        ],
+        "disease_area": [
+          "infectious",
+          "psychiatry"
+        ],
+        "n_subjects": "1k_10k",
+        "volume": "100gb_1tb",
+        "longitudinal": true,
+        "annotation": "partial",
+        "linkage": [
+          "mortality"
+        ],
+        "standards": [
+          "snomed",
+          "omop_cdm"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "fully_anonymised",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "not_required",
+        "publicly_describable": true
+      }
+    ]
+  },
+  {
+    "id": "da7a0000-0000-4000-8000-000000000032",
+    "slug": "odra-regional-data-centre",
+    "org_name": "Odra Regional Data Centre",
+    "org_type": "hospital",
+    "country": "CY",
+    "eligible_hq": true,
+    "partner_only": false,
+    "one_liner": "Synthetic metabolic endocrine dataset for demonstration purposes.",
+    "summary": "A fabricated Odra-region data holder generated to populate the demo directory. Not a real institution — see /seed/README.md.",
+    "languages": [
+      "el",
+      "en"
+    ],
+    "looking_for": [
+      "ai_partner"
+    ],
+    "application_status": "applying_with_partner",
+    "parallel_public_funding": "no",
+    "attending": [
+      "event_sept_3",
+      "event_sept_1"
+    ],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Fabricated Contact (odra-regional-data-centre)",
+    "contact_email": "odra-regional-data-centre@example.invalid",
+    "contact_role": "Data Protection Officer",
+    "created_at": "2026-08-01T09:00:00.000Z",
+    "updated_at": "2026-08-01T09:00:00.000Z",
+    "claimed_at": "2026-08-01T09:00:00.000Z",
+    "completeness": 93,
+    "kind": "data_holder",
+    "datasets": [
+      {
+        "name": "Odra metabolic endocrine dataset",
+        "modality": [
+          "biospecimens",
+          "imaging_xray"
+        ],
+        "disease_area": [
+          "metabolic_endocrine",
+          "rare_disease"
+        ],
+        "n_subjects": "lt_1k",
+        "volume": "lt_100gb",
+        "longitudinal": false,
+        "annotation": "none",
+        "linkage": [
+          "outcomes",
+          "mortality"
+        ],
+        "standards": [
+          "hl7v2"
+        ],
+        "readiness": "partially_curated",
+        "consent_basis": "study_specific_consent",
+        "access_model": "synthetic_derivative_only",
+        "data_can_leave_institution": "no",
+        "ethics_approval": "in_progress",
+        "publicly_describable": true
+      }
+    ]
   }
 ]
