@@ -24,3 +24,5 @@ data/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+.vercel
+.env*
