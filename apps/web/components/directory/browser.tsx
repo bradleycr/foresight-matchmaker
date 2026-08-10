@@ -172,6 +172,25 @@ export function DirectoryBrowser({ profiles }: { profiles: DirectoryProfile[] })
         {t("directory.result_count", { count: visible.length })}
       </p>
 
+      {/* Letter jump strip — the phone's-width stand-in for the desktop thumb
+          tabs below, since a fixed sidebar has nowhere to live at 390px. */}
+      {letters.length > 1 && (
+        <nav
+          aria-label={t("directory.letter_index")}
+          className="sticky top-0 z-10 -mx-4 flex gap-px overflow-x-auto border-b border-rule-strong bg-paper px-4 py-1 sm:-mx-6 sm:px-6 md:hidden"
+        >
+          {letters.map((letter) => (
+            <a
+              key={letter}
+              href={`#letter-${letter}`}
+              className="shrink-0 min-w-6 border-b-2 border-transparent px-1 text-center font-listing text-sm font-bold hover:border-mark"
+            >
+              {letter}
+            </a>
+          ))}
+        </nav>
+      )}
+
       <div className="relative flex gap-4">
         {/* The listings. */}
         <div className="min-w-0 flex-1">
