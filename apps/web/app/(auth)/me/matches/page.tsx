@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
-import { apiFetch } from "@/lib/api/server-fetch"
+import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { enumLabel } from "@/lib/i18n/labels"
@@ -98,7 +98,10 @@ export default async function MatchesPage() {
     apiFetch("/api/v1/matches"),
     apiFetch(`/api/v1/profiles/${session.profileId}`),
   ])
-  if (!matchRes.ok || !profileRes.ok) redirect("/signin")
+  redirectOnAuthFailure(matchRes)
+  redirectOnAuthFailure(profileRes)
+  if (!matchRes.ok) throw new Error(`Could not load matches (status ${matchRes.status}).`)
+  if (!profileRes.ok) throw new Error(`Could not load your profile (status ${profileRes.status}).`)
 
   const { matches } = (await matchRes.json()) as { matches: MatchPayload[] }
   const { profile } = (await profileRes.json()) as { profile: Profile }

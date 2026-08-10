@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
-import { apiFetch } from "@/lib/api/server-fetch"
+import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { ProfileForm } from "@/components/profile-form"
@@ -18,7 +18,8 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
   const { saved } = await searchParams
 
   const res = await apiFetch(`/api/v1/profiles/${session.profileId}`)
-  if (!res.ok) redirect("/signin")
+  redirectOnAuthFailure(res)
+  if (!res.ok) throw new Error(`Could not load your profile (status ${res.status}).`)
   const body = (await res.json()) as {
     profile: Profile
     joint_application?: "yes" | "no" | "not_yet" | null

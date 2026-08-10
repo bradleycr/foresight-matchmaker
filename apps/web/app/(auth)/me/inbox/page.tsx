@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { apiFetch } from "@/lib/api/server-fetch"
+import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import type { IntroPayload } from "@/lib/api/types"
@@ -18,7 +18,8 @@ export default async function InboxPage() {
 
   const { t } = await getT()
   const res = await apiFetch("/api/v1/intros")
-  if (!res.ok) redirect("/signin")
+  redirectOnAuthFailure(res)
+  if (!res.ok) throw new Error(`Could not load your inbox (status ${res.status}).`)
 
   const { intros } = (await res.json()) as { intros: IntroPayload[] }
 
