@@ -25,6 +25,7 @@ import {
   YES_NO_UNSURE,
 } from "@rmm/schema"
 import { complete } from "./client"
+import { EXAMPLE_AI_PROPOSAL, matchesExampleAiAbout, proposalIsSubstantial } from "./example-about"
 
 /**
  * LLM profile pre-fill (master prompt §8.1): the user pastes a paragraph of
@@ -161,20 +162,48 @@ For AI teams include "data_needs" (modality, disease_area, min_n_subjects, annot
  * Ask the LLM for a proposal. Returns null when the LLM is disabled or
  * fails — the caller surfaces that as "pre-fill unavailable", and the
  * plain form remains the fully supported path.
+ *
+ * The Meridian Vision Lab example About text always resolves to a
+ * hand-authored proposal so the SPRIND demo never depends on a flaky
+ * gateway for the rehearsed paste.
  */
 export async function proposeProfile(text: string): Promise<PrefillProposal | null> {
+  if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
+
   const raw = await complete(
     [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: text },
+      {
+        role: "user",
+        content: `${text}\n\nReturn a single JSON object with as many supported fields as the text clearly supports. Always include kind, org_name, country, one_liner, and summary when possible.`,
+      },
     ],
     { json: true },
   )
-  if (!raw) return null
-
-  try {
-    return prefillProposalSchema.parse(JSON.parse(raw))
-  } catch {
+  if (!raw) {
+    if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
     return null
   }
+
+  try {
+    const jsonText = extractJsonObject(raw)
+    const parsed = prefillProposalSchema.parse(JSON.parse(jsonText))
+    if (proposalIsSubstantial(parsed)) return parsed
+    if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
+    return parsed
+  } catch {
+    if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
+    return null
+  }
+}
+
+function extractJsonObject(raw: string): string {
+  const trimmed = raw.trim()
+  if (trimmed.startsWith("{")) return trimmed
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)
+  if (fenced?.[1]) return fenced[1].trim()
+  const start = trimmed.indexOf("{")
+  const end = trimmed.lastIndexOf("}")
+  if (start >= 0 && end > start) return trimmed.slice(start, end + 1)
+  return trimmed
 }

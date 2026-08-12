@@ -12,6 +12,10 @@ interface ChatMessage {
   content: string
 }
 
+function proposalLooksFilled(p: PrefillProposal): boolean {
+  return Boolean(p.org_name?.trim() || p.one_liner?.trim() || p.summary?.trim())
+}
+
 /**
  * Remmy chat — create or update a profile by conversation.
  * Drafts require an explicit confirmation card before the parent applies them.
@@ -114,20 +118,51 @@ export function RemmyChat({
   }
 
   /**
-   * Transfer chat → form. Uses the pending review draft, else the latest
-   * proposal Remmy already returned, else forces a draft from the transcript.
+   * Transfer chat → form. Prefer the dedicated prefill extractor on the
+   * user's messages (reliable for About-page pastes). Fall back to any
+   * Remmy proposal already on hand, then force_draft.
    */
   async function fillFormFromChat() {
     if (busy) return
 
-    if (pending?.proposal) {
+    const userBlob = messages
+      .filter((m) => m.role === "user")
+      .map((m) => m.content)
+      .join("\n\n")
+      .trim()
+
+    if (pending?.proposal && proposalLooksFilled(pending.proposal)) {
       onDraftConfirmed(pending.proposal)
       return
     }
-    if (latestProposal?.proposal) {
+    if (latestProposal?.proposal && proposalLooksFilled(latestProposal.proposal)) {
       onDraftConfirmed(latestProposal.proposal)
       return
     }
+
+    if (userBlob.length >= 40) {
+      setBusy(true)
+      setError(null)
+      try {
+        const res = await fetch("/api/v1/prefill", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: userBlob }),
+        })
+        if (res.ok) {
+          const body = (await res.json()) as { proposal: PrefillProposal }
+          if (body.proposal && proposalLooksFilled(body.proposal)) {
+            onDraftConfirmed(body.proposal)
+            return
+          }
+        }
+      } catch {
+        // fall through to Remmy force_draft
+      } finally {
+        setBusy(false)
+      }
+    }
+
     if (userTurns === 0) {
       onUseFormInstead()
       return
@@ -138,7 +173,7 @@ export function RemmyChat({
     try {
       const turn = await callRemmy(messages, true)
       setMessages((m) => [...m, { role: "assistant", content: turn.reply }])
-      if (turn.proposal) {
+      if (turn.proposal && proposalLooksFilled(turn.proposal)) {
         onDraftConfirmed(turn.proposal)
         return
       }

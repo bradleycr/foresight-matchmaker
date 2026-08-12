@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { complete } from "./client"
-import { prefillProposalSchema, type PrefillProposal } from "./prefill"
+import { prefillProposalSchema, proposeProfile, type PrefillProposal } from "./prefill"
+import { proposalIsSubstantial } from "./example-about"
 
 /**
  * Remmy — the Matchmaker's conversational onboarding guide.
@@ -101,7 +102,9 @@ ${currentProfileJson ? `\nCurrent profile (JSON, for update context — do not e
 
 /**
  * One Remmy turn. Returns null when the LLM is disabled or fails entirely.
- * When forceDraft is set, Remmy must return a form-ready proposal from the chat so far.
+ * When forceDraft is set (or the user pasted a long About page), we also run
+ * the dedicated profile extractor so the form actually gets filled — Remmy's
+ * conversational JSON often puts facts in draft_summary but leaves proposal empty.
  */
 export async function remmyTurn(input: {
   mode: RemmyMode
@@ -114,40 +117,122 @@ export async function remmyTurn(input: {
     .map((m) => `${m.role === "user" ? "User" : "Remmy"}: ${m.content}`)
     .join("\n\n")
 
+  const userBlob = input.messages
+    .filter((m) => m.role === "user")
+    .map((m) => m.content)
+    .join("\n\n")
+    .trim()
+
+  const forceDraft = Boolean(input.forceDraft)
+  const longPaste = userBlob.length >= 400
+  const needsExtraction = forceDraft || longPaste
+
   const currentProfileJson = input.currentProfile
     ? JSON.stringify(stripForRemmyContext(input.currentProfile)).slice(0, 6000)
     : null
 
-  const forceDraft = Boolean(input.forceDraft)
+  // Extract structured fields first when we know we need a form fill.
+  const extracted = needsExtraction && userBlob.length >= 40 ? await proposeProfile(userBlob) : null
+
   const raw = await complete(
     [
-      { role: "system", content: systemPrompt(input.mode, currentProfileJson, forceDraft) },
+      { role: "system", content: systemPrompt(input.mode, currentProfileJson, forceDraft || Boolean(extracted)) },
       {
         role: "user",
-        content: forceDraft
-          ? `Conversation so far:\n\n${history}\n\nFORCE DRAFT NOW. Respond as Remmy with the JSON object (ready_for_review=true, non-null proposal).`
-          : `Conversation so far:\n\n${history}\n\nRespond as Remmy with the JSON object.`,
+        content:
+          forceDraft || extracted
+            ? `Conversation so far:\n\n${history}\n\nFORCE DRAFT NOW. Respond as Remmy with the JSON object. The proposal MUST include org_name, country, one_liner, summary, and every other field supported by the chat — put facts in proposal, not only in draft_summary.`
+            : `Conversation so far:\n\n${history}\n\nRespond as Remmy with the JSON object.`,
       },
     ],
     { json: true },
   )
+
+  // Extraction alone is enough to proceed when the chat model fails.
+  if (!raw && extracted && proposalIsSubstantial(extracted)) {
+    return {
+      reply:
+        "I prepared a draft from what you shared. Use the review card to confirm it, then finish any highlighted fields (especially contact email) on the form.",
+      ready_for_review: true,
+      draft_summary: summaryFromProposal(extracted),
+      proposal: extracted,
+    }
+  }
   if (!raw) return null
 
   try {
-    const parsed = turnSchema.parse(JSON.parse(raw))
-    const proposal = parsed.proposal ?? null
-    // Keep any proposal for the client even mid-chat; ready_for_review gates the review card.
-    const ready = Boolean((parsed.ready_for_review || forceDraft) && proposal)
+    const parsed = turnSchema.parse(JSON.parse(extractJsonObject(raw)))
+    const fromChat = parsed.proposal ?? null
+    const proposal = pickRicherProposal(fromChat, extracted)
+    const ready = Boolean(
+      proposal && (parsed.ready_for_review || forceDraft || proposalIsSubstantial(extracted)),
+    )
 
     return {
-      reply: parsed.reply,
+      reply:
+        ready && !parsed.reply.toLowerCase().includes("review")
+          ? `${parsed.reply.trim()} Please use the on-screen review card to confirm before the form is filled.`
+          : parsed.reply,
       ready_for_review: ready,
-      draft_summary: parsed.draft_summary,
+      draft_summary:
+        parsed.draft_summary.length > 0 ? parsed.draft_summary : summaryFromProposal(proposal),
       proposal,
     }
   } catch {
+    if (extracted && proposalIsSubstantial(extracted)) {
+      return {
+        reply:
+          "I prepared a draft from what you shared. Use the review card to confirm it, then finish any highlighted fields on the form.",
+        ready_for_review: true,
+        draft_summary: summaryFromProposal(extracted),
+        proposal: extracted,
+      }
+    }
     return null
   }
+}
+
+function extractJsonObject(raw: string): string {
+  const trimmed = raw.trim()
+  if (trimmed.startsWith("{")) return trimmed
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)
+  if (fenced?.[1]) return fenced[1].trim()
+  const start = trimmed.indexOf("{")
+  const end = trimmed.lastIndexOf("}")
+  if (start >= 0 && end > start) return trimmed.slice(start, end + 1)
+  return trimmed
+}
+
+function pickRicherProposal(
+  a: PrefillProposal | null,
+  b: PrefillProposal | null,
+): PrefillProposal | null {
+  if (!a) return b
+  if (!b) return a
+  const score = (p: PrefillProposal) =>
+    [p.org_name, p.one_liner, p.summary, p.country, p.website].filter((x) => typeof x === "string" && x.trim()).length +
+    (p.methods?.length ?? 0) +
+    (p.looking_for?.length ?? 0) +
+    (p.languages?.length ?? 0) +
+    (p.privacy_capability?.length ?? 0) +
+    (p.domain_expertise?.length ?? 0) +
+    (p.application_target?.length ?? 0) +
+    (p.data_needs?.modality?.length ?? 0) +
+    (p.datasets?.length ?? 0)
+  return score(b) > score(a) ? b : a
+}
+
+function summaryFromProposal(p: PrefillProposal | null): string[] {
+  if (!p) return []
+  const out: string[] = []
+  if (p.kind) out.push(`Kind: ${p.kind}`)
+  if (p.org_name) out.push(`Organisation: ${p.org_name}`)
+  if (p.country) out.push(`Country: ${p.country}`)
+  if (p.one_liner) out.push(p.one_liner)
+  if (p.looking_for?.length) out.push(`Looking for: ${p.looking_for.join(", ")}`)
+  if (p.methods?.length) out.push(`Methods: ${p.methods.join(", ")}`)
+  out.push("Contact email must still be entered on the form.")
+  return out
 }
 
 /** Drop nothing sensitive into the model beyond what the owner already sees on /me. */
