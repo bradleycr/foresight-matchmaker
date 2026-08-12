@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import type { Profile } from "@rmm/schema"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
@@ -11,6 +12,7 @@ import { RemmyChat } from "./chat"
 /**
  * Signed-in profile editor with an optional Remmy update path.
  * Remmy drafts still require confirmation; Save on the form remains the write.
+ * Matchmaking chat lives on /me/matches (generative UI).
  */
 export function MeEditor({
   profile,
@@ -32,9 +34,17 @@ export function MeEditor({
             <p className="font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">{t("remmy.kicker")}</p>
             <p className="text-sm leading-relaxed">{t("remmy.me_teaser")}</p>
           </div>
-          <Button type="button" variant={showRemmy ? "outline" : "primary"} onClick={() => setShowRemmy((v) => !v)}>
-            {showRemmy ? t("remmy.me_hide") : t("remmy.me_show")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/me/matches"
+              className="inline-flex min-h-11 items-center border border-ink bg-mark px-4 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
+            >
+              {t("remmy.me_matches_cta")}
+            </Link>
+            <Button type="button" variant="outline" onClick={() => setShowRemmy((v) => !v)}>
+              {showRemmy ? t("remmy.me_hide") : t("remmy.me_show")}
+            </Button>
+          </div>
         </div>
       )}
 

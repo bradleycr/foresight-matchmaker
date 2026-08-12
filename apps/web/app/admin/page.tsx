@@ -9,10 +9,8 @@ import type { T } from "@/lib/i18n"
 export const dynamic = "force-dynamic"
 
 /**
- * /admin — reporting, gated by the ADMIN_SECRET env var exchanged for a
- * signed cookie. The centrepiece is the blocker-frequency histogram: which
- * single field kills the most otherwise-viable matches. That number is the
- * research output SPRIND asked for.
+ * /admin — reporting, gated by ADMIN_SECRET (defaults to password123 when
+ * unset). Exchanged once via the form for a signed cookie.
  */
 
 async function signInAction(formData: FormData) {

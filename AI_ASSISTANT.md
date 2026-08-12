@@ -1,7 +1,8 @@
 # AI assistant — living plan
 
 Status: **Remmy onboarding shipped** (create + update chat, mandatory draft review).
-Directory Q&A / generative shortlist remain future work.
+**Remmy Guide shipped** for signed-in match exploration (generative shortlist,
+intro compose, gaps) on `/me/matches` when `LLM_*` is configured.
 
 Related: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md), [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md),
 YCluster inference gateway ([docs](https://gitlab.com/devrandom01/ycluster/-/blob/main/docs/operations/inference.md)).
@@ -17,6 +18,16 @@ YCluster inference gateway ([docs](https://gitlab.com/devrandom01/ycluster/-/blo
 - Update mode requires a session; IP rate limit on the route.
 
 Do not auto-publish from chat. Do not skip the review card.
+
+## Shipped: Remmy Guide (logged-in matches)
+
+- `POST /api/v1/remmy/guide` — session required; returns `reply` + hydrated UI `parts`.
+- Model emits **intents** only; server hydrates scorer-backed cards (never invents scores).
+- Generative UI parts: match shortlist (top 5), match detail, intro compose (human sends), gaps nudge, navigate.
+- `/me/matches` is chat-first when LLM is on; classic list at `?view=list`.
+- Introductions are **never** auto-sent.
+
+Do not put the LLM on the scoring path. Do not auto-connect.
 
 ## Goal
 
@@ -156,8 +167,8 @@ Spinning up another challenge = new config + seed + copy on the same engine.
 | Phase | Work | Touches `main` demo? |
 | --- | --- | --- |
 | **0** | This plan; wire `LLM_*` for prefill/rationale; rotate test keys | Env only |
-| **1** | Branch: AI SDK chat + `get_my_matches` → five cards | No |
-| **2** | Generative UI: profile sheet, intro modal, register draft | No until merge |
+| **1** | ~~Branch: AI SDK chat + `get_my_matches` → five cards~~ **Done via Remmy Guide** (`/api/v1/remmy/guide` + gen-UI parts; OpenAI-compatible gateway, intent hydration) | Yes (when LLM configured) |
+| **2** | Generative UI: profile sheet, intro modal, register draft | Partial — intro compose + shortlist shipped; profile sheet later |
 | **3** | Challenge config package (branding / copy overlay) | Additive |
 | **4** | Second challenge deploy from config | Later |
 

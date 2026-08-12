@@ -2,15 +2,20 @@ import { createHmac, timingSafeEqual } from "node:crypto"
 import { cookies } from "next/headers"
 
 /**
- * Admin gate: a shared secret in ADMIN_SECRET, exchanged once via a form for
- * a signed cookie. The cookie stores an HMAC of the secret, not the secret
- * itself, so it cannot be replayed against a rotated secret.
+ * Admin gate: shared secret exchanged once via a form for a signed cookie.
+ * The cookie stores an HMAC of the secret, not the secret itself, so it
+ * cannot be replayed against a rotated secret.
+ *
+ * For the demo era we default to a trivial password when ADMIN_SECRET is
+ * unset — set a real secret in production when you care.
  */
 
 const ADMIN_COOKIE = "rmm_admin"
+const DEMO_DEFAULT_SECRET = "password123"
 
-function adminSecret(): string | null {
-  return process.env.ADMIN_SECRET ?? null
+function adminSecret(): string {
+  const fromEnv = process.env.ADMIN_SECRET?.trim()
+  return fromEnv && fromEnv.length > 0 ? fromEnv : DEMO_DEFAULT_SECRET
 }
 
 function adminCookieValue(secret: string): string {
@@ -19,7 +24,6 @@ function adminCookieValue(secret: string): string {
 
 export function verifyAdminSecret(candidate: string): boolean {
   const secret = adminSecret()
-  if (!secret) return false
   const a = Buffer.from(candidate)
   const b = Buffer.from(secret)
   return a.length === b.length && timingSafeEqual(a, b)
@@ -27,7 +31,6 @@ export function verifyAdminSecret(candidate: string): boolean {
 
 export async function grantAdminCookie(): Promise<void> {
   const secret = adminSecret()
-  if (!secret) return
   const jar = await cookies()
   jar.set(ADMIN_COOKIE, adminCookieValue(secret), {
     httpOnly: true,
@@ -40,7 +43,6 @@ export async function grantAdminCookie(): Promise<void> {
 
 export async function isAdmin(): Promise<boolean> {
   const secret = adminSecret()
-  if (!secret) return false
   const jar = await cookies()
   const value = jar.get(ADMIN_COOKIE)?.value
   if (!value) return false

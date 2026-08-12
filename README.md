@@ -21,10 +21,12 @@ shown on screen in development (and logged to the server console). In
 production, set `SMTP_URL` — or explicitly `AUTH_REVEAL_LINKS=true` for a
 controlled demo. Sign in with any seed contact email (e.g. `a.voss@example.invalid`).
 
-To unlock `/admin`, set a secret first:
+To unlock `/admin`, open the page and enter the admin secret
+(`password123` by default when `ADMIN_SECRET` is unset):
 
 ```bash
-echo 'ADMIN_SECRET=demo-admin-secret' >> apps/web/.env
+# optional — override the default
+echo 'ADMIN_SECRET=your-real-secret' >> apps/web/.env
 ```
 
 ### Tests
@@ -77,6 +79,7 @@ The machine-readable contract:
 | `GET /api/v1/matches` | Ranked shortlist for the signed-in profile |
 | `GET /api/v1/intros` · `POST` · `PATCH /:id` | Double opt-in introduction flow |
 | `POST /api/v1/auth/request-link` · `/claim` · `/logout` | Magic-link auth |
+| `POST /api/v1/remmy` · `/remmy/guide` | Remmy interview (create/update) · signed-in match guide with generative UI parts |
 | `GET /api/v1/metrics` | Reporting (admin only; `?format=csv` for export) |
 
 These two directory routes are intentional, not duplicates: `.json` is the lockable public dump; bare `/directory` is session-aware for the App Router pages.
