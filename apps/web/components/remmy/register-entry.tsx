@@ -9,12 +9,12 @@ import { RemmyChat } from "./chat"
 type Path = "remmy" | "form"
 
 /**
- * Register entry — Remmy is the default path when an LLM is configured.
+ * Register entry — form first; Remmy is optional when an LLM is configured.
  * Chat drafts only; the form submit remains the only publish path.
  */
 export function RegisterEntry({ remmyEnabled }: { remmyEnabled: boolean }) {
   const t = useT()
-  const [path, setPath] = useState<Path>(remmyEnabled ? "remmy" : "form")
+  const [path, setPath] = useState<Path>("form")
   const [confirmedDraft, setConfirmedDraft] = useState<PrefillProposal | null>(null)
 
   if (path === "remmy" && remmyEnabled && !confirmedDraft) {
