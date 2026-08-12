@@ -28,9 +28,6 @@ export async function SiteHeader() {
         <Link href="/directory" className="hover:underline">
           {t("nav.directory")}
         </Link>
-        <Link href="/register" className="hover:underline">
-          {t("nav.register")}
-        </Link>
         {session ? (
           <>
             <Link href="/me/matches" className="hover:underline">
@@ -44,9 +41,14 @@ export async function SiteHeader() {
             </Link>
           </>
         ) : (
-          <Link href="/signin" className="hover:underline">
-            {t("nav.signin")}
-          </Link>
+          <>
+            <Link href="/register" className="hover:underline">
+              {t("nav.register")}
+            </Link>
+            <Link href="/signin" className="hover:underline">
+              {t("nav.signin")}
+            </Link>
+          </>
         )}
       </nav>
     </header>

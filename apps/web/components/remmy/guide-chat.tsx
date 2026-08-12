@@ -5,8 +5,8 @@ import Link from "next/link"
 import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 import type { GuidePart, GuideMatchCard } from "@/lib/remmy/hydrate-guide"
-import { MatchShortlistPart, MatchDetailPart } from "./parts/match-parts"
-import { IntroComposePart } from "./parts/intro-compose-part"
+import { MatchShortlistPart, MatchDetailChip, IntroDraftChip } from "./parts/match-parts"
+import { MatchSheet } from "./parts/match-sheet"
 import { GapsPart, NavigatePart } from "./parts/gaps-part"
 
 interface GuideTurn {
@@ -15,6 +15,10 @@ interface GuideTurn {
   parts?: GuidePart[]
 }
 
+type SheetState =
+  | { kind: "match"; match: GuideMatchCard; focus: "detail" | "intro" }
+  | { kind: "intro"; toId: string; toName: string; toSlug: string; draftMessage: string }
+
 const SUGGESTIONS = [
   "guide.suggest_matches",
   "guide.suggest_improve",
@@ -22,16 +26,18 @@ const SUGGESTIONS = [
 ] as const
 
 /**
- * Logged-in Remmy: chat that emits curated generative UI parts
- * (shortlist, match detail, intro compose, gaps) instead of Markdown dumps.
+ * Logged-in Remmy: chat that emits compact generative UI. Heavy surfaces
+ * (match detail, intro compose) open as a sheet so the thread stays readable
+ * on a phone.
  */
-export function RemmyGuideChat() {
+export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
   const t = useT()
   const scroller = useRef<HTMLDivElement>(null)
   const [turns, setTurns] = useState<GuideTurn[]>([])
   const [input, setInput] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sheet, setSheet] = useState<SheetState | null>(null)
 
   useEffect(() => {
     setTurns([{ role: "assistant", content: t("guide.hello") }])
@@ -42,22 +48,26 @@ export function RemmyGuideChat() {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" })
   }, [turns, busy])
 
-  function attachIntro(match: GuideMatchCard) {
-    const part: GuidePart = {
-      type: "intro_compose",
-      to_id: match.profile.id,
-      to_name: match.profile.org_name,
-      to_slug: match.profile.slug,
-      draft_message: t("guide.default_intro", { name: match.profile.org_name }),
+  function openMatch(match: GuideMatchCard, intent: "detail" | "intro") {
+    setSheet({ kind: "match", match, focus: intent })
+  }
+
+  function sheetFromParts(parts: GuidePart[]) {
+    const detail = parts.find((p) => p.type === "match_detail")
+    if (detail?.type === "match_detail") {
+      setSheet({ kind: "match", match: detail.match, focus: "detail" })
+      return
     }
-    setTurns((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: t("guide.intro_prompt", { name: match.profile.org_name }),
-        parts: [part],
-      },
-    ])
+    const intro = parts.find((p) => p.type === "intro_compose")
+    if (intro?.type === "intro_compose") {
+      setSheet({
+        kind: "intro",
+        toId: intro.to_id,
+        toName: intro.to_name,
+        toSlug: intro.to_slug,
+        draftMessage: intro.draft_message,
+      })
+    }
   }
 
   async function send(text: string) {
@@ -88,10 +98,9 @@ export function RemmyGuideChat() {
         setBusy(false)
         return
       }
-      setTurns((prev) => [
-        ...prev,
-        { role: "assistant", content: body.reply!, parts: body.parts ?? [] },
-      ])
+      const parts = body.parts ?? []
+      setTurns((prev) => [...prev, { role: "assistant", content: body.reply!, parts }])
+      sheetFromParts(parts)
     } catch {
       setError(t("guide.error"))
     } finally {
@@ -108,21 +117,40 @@ export function RemmyGuideChat() {
           </p>
           <h2 className="font-listing text-lg font-bold uppercase leading-none">{t("guide.title")}</h2>
         </div>
-        <Link href="/me/matches?view=list" className="text-xs font-semibold uppercase tracking-wide underline">
-          {t("guide.classic_list")}
-        </Link>
+        {!embedded ? (
+          <Link href="/me/matches" className="text-xs font-semibold uppercase tracking-wide underline">
+            {t("guide.classic_list")}
+          </Link>
+        ) : null}
       </header>
 
-      <div ref={scroller} className="flex max-h-[min(70vh,36rem)] flex-col gap-4 overflow-y-auto px-3 py-4">
+      <div
+        ref={scroller}
+        className="flex max-h-[min(65dvh,36rem)] flex-col gap-4 overflow-y-auto overscroll-contain px-3 py-4"
+      >
         {turns.map((turn, i) => (
-          <div key={`${turn.role}-${i}`} className={turn.role === "user" ? "ml-6 sm:ml-16" : "mr-4 sm:mr-12"}>
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
-              {turn.role === "user" ? t("remmy.you") : t("remmy.name")}
-            </p>
-            <p className="mt-1 whitespace-pre-wrap leading-relaxed">{turn.content}</p>
+          <div key={`${turn.role}-${i}`}>
+            <div className={turn.role === "user" ? "ml-8 sm:ml-16" : undefined}>
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+                {turn.role === "user" ? t("remmy.you") : t("remmy.name")}
+              </p>
+              <p className="mt-1 whitespace-pre-wrap leading-relaxed">{turn.content}</p>
+            </div>
             {turn.parts?.map((part, j) => (
               <div key={`${part.type}-${j}`} className="mt-3">
-                <GuidePartView part={part} onConnect={attachIntro} />
+                <GuidePartView
+                  part={part}
+                  onOpenMatch={openMatch}
+                  onOpenIntro={(intro) =>
+                    setSheet({
+                      kind: "intro",
+                      toId: intro.to_id,
+                      toName: intro.to_name,
+                      toSlug: intro.to_slug,
+                      draftMessage: intro.draft_message,
+                    })
+                  }
+                />
               </div>
             ))}
           </div>
@@ -142,7 +170,7 @@ export function RemmyGuideChat() {
               key={key}
               type="button"
               onClick={() => send(t(key))}
-              className="border border-rule px-2 py-1 text-xs font-semibold uppercase tracking-wide hover:border-ink hover:bg-paper-shade"
+              className="min-h-11 border border-rule px-3 py-2 text-xs font-semibold uppercase tracking-wide hover:border-ink hover:bg-paper-shade"
             >
               {t(key)}
             </button>
@@ -172,29 +200,57 @@ export function RemmyGuideChat() {
           {t("remmy.send")}
         </Button>
       </form>
+
+      {sheet?.kind === "match" ? (
+        <MatchSheet
+          match={sheet.match}
+          intro={
+            sheet.focus === "intro"
+              ? {
+                  toId: sheet.match.profile.id,
+                  toName: sheet.match.profile.org_name,
+                  toSlug: sheet.match.profile.slug,
+                  draftMessage: t("guide.default_intro", { name: sheet.match.profile.org_name }),
+                }
+              : undefined
+          }
+          onClose={() => setSheet(null)}
+        />
+      ) : null}
+      {sheet?.kind === "intro" ? (
+        <MatchSheet
+          intro={{
+            toId: sheet.toId,
+            toName: sheet.toName,
+            toSlug: sheet.toSlug,
+            draftMessage: sheet.draftMessage,
+          }}
+          onClose={() => setSheet(null)}
+        />
+      ) : null}
     </div>
   )
 }
 
 function GuidePartView({
   part,
-  onConnect,
+  onOpenMatch,
+  onOpenIntro,
 }: {
   part: GuidePart
-  onConnect: (match: GuideMatchCard) => void
+  onOpenMatch: (match: GuideMatchCard, intent: "detail" | "intro") => void
+  onOpenIntro: (intro: Extract<GuidePart, { type: "intro_compose" }>) => void
 }) {
   switch (part.type) {
     case "match_shortlist":
-      return <MatchShortlistPart matches={part.matches} onConnect={onConnect} />
+      return <MatchShortlistPart matches={part.matches} onOpen={onOpenMatch} />
     case "match_detail":
-      return <MatchDetailPart match={part.match} onConnect={onConnect} />
+      return <MatchDetailChip match={part.match} onOpen={onOpenMatch} />
     case "intro_compose":
       return (
-        <IntroComposePart
-          toId={part.to_id}
-          toName={part.to_name}
-          toSlug={part.to_slug}
-          draftMessage={part.draft_message}
+        <IntroDraftChip
+          name={part.to_name}
+          onOpen={() => onOpenIntro(part)}
         />
       )
     case "gaps":

@@ -24,7 +24,7 @@ Do not auto-publish from chat. Do not skip the review card.
 - `POST /api/v1/remmy/guide` — session required; returns `reply` + hydrated UI `parts`.
 - Model emits **intents** only; server hydrates scorer-backed cards (never invents scores).
 - Generative UI parts: match shortlist (top 5), match detail, intro compose (human sends), gaps nudge, navigate.
-- `/me/matches` is chat-first when LLM is on; classic list at `?view=list`.
+- `/me/matches` shows the ranked list first; Remmy Guide is a second tab when LLM is on.
 - Introductions are **never** auto-sent.
 
 Do not put the LLM on the scoring path. Do not auto-connect.

@@ -14,11 +14,13 @@ export function IntroComposePart({
   toName,
   toSlug,
   draftMessage,
+  embedded = false,
 }: {
   toId: string
   toName: string
   toSlug: string
   draftMessage: string
+  embedded?: boolean
 }) {
   const t = useT()
   const [message, setMessage] = useState(draftMessage.slice(0, 500))
@@ -52,7 +54,7 @@ export function IntroComposePart({
   }
 
   return (
-    <form onSubmit={submit} className="border border-ink bg-paper-shade p-3">
+    <form onSubmit={submit} className={embedded ? "" : "border border-ink bg-paper-shade p-3"}>
       <p className="font-listing text-sm font-bold uppercase tracking-wide">
         {t("guide.intro_title", { name: toName })}
       </p>

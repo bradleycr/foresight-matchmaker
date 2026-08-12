@@ -9,7 +9,7 @@ import { llmEnabled } from "@/lib/llm/client"
 import type { MatchPayload } from "@/lib/api/types"
 import { Tag } from "@/components/ui/primitives"
 import { MatchRationale } from "@/components/match-rationale"
-import { RemmyGuideChat } from "@/components/remmy/guide-chat"
+import { MatchesTabs } from "@/components/remmy/matches-tabs"
 import { nudgeField } from "@/lib/match-nudge"
 import type { T } from "@/lib/i18n"
 
@@ -69,18 +69,28 @@ function FactorBreakdown({ match, t }: { match: MatchPayload; t: T }) {
 function ClassicMatchList({
   matches,
   polish,
+  profile,
   t,
 }: {
   matches: MatchPayload[]
   polish: boolean
+  profile: Profile
   t: T
 }) {
   if (matches.length === 0) {
-    return null
+    return (
+      <div className="max-w-xl border border-ink p-4">
+        <p className="font-semibold">{t("matches.empty_title")}</p>
+        <p className="mt-1">{t(`matches.empty_nudge.${nudgeField(profile)}`)}</p>
+        <Link href="/me" className="mt-3 inline-block font-semibold underline">
+          {t("matches.empty_cta")}
+        </Link>
+      </div>
+    )
   }
 
   return (
-    <ol className="mt-6">
+    <ol>
       {matches.map((match) => (
         <li key={match.profile.id} className="border-b border-rule py-4">
           <div className="flex items-start gap-4">
@@ -132,22 +142,15 @@ function ClassicMatchList({
 }
 
 /**
- * Matches hub. When Remmy is configured, chat-first generative UI is the
- * primary surface; classic ranked list remains one click away (?view=list)
- * and is the only surface when the LLM is off.
+ * Matches hub: ranked list first. When the LLM is configured, Remmy Guide
+ * is a second tab — not the default surface.
  */
-export default async function MatchesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ view?: string }>
-}) {
+export default async function MatchesPage() {
   const session = await getSession()
   if (!session) redirect("/signin")
 
   const { t } = await getT()
-  const { view } = await searchParams
   const polish = llmEnabled()
-  const guideMode = polish && view !== "list"
 
   const [matchRes, profileRes] = await Promise.all([
     apiFetch("/api/v1/matches"),
@@ -161,43 +164,17 @@ export default async function MatchesPage({
   const { matches } = (await matchRes.json()) as { matches: MatchPayload[] }
   const { profile } = (await profileRes.json()) as { profile: Profile }
 
-  if (guideMode) {
-    return (
-      <div className="py-6">
-        <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("matches.title")}</h1>
-        <p className="mt-1 max-w-2xl text-ink-soft">{t("guide.page_explainer")}</p>
-        <div className="mt-6">
-          <RemmyGuideChat />
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="py-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("matches.title")}</h1>
-          <p className="mt-1 max-w-2xl text-ink-soft">{t("matches.explainer")}</p>
-        </div>
-        {polish ? (
-          <Link href="/me/matches" className="text-sm font-semibold uppercase tracking-wide underline">
-            {t("guide.back_to_remmy")}
-          </Link>
-        ) : null}
-      </div>
+      <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("matches.title")}</h1>
+      <p className="mt-1 max-w-2xl text-ink-soft">{t("matches.explainer")}</p>
 
-      {matches.length === 0 ? (
-        <div className="mt-8 max-w-xl border border-ink p-4">
-          <p className="font-semibold">{t("matches.empty_title")}</p>
-          <p className="mt-1">{t(`matches.empty_nudge.${nudgeField(profile)}`)}</p>
-          <Link href="/me" className="mt-3 inline-block font-semibold underline">
-            {t("matches.empty_cta")}
-          </Link>
-        </div>
-      ) : (
-        <ClassicMatchList matches={matches} polish={polish} t={t} />
-      )}
+      <div className="mt-6">
+        <MatchesTabs
+          remmyEnabled={polish}
+          list={<ClassicMatchList matches={matches} polish={polish} profile={profile} t={t} />}
+        />
+      </div>
     </div>
   )
 }
