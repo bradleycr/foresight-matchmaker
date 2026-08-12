@@ -39,11 +39,21 @@ const turnSchema = z.object({
   proposal: prefillProposalSchema.nullable().optional().catch(null),
 })
 
-function systemPrompt(mode: RemmyMode, currentProfileJson: string | null): string {
+function systemPrompt(mode: RemmyMode, currentProfileJson: string | null, forceDraft: boolean): string {
   const role =
     mode === "create"
       ? "You are helping a new organisation create a directory profile."
       : "You are helping an organisation update their existing directory profile. Only propose fields that should change."
+
+  const forceBlock = forceDraft
+    ? `
+FORCE DRAFT NOW (user asked to fill the form from this chat):
+- Set ready_for_review=true.
+- Return the best proposal you can from the conversation so far.
+- Ask ZERO questions in reply — one short sentence that the review card / form is ready.
+- Fill every field you can support from the chat. Omit only what was never mentioned. Never invent contact email/name.
+`
+    : ""
 
   return `You are Remmy, the Recoding Medicine Matchmaker guide. ${role}
 
@@ -56,7 +66,7 @@ Hard rules:
 - Question budget (strict): ask exactly ONE question per reply. You may ask TWO only when they are a natural pair that belongs in one short answer (e.g. “organisation name and HQ country?”). Never ask three. Never stack a list of unrelated questions. No “also… / and… / finally…” chains.
 - Keep clarifying replies to 1–3 short sentences plus the question(s).
 - The user may paste an organisation About page — treat that as rich input and move to a draft quickly (few or no follow-ups).
-
+${forceBlock}
 Conversation goals (create) — cover these topics one turn at a time (skip anything the paste already answered):
 1. Kind: data holder, AI team, or consortium?
 2. Organisation name (optionally pair with HQ country if still unknown).
@@ -82,7 +92,8 @@ Return ONLY a JSON object with this shape:
 
 Set ready_for_review=true ONLY when proposal is non-null and substantial enough to review.
 When ready_for_review is true, your reply MUST tell the user to use the on-screen review card (confirm / revise / discard) — do not claim the draft was applied. Prefer a brief acknowledgement over more questions.
-Omit proposal (or null) while still clarifying. Never put contact_email or contact_name in the proposal.
+Omit proposal (or null) while still clarifying — unless FORCE DRAFT NOW is active.
+Never put contact_email or contact_name in the proposal.
 
 Proposal field rules match the directory schema — use exact enum strings; omit anything uncertain.
 ${currentProfileJson ? `\nCurrent profile (JSON, for update context — do not echo private fields unnecessarily):\n${currentProfileJson}` : ""}`
@@ -90,11 +101,13 @@ ${currentProfileJson ? `\nCurrent profile (JSON, for update context — do not e
 
 /**
  * One Remmy turn. Returns null when the LLM is disabled or fails entirely.
+ * When forceDraft is set, Remmy must return a form-ready proposal from the chat so far.
  */
 export async function remmyTurn(input: {
   mode: RemmyMode
   messages: RemmyMessage[]
   currentProfile?: Record<string, unknown> | null
+  forceDraft?: boolean
 }): Promise<RemmyTurnResult | null> {
   const history = input.messages
     .slice(-16)
@@ -105,12 +118,15 @@ export async function remmyTurn(input: {
     ? JSON.stringify(stripForRemmyContext(input.currentProfile)).slice(0, 6000)
     : null
 
+  const forceDraft = Boolean(input.forceDraft)
   const raw = await complete(
     [
-      { role: "system", content: systemPrompt(input.mode, currentProfileJson) },
+      { role: "system", content: systemPrompt(input.mode, currentProfileJson, forceDraft) },
       {
         role: "user",
-        content: `Conversation so far:\n\n${history}\n\nRespond as Remmy with the JSON object.`,
+        content: forceDraft
+          ? `Conversation so far:\n\n${history}\n\nFORCE DRAFT NOW. Respond as Remmy with the JSON object (ready_for_review=true, non-null proposal).`
+          : `Conversation so far:\n\n${history}\n\nRespond as Remmy with the JSON object.`,
       },
     ],
     { json: true },
@@ -120,13 +136,14 @@ export async function remmyTurn(input: {
   try {
     const parsed = turnSchema.parse(JSON.parse(raw))
     const proposal = parsed.proposal ?? null
-    const ready = Boolean(parsed.ready_for_review && proposal)
+    // Keep any proposal for the client even mid-chat; ready_for_review gates the review card.
+    const ready = Boolean((parsed.ready_for_review || forceDraft) && proposal)
 
     return {
       reply: parsed.reply,
       ready_for_review: ready,
       draft_summary: parsed.draft_summary,
-      proposal: ready ? proposal : null,
+      proposal,
     }
   } catch {
     return null

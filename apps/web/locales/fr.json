@@ -466,8 +466,8 @@
   "remmy.error": "Remmy n’a pas pu répondre pour le moment. Réessayez, ou passez au formulaire.",
   "remmy.input_label": "Message à Remmy",
   "remmy.input_placeholder": "Collez une page À propos, ou répondez à Remmy…",
-  "remmy.hint_verify": "Remmy ne fait que des brouillons. Vous vérifiez toujours avant que quoi que ce soit n’atteigne le formulaire.",
-  "remmy.use_form": "Utiliser le formulaire à la place",
+  "remmy.hint_verify": "Quand vous êtes prêt, cliquez Remplir le formulaire — vos réponses sont transférées. Les champs surlignés restent à vous.",
+  "remmy.use_form": "Formulaire vide",
   "remmy.switch_to_chat": "Préférez discuter avec Remmy ?",
   "remmy.path_featured": "Recommandé",
   "remmy.path_classic": "Classique",
@@ -481,7 +481,7 @@
   "remmy.review_title": "Cela correspond-il à ce que vous vouliez ?",
   "remmy.review_body_create": "Remmy a préparé ce brouillon à partir de votre discussion. Confirmez seulement si chaque point est correct. Rien n’est publié tant que vous n’avez pas soumis le formulaire ensuite.",
   "remmy.review_body_update": "Remmy a préparé ces mises à jour à partir de votre discussion. Confirmez seulement si chaque changement est correct. Rien n’est enregistré tant que vous n’avez pas cliqué sur Enregistrer dans le formulaire.",
-  "remmy.confirm": "Oui — appliquer au formulaire",
+  "remmy.confirm": "Oui — remplir le formulaire",
   "remmy.revise": "Pas tout à fait — réviser",
   "remmy.discard": "Jeter le brouillon",
   "remmy.revise_prompt": "Ce brouillon n’est pas tout à fait exact. Merci de le réviser d’après ce que j’ai déjà dit, et de poser des questions si quelque chose n’est pas clair.",
@@ -498,5 +498,8 @@
   "form.gaps_body": "Le brouillon a laissé ces champs vides (Remmy n’invente jamais de coordonnées). Cliquez un champ pour y aller.",
   "form.gaps_dismiss": "Masquer les surlignages",
   "form.gaps_datasets_nudge": "Détails du jeu de données incomplets — renseignez modalité, échelle et modèle d’accès avant d’envoyer.",
-  "remmy.load_example": "Charger un exemple À propos"
+  "remmy.load_example": "Charger un exemple À propos",
+  "remmy.fill_form": "Remplir le formulaire depuis le chat",
+  "remmy.blank_form": "Formulaire vide",
+  "remmy.fill_failed": "Impossible de créer un brouillon depuis ce chat. Continuez, ou ouvrez un formulaire vide."
 }

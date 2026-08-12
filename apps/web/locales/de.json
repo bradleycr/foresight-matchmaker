@@ -466,8 +466,8 @@
   "remmy.error": "Remmy konnte gerade nicht antworten. Versuchen Sie es erneut oder wechseln Sie zum Formular.",
   "remmy.input_label": "Nachricht an Remmy",
   "remmy.input_placeholder": "About-Seite einfügen oder Remmys Frage beantworten…",
-  "remmy.hint_verify": "Remmy entwirft nur. Sie prüfen immer, bevor etwas ins Formular gelangt.",
-  "remmy.use_form": "Stattdessen Formular nutzen",
+  "remmy.hint_verify": "Wenn bereit: „Formular aus dem Chat füllen“ — Ihre Antworten werden übernommen. Markierte Felder brauchen noch Sie.",
+  "remmy.use_form": "Leeres Formular",
   "remmy.switch_to_chat": "Lieber mit Remmy chatten?",
   "remmy.path_featured": "Empfohlen",
   "remmy.path_classic": "Klassisch",
@@ -481,7 +481,7 @@
   "remmy.review_title": "Stimmt das mit Ihrer Absicht überein?",
   "remmy.review_body_create": "Remmy hat diesen Entwurf aus dem Chat erstellt. Bestätigen Sie nur, wenn jeder Punkt stimmt. Veröffentlicht wird erst, wenn Sie danach das Formular absenden.",
   "remmy.review_body_update": "Remmy hat diese Updates aus dem Chat erstellt. Bestätigen Sie nur, wenn jede Änderung stimmt. Gespeichert wird erst, wenn Sie im Formular Speichern klicken.",
-  "remmy.confirm": "Ja — ins Formular übernehmen",
+  "remmy.confirm": "Ja — Formular füllen",
   "remmy.revise": "Nicht ganz — überarbeiten",
   "remmy.discard": "Entwurf verwerfen",
   "remmy.revise_prompt": "Dieser Entwurf stimmt nicht ganz. Bitte überarbeiten Sie ihn anhand dessen, was ich bereits gesagt habe, und fragen Sie nach, wenn etwas unklar ist.",
@@ -498,5 +498,8 @@
   "form.gaps_body": "Der Entwurf hat diese Felder leer gelassen (Remmy erfindet keine Kontaktdaten). Klicken Sie ein Feld, um dorthin zu springen.",
   "form.gaps_dismiss": "Markierungen ausblenden",
   "form.gaps_datasets_nudge": "Datensatzangaben unvollständig — Modalität, Umfang und Zugangsmodell vor dem Absenden ausfüllen.",
-  "remmy.load_example": "Beispiel-About laden"
+  "remmy.load_example": "Beispiel-About laden",
+  "remmy.fill_form": "Formular aus dem Chat füllen",
+  "remmy.blank_form": "Leeres Formular",
+  "remmy.fill_failed": "Aus diesem Chat konnte kein Entwurf gebaut werden. Weiter antworten oder leeres Formular öffnen."
 }

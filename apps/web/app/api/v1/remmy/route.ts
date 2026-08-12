@@ -18,6 +18,8 @@ const bodySchema = z.object({
   mode: z.enum(["create", "update"]).default("create"),
   messages: z.array(messageSchema).min(1).max(24),
   current_profile: z.record(z.unknown()).optional().nullable(),
+  /** Build a form draft from the chat now — no more clarifying questions. */
+  force_draft: z.boolean().optional().default(false),
 })
 
 /**
@@ -52,15 +54,32 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const last = parsed.data.messages[parsed.data.messages.length - 1]
-  if (last.role !== "user") {
-    return badRequest("The last message must be from the user.")
+  // force_draft may end with an assistant-only history (user clicked fill-form
+  // without a new message). Inject a synthetic user cue so validation + the model agree.
+  let messages = parsed.data.messages
+  if (parsed.data.force_draft) {
+    const last = messages[messages.length - 1]
+    if (!last || last.role !== "user") {
+      messages = [
+        ...messages,
+        {
+          role: "user" as const,
+          content: "Please fill the form from everything I have told you so far.",
+        },
+      ]
+    }
+  } else {
+    const last = messages[messages.length - 1]
+    if (!last || last.role !== "user") {
+      return badRequest("The last message must be from the user.")
+    }
   }
 
   const turn = await remmyTurn({
     mode: parsed.data.mode,
-    messages: parsed.data.messages,
+    messages,
     currentProfile: parsed.data.mode === "update" ? parsed.data.current_profile ?? null : null,
+    forceDraft: parsed.data.force_draft,
   })
 
   if (!turn) {
@@ -70,6 +89,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   logEvent("remmy_turn", null, {
     mode: parsed.data.mode,
     ready_for_review: turn.ready_for_review,
+    force_draft: parsed.data.force_draft,
   })
 
   return ok(turn)

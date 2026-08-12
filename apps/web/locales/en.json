@@ -466,8 +466,8 @@
   "remmy.error": "Remmy could not respond just now. Try again, or switch to the form.",
   "remmy.input_label": "Message to Remmy",
   "remmy.input_placeholder": "Paste an About page, or answer Remmy’s question…",
-  "remmy.hint_verify": "Remmy drafts only. You always verify before anything reaches the form.",
-  "remmy.use_form": "Use the form instead",
+  "remmy.hint_verify": "When ready, click Fill form from chat — your answers transfer over. Highlighted fields still need you.",
+  "remmy.use_form": "Blank form",
   "remmy.switch_to_chat": "Prefer chatting with Remmy?",
   "remmy.path_featured": "Recommended",
   "remmy.path_classic": "Classic",
@@ -481,7 +481,7 @@
   "remmy.review_title": "Does this match what you meant?",
   "remmy.review_body_create": "Remmy prepared this draft from your chat. Confirm only if every point is correct. Nothing is published until you submit the form afterward.",
   "remmy.review_body_update": "Remmy prepared these updates from your chat. Confirm only if every change is correct. Nothing is saved until you click Save on the form.",
-  "remmy.confirm": "Yes — apply to the form",
+  "remmy.confirm": "Yes — fill the form",
   "remmy.revise": "Not quite — revise",
   "remmy.discard": "Discard draft",
   "remmy.revise_prompt": "That draft is not quite right. Please revise based on what I already told you, and ask if anything is unclear.",
@@ -498,5 +498,8 @@
   "form.gaps_body": "The draft left these empty (Remmy never invents contact details). Click a field to jump there.",
   "form.gaps_dismiss": "Hide highlights",
   "form.gaps_datasets_nudge": "Dataset details are incomplete — fill modality, scale, and access model before submitting.",
-  "remmy.load_example": "Load example About text"
+  "remmy.load_example": "Load example About text",
+  "remmy.fill_form": "Fill form from chat",
+  "remmy.blank_form": "Blank form",
+  "remmy.fill_failed": "Could not build a draft from this chat. Keep answering, or open a blank form."
 }
