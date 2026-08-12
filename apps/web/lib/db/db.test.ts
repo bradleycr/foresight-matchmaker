@@ -3,9 +3,14 @@ import { describe, it, expect, beforeAll } from "vitest"
 // An isolated in-memory database per test run — no disk state, no cleanup.
 process.env.DATABASE_PATH = ":memory:"
 
-import { saveProfile, listPublicProfiles, getProfilesByEmail } from "./profiles"
-import { getShortlist } from "./matches"
+import { saveProfile, listPublicProfiles, getProfilesByEmail, getProfileById, deleteProfile } from "./profiles"
+import { getShortlist, getAllCachedMatches } from "./matches"
 import { requestIntro, respondToIntro, listIntrosFor, rateLimitPer24h } from "./intros"
+import { listEvents } from "./events"
+import { issueToken } from "../auth/tokens"
+import { getDb } from "./client"
+import { authTokens, matches as matchesTable, intros as introsTable } from "./schema"
+import { eq, or } from "drizzle-orm"
 
 const PRIVATE_KEYS = ["contact_name", "contact_email", "contact_role", "governance_notes"]
 
@@ -221,5 +226,55 @@ describe("intro flow", () => {
     }
     if (original === undefined) delete process.env.RATE_LIMIT_PER_24H
     else process.env.RATE_LIMIT_PER_24H = original
+  })
+})
+
+describe("GDPR profile erasure", () => {
+  it("hard-deletes the profile and every record that names it", () => {
+    const doomed = makeAiTeam(99, {
+      slug: "doomed-team",
+      contact_email: "doomed@example.org",
+      org_name: "Doomed Team",
+    })
+    const peer = makeDataHolder(99, { slug: "doomed-peer" })
+    expect(requestIntro(doomed.id, peer.id, "Please erase me after.").ok).toBe(true)
+    issueToken("doomed@example.org", doomed.id)
+
+    expect(deleteProfile(doomed.id)).toBe(true)
+    expect(getProfileById(doomed.id)).toBeNull()
+    expect(listPublicProfiles().some((p) => p.id === doomed.id)).toBe(false)
+
+    const db = getDb()
+    expect(
+      db
+        .select()
+        .from(matchesTable)
+        .where(or(eq(matchesTable.subjectId, doomed.id), eq(matchesTable.otherId, doomed.id)))
+        .all(),
+    ).toHaveLength(0)
+    expect(
+      db
+        .select()
+        .from(introsTable)
+        .where(or(eq(introsTable.fromId, doomed.id), eq(introsTable.toId, doomed.id)))
+        .all(),
+    ).toHaveLength(0)
+    expect(db.select().from(authTokens).where(eq(authTokens.email, "doomed@example.org")).all()).toHaveLength(0)
+
+    // Event rows for this actor are anonymised; an erasure crumb remains without PII.
+    const attributed = listEvents().filter((e) => e.actorId === doomed.id)
+    expect(attributed).toHaveLength(0)
+    const erasure = listEvents().filter((e) => e.type === "profile_deleted")
+    expect(erasure.length).toBeGreaterThan(0)
+    expect(erasure.every((e) => e.actorId === null && e.payload.erased === true)).toBe(true)
+
+    // Peer still exists; their shortlist no longer points at the erased profile.
+    expect(getProfileById(peer.id)).not.toBeNull()
+    expect(getShortlist(peer.id).some((m) => m.otherId === doomed.id)).toBe(false)
+    expect(getAllCachedMatches().some((m) => m.otherId === doomed.id)).toBe(false)
+  })
+
+  it("returns false for an unknown id", () => {
+    expect(deleteProfile("no-such-profile")).toBe(false)
   })
 })

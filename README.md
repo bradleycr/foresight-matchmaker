@@ -73,7 +73,7 @@ The machine-readable contract:
 | `GET /api/v1/directory` | UI corpus: same shape, but signed-in callers also receive `authenticated_only` profiles. Anonymous callers see `public` only. Pages self-fetch this; do not treat it as the public dump. |
 | `GET /api/v1/schema/v1/profile.schema.json` | JSON Schema of the profile |
 | `POST /api/v1/profiles` | Register a profile (returns a claim link) |
-| `GET /api/v1/profiles/:id` · `PATCH` | Read public profile / edit own (session) |
+| `GET /api/v1/profiles/:id` · `PATCH` · `DELETE` | Read public profile / edit own / GDPR erase own (session) |
 | `GET /api/v1/matches` | Ranked shortlist for the signed-in profile |
 | `GET /api/v1/intros` · `POST` · `PATCH /:id` | Double opt-in introduction flow |
 | `POST /api/v1/auth/request-link` · `/claim` · `/logout` | Magic-link auth |
@@ -94,4 +94,4 @@ The whole test suite passes with no LLM configured.
 
 ## Privacy
 
-See [`PRIVACY.md`](PRIVACY.md). Highlights: minimal collection (one contact per organisation), no trackers, no analytics beyond an internal event log, data on the European deployment VM, and deletion on request once the controller is designated (`[CONTROLLER TBD]`).
+See [`PRIVACY.md`](PRIVACY.md). Highlights: Foresight Institute as operator of this directory, minimal collection (one contact per organisation), no advertising trackers, optional AI drafting only with human confirmation, and deletion on request — self-service from Your profile (`/me`) or via the privacy contact email.

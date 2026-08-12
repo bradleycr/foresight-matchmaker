@@ -7,8 +7,11 @@ import { llmEnabled } from "@/lib/llm/client"
 import { MeEditor } from "@/components/remmy/me-editor"
 import { OutcomeReport } from "@/components/outcome-report"
 import { SignOutButton } from "@/components/sign-out-button"
+import { DeleteAccountPanel } from "@/components/delete-account-panel"
 
 export const dynamic = "force-dynamic"
+
+const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 
 /** Edit your own profile. The owner sees the full record, private fields included. */
 export default async function MePage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
@@ -51,6 +54,8 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
       <div className="mt-8">
         <MeEditor profile={profile} remmyEnabled={llmEnabled()} />
       </div>
+
+      <DeleteAccountPanel profileId={profile.id} orgName={profile.org_name} privacyEmail={PRIVACY_EMAIL} />
     </div>
   )
 }

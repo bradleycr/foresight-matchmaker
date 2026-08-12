@@ -1,16 +1,19 @@
+import { eq } from "drizzle-orm"
 import { getDb } from "./client"
 import { events } from "./schema"
 
 /**
  * Append-only event log. Every intro state transition, profile write, and
- * funnel-relevant page view lands here. Rows are never updated or deleted —
- * the admin funnel and response-time metrics are derived by reading forward.
+ * funnel-relevant page view lands here. Rows are never deleted in the
+ * ordinary course — the admin funnel reads forward. GDPR erasure is the
+ * one exception: see `anonymiseEventsFor`.
  */
 
 export type EventType =
   | "profile_created"
   | "profile_updated"
   | "profile_claimed"
+  | "profile_deleted"
   | "shortlist_viewed"
   | "intro_requested"
   | "intro_accepted"
@@ -30,6 +33,19 @@ export function logEvent(type: EventType, actorId: string | null, payload: Recor
       payload: JSON.stringify(payload),
       createdAt: new Date().toISOString(),
     })
+    .run()
+}
+
+/**
+ * Strip personal linkage from every event attributed to a profile about to
+ * be erased. Actor id is cleared; payloads collapse to a marker so funnel
+ * counts still work without retaining identifiers.
+ */
+export function anonymiseEventsFor(profileId: string): void {
+  getDb()
+    .update(events)
+    .set({ actorId: null, payload: JSON.stringify({ anonymised: true }) })
+    .where(eq(events.actorId, profileId))
     .run()
 }
 

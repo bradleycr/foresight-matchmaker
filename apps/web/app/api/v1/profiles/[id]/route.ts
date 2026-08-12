@@ -3,8 +3,14 @@ import { ZodError } from "zod"
 import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema, outcomeSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, notFound, unauthorized, forbidden } from "@/lib/api/respond"
-import { getProfileById, saveProfile, setJointApplicationOutcome, getJointApplicationOutcome } from "@/lib/db/profiles"
-import { getSession } from "@/lib/auth/session"
+import {
+  getProfileById,
+  saveProfile,
+  setJointApplicationOutcome,
+  getJointApplicationOutcome,
+  deleteProfile,
+} from "@/lib/db/profiles"
+import { destroySession, getSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
 
 export const dynamic = "force-dynamic"
@@ -91,4 +97,42 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
   })
 
   return ok({ profile: updated })
+}
+
+/**
+ * DELETE /api/v1/profiles/[id] — owner-only GDPR erasure.
+ *
+ * Body must confirm with the exact organisation name:
+ *   `{ "confirm_org_name": "…" }`
+ * On success the profile and all linked personal data are removed and the
+ * session cookie is cleared.
+ */
+export async function DELETE(req: NextRequest, { params }: Params): Promise<Response> {
+  const { id } = await params
+  const profile = getProfileById(id)
+  if (!profile) return notFound("No profile with that id.")
+
+  const session = await getSession()
+  if (!session) return unauthorized()
+  if (session.profileId !== profile.id) return forbidden("Only the profile owner can delete it.")
+
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return badRequest("Request body must be JSON.")
+  }
+
+  const confirm =
+    typeof body === "object" && body !== null && "confirm_org_name" in body
+      ? String((body as { confirm_org_name: unknown }).confirm_org_name)
+      : ""
+
+  if (confirm.trim() !== profile.org_name) {
+    return badRequest("confirm_org_name must exactly match the organisation name on the profile.")
+  }
+
+  deleteProfile(profile.id)
+  await destroySession()
+  return ok({ deleted: true })
 }

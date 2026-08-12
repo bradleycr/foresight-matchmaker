@@ -76,7 +76,11 @@ export const authTokens = sqliteTable("auth_tokens", {
   usedAt: text("used_at"),
 })
 
-/** Append-only event log. Rows are inserted, never updated or deleted. */
+/**
+ * Append-only event log in ordinary use. GDPR erasure anonymises rows
+ * attributed to a deleted profile (actor cleared, payload scrubbed) rather
+ * than removing the row — funnel counts stay, identifiers do not.
+ */
 export const events = sqliteTable(
   "events",
   {

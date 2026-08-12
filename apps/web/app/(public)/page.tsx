@@ -10,8 +10,13 @@ export const dynamic = "force-dynamic"
  * dataset cannot apply at all — and routes people into the directory or
  * the profile form. Plain, institutional, unhurried.
  */
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>
+}) {
   const { t } = await getT()
+  const { deleted } = await searchParams
   const directory = (await apiFetch("/api/v1/directory").then((r) => r.json())) as DirectoryPayload
 
   const counts = {
@@ -22,6 +27,12 @@ export default async function LandingPage() {
 
   return (
     <div className="py-10">
+      {deleted ? (
+        <p role="status" className="mb-6 border border-ink bg-paper-shade px-3 py-2">
+          {t("landing.deleted")}
+        </p>
+      ) : null}
+
       <p className="font-listing text-sm font-bold uppercase tracking-widest text-ink-soft">{t("landing.kicker")}</p>
       <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-6xl">
         {t("landing.headline")}

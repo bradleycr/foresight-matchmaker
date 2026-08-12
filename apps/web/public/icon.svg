@@ -1,26 +1,34 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @media (prefers-color-scheme: light) {
-      .background { fill: black; }
-      .foreground { fill: white; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: white; }
-      .foreground { fill: black; }
-    }
-  </style>
-  <g clip-path="url(#clip0_7960_43945)">
-    <rect class="background" width="180" height="180" rx="37" />
-    <g style="transform: scale(95%); transform-origin: center">
-      <path class="foreground"
-        d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-      <path class="foreground"
-        d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Recoding Medicine Matchmaker">
+  <!--
+    Matchmaker mark: a six-node molecular wheel on directory yellow.
+    Reads as Foresight’s nanoscale heritage at a glance; at 16px it
+    collapses to a bold radial silhouette that still holds the tab.
+    Colours are the product tokens — mark (#ffd200) and ink (#17150f) —
+    and stay fixed (no prefers-color-scheme flip) so the yellow remains
+    the recognisable signal on both light and dark browser chrome.
+  -->
+  <rect width="32" height="32" fill="#ffd200"/>
+  <g stroke="#17150f" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- Hex perimeter -->
+    <line x1="16" y1="7.5" x2="23.5" y2="11.8"/>
+    <line x1="23.5" y1="11.8" x2="23.5" y2="20.2"/>
+    <line x1="23.5" y1="20.2" x2="16" y2="24.5"/>
+    <line x1="16" y1="24.5" x2="8.5" y2="20.2"/>
+    <line x1="8.5" y1="20.2" x2="8.5" y2="11.8"/>
+    <line x1="8.5" y1="11.8" x2="16" y2="7.5"/>
+    <!-- Spokes into the hub — the match sits at the centre -->
+    <line x1="16" y1="7.5" x2="16" y2="16"/>
+    <line x1="23.5" y1="11.8" x2="16" y2="16"/>
+    <line x1="23.5" y1="20.2" x2="16" y2="16"/>
+    <line x1="16" y1="24.5" x2="16" y2="16"/>
+    <line x1="8.5" y1="20.2" x2="16" y2="16"/>
+    <line x1="8.5" y1="11.8" x2="16" y2="16"/>
   </g>
-  <defs>
-    <clipPath id="clip0_7960_43945">
-      <rect width="180" height="180" fill="white" />
-    </clipPath>
-  </defs>
+  <circle cx="16" cy="7.5" r="2.4" fill="#17150f"/>
+  <circle cx="23.5" cy="11.8" r="2.4" fill="#17150f"/>
+  <circle cx="23.5" cy="20.2" r="2.4" fill="#17150f"/>
+  <circle cx="16" cy="24.5" r="2.4" fill="#17150f"/>
+  <circle cx="8.5" cy="20.2" r="2.4" fill="#17150f"/>
+  <circle cx="8.5" cy="11.8" r="2.4" fill="#17150f"/>
+  <circle cx="16" cy="16" r="2.9" fill="#17150f"/>
 </svg>

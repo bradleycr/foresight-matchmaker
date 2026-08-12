@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm"
+import { eq, or } from "drizzle-orm"
 import { randomUUID } from "node:crypto"
 import {
   profileSchema,
@@ -8,9 +8,9 @@ import {
   type PublicProfile,
 } from "@rmm/schema"
 import { getDb } from "./client"
-import { profiles } from "./schema"
+import { profiles, matches, intros, authTokens } from "./schema"
 import { recomputeMatchesFor } from "./matches"
-import { logEvent } from "./events"
+import { anonymiseEventsFor, logEvent } from "./events"
 
 /**
  * Profile repository. Every write path funnels through `saveProfile`, which
@@ -169,4 +169,46 @@ export function markClaimed(id: string): void {
 export function setJointApplicationOutcome(id: string, outcome: "yes" | "no" | "not_yet"): void {
   getDb().update(profiles).set({ jointApplication: outcome }).where(eq(profiles.id, id)).run()
   logEvent("joint_application_reported", id, { outcome })
+}
+
+/**
+ * GDPR erasure — hard-delete the profile and every record that names it.
+ *
+ * Removes: the profile row, match-cache rows in both directions, all
+ * introductions (sent or received), and magic-link tokens bound to this
+ * profile (plus unbound tokens for the contact email when no other profile
+ * still uses that address). Event-log rows are anonymised rather than
+ * deleted so aggregate funnel metrics survive without personal data.
+ *
+ * Returns false when the id is unknown.
+ */
+export function deleteProfile(id: string): boolean {
+  const profile = getProfileById(id)
+  if (!profile) return false
+
+  const email = profile.contact_email.toLowerCase()
+  const db = getDb()
+
+  db.transaction((tx) => {
+    tx.delete(matches)
+      .where(or(eq(matches.subjectId, id), eq(matches.otherId, id)))
+      .run()
+    tx.delete(intros)
+      .where(or(eq(intros.fromId, id), eq(intros.toId, id)))
+      .run()
+    tx.delete(authTokens).where(eq(authTokens.profileId, id)).run()
+    tx.delete(profiles).where(eq(profiles.id, id)).run()
+  })
+
+  // Tokens issued against the email but not bound to a profile id — only
+  // safe to drop when no other profile still claims that address.
+  const siblings = getProfilesByEmail(email)
+  if (siblings.length === 0) {
+    db.delete(authTokens).where(eq(authTokens.email, email)).run()
+  }
+
+  anonymiseEventsFor(id)
+  // Audit crumb with no personal data — proves erasure happened.
+  logEvent("profile_deleted", null, { erased: true })
+  return true
 }
