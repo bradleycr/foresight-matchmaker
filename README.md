@@ -63,13 +63,14 @@ A **profile** is a data holder, an AI team, or a consortium (both at once). Data
 The machine-readable contract:
 
 - `GET /api/v1/schema/v1/profile.schema.json` — JSON Schema for the profile
-- `GET /api/v1/directory.json` — the full redacted public directory
+- `GET /api/v1/directory.json` — the full redacted **public** directory (stable third-party contract)
 
 ## Public API (v1)
 
 | Endpoint | Description |
 | --- | --- |
-| `GET /api/v1/directory.json` | Full redacted directory (no contact details, ever) |
+| `GET /api/v1/directory.json` | Stable public machine contract: redacted `public` profiles only (no contact details, ever). What the footer links and third parties should call. |
+| `GET /api/v1/directory` | UI corpus: same shape, but signed-in callers also receive `authenticated_only` profiles. Anonymous callers see `public` only. Pages self-fetch this; do not treat it as the public dump. |
 | `GET /api/v1/schema/v1/profile.schema.json` | JSON Schema of the profile |
 | `POST /api/v1/profiles` | Register a profile (returns a claim link) |
 | `GET /api/v1/profiles/:id` · `PATCH` | Read public profile / edit own (session) |
@@ -77,6 +78,8 @@ The machine-readable contract:
 | `GET /api/v1/intros` · `POST` · `PATCH /:id` | Double opt-in introduction flow |
 | `POST /api/v1/auth/request-link` · `/claim` · `/logout` | Magic-link auth |
 | `GET /api/v1/metrics` | Reporting (admin only; `?format=csv` for export) |
+
+These two directory routes are intentional, not duplicates: `.json` is the lockable public dump; bare `/directory` is session-aware for the App Router pages.
 
 Redaction is enforced server-side: `contact_name`, `contact_email`, `contact_role`, and hidden-field values never appear in any public payload. Contact details travel only inside an accepted introduction.
 
