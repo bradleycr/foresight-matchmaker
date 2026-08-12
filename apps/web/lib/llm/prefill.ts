@@ -26,6 +26,7 @@ import {
 } from "@rmm/schema"
 import { complete } from "./client"
 import { extractJsonObject } from "./json"
+import { parseUrlLines, tryNormalizeUrl } from "@/lib/normalize-url"
 
 /**
  * Schema-first profile extraction — the single structured-output path.
@@ -81,7 +82,13 @@ export const prefillProposalSchema = z.object({
   ).catch(undefined),
   one_liner: looseString(140),
   summary: looseString(600),
-  website: looseString(300),
+  website: z.preprocess(
+    (v) => {
+      if (typeof v !== "string") return undefined
+      return tryNormalizeUrl(v) ?? undefined
+    },
+    z.string().url().optional(),
+  ).catch(undefined),
   languages: looseArray(LANGUAGE),
   looking_for: looseArray(LOOKING_FOR),
   methods: looseArray(METHODS),
@@ -93,7 +100,10 @@ export const prefillProposalSchema = z.object({
   privacy_capability: looseArray(PRIVACY_CAPABILITY),
   team_size: loose(TEAM_SIZE),
   track_record: z.preprocess(
-    (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, 5) : []),
+    (v) => {
+      if (!Array.isArray(v)) return []
+      return parseUrlLines(v.filter((x): x is string => typeof x === "string").join("\n"), 5).urls
+    },
     z.array(z.string()),
   ).catch([]),
   data_needs: z

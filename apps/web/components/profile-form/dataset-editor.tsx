@@ -16,6 +16,7 @@ import {
   type Dataset,
 } from "@rmm/schema"
 import { useT } from "@/lib/i18n/client"
+import { isDatasetBlank } from "@/lib/profile-form-validate"
 import { Button, Field, Input, Textarea } from "@/components/ui/primitives"
 import { EnumChips, EnumSelect } from "./enum-controls"
 
@@ -40,6 +41,15 @@ export function emptyDataset(): Dataset {
   }
 }
 
+function datasetStatus(dataset: Dataset, t: (k: string, p?: Record<string, string | number>) => string): string[] {
+  if (isDatasetBlank(dataset)) return []
+  const missing: string[] = []
+  if (!dataset.name.trim()) missing.push(t("form.dataset_missing_name"))
+  if (dataset.modality.length === 0) missing.push(t("form.dataset_missing_modality"))
+  if (dataset.disease_area.length === 0) missing.push(t("form.dataset_missing_disease"))
+  return missing
+}
+
 export function DatasetEditor({
   dataset,
   index,
@@ -55,6 +65,8 @@ export function DatasetEditor({
 }) {
   const t = useT()
   const set = <K extends keyof Dataset>(key: K, value: Dataset[K]) => onChange({ ...dataset, [key]: value })
+  const missing = datasetStatus(dataset, t)
+  const started = !isDatasetBlank(dataset)
 
   return (
     <fieldset className="border border-rule-strong p-4">
@@ -62,19 +74,53 @@ export function DatasetEditor({
         {t("form.dataset_legend", { n: index + 1 })}
       </legend>
 
-      <div className="flex flex-col gap-4">
+      <p className="mt-2 text-sm text-ink-soft">{t("form.dataset_required_hint")}</p>
+
+      {started && missing.length > 0 && (
+        <p role="status" className="mt-2 border border-alert bg-alert/5 px-3 py-2 text-sm text-alert">
+          {t("form.dataset_incomplete")}: {missing.join(" · ")}
+        </p>
+      )}
+
+      <div className="mt-4 flex flex-col gap-4">
+        <h3 className="font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">
+          {t("form.dataset_section_required")}
+        </h3>
+
         <Field label={t("field.dataset_name")} htmlFor={`ds-name-${index}`} required>
           <Input
             id={`ds-name-${index}`}
             required
             maxLength={160}
+            placeholder={t("form.dataset_name_placeholder")}
             value={dataset.name}
             onChange={(e) => set("name", e.target.value)}
           />
         </Field>
 
-        <EnumChips label={t("field.modality")} group="modality" options={MODALITY} value={dataset.modality} onChange={(v) => set("modality", v)} />
-        <EnumChips label={t("field.disease_area")} group="disease_area" options={DISEASE_AREA} value={dataset.disease_area} onChange={(v) => set("disease_area", v)} />
+        <EnumChips
+          label={t("field.modality")}
+          group="modality"
+          options={MODALITY}
+          value={dataset.modality}
+          onChange={(v) => set("modality", v)}
+          required
+          fieldId={`ds-modality-${index}`}
+        />
+        <EnumChips
+          label={t("field.disease_area")}
+          group="disease_area"
+          options={DISEASE_AREA}
+          value={dataset.disease_area}
+          onChange={(v) => set("disease_area", v)}
+          required
+          fieldId={`ds-disease-${index}`}
+        />
+
+        <h3 className="mt-2 border-t border-rule pt-4 font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">
+          {t("form.dataset_section_optional")}
+        </h3>
+        <p className="text-sm text-ink-faint">{t("form.dataset_optional_hint")}</p>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <EnumSelect label={t("field.n_subjects")} group="n_subjects" options={N_SUBJECTS} value={dataset.n_subjects} onChange={(v) => v && set("n_subjects", v)} id={`ds-nsub-${index}`} />

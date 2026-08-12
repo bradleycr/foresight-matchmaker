@@ -18,6 +18,7 @@ export function EnumChips<V extends string>({
   value,
   onChange,
   hint,
+  required,
   attention,
   fieldId,
 }: {
@@ -27,13 +28,14 @@ export function EnumChips<V extends string>({
   value: V[]
   onChange: (next: V[]) => void
   hint?: string
+  required?: boolean
   attention?: boolean
   fieldId?: string
 }) {
   const t = useT()
 
   return (
-    <Field label={label} hint={hint} attention={attention} id={fieldId}>
+    <Field label={label} hint={hint} required={required} attention={attention} id={fieldId}>
       <div role="group" aria-label={label} className="flex flex-wrap gap-1.5">
         {options.map((option) => {
           const active = value.includes(option)

@@ -39,6 +39,14 @@ import { PrefillBox } from "./prefill-box"
 import { GapsBanner } from "./gaps-banner"
 import type { PrefillProposal } from "@/lib/llm/prefill"
 import { findManualGaps, type GapField } from "@/lib/profile-form-gaps"
+import { parseUrlLines, tryNormalizeUrl } from "@/lib/normalize-url"
+import {
+  collectValidationIssues,
+  fieldIdFromApiPath,
+  filterDatasetsForSubmit,
+  friendlyApiMessage,
+  type ValidationIssue,
+} from "@/lib/profile-form-validate"
 
 /**
  * The profile form — create and edit in one component. Sections appear and
@@ -183,6 +191,10 @@ function stateFromProfile(p: Profile): FormState {
 
 /** Assemble the API payload for the current kind. */
 function toPayload(s: FormState): Record<string, unknown> {
+  const websiteRaw = s.website.trim()
+  const website = websiteRaw ? tryNormalizeUrl(websiteRaw) ?? websiteRaw : undefined
+  const { urls: trackUrls } = parseUrlLines(s.track_record)
+
   const shared = {
     kind: s.kind,
     org_name: s.org_name,
@@ -190,7 +202,7 @@ function toPayload(s: FormState): Record<string, unknown> {
     country: s.country,
     one_liner: s.one_liner,
     summary: s.summary,
-    website: s.website || undefined,
+    website,
     languages: s.languages,
     looking_for: s.looking_for,
     application_status: s.application_status,
@@ -214,7 +226,7 @@ function toPayload(s: FormState): Record<string, unknown> {
     compute_scale: s.compute_scale || undefined,
     privacy_capability: s.privacy_capability,
     team_size: s.team_size,
-    track_record: s.track_record.split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 5),
+    track_record: trackUrls,
     data_needs: {
       modality: s.needs_modality,
       disease_area: s.needs_disease_area,
@@ -225,9 +237,9 @@ function toPayload(s: FormState): Record<string, unknown> {
     },
   }
 
-  if (s.kind === "data_holder") return { ...shared, datasets: s.datasets }
+  if (s.kind === "data_holder") return { ...shared, datasets: filterDatasetsForSubmit(s.datasets) }
   if (s.kind === "ai_team") return { ...shared, ...aiFields }
-  return { ...shared, ...aiFields, datasets: s.datasets, still_seeking: s.still_seeking }
+  return { ...shared, ...aiFields, datasets: filterDatasetsForSubmit(s.datasets), still_seeking: s.still_seeking }
 }
 
 /**
@@ -307,6 +319,7 @@ export function ProfileForm({
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
   const [claimLink, setClaimLink] = useState<string | null>(null)
   const [apiError, setApiError] = useState<ApiError | null>(null)
+  const [clientIssues, setClientIssues] = useState<ValidationIssue[]>([])
   const [spotlightGaps, setSpotlightGaps] = useState(highlightGapsOnMount)
 
   const countryNames = useMemo(() => new Intl.DisplayNames([locale], { type: "region" }), [locale])
@@ -339,8 +352,25 @@ export function ProfileForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    setStatus("saving")
     setApiError(null)
+
+    const issues = collectValidationIssues({
+      kind: state.kind,
+      website: state.website,
+      track_record: state.track_record,
+      datasets: state.datasets,
+    })
+
+    if (issues.length > 0) {
+      setClientIssues(issues)
+      const first = issues[0]
+      document.getElementById(first.fieldId)?.scrollIntoView({ behavior: "smooth", block: "center" })
+      window.scrollTo({ top: 0 })
+      return
+    }
+
+    setClientIssues([])
+    setStatus("saving")
 
     const res = await fetch(isCreate ? "/api/v1/profiles" : `/api/v1/profiles/${profileId}`, {
       method: isCreate ? "POST" : "PATCH",
@@ -405,14 +435,47 @@ export function ProfileForm({
         <div role="alert" className="border border-alert p-4 text-alert">
           <p className="font-semibold">{apiError.error ?? t("form.error_generic")}</p>
           {apiError.details && (
-            <ul className="mt-2 list-inside list-disc">
-              {apiError.details.map((d) => (
-                <li key={d.path}>
-                  <span className="font-listing">{d.path}</span>: {d.message}
-                </li>
-              ))}
+            <ul className="mt-2 space-y-1">
+              {apiError.details.map((d) => {
+                const fieldId = fieldIdFromApiPath(d.path)
+                const message = friendlyApiMessage(d.path, d.message)
+                return (
+                  <li key={d.path}>
+                    {fieldId ? (
+                      <button
+                        type="button"
+                        className="text-left underline"
+                        onClick={() => document.getElementById(fieldId)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                      >
+                        {message}
+                      </button>
+                    ) : (
+                      message
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           )}
+        </div>
+      )}
+
+      {clientIssues.length > 0 && (
+        <div role="alert" className="border border-alert p-4 text-alert">
+          <p className="font-semibold">{t("form.validation.title")}</p>
+          <ul className="mt-2 space-y-1">
+            {clientIssues.map((issue) => (
+              <li key={`${issue.fieldId}-${issue.messageKey}`}>
+                <button
+                  type="button"
+                  className="text-left underline"
+                  onClick={() => document.getElementById(issue.fieldId)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                >
+                  {t(issue.messageKey, issue.params)}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -495,6 +558,7 @@ export function ProfileForm({
             {t("form.section_datasets")}
           </h2>
           <p className="text-sm text-ink-soft">{t("form.datasets_hint")}</p>
+          <p className="text-sm font-semibold text-ink-soft">{t("form.datasets_required_summary")}</p>
           {needs("datasets") && (
             <p className="border border-alert bg-alert/5 px-3 py-2 text-sm font-semibold text-alert">
               {t("form.gaps_datasets_nudge")}
@@ -544,8 +608,14 @@ export function ProfileForm({
             <EnumSelect label={t("field.team_size")} group="team_size" options={TEAM_SIZE} value={state.team_size} onChange={(v) => v && set("team_size", v)} id="team_size" />
           </div>
           <EnumChips label={t("field.regulatory_experience")} group="regulatory_experience" options={REGULATORY_EXPERIENCE} value={state.regulatory_experience} onChange={(v) => set("regulatory_experience", v)} />
-          <Field label={t("field.track_record")} htmlFor="track_record" hint={t("form.track_record_hint")} attention={needs("track_record")} id="gap-track_record">
-            <Textarea id="track_record" rows={3} value={state.track_record} onChange={(e) => set("track_record", e.target.value)} />
+          <Field label={t("field.track_record")} htmlFor="track_record" hint={t("form.track_record_hint")} id="gap-track_record">
+            <Textarea
+              id="track_record"
+              rows={3}
+              placeholder="https://github.com/your-org/repo"
+              value={state.track_record}
+              onChange={(e) => set("track_record", e.target.value)}
+            />
           </Field>
 
           <h3 className="mt-2 border-b border-rule pb-1 font-listing text-lg font-bold uppercase">

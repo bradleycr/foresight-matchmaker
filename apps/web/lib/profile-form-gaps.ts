@@ -24,7 +24,6 @@ export type GapField =
   | "datasets"
   | "website"
   | "compute_scale"
-  | "track_record"
 
 /** Minimal shape — anything the profile form can hand to gap detection. */
 export interface GapInspectable {
@@ -47,7 +46,6 @@ export interface GapInspectable {
   needs_min_n_subjects: string
   needs_annotation: string
   compute_scale: string
-  track_record: string
   datasets: Array<{
     name: string
     modality: unknown[]
@@ -84,7 +82,6 @@ export function findManualGaps(state: GapInspectable): GapField[] {
     if (!state.needs_min_n_subjects) gaps.push("needs_min_n_subjects")
     if (!state.needs_annotation) gaps.push("needs_annotation")
     if (empty(state.compute_scale)) gaps.push("compute_scale")
-    if (empty(state.track_record)) gaps.push("track_record")
   }
 
   if (showData) {
