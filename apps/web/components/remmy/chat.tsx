@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 import type { PrefillProposal } from "@/lib/llm/prefill"
+import { EXAMPLE_AI_ABOUT } from "@/lib/llm/example-about"
 import { RemmyDraftReview } from "./draft-review"
 
 interface ChatMessage {
@@ -192,9 +193,22 @@ export function RemmyChat({
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-ink-faint">{t("remmy.hint_verify")}</p>
-          <Button type="submit" variant="primary" disabled={busy || Boolean(pending) || input.trim().length === 0}>
-            {busy ? t("remmy.thinking") : t("remmy.send")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {mode === "create" && messages.length <= 2 && (
+              <Button
+                type="button"
+                disabled={busy || Boolean(pending)}
+                onClick={() => {
+                  setInput(EXAMPLE_AI_ABOUT)
+                }}
+              >
+                {t("remmy.load_example")}
+              </Button>
+            )}
+            <Button type="submit" variant="primary" disabled={busy || Boolean(pending) || input.trim().length === 0}>
+              {busy ? t("remmy.thinking") : t("remmy.send")}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

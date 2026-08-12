@@ -18,6 +18,8 @@ export function EnumChips<V extends string>({
   value,
   onChange,
   hint,
+  attention,
+  fieldId,
 }: {
   label: string
   group: string
@@ -25,11 +27,13 @@ export function EnumChips<V extends string>({
   value: V[]
   onChange: (next: V[]) => void
   hint?: string
+  attention?: boolean
+  fieldId?: string
 }) {
   const t = useT()
 
   return (
-    <Field label={label} hint={hint}>
+    <Field label={label} hint={hint} attention={attention} id={fieldId}>
       <div role="group" aria-label={label} className="flex flex-wrap gap-1.5">
         {options.map((option) => {
           const active = value.includes(option)
@@ -57,6 +61,8 @@ export function EnumSelect<V extends string>({
   allowEmpty,
   hint,
   id,
+  attention,
+  fieldId,
 }: {
   label: string
   group: string
@@ -66,11 +72,13 @@ export function EnumSelect<V extends string>({
   allowEmpty?: boolean
   hint?: string
   id?: string
+  attention?: boolean
+  fieldId?: string
 }) {
   const t = useT()
 
   return (
-    <Field label={label} htmlFor={id} hint={hint}>
+    <Field label={label} htmlFor={id} hint={hint} attention={attention} id={fieldId}>
       <Select id={id} value={value} onChange={(e) => onChange(e.target.value as V | "")}>
         {allowEmpty && <option value="">—</option>}
         {options.map((option) => (

@@ -91,16 +91,27 @@ export function Field({
   hint,
   htmlFor,
   required,
+  attention,
+  id,
   children,
 }: {
   label: string
   hint?: string
   htmlFor?: string
   required?: boolean
+  /** Still empty after an LLM draft — ring so the human can finish it. */
+  attention?: boolean
+  id?: string
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div
+      id={id}
+      className={cn(
+        "flex flex-col gap-1.5",
+        attention && "border-2 border-alert bg-alert/5 p-3",
+      )}
+    >
       <label htmlFor={htmlFor} className="text-sm font-semibold uppercase tracking-wide text-ink">
         {label}
         {required ? <span aria-hidden="true"> *</span> : null}

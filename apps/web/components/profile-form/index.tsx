@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   KIND,
@@ -36,7 +36,9 @@ import { Button, Field, Input, Select, Textarea } from "@/components/ui/primitiv
 import { EnumChips, EnumSelect } from "./enum-controls"
 import { DatasetEditor, emptyDataset } from "./dataset-editor"
 import { PrefillBox } from "./prefill-box"
+import { GapsBanner } from "./gaps-banner"
 import type { PrefillProposal } from "@/lib/llm/prefill"
+import { findManualGaps, type GapField } from "@/lib/profile-form-gaps"
 
 /**
  * The profile form — create and edit in one component. Sections appear and
@@ -285,12 +287,15 @@ export function ProfileForm({
   profileId,
   prefillEnabled = false,
   initialProposal,
+  highlightGapsOnMount = false,
 }: {
   initial?: Profile
   profileId?: string
   prefillEnabled?: boolean
   /** Remmy (or paste-prefill) draft already confirmed by the user. */
   initialProposal?: PrefillProposal
+  /** After a Remmy draft is applied, spotlight fields still empty. */
+  highlightGapsOnMount?: boolean
 }) {
   const t = useT()
   const locale = useLocale()
@@ -302,6 +307,7 @@ export function ProfileForm({
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
   const [claimLink, setClaimLink] = useState<string | null>(null)
   const [apiError, setApiError] = useState<ApiError | null>(null)
+  const [spotlightGaps, setSpotlightGaps] = useState(highlightGapsOnMount)
 
   const countryNames = useMemo(() => new Intl.DisplayNames([locale], { type: "region" }), [locale])
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setState((s) => ({ ...s, [key]: value }))
@@ -309,6 +315,27 @@ export function ProfileForm({
   const isCreate = !profileId
   const showDatasets = state.kind === "data_holder" || state.kind === "consortium"
   const showAiFields = state.kind === "ai_team" || state.kind === "consortium"
+
+  const gaps = useMemo(() => (spotlightGaps ? findManualGaps(state) : []), [spotlightGaps, state])
+  const gapSet = useMemo(() => new Set<GapField>(gaps), [gaps])
+  const needs = (key: GapField) => gapSet.has(key)
+
+  function applyDraft(proposal: PrefillProposal) {
+    setState((s) => applyProposal(s, proposal))
+    setSpotlightGaps(true)
+    // Next paint — scroll the checklist into view.
+    queueMicrotask(() => {
+      document.getElementById("form-gaps")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }
+
+  useEffect(() => {
+    if (highlightGapsOnMount && gaps.length > 0) {
+      document.getElementById("form-gaps")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+    // Only on first mount after a Remmy confirm.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -366,7 +393,13 @@ export function ProfileForm({
 
   return (
     <form onSubmit={submit} className="flex max-w-3xl flex-col gap-6">
-      {isCreate && prefillEnabled && <PrefillBox onProposal={(p) => setState((s) => applyProposal(s, p))} />}
+      {isCreate && prefillEnabled && <PrefillBox onProposal={applyDraft} />}
+
+      {spotlightGaps && (
+        <div id="form-gaps">
+          <GapsBanner gaps={gaps} onDismiss={() => setSpotlightGaps(false)} />
+        </div>
+      )}
 
       {apiError && (
         <div role="alert" className="border border-alert p-4 text-alert">
@@ -407,7 +440,7 @@ export function ProfileForm({
         <h2 className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
           {t("form.section_org")}
         </h2>
-        <Field label={t("field.org_name")} htmlFor="org_name" required>
+        <Field label={t("field.org_name")} htmlFor="org_name" required attention={needs("org_name")} id="gap-org_name">
           <Input id="org_name" required maxLength={200} value={state.org_name} onChange={(e) => set("org_name", e.target.value)} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -422,16 +455,16 @@ export function ProfileForm({
             </Select>
           </Field>
         </div>
-        <Field label={t("field.one_liner")} htmlFor="one_liner" hint={t("form.one_liner_hint")} required>
+        <Field label={t("field.one_liner")} htmlFor="one_liner" hint={t("form.one_liner_hint")} required attention={needs("one_liner")} id="gap-one_liner">
           <Input id="one_liner" required maxLength={140} value={state.one_liner} onChange={(e) => set("one_liner", e.target.value)} />
         </Field>
-        <Field label={t("field.summary")} htmlFor="summary" required>
+        <Field label={t("field.summary")} htmlFor="summary" required attention={needs("summary")} id="gap-summary">
           <Textarea id="summary" required rows={4} maxLength={600} value={state.summary} onChange={(e) => set("summary", e.target.value)} />
         </Field>
-        <Field label={t("field.website")} htmlFor="website">
+        <Field label={t("field.website")} htmlFor="website" attention={needs("website")} id="gap-website">
           <Input id="website" type="url" placeholder="https://" value={state.website} onChange={(e) => set("website", e.target.value)} />
         </Field>
-        <EnumChips label={t("field.languages")} group="language" options={LANGUAGE} value={state.languages} onChange={(v) => set("languages", v)} />
+        <EnumChips label={t("field.languages")} group="language" options={LANGUAGE} value={state.languages} onChange={(v) => set("languages", v)} attention={needs("languages")} fieldId="gap-languages" />
       </section>
 
       {/* Application intent. */}
@@ -439,7 +472,7 @@ export function ProfileForm({
         <h2 className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
           {t("form.section_application")}
         </h2>
-        <EnumChips label={t("field.looking_for")} group="looking_for" options={LOOKING_FOR} value={state.looking_for} onChange={(v) => set("looking_for", v)} />
+        <EnumChips label={t("field.looking_for")} group="looking_for" options={LOOKING_FOR} value={state.looking_for} onChange={(v) => set("looking_for", v)} attention={needs("looking_for")} fieldId="gap-looking_for" />
         <div className="grid gap-4 sm:grid-cols-2">
           <EnumSelect label={t("field.application_status")} group="application_status" options={APPLICATION_STATUS} value={state.application_status} onChange={(v) => v && set("application_status", v)} id="application_status" />
           <EnumSelect
@@ -452,16 +485,21 @@ export function ProfileForm({
             id="parallel_public_funding"
           />
         </div>
-        <EnumChips label={t("field.attending")} group="attending" options={ATTENDING} value={state.attending} onChange={(v) => set("attending", v)} />
+        <EnumChips label={t("field.attending")} group="attending" options={ATTENDING} value={state.attending} onChange={(v) => set("attending", v)} attention={needs("attending")} fieldId="gap-attending" />
       </section>
 
       {/* Datasets. */}
       {showDatasets && (
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4" id="gap-datasets">
           <h2 className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
             {t("form.section_datasets")}
           </h2>
           <p className="text-sm text-ink-soft">{t("form.datasets_hint")}</p>
+          {needs("datasets") && (
+            <p className="border border-alert bg-alert/5 px-3 py-2 text-sm font-semibold text-alert">
+              {t("form.gaps_datasets_nudge")}
+            </p>
+          )}
           {state.datasets.map((dataset, i) => (
             <DatasetEditor
               key={i}
@@ -484,9 +522,9 @@ export function ProfileForm({
           <h2 className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
             {t("form.section_ai")}
           </h2>
-          <EnumChips label={t("field.methods")} group="methods" options={METHODS} value={state.methods} onChange={(v) => set("methods", v)} />
-          <EnumChips label={t("field.application_target")} group="application_target" options={APPLICATION_TARGET} value={state.application_target} onChange={(v) => set("application_target", v)} />
-          <EnumChips label={t("field.domain_expertise")} group="disease_area" options={DISEASE_AREA} value={state.domain_expertise} onChange={(v) => set("domain_expertise", v)} />
+          <EnumChips label={t("field.methods")} group="methods" options={METHODS} value={state.methods} onChange={(v) => set("methods", v)} attention={needs("methods")} fieldId="gap-methods" />
+          <EnumChips label={t("field.application_target")} group="application_target" options={APPLICATION_TARGET} value={state.application_target} onChange={(v) => set("application_target", v)} attention={needs("application_target")} fieldId="gap-application_target" />
+          <EnumChips label={t("field.domain_expertise")} group="disease_area" options={DISEASE_AREA} value={state.domain_expertise} onChange={(v) => set("domain_expertise", v)} attention={needs("domain_expertise")} fieldId="gap-domain_expertise" />
           <EnumChips
             label={t("field.privacy_capability")}
             group="privacy_capability"
@@ -494,28 +532,30 @@ export function ProfileForm({
             value={state.privacy_capability}
             onChange={(v) => set("privacy_capability", v)}
             hint={t("form.privacy_capability_hint")}
+            attention={needs("privacy_capability")}
+            fieldId="gap-privacy_capability"
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <EnumSelect label={t("field.clinical_partner")} group="clinical_partner" options={CLINICAL_PARTNER} value={state.clinical_partner} onChange={(v) => v && set("clinical_partner", v)} id="clinical_partner" />
             <EnumSelect label={t("field.compute")} group="compute" options={COMPUTE} value={state.compute} onChange={(v) => v && set("compute", v)} id="compute" />
-            <Field label={t("field.compute_scale")} htmlFor="compute_scale">
+            <Field label={t("field.compute_scale")} htmlFor="compute_scale" attention={needs("compute_scale")} id="gap-compute_scale">
               <Input id="compute_scale" maxLength={120} placeholder="8× H100" value={state.compute_scale} onChange={(e) => set("compute_scale", e.target.value)} />
             </Field>
             <EnumSelect label={t("field.team_size")} group="team_size" options={TEAM_SIZE} value={state.team_size} onChange={(v) => v && set("team_size", v)} id="team_size" />
           </div>
           <EnumChips label={t("field.regulatory_experience")} group="regulatory_experience" options={REGULATORY_EXPERIENCE} value={state.regulatory_experience} onChange={(v) => set("regulatory_experience", v)} />
-          <Field label={t("field.track_record")} htmlFor="track_record" hint={t("form.track_record_hint")}>
+          <Field label={t("field.track_record")} htmlFor="track_record" hint={t("form.track_record_hint")} attention={needs("track_record")} id="gap-track_record">
             <Textarea id="track_record" rows={3} value={state.track_record} onChange={(e) => set("track_record", e.target.value)} />
           </Field>
 
           <h3 className="mt-2 border-b border-rule pb-1 font-listing text-lg font-bold uppercase">
             {t("form.section_needs")}
           </h3>
-          <EnumChips label={t("field.modality")} group="modality" options={MODALITY} value={state.needs_modality} onChange={(v) => set("needs_modality", v)} />
-          <EnumChips label={t("field.disease_area")} group="disease_area" options={DISEASE_AREA} value={state.needs_disease_area} onChange={(v) => set("needs_disease_area", v)} />
+          <EnumChips label={t("field.modality")} group="modality" options={MODALITY} value={state.needs_modality} onChange={(v) => set("needs_modality", v)} attention={needs("needs_modality")} fieldId="gap-needs_modality" />
+          <EnumChips label={t("field.disease_area")} group="disease_area" options={DISEASE_AREA} value={state.needs_disease_area} onChange={(v) => set("needs_disease_area", v)} attention={needs("needs_disease_area")} fieldId="gap-needs_disease_area" />
           <div className="grid gap-4 sm:grid-cols-2">
-            <EnumSelect label={t("field.min_n_subjects")} group="n_subjects" options={N_SUBJECTS} value={state.needs_min_n_subjects} onChange={(v) => set("needs_min_n_subjects", v)} allowEmpty id="needs_min_n" />
-            <EnumSelect label={t("field.annotation_required")} group="annotation" options={ANNOTATION} value={state.needs_annotation} onChange={(v) => set("needs_annotation", v)} allowEmpty id="needs_annotation" />
+            <EnumSelect label={t("field.min_n_subjects")} group="n_subjects" options={N_SUBJECTS} value={state.needs_min_n_subjects} onChange={(v) => set("needs_min_n_subjects", v)} allowEmpty id="needs_min_n" attention={needs("needs_min_n_subjects")} fieldId="gap-needs_min_n_subjects" />
+            <EnumSelect label={t("field.annotation_required")} group="annotation" options={ANNOTATION} value={state.needs_annotation} onChange={(v) => set("needs_annotation", v)} allowEmpty id="needs_annotation" attention={needs("needs_annotation")} fieldId="gap-needs_annotation" />
           </div>
           <EnumChips label={t("field.linkage_required")} group="linkage" options={LINKAGE} value={state.needs_linkage} onChange={(v) => set("needs_linkage", v)} />
           <EnumChips label={t("field.standards_preferred")} group="standards" options={STANDARDS} value={state.needs_standards} onChange={(v) => set("needs_standards", v)} />
@@ -531,10 +571,10 @@ export function ProfileForm({
         <h2 className="font-listing text-xl font-bold uppercase">{t("form.section_contact")}</h2>
         <p className="text-sm text-ink-soft">{t("form.contact_privacy_note")}</p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("field.contact_name")} htmlFor="contact_name" required>
+          <Field label={t("field.contact_name")} htmlFor="contact_name" required attention={needs("contact_name")} id="gap-contact_name">
             <Input id="contact_name" required maxLength={160} value={state.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
           </Field>
-          <Field label={t("field.contact_email")} htmlFor="contact_email" required>
+          <Field label={t("field.contact_email")} htmlFor="contact_email" required attention={needs("contact_email")} id="gap-contact_email">
             <Input id="contact_email" type="email" required value={state.contact_email} onChange={(e) => set("contact_email", e.target.value)} />
           </Field>
           <Field label={t("field.contact_role")} htmlFor="contact_role">
