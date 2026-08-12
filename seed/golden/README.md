@@ -14,7 +14,7 @@ These ten profiles are not here to look good. Roughly half exist to break someth
 | 2 | CHR Garonne ↔ Fédération Neuro-IA | `federated_no_movement` must score FULL marks against a federated-capable team, not be penalised as a restriction |
 | 3 | CHR Garonne (French only) | i18n end-to-end: must be discoverable and legible to a German-speaking user |
 | 4 | Aurora Registry (`parallel_public_funding: unsure`) | Soft blocker with a resolution prompt — not a hard block, not a silent rank drop |
-| 5 | Aurora Registry (`available_from: 2027-01-01`) | Availability postdates Stage 1 start. The scorer has no factor for this. Decide whether to add one. |
+| 5 | Aurora Registry (`available_from: 2027-01-01`) | Availability postdates Stage 1 start. Soft blocker only (not a weighted factor) — see root [`OPEN_QUESTIONS.md`](../OPEN_QUESTIONS.md). |
 | 6 | ISEA Alpenraum (country CH) | Switzerland is EFTA and therefore **eligible** |
 | 7 | Sentinel Health (country GB) | The UK is **eligible**. Getting this wrong hides much of Europe's best epidemiology talent. |
 | 8 | Aleph Genomics (country IL) | Israel is **eligible**. Counter-intuitive, and in the rules. |
@@ -37,7 +37,8 @@ lead.
 
 ## Fields still to confirm with SPRIND
 
-Ask for these in the outreach email rather than guessing:
+Ask for these in the outreach email rather than guessing. Speaking notes and
+current product defaults live in the root [`OPEN_QUESTIONS.md`](../../OPEN_QUESTIONS.md):
 
 - Which of these fields SPRIND needs for its own eligibility pre-screening. If the profile schema already collects what the jury needs, the platform stops being a favour and becomes infrastructure.
 - Whether they want `application_status` visible publicly or only to SPRIND. Public visibility helps matching; it also reveals competitive intent, and some applicants will refuse to state it.
