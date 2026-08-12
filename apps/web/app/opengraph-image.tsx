@@ -11,13 +11,13 @@ const ORIGIN = process.env.APP_URL ?? "https://matchmaker-sprind.vercel.app"
 /** Ink-on-paper card for Slack, email, and social link previews. */
 export default async function OpenGraphImage() {
   const assetDir = join(process.cwd(), "public/partners")
-  const [sprindSvg, foresightSvg] = await Promise.all([
+  const [sprindSvg, foresightPng] = await Promise.all([
     readFile(join(assetDir, "sprind.svg")),
-    readFile(join(assetDir, "foresight.svg")),
+    readFile(join(assetDir, "foresight.png")),
   ])
 
   const sprindSrc = `data:image/svg+xml;base64,${Buffer.from(sprindSvg).toString("base64")}`
-  const foresightSrc = `data:image/svg+xml;base64,${Buffer.from(foresightSvg).toString("base64")}`
+  const foresightSrc = `data:image/png;base64,${Buffer.from(foresightPng).toString("base64")}`
 
   return new ImageResponse(
     (

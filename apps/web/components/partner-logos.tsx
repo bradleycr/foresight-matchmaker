@@ -33,10 +33,10 @@ export function PartnerLogos({ className = "" }: { className?: string }) {
           rel="noopener noreferrer"
           className="inline-flex opacity-80 transition-opacity hover:opacity-100"
         >
-          {/* Official Foresight Institute wordmark (foresight.org). */}
+          {/* Official black wordmark — foresight.org/wp-content/uploads/2025/05/logo.png */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/partners/foresight.svg"
+            src="/partners/foresight.png"
             alt="Foresight Institute"
             className="h-7 w-auto sm:h-8"
             width={140}
