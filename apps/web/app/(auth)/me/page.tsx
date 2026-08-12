@@ -3,7 +3,8 @@ import type { Profile } from "@rmm/schema"
 import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
-import { ProfileForm } from "@/components/profile-form"
+import { llmEnabled } from "@/lib/llm/client"
+import { MeEditor } from "@/components/remmy/me-editor"
 import { OutcomeReport } from "@/components/outcome-report"
 import { SignOutButton } from "@/components/sign-out-button"
 
@@ -48,7 +49,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
       <OutcomeReport profileId={profile.id} initial={body.joint_application ?? null} />
 
       <div className="mt-8">
-        <ProfileForm initial={profile} profileId={profile.id} />
+        <MeEditor profile={profile} remmyEnabled={llmEnabled()} />
       </div>
     </div>
   )

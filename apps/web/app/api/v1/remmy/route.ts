@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { ok, badRequest, unauthorized, zodError } from "@/lib/api/respond"
+import { getSession } from "@/lib/auth/session"
+import { rateLimit } from "@/lib/auth/rate-limit"
+import { llmEnabled } from "@/lib/llm/client"
+import { remmyTurn } from "@/lib/llm/remmy"
+import { logEvent } from "@/lib/db/events"
+
+export const dynamic = "force-dynamic"
+
+const messageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1).max(4000),
+})
+
+const bodySchema = z.object({
+  mode: z.enum(["create", "update"]).default("create"),
+  messages: z.array(messageSchema).min(1).max(24),
+  current_profile: z.record(z.unknown()).optional().nullable(),
+})
+
+/**
+ * POST /api/v1/remmy — one conversational turn with Remmy.
+ *
+ * Never writes a profile. Returns a reply and optionally a draft proposal
+ * that the client must show for human confirmation before applying to the form.
+ */
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  if (!llmEnabled()) {
+    return NextResponse.json(
+      { error: "Remmy is not available on this deployment. Use the traditional form." },
+      { status: 503 },
+    )
+  }
+
+  const parsed = bodySchema.safeParse(await req.json().catch(() => null))
+  if (!parsed.success) return zodError(parsed.error)
+
+  // Update mode carries the owner's profile into the model — require a session.
+  if (parsed.data.mode === "update") {
+    const session = await getSession()
+    if (!session) return unauthorized()
+  }
+
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  const limited = rateLimit(`remmy:${ip}`, { limit: 30, windowMs: 15 * 60 * 1000 })
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many Remmy turns. Wait a few minutes, or use the traditional form." },
+      { status: 429 },
+    )
+  }
+
+  const last = parsed.data.messages[parsed.data.messages.length - 1]
+  if (last.role !== "user") {
+    return badRequest("The last message must be from the user.")
+  }
+
+  const turn = await remmyTurn({
+    mode: parsed.data.mode,
+    messages: parsed.data.messages,
+    currentProfile: parsed.data.mode === "update" ? parsed.data.current_profile ?? null : null,
+  })
+
+  if (!turn) {
+    return badRequest("Remmy could not respond just now. Try again, or use the traditional form.")
+  }
+
+  logEvent("remmy_turn", null, {
+    mode: parsed.data.mode,
+    ready_for_review: turn.ready_for_review,
+  })
+
+  return ok(turn)
+}

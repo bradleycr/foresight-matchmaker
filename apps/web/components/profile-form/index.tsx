@@ -284,15 +284,21 @@ export function ProfileForm({
   initial,
   profileId,
   prefillEnabled = false,
+  initialProposal,
 }: {
   initial?: Profile
   profileId?: string
   prefillEnabled?: boolean
+  /** Remmy (or paste-prefill) draft already confirmed by the user. */
+  initialProposal?: PrefillProposal
 }) {
   const t = useT()
   const locale = useLocale()
   const router = useRouter()
-  const [state, setState] = useState<FormState>(() => (initial ? stateFromProfile(initial) : blankState()))
+  const [state, setState] = useState<FormState>(() => {
+    const base = initial ? stateFromProfile(initial) : blankState()
+    return initialProposal ? applyProposal(base, initialProposal) : base
+  })
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
   const [claimLink, setClaimLink] = useState<string | null>(null)
   const [apiError, setApiError] = useState<ApiError | null>(null)

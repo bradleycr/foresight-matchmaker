@@ -1,12 +1,22 @@
 # AI assistant — living plan
 
-Status: **plan only**. Do not implement on `main` until after the Recoding Medicine
-stakeholder demo. Spike on a branch.
+Status: **Remmy onboarding shipped** (create + update chat, mandatory draft review).
+Directory Q&A / generative shortlist remain future work.
 
 Related: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md), [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md),
 YCluster inference gateway ([docs](https://gitlab.com/devrandom01/ycluster/-/blob/main/docs/operations/inference.md)).
 
 ---
+
+## Shipped: Remmy (profile create / update)
+
+- `POST /api/v1/remmy` — conversational turn; **never writes the DB**.
+- UI: `/register` chooser (Remmy vs form); `/me` optional “Update with Remmy”.
+- Mandatory **draft review** card (confirm / revise / discard) before applying to `ProfileForm`.
+- Form submit / Save remains the only publish path.
+- Update mode requires a session; IP rate limit on the route.
+
+Do not auto-publish from chat. Do not skip the review card.
 
 ## Goal
 

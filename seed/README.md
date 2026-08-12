@@ -1,24 +1,27 @@
 # Seed data
 
-**Every record in this directory is fabricated.**
+**Almost every record in this directory is fabricated.**
 
-There is **no real personal data** here. Organisation names, people, datasets,
-websites, and email addresses are all invented for demonstration and testing.
-All contact emails use the reserved `.invalid` TLD and can never route mail. Any
-resemblance to a real organisation is coincidental.
+Organisation names, people, datasets, websites, and email addresses under
+`golden/` and the bulk JSON files are invented for demonstration and testing.
+Those contact emails use the reserved `.invalid` TLD and can never route mail.
+
+The exception is `operators/` — real QA / demo logins (see that folder’s README).
+Any other resemblance to a real organisation is coincidental.
 
 ## Layout
 
 | Path | Role |
 |---|---|
 | `golden/` | Hand-authored test matrix (10 profiles). Source of truth for matcher assertions. |
+| `operators/` | Real QA / demo logins (e.g. `bradley@foresight.org`). Not part of the matcher assertions. |
 | `data-holders.json` · `ai-teams.json` · `consortia.json` | Generated bulk directory filler (108 profiles: a hand-authored core plus a larger combinatorially-generated set, spread across 33 HQ-eligible countries — plus two ineligible ones to exercise `partner_only` — and every disease area). |
 | `golden/README.md` | What each golden profile is designed to catch. |
 
-118 profiles total load into the directory: golden first, then bulk.
+~119 profiles total load into the directory: golden → operators → bulk.
 
-The loader (`pnpm db:seed`) upserts **golden first**, then bulk, skipping any
-bulk slug that collides with a golden profile.
+The loader (`pnpm db:seed`) upserts **golden first**, then operators, then bulk,
+skipping any slug already claimed earlier.
 
 ## Golden test matrix
 

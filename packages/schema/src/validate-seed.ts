@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
+import { finalizeGolden } from "./finalize-golden"
 import { profileSchema } from "./profile"
 
 /**
@@ -13,12 +14,16 @@ import { profileSchema } from "./profile"
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const SEED_DIR = resolve(__dirname, "../../../seed")
 
-const files = ["data-holders.json", "ai-teams.json", "consortia.json"]
+const bulkFiles = ["data-holders.json", "ai-teams.json", "consortia.json"]
+const finalizedDirs = [
+  { label: "golden", files: ["data-holders.json", "ai-teams.json"] },
+  { label: "operators", files: ["ai-teams.json", "data-holders.json"] },
+] as const
 
 let total = 0
 let failures = 0
 
-for (const file of files) {
+for (const file of bulkFiles) {
   const path = resolve(SEED_DIR, file)
   const records = JSON.parse(readFileSync(path, "utf8")) as unknown[]
   for (const [i, record] of records.entries()) {
@@ -28,6 +33,24 @@ for (const file of files) {
       failures++
       // eslint-disable-next-line no-console
       console.error(`FAIL ${file}[${i}]:`, JSON.stringify(result.error.issues, null, 2))
+    }
+  }
+}
+
+for (const { label, files } of finalizedDirs) {
+  for (const file of files) {
+    const path = resolve(SEED_DIR, label, file)
+    if (!existsSync(path)) continue
+    const records = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>[]
+    for (const [i, record] of records.entries()) {
+      total++
+      try {
+        finalizeGolden(record)
+      } catch (e) {
+        failures++
+        // eslint-disable-next-line no-console
+        console.error(`FAIL ${label}/${file}[${i}]:`, e)
+      }
     }
   }
 }

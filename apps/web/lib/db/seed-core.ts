@@ -9,14 +9,13 @@ import { recomputeAllMatches } from "./matches"
  * Seeding, shared between the CLI (`pnpm db:seed`) and the container
  * bootstrap (instrumentation.ts with SEED_ON_EMPTY=true).
  *
- * Order matters: the hand-authored golden fixtures in seed/golden/ load
- * first (they are the matcher test matrix). The generated bulk in seed/
- * fills out the directory afterwards, skipping any slug already claimed
- * by a golden profile.
+ * Order: golden (matcher test matrix) → operators (real QA logins) →
+ * bulk filler. Later stages skip any slug already claimed earlier.
  */
 
 const BULK_FILES = ["data-holders.json", "ai-teams.json", "consortia.json"] as const
 const GOLDEN_FILES = ["data-holders.json", "ai-teams.json"] as const
+const OPERATOR_FILES = ["ai-teams.json", "data-holders.json"] as const
 
 /** Walk up from cwd until we find a directory containing seed/. */
 export function findSeedDir(): string {
@@ -51,13 +50,14 @@ function upsertProfile(profile: Profile): void {
   getDb().insert(profiles).values(row).onConflictDoUpdate({ target: profiles.id, set: row }).run()
 }
 
-function loadGolden(seedDir: string): Profile[] {
-  const goldenDir = path.join(seedDir, "golden")
-  if (!fs.existsSync(goldenDir)) return []
+/** Load incomplete fixtures (golden / operators) via finalizeGolden. */
+function loadFinalizedDir(seedDir: string, subdir: string, files: readonly string[]): Profile[] {
+  const dir = path.join(seedDir, subdir)
+  if (!fs.existsSync(dir)) return []
 
   const out: Profile[] = []
-  for (const file of GOLDEN_FILES) {
-    const filePath = path.join(goldenDir, file)
+  for (const file of files) {
+    const filePath = path.join(dir, file)
     if (!fs.existsSync(filePath)) continue
     // turbopackIgnore: seed lives outside the Next bundle.
     const records = JSON.parse(fs.readFileSync(/* turbopackIgnore: true */ filePath, "utf8")) as Record<
@@ -89,14 +89,15 @@ function loadBulk(seedDir: string, skipSlugs: Set<string>): Profile[] {
 
 /** Validate and upsert every seed profile, then rebuild the match cache. */
 export function seedFromDirectory(seedDir: string): number {
-  const golden = loadGolden(seedDir)
-  const skip = new Set(golden.map((p) => p.slug))
+  const golden = loadFinalizedDir(seedDir, "golden", GOLDEN_FILES)
+  const operators = loadFinalizedDir(seedDir, "operators", OPERATOR_FILES)
+  const skip = new Set([...golden, ...operators].map((p) => p.slug))
   const bulk = loadBulk(seedDir, skip)
 
-  for (const profile of [...golden, ...bulk]) upsertProfile(profile)
+  for (const profile of [...golden, ...operators, ...bulk]) upsertProfile(profile)
 
   recomputeAllMatches()
-  return golden.length + bulk.length
+  return golden.length + operators.length + bulk.length
 }
 
 /**

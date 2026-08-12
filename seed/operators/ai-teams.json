@@ -1,0 +1,40 @@
+[
+  {
+    "slug": "foresight-bradley",
+    "kind": "ai_team",
+    "org_name": "Foresight Institute — Matchmaker Ops",
+    "org_type": "research_institute",
+    "country": "DE",
+    "one_liner": "Operator test account for end-to-end matchmaker QA (sign-in, matches, intros).",
+    "summary": "This is a real operator login for local and demo testing. It is deliberately a well-formed AI team so the directory, shortlist, and intro flows can be exercised under bradley@foresight.org without relying on synthetic .invalid addresses.",
+    "website": "https://foresight.org",
+    "languages": ["en", "de"],
+    "looking_for": ["dataset_access", "clinical_partner"],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": ["webinar_2026_08_20", "remote_only"],
+    "open_to_intros": true,
+    "visibility": "public",
+    "contact_name": "Bradley Royes",
+    "contact_email": "bradley@foresight.org",
+    "contact_role": "Operator",
+    "methods": ["computer_vision", "foundation_models", "multimodal"],
+    "application_target": ["diagnostics", "biomarker_discovery", "prognosis_risk"],
+    "domain_expertise": ["oncology", "multi_domain"],
+    "clinical_partner": "need",
+    "regulatory_experience": ["gdpr_dpia"],
+    "compute": "cloud_budget",
+    "compute_scale": "Cloud GPU budget for fine-tuning",
+    "privacy_capability": ["can_work_in_tre", "federated_capable"],
+    "team_size": "2_5",
+    "track_record": ["https://foresight.org"],
+    "data_needs": {
+      "modality": ["imaging_histopath", "ehr_structured"],
+      "disease_area": ["oncology"],
+      "min_n_subjects": "1k_10k",
+      "annotation_required": "outcome_linked",
+      "linkage_required": ["outcomes", "mortality"],
+      "standards_preferred": ["dicom", "fhir"]
+    }
+  }
+]

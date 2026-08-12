@@ -19,6 +19,7 @@ export type EventType =
   | "joint_application_reported"
   | "magic_link_issued"
   | "prefill_used"
+  | "remmy_turn"
 
 export function logEvent(type: EventType, actorId: string | null, payload: Record<string, unknown>): void {
   getDb()
