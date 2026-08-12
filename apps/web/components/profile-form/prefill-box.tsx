@@ -4,11 +4,10 @@ import { useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 import type { PrefillProposal } from "@/lib/llm/prefill"
-import { EXAMPLE_AI_ABOUT } from "@/lib/llm/example-about"
 
 /**
- * Paste an About page (or any prose) → structured draft on the form.
- * Includes a one-click example for demo rehearsals.
+ * Paste an About page (or any prose) → structured draft on the form via
+ * the same schema-first extractor Remmy uses after chat.
  */
 export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) => void }) {
   const t = useT()
@@ -16,13 +15,12 @@ export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) =>
   const [status, setStatus] = useState<"idle" | "busy" | "applied" | "error">("idle")
   const [error, setError] = useState<string | null>(null)
 
-  async function propose(source?: string) {
-    const body = (source ?? text).trim()
+  async function propose() {
+    const body = text.trim()
     if (body.length < 40) return
 
     setStatus("busy")
     setError(null)
-    if (source) setText(source)
 
     const res = await fetch("/api/v1/prefill", {
       method: "POST",
@@ -56,15 +54,13 @@ export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) =>
         className="mt-3 bg-paper"
       />
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Button type="button" variant="primary" disabled={status === "busy" || text.trim().length < 40} onClick={() => void propose()}>
-          {status === "busy" ? t("form.prefill_busy") : t("form.prefill_button")}
-        </Button>
         <Button
           type="button"
-          disabled={status === "busy"}
-          onClick={() => void propose(EXAMPLE_AI_ABOUT)}
+          variant="primary"
+          disabled={status === "busy" || text.trim().length < 40}
+          onClick={() => void propose()}
         >
-          {t("form.prefill_example")}
+          {status === "busy" ? t("form.prefill_busy") : t("form.prefill_button")}
         </Button>
         {status === "applied" && <span className="text-sm font-semibold">{t("form.prefill_applied")}</span>}
         {error && (

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 import type { PrefillProposal } from "@/lib/llm/prefill"
-import { EXAMPLE_AI_ABOUT } from "@/lib/llm/example-about"
+import { proposalIsSubstantial, summaryFromProposal, transcriptFromMessages } from "@/lib/llm/proposal-utils"
 import { RemmyDraftReview } from "./draft-review"
 
 interface ChatMessage {
@@ -12,15 +12,13 @@ interface ChatMessage {
   content: string
 }
 
-function proposalLooksFilled(p: PrefillProposal): boolean {
-  return Boolean(p.org_name?.trim() || p.one_liner?.trim() || p.summary?.trim())
-}
+const LONG_PASTE_CHARS = 400
 
 /**
- * Remmy chat — create or update a profile by conversation.
- * Drafts require an explicit confirmation card before the parent applies them.
- * "Fill form from chat" always synthesises a proposal from the conversation
- * so answers are never dropped when leaving chat.
+ * Remmy chat — hybrid conversational intake:
+ * 1. Remmy interviews (one question at a time).
+ * 2. Schema extractor (/api/v1/prefill) maps the transcript → form fields.
+ * 3. Human confirms the review card before the form is filled.
  */
 export function RemmyChat({
   mode,
@@ -31,7 +29,6 @@ export function RemmyChat({
   mode: "create" | "update"
   currentProfile?: Record<string, unknown> | null
   onDraftConfirmed: (proposal: PrefillProposal) => void
-  /** Blank form — no chat transfer. */
   onUseFormInstead: () => void
 }) {
   const t = useT()
@@ -41,11 +38,6 @@ export function RemmyChat({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState<{
-    proposal: PrefillProposal
-    summary: string[]
-  } | null>(null)
-  /** Best proposal seen this chat — even before ready_for_review. */
-  const [latestProposal, setLatestProposal] = useState<{
     proposal: PrefillProposal
     summary: string[]
   } | null>(null)
@@ -66,28 +58,24 @@ export function RemmyChat({
 
   const userTurns = messages.filter((m) => m.role === "user").length
 
-  async function callRemmy(nextMessages: ChatMessage[], forceDraft = false) {
-    const res = await fetch("/api/v1/remmy", {
+  async function extractDraft(fromMessages: ChatMessage[], narrativeSummary: string[] = []) {
+    const transcript = transcriptFromMessages(fromMessages)
+    if (transcript.length < 40) return null
+
+    const res = await fetch("/api/v1/prefill", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mode,
-        messages: nextMessages,
-        current_profile: mode === "update" ? currentProfile ?? null : null,
-        force_draft: forceDraft,
-      }),
+      body: JSON.stringify({ text: transcript }),
     })
 
-    if (!res.ok) {
-      const body = (await res.json().catch(() => null)) as { error?: string } | null
-      throw new Error(body?.error ?? t("remmy.error"))
-    }
+    if (!res.ok) return null
 
-    return (await res.json()) as {
-      reply: string
-      ready_for_review: boolean
-      draft_summary: string[]
-      proposal: PrefillProposal | null
+    const body = (await res.json()) as { proposal: PrefillProposal }
+    if (!proposalIsSubstantial(body.proposal)) return null
+
+    return {
+      proposal: body.proposal,
+      summary: narrativeSummary.length > 0 ? narrativeSummary : summaryFromProposal(body.proposal),
     }
   }
 
@@ -101,14 +89,52 @@ export function RemmyChat({
     setBusy(true)
     setError(null)
 
-    try {
-      const turn = await callRemmy(nextMessages)
-      setMessages((m) => [...m, { role: "assistant", content: turn.reply }])
+    const longPaste = trimmed.length >= LONG_PASTE_CHARS
 
-      if (turn.proposal) {
-        const pack = { proposal: turn.proposal, summary: turn.draft_summary ?? [] }
-        setLatestProposal(pack)
-        if (turn.ready_for_review) setPending(pack)
+    try {
+      if (longPaste) {
+        const draft = await extractDraft(nextMessages)
+        if (draft) {
+          setMessages((m) => [
+            ...m,
+            {
+              role: "assistant",
+              content: t("remmy.paste_ready"),
+            },
+          ])
+          setPending(draft)
+          return
+        }
+      }
+
+      const res = await fetch("/api/v1/remmy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode,
+          messages: nextMessages,
+          current_profile: mode === "update" ? currentProfile ?? null : null,
+        }),
+      })
+
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null
+        throw new Error(body?.error ?? t("remmy.error"))
+      }
+
+      const turn = (await res.json()) as {
+        reply: string
+        ready_for_review: boolean
+        draft_summary: string[]
+      }
+
+      const withReply: ChatMessage[] = [...nextMessages, { role: "assistant", content: turn.reply }]
+      setMessages(withReply)
+
+      if (turn.ready_for_review) {
+        const draft = await extractDraft(withReply, turn.draft_summary)
+        if (draft) setPending(draft)
+        else setError(t("remmy.fill_failed"))
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("remmy.error"))
@@ -117,50 +143,12 @@ export function RemmyChat({
     }
   }
 
-  /**
-   * Transfer chat → form. Prefer the dedicated prefill extractor on the
-   * user's messages (reliable for About-page pastes). Fall back to any
-   * Remmy proposal already on hand, then force_draft.
-   */
   async function fillFormFromChat() {
     if (busy) return
 
-    const userBlob = messages
-      .filter((m) => m.role === "user")
-      .map((m) => m.content)
-      .join("\n\n")
-      .trim()
-
-    if (pending?.proposal && proposalLooksFilled(pending.proposal)) {
+    if (pending?.proposal) {
       onDraftConfirmed(pending.proposal)
       return
-    }
-    if (latestProposal?.proposal && proposalLooksFilled(latestProposal.proposal)) {
-      onDraftConfirmed(latestProposal.proposal)
-      return
-    }
-
-    if (userBlob.length >= 40) {
-      setBusy(true)
-      setError(null)
-      try {
-        const res = await fetch("/api/v1/prefill", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: userBlob }),
-        })
-        if (res.ok) {
-          const body = (await res.json()) as { proposal: PrefillProposal }
-          if (body.proposal && proposalLooksFilled(body.proposal)) {
-            onDraftConfirmed(body.proposal)
-            return
-          }
-        }
-      } catch {
-        // fall through to Remmy force_draft
-      } finally {
-        setBusy(false)
-      }
     }
 
     if (userTurns === 0) {
@@ -171,15 +159,12 @@ export function RemmyChat({
     setBusy(true)
     setError(null)
     try {
-      const turn = await callRemmy(messages, true)
-      setMessages((m) => [...m, { role: "assistant", content: turn.reply }])
-      if (turn.proposal && proposalLooksFilled(turn.proposal)) {
-        onDraftConfirmed(turn.proposal)
+      const draft = await extractDraft(messages)
+      if (draft) {
+        setPending(draft)
         return
       }
       setError(t("remmy.fill_failed"))
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t("remmy.fill_failed"))
     } finally {
       setBusy(false)
     }
@@ -202,7 +187,7 @@ export function RemmyChat({
             type="button"
             variant="primary"
             className="text-sm"
-            disabled={busy}
+            disabled={busy || userTurns === 0}
             onClick={() => void fillFormFromChat()}
           >
             {busy ? t("remmy.thinking") : t("remmy.fill_form")}
@@ -242,9 +227,8 @@ export function RemmyChat({
             proposal={pending.proposal}
             summary={pending.summary}
             onConfirm={() => {
-              const draft = pending.proposal
+              onDraftConfirmed(pending.proposal)
               setPending(null)
-              onDraftConfirmed(draft)
             }}
             onRevise={() => {
               setPending(null)
@@ -285,20 +269,9 @@ export function RemmyChat({
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-ink-faint">{t("remmy.hint_verify")}</p>
-          <div className="flex flex-wrap gap-2">
-            {mode === "create" && messages.length <= 2 && (
-              <Button
-                type="button"
-                disabled={busy || Boolean(pending)}
-                onClick={() => setInput(EXAMPLE_AI_ABOUT)}
-              >
-                {t("remmy.load_example")}
-              </Button>
-            )}
-            <Button type="submit" variant="primary" disabled={busy || Boolean(pending) || input.trim().length === 0}>
-              {busy ? t("remmy.thinking") : t("remmy.send")}
-            </Button>
-          </div>
+          <Button type="submit" variant="primary" disabled={busy || Boolean(pending) || input.trim().length === 0}>
+            {busy ? t("remmy.thinking") : t("remmy.send")}
+          </Button>
         </div>
       </form>
     </div>

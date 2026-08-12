@@ -25,27 +25,20 @@ import {
   YES_NO_UNSURE,
 } from "@rmm/schema"
 import { complete } from "./client"
-import { EXAMPLE_AI_PROPOSAL, matchesExampleAiAbout, proposalIsSubstantial } from "./example-about"
+import { extractJsonObject } from "./json"
 
 /**
- * LLM profile pre-fill (master prompt §8.1): the user pastes a paragraph of
- * prose, the model proposes structured fields, and the user reviews every
- * one of them in the form before saving. Nothing is ever auto-published.
+ * Schema-first profile extraction — the single structured-output path.
  *
- * The model's output is treated as untrusted input: every field passes
- * through a tolerant Zod schema that silently DROPS anything invalid —
- * a wrong enum value or a hallucinated key degrades the proposal, never
- * the request.
+ * Chat (Remmy) collects facts; this module maps prose → PrefillProposal.
+ * Output is validated with a tolerant Zod schema; invalid enum values are
+ * dropped, never fatal. Nothing is published until the human submits the form.
  */
 
-// --- tolerant parsing helpers ----------------------------------------------
-
-/** A single enum value; anything invalid becomes undefined. */
 function loose<T extends readonly [string, ...string[]]>(values: T) {
   return z.enum(values).optional().catch(undefined)
 }
 
-/** An enum array; invalid members are filtered out, not fatal. */
 function looseArray<T extends readonly [string, ...string[]]>(values: T) {
   const allowed = new Set<string>(values)
   return z.preprocess(
@@ -122,21 +115,19 @@ export const prefillProposalSchema = z.object({
 
 export type PrefillProposal = z.infer<typeof prefillProposalSchema>
 
-// --- prompt -----------------------------------------------------------------
+const EXTRACT_SYSTEM_PROMPT = `You extract a structured organisation profile from free text, for a directory pairing European health-data holders with AI/ML teams.
 
-const SYSTEM_PROMPT = `You extract a structured organisation profile from free text, for a directory pairing European health-data holders with AI/ML teams.
+Return ONLY a JSON object matching the profile schema. Include a field ONLY when the text clearly supports it — omit anything uncertain. Never invent contact details, subject counts, or ethics status.
 
-Return ONLY a JSON object. Include a field ONLY when the text clearly supports it — omit anything you are not sure about. Never invent facts, numbers, or contact details.
-
-Allowed values (use these EXACT strings):
+Allowed enum values (use EXACT strings):
 kind: ${KIND.join(", ")}
 org_type: ${ORG_TYPE.join(", ")}
-country: ISO 3166-1 alpha-2 code (e.g. DE, FR)
+country: ISO 3166-1 alpha-2 (e.g. DE, FR)
 languages[]: ${LANGUAGE.join(", ")}
 looking_for[]: ${LOOKING_FOR.join(", ")}
 methods[]: ${METHODS.join(", ")}
 application_target[]: ${APPLICATION_TARGET.join(", ")}
-domain_expertise[] and disease_area[]: ${DISEASE_AREA.join(", ")}
+domain_expertise[] / disease_area[]: ${DISEASE_AREA.join(", ")}
 clinical_partner: ${CLINICAL_PARTNER.join(", ")}
 regulatory_experience[]: ${REGULATORY_EXPERIENCE.join(", ")}
 compute: ${COMPUTE.join(", ")}
@@ -144,7 +135,6 @@ privacy_capability[]: ${PRIVACY_CAPABILITY.join(", ")}
 team_size: ${TEAM_SIZE.join(", ")}
 modality[]: ${MODALITY.join(", ")}
 n_subjects / min_n_subjects: ${N_SUBJECTS.join(", ")}
-volume: ${VOLUME.join(", ")}
 annotation / annotation_required: ${ANNOTATION.join(", ")}
 linkage[]: ${LINKAGE.join(", ")}
 standards[]: ${STANDARDS.join(", ")}
@@ -154,56 +144,30 @@ access_model: ${ACCESS_MODEL.join(", ")}
 data_can_leave_institution: ${YES_NO_UNSURE.join(", ")}
 ethics_approval: ${ETHICS_APPROVAL.join(", ")}
 
-Text fields: org_name (<=200 chars), one_liner (<=140), summary (<=600), website (URL), track_record (array of up to 5 short strings).
-For data holders include "datasets": an array of dataset objects (name, modality, disease_area, n_subjects, volume, longitudinal, annotation, linkage, standards, readiness, consent_basis, access_model, data_can_leave_institution, ethics_approval).
-For AI teams include "data_needs" (modality, disease_area, min_n_subjects, annotation_required, linkage_required, standards_preferred).`
+Text: org_name, one_liner (<=140), summary (<=600), website, track_record (up to 5 URLs).
+Data holders: datasets[] with name, modality, disease_area, n_subjects, access_model, etc.
+AI teams: data_needs { modality, disease_area, min_n_subjects, annotation_required, linkage_required, standards_preferred }.`
 
 /**
- * Ask the LLM for a proposal. Returns null when the LLM is disabled or
- * fails — the caller surfaces that as "pre-fill unavailable", and the
- * plain form remains the fully supported path.
- *
- * The Meridian Vision Lab example About text always resolves to a
- * hand-authored proposal so the SPRIND demo never depends on a flaky
- * gateway for the rehearsed paste.
+ * Map prose or a chat transcript → validated PrefillProposal.
+ * Returns null when the LLM is disabled or extraction fails.
  */
 export async function proposeProfile(text: string): Promise<PrefillProposal | null> {
-  if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
-
   const raw = await complete(
     [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: EXTRACT_SYSTEM_PROMPT },
       {
         role: "user",
-        content: `${text}\n\nReturn a single JSON object with as many supported fields as the text clearly supports. Always include kind, org_name, country, one_liner, and summary when possible.`,
+        content: `${text}\n\nReturn one JSON object with every field the text supports. Include kind, org_name, country, one_liner, and summary when possible.`,
       },
     ],
     { json: true },
   )
-  if (!raw) {
-    if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
-    return null
-  }
+  if (!raw) return null
 
   try {
-    const jsonText = extractJsonObject(raw)
-    const parsed = prefillProposalSchema.parse(JSON.parse(jsonText))
-    if (proposalIsSubstantial(parsed)) return parsed
-    if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
-    return parsed
+    return prefillProposalSchema.parse(JSON.parse(extractJsonObject(raw)))
   } catch {
-    if (matchesExampleAiAbout(text)) return EXAMPLE_AI_PROPOSAL
     return null
   }
-}
-
-function extractJsonObject(raw: string): string {
-  const trimmed = raw.trim()
-  if (trimmed.startsWith("{")) return trimmed
-  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)
-  if (fenced?.[1]) return fenced[1].trim()
-  const start = trimmed.indexOf("{")
-  const end = trimmed.lastIndexOf("}")
-  if (start >= 0 && end > start) return trimmed.slice(start, end + 1)
-  return trimmed
 }
