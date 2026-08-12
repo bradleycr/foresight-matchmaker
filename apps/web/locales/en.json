@@ -459,7 +459,7 @@
   "remmy.name": "Remmy",
   "remmy.kicker": "Directory guide",
   "remmy.you": "You",
-  "remmy.hello_create": "I am Remmy. I will draft your directory profile with a few short questions — or paste your organisation’s About page text and I will prepare a draft from that. I never publish anything without your confirmation. Are you a data holder, an AI team, or a consortium?",
+  "remmy.hello_create": "I am Remmy. Paste your organisation’s About page, or answer one short question at a time — I never publish without your confirmation. Are you a data holder, an AI team, or a consortium?",
   "remmy.hello_update": "I am Remmy. Tell me what should change on your profile. I will prepare a draft of the updates for you to verify — nothing is saved until you confirm and click Save.",
   "remmy.send": "Send",
   "remmy.thinking": "Remmy is thinking…",

@@ -459,7 +459,7 @@
   "remmy.name": "Remmy",
   "remmy.kicker": "Guide de l’annuaire",
   "remmy.you": "Vous",
-  "remmy.hello_create": "Je suis Remmy. Je rédige votre profil avec quelques questions courtes — ou collez le texte À propos de votre organisation. Je ne publie rien sans votre confirmation. Êtes-vous détenteur de données, équipe IA ou consortium ?",
+  "remmy.hello_create": "Je suis Remmy. Collez la page À propos de votre organisation, ou répondez à une question courte à la fois — je ne publie rien sans votre confirmation. Êtes-vous détenteur de données, équipe IA ou consortium ?",
   "remmy.hello_update": "Je suis Remmy. Dites-moi ce qui doit changer sur votre profil. Je préparerai un brouillon des mises à jour à vérifier — rien n’est enregistré tant que vous n’avez pas confirmé et cliqué sur Enregistrer.",
   "remmy.send": "Envoyer",
   "remmy.thinking": "Remmy réfléchit…",

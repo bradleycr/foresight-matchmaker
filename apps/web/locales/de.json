@@ -459,7 +459,7 @@
   "remmy.name": "Remmy",
   "remmy.kicker": "Verzeichnis-Guide",
   "remmy.you": "Sie",
-  "remmy.hello_create": "Ich bin Remmy. Ich entwerfe Ihr Verzeichnisprofil mit kurzen Fragen — oder fügen Sie den About-Text Ihrer Organisation ein. Ich veröffentliche nichts ohne Ihre Bestätigung. Sind Sie Datenhalter, KI-Team oder Konsortium?",
+  "remmy.hello_create": "Ich bin Remmy. Fügen Sie den About-Text Ihrer Organisation ein, oder beantworten Sie jeweils eine kurze Frage — ich veröffentliche nichts ohne Ihre Bestätigung. Sind Sie Datenhalter, KI-Team oder Konsortium?",
   "remmy.hello_update": "Ich bin Remmy. Sagen Sie mir, was sich an Ihrem Profil ändern soll. Ich bereite einen Entwurf der Updates vor, den Sie prüfen — gespeichert wird erst, wenn Sie bestätigen und Speichern klicken.",
   "remmy.send": "Senden",
   "remmy.thinking": "Remmy denkt nach…",
