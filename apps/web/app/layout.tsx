@@ -19,10 +19,31 @@ const archivoNarrow = Archivo_Narrow({ subsets: ["latin"], variable: "--font-arc
 
 const dictionaries = { en, de, fr } as const
 
+const ORIGIN = process.env.APP_URL ?? "https://matchmaker-sprind.vercel.app"
+
 export const metadata: Metadata = {
+  metadataBase: new URL(ORIGIN),
   title: "Recoding Medicine Matchmaker",
   description:
     "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge. Application deadline: 16 October 2026.",
+  openGraph: {
+    title: "Recoding Medicine Matchmaker",
+    description:
+      "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge. Application deadline: 16 October 2026.",
+    type: "website",
+    locale: "en_GB",
+    siteName: "Recoding Medicine Matchmaker",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Recoding Medicine Matchmaker",
+    description:
+      "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge.",
+  },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
 }
 
 export const viewport: Viewport = {
