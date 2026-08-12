@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 import type { PrefillProposal } from "@/lib/llm/prefill"
-import { proposalIsSubstantial, summaryFromProposal, transcriptFromMessages } from "@/lib/llm/proposal-utils"
+import { fetchPrefill } from "@/lib/llm/fetch-prefill"
+import { summaryFromProposal, transcriptForExtraction } from "@/lib/llm/proposal-utils"
+import { proposalWarnings } from "@/lib/llm/sanitize-proposal"
 import { RemmyDraftReview } from "./draft-review"
 
 interface ChatMessage {
@@ -59,23 +61,25 @@ export function RemmyChat({
   const userTurns = messages.filter((m) => m.role === "user").length
 
   async function extractDraft(fromMessages: ChatMessage[], narrativeSummary: string[] = []) {
-    const transcript = transcriptFromMessages(fromMessages)
-    if (transcript.length < 40) return null
+    const transcript = transcriptForExtraction(fromMessages)
+    if (transcript.length < 40) {
+      return { ok: false as const, message: t("remmy.fill_failed") }
+    }
 
-    const res = await fetch("/api/v1/prefill", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: transcript }),
-    })
-
-    if (!res.ok) return null
-
-    const body = (await res.json()) as { proposal: PrefillProposal }
-    if (!proposalIsSubstantial(body.proposal)) return null
+    const result = await fetchPrefill(transcript, "chat")
+    if (!result.ok) {
+      return { ok: false as const, message: result.message }
+    }
 
     return {
-      proposal: body.proposal,
-      summary: narrativeSummary.length > 0 ? narrativeSummary : summaryFromProposal(body.proposal),
+      ok: true as const,
+      draft: {
+        proposal: result.proposal,
+        summary:
+          narrativeSummary.length > 0
+            ? [...narrativeSummary, ...proposalWarnings(result.proposal)]
+            : summaryFromProposal(result.proposal),
+      },
     }
   }
 
@@ -93,18 +97,14 @@ export function RemmyChat({
 
     try {
       if (longPaste) {
-        const draft = await extractDraft(nextMessages)
-        if (draft) {
-          setMessages((m) => [
-            ...m,
-            {
-              role: "assistant",
-              content: t("remmy.paste_ready"),
-            },
-          ])
-          setPending(draft)
+        const extracted = await extractDraft(nextMessages)
+        if (extracted.ok) {
+          setMessages((m) => [...m, { role: "assistant", content: t("remmy.paste_ready") }])
+          setPending(extracted.draft)
           return
         }
+        setError(extracted.message)
+        return
       }
 
       const res = await fetch("/api/v1/remmy", {
@@ -132,9 +132,9 @@ export function RemmyChat({
       setMessages(withReply)
 
       if (turn.ready_for_review) {
-        const draft = await extractDraft(withReply, turn.draft_summary)
-        if (draft) setPending(draft)
-        else setError(t("remmy.fill_failed"))
+        const extracted = await extractDraft(withReply, turn.draft_summary)
+        if (extracted.ok) setPending(extracted.draft)
+        else setError(extracted.message)
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("remmy.error"))
@@ -159,12 +159,12 @@ export function RemmyChat({
     setBusy(true)
     setError(null)
     try {
-      const draft = await extractDraft(messages)
-      if (draft) {
-        setPending(draft)
+      const extracted = await extractDraft(messages)
+      if (extracted.ok) {
+        setPending(extracted.draft)
         return
       }
-      setError(t("remmy.fill_failed"))
+      setError(extracted.message)
     } finally {
       setBusy(false)
     }

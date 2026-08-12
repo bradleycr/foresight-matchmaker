@@ -108,5 +108,9 @@ function stripForRemmyContext(profile: Record<string, unknown>): Record<string, 
   delete clone.completeness
   delete clone.created_at
   delete clone.updated_at
+  delete clone.contact_name
+  delete clone.contact_email
+  delete clone.contact_role
+  delete clone.claimed_at
   return clone
 }

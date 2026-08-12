@@ -47,6 +47,7 @@ import {
   friendlyApiMessage,
   type ValidationIssue,
 } from "@/lib/profile-form-validate"
+import { mergeProposalIntoForm } from "@/lib/profile-form-apply"
 
 /**
  * The profile form — create and edit in one component. Sections appear and
@@ -242,53 +243,6 @@ function toPayload(s: FormState): Record<string, unknown> {
   return { ...shared, ...aiFields, datasets: filterDatasetsForSubmit(s.datasets), still_seeking: s.still_seeking }
 }
 
-/**
- * Merge an LLM proposal into the form state. Only fields the proposal
- * actually contains are applied; everything else keeps its current value.
- * The user reviews the whole form before anything is saved.
- */
-function applyProposal(s: FormState, p: PrefillProposal): FormState {
-  const next = { ...s }
-
-  if (p.kind) next.kind = p.kind
-  if (p.org_name) next.org_name = p.org_name
-  if (p.org_type) next.org_type = p.org_type
-  if (p.country && (COUNTRY_CODES as readonly string[]).includes(p.country)) next.country = p.country
-  if (p.one_liner) next.one_liner = p.one_liner
-  if (p.summary) next.summary = p.summary
-  if (p.website) next.website = p.website
-  if (p.languages.length) next.languages = p.languages
-  if (p.looking_for.length) next.looking_for = p.looking_for
-  if (p.methods.length) next.methods = p.methods
-  if (p.application_target.length) next.application_target = p.application_target
-  if (p.domain_expertise.length) next.domain_expertise = p.domain_expertise
-  if (p.clinical_partner) next.clinical_partner = p.clinical_partner
-  if (p.regulatory_experience.length) next.regulatory_experience = p.regulatory_experience
-  if (p.compute) next.compute = p.compute
-  if (p.privacy_capability.length) next.privacy_capability = p.privacy_capability
-  if (p.team_size) next.team_size = p.team_size
-  if (p.track_record.length) next.track_record = p.track_record.join("\n")
-
-  if (p.data_needs) {
-    if (p.data_needs.modality.length) next.needs_modality = p.data_needs.modality
-    if (p.data_needs.disease_area.length) next.needs_disease_area = p.data_needs.disease_area
-    if (p.data_needs.min_n_subjects) next.needs_min_n_subjects = p.data_needs.min_n_subjects
-    if (p.data_needs.annotation_required) next.needs_annotation = p.data_needs.annotation_required
-    if (p.data_needs.linkage_required.length) next.needs_linkage = p.data_needs.linkage_required
-    if (p.data_needs.standards_preferred.length) next.needs_standards = p.data_needs.standards_preferred
-  }
-
-  if (p.datasets.length) {
-    // Partial dataset proposals are laid over blank-dataset defaults.
-    next.datasets = p.datasets.map((d) => ({
-      ...emptyDataset(),
-      ...Object.fromEntries(Object.entries(d).filter(([, v]) => v !== undefined)),
-    }))
-  }
-
-  return next
-}
-
 interface ApiError {
   error?: string
   details?: Array<{ path: string; message: string }>
@@ -314,7 +268,7 @@ export function ProfileForm({
   const router = useRouter()
   const [state, setState] = useState<FormState>(() => {
     const base = initial ? stateFromProfile(initial) : blankState()
-    return initialProposal ? applyProposal(base, initialProposal) : base
+    return initialProposal ? mergeProposalIntoForm(base, initialProposal, COUNTRY_CODES) : base
   })
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
   const [claimLink, setClaimLink] = useState<string | null>(null)
@@ -323,7 +277,10 @@ export function ProfileForm({
   const [spotlightGaps, setSpotlightGaps] = useState(highlightGapsOnMount)
 
   const countryNames = useMemo(() => new Intl.DisplayNames([locale], { type: "region" }), [locale])
-  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setState((s) => ({ ...s, [key]: value }))
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setClientIssues([])
+    setState((s) => ({ ...s, [key]: value }))
+  }
 
   const isCreate = !profileId
   const showDatasets = state.kind === "data_holder" || state.kind === "consortium"
@@ -334,8 +291,9 @@ export function ProfileForm({
   const needs = (key: GapField) => gapSet.has(key)
 
   function applyDraft(proposal: PrefillProposal) {
-    setState((s) => applyProposal(s, proposal))
+    setState((s) => mergeProposalIntoForm(s, proposal, COUNTRY_CODES))
     setSpotlightGaps(true)
+    setClientIssues([])
     // Next paint — scroll the checklist into view.
     queueMicrotask(() => {
       document.getElementById("form-gaps")?.scrollIntoView({ behavior: "smooth", block: "start" })

@@ -62,6 +62,7 @@ export function MeEditor({
         initial={profile}
         profileId={profile.id}
         initialProposal={proposal ?? undefined}
+        highlightGapsOnMount={Boolean(proposal)}
         prefillEnabled={false}
       />
     </div>

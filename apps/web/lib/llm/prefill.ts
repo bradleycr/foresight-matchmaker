@@ -27,6 +27,7 @@ import {
 import { complete } from "./client"
 import { extractJsonObject } from "./json"
 import { parseUrlLines, tryNormalizeUrl } from "@/lib/normalize-url"
+import { sanitizeProposal } from "./sanitize-proposal"
 
 /**
  * Schema-first profile extraction — the single structured-output path.
@@ -127,7 +128,7 @@ export type PrefillProposal = z.infer<typeof prefillProposalSchema>
 
 const EXTRACT_SYSTEM_PROMPT = `You extract a structured organisation profile from free text, for a directory pairing European health-data holders with AI/ML teams.
 
-Return ONLY a JSON object matching the profile schema. Include a field ONLY when the text clearly supports it — omit anything uncertain. Never invent contact details, subject counts, or ethics status.
+Return ONLY a JSON object matching the profile schema. Include a field ONLY when the text clearly supports it — omit anything uncertain. Never invent contact details, subject counts, or ethics status. Never return contact_name, contact_email, or contact_role.
 
 Allowed enum values (use EXACT strings):
 kind: ${KIND.join(", ")}
@@ -160,24 +161,32 @@ AI teams: data_needs { modality, disease_area, min_n_subjects, annotation_requir
 
 /**
  * Map prose or a chat transcript → validated PrefillProposal.
- * Returns null when the LLM is disabled or extraction fails.
+ * Returns null when the LLM is disabled or extraction fails after one retry.
  */
 export async function proposeProfile(text: string): Promise<PrefillProposal | null> {
-  const raw = await complete(
-    [
-      { role: "system", content: EXTRACT_SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `${text}\n\nReturn one JSON object with every field the text supports. Include kind, org_name, country, one_liner, and summary when possible.`,
-      },
-    ],
-    { json: true },
-  )
-  if (!raw) return null
+  const userContent = `${text.trim()}\n\nReturn one JSON object with every field the text supports. Include kind, org_name, country, one_liner, and summary when possible. Never include contact_name, contact_email, or contact_role.`
 
-  try {
-    return prefillProposalSchema.parse(JSON.parse(extractJsonObject(raw)))
-  } catch {
-    return null
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const raw = await complete(
+      [
+        { role: "system", content: EXTRACT_SYSTEM_PROMPT },
+        { role: "user", content: userContent },
+      ],
+      { json: true },
+    )
+    if (!raw) return null
+
+    try {
+      const parsed = prefillProposalSchema.parse(JSON.parse(extractJsonObject(raw)))
+      return sanitizeProposal(parsed)
+    } catch (e) {
+      if (attempt === 0) {
+        console.warn("[prefill] parse failed — retrying once", e instanceof Error ? e.message : e)
+        continue
+      }
+      return null
+    }
   }
+
+  return null
 }
