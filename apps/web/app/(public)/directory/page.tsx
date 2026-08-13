@@ -9,7 +9,7 @@ import { DirectoryBrowser } from "@/components/directory/browser"
 export const dynamic = "force-dynamic"
 
 /**
- * Members-only directory. Listings are redacted; contact happens by email.
+ * Directory of listed organisations. Listings are redacted.
  */
 export default async function DirectoryPage() {
   const session = await getSession()
