@@ -16,6 +16,7 @@ export type EventType =
   | "profile_deleted"
   | "shortlist_viewed"
   | "intro_requested"
+  | "intro_emailed"
   | "intro_accepted"
   | "intro_declined"
   | "intro_expired"

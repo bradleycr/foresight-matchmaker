@@ -3,11 +3,12 @@
 import { useMemo } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { KIND, DISEASE_AREA, MODALITY, type Kind, type DiseaseArea, type Modality } from "@rmm/schema"
+import { KIND, DISEASE_AREA, MODALITY, CHALLENGE_ID, type Kind, type DiseaseArea, type Modality, type ChallengeId } from "@rmm/schema"
 import type { DirectoryProfile } from "@/lib/api/types"
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Chip, Input, Select, Tag } from "@/components/ui/primitives"
+import { challengeIdOf } from "@/lib/challenges/catalog"
 
 /**
  * The directory browser. The full redacted corpus arrives as a prop from the
@@ -15,13 +16,14 @@ import { Chip, Input, Select, Tag } from "@/components/ui/primitives"
  * synchronously in memory. There is no loading state because there is
  * nothing to load.
  *
- * Filter state lives in the URL, nowhere else: ?q, ?kind, ?area, ?modality,
- * ?country. A filtered view is a link you can send to a colleague.
+ * Filter state lives in the URL, nowhere else: ?q, ?kind, ?challenge, ?area,
+ * ?modality, ?country. A filtered view is a link you can send to a colleague.
  */
 
 interface Filters {
   q: string
   kind: Kind | ""
+  challenge: ChallengeId | ""
   area: DiseaseArea | ""
   modality: Modality | ""
   country: string
@@ -45,6 +47,7 @@ function modalitiesOf(p: DirectoryProfile): Set<string> {
 
 function matchesFilters(p: DirectoryProfile, f: Filters): boolean {
   if (f.kind && p.kind !== f.kind) return false
+  if (f.challenge && challengeIdOf(p.challenge_id) !== f.challenge) return false
   if (f.country && p.country !== f.country) return false
   if (f.area && !diseaseAreasOf(p).has(f.area)) return false
   if (f.modality && !modalitiesOf(p).has(f.modality)) return false
@@ -77,6 +80,7 @@ export function DirectoryBrowser({ profiles }: { profiles: DirectoryProfile[] })
   const filters: Filters = {
     q: params.get("q") ?? "",
     kind: (params.get("kind") as Kind) ?? "",
+    challenge: (params.get("challenge") as ChallengeId) ?? "",
     area: (params.get("area") as DiseaseArea) ?? "",
     modality: (params.get("modality") as Modality) ?? "",
     country: params.get("country") ?? "",
@@ -97,7 +101,7 @@ export function DirectoryBrowser({ profiles }: { profiles: DirectoryProfile[] })
         .filter((p) => matchesFilters(p, filters))
         .sort((a, b) => a.org_name.localeCompare(b.org_name)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [profiles, filters.q, filters.kind, filters.area, filters.modality, filters.country],
+    [profiles, filters.q, filters.kind, filters.challenge, filters.area, filters.modality, filters.country],
   )
 
   // Alphabetical groups with letter headers, phone-book style.
@@ -115,16 +119,39 @@ export function DirectoryBrowser({ profiles }: { profiles: DirectoryProfile[] })
 
   const letters = groups.map(([letter]) => letter)
 
+  const pool = useMemo(
+    () =>
+      filters.challenge
+        ? profiles.filter((p) => challengeIdOf(p.challenge_id) === filters.challenge)
+        : profiles,
+    [profiles, filters.challenge],
+  )
+
   return (
     <div>
-      {/* Category tabs: the three SPRIND applicant profiles. */}
-      <div role="tablist" aria-label={t("directory.kind_filter")} className="flex flex-wrap gap-1 border-b-2 border-rule-strong pb-2">
+      <div role="tablist" aria-label={t("directory.challenge_filter")} className="flex flex-wrap gap-1 border-b border-rule pb-2">
+        <Chip active={filters.challenge === ""} onClick={() => setFilter("challenge", "")}>
+          {t("directory.all_challenges")} ({profiles.length})
+        </Chip>
+        {CHALLENGE_ID.map((id) => (
+          <Chip
+            key={id}
+            active={filters.challenge === id}
+            onClick={() => setFilter("challenge", filters.challenge === id ? "" : id)}
+          >
+            {enumLabel(t, "challenge", id)} ({profiles.filter((p) => challengeIdOf(p.challenge_id) === id).length})
+          </Chip>
+        ))}
+      </div>
+
+      {/* Category tabs: the three applicant kinds for the selected programme. */}
+      <div role="tablist" aria-label={t("directory.kind_filter")} className="mt-2 flex flex-wrap gap-1 border-b-2 border-rule-strong pb-2">
         <Chip active={filters.kind === ""} onClick={() => setFilter("kind", "")}>
-          {t("directory.all_kinds")} ({profiles.length})
+          {t("directory.all_kinds")} ({pool.length})
         </Chip>
         {KIND.map((kind) => (
           <Chip key={kind} active={filters.kind === kind} onClick={() => setFilter("kind", filters.kind === kind ? "" : kind)}>
-            {enumLabel(t, "kind", kind)} ({profiles.filter((p) => p.kind === kind).length})
+            {enumLabel(t, "kind", kind)} ({pool.filter((p) => p.kind === kind).length})
           </Chip>
         ))}
       </div>
@@ -215,6 +242,7 @@ export function DirectoryBrowser({ profiles }: { profiles: DirectoryProfile[] })
                           </span>
                           <span className="ml-2 whitespace-nowrap text-sm text-ink-soft">{p.country}</span>
                           <Tag className="ml-2 align-middle">{enumLabel(t, "kind", p.kind)}</Tag>
+                          <Tag className="ml-2 align-middle">{enumLabel(t, "challenge", challengeIdOf(p.challenge_id))}</Tag>
                           <span className="mt-0.5 block truncate text-sm text-ink-soft">{p.one_liner}</span>
                         </span>
                         <span className="tnum whitespace-nowrap text-right font-listing text-sm">

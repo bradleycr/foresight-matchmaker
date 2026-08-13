@@ -20,16 +20,18 @@ type Params = { params: Promise<{ id: string }> }
 /**
  * GET /api/v1/profiles/[id]
  *
- * The owner and the admin see the full profile. Everyone else sees the
- * redacted public shape — and only when visibility allows it.
+ * Members-only. The owner and the admin see the full profile; other signed-in
+ * viewers see the redacted shape. Hidden profiles 404.
  */
 export async function GET(_req: NextRequest, { params }: Params): Promise<Response> {
+  const session = await getSession()
+  if (!session) return unauthorized("Sign in to view this profile.")
+
   const { id } = await params
   const profile = getProfileById(id)
   if (!profile) return notFound("No profile with that id.")
 
-  const session = await getSession()
-  const owner = session?.profileId === profile.id
+  const owner = session.profileId === profile.id
 
   if (owner || (await isAdmin())) {
     return ok({
@@ -39,9 +41,6 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
   }
 
   if (profile.visibility === "hidden") return notFound("No profile with that id.")
-  if (profile.visibility === "authenticated_only" && !session) {
-    return unauthorized("Sign in to view this profile.")
-  }
   return ok({ profile: toPublicProfile(profile) })
 }
 
@@ -49,7 +48,7 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
  * PATCH /api/v1/profiles/[id] — owner-only.
  *
  * Two payloads are accepted:
- *  - a full profile form (same shape as create; kind cannot change), or
+ *  - a full profile form (same shape as create; kind and programme cannot change), or
  *  - `{ joint_application: "yes" | "no" | "not_yet" }` — the one-click KPI
  *    self-report.
  */
@@ -86,6 +85,10 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
   }
   if (input.kind !== profile.kind) {
     return badRequest("A profile cannot change kind. Create a new profile instead.")
+  }
+  const existingChallenge = profile.challenge_id ?? "recoding_medicine"
+  if (input.challenge_id !== existingChallenge) {
+    return badRequest("A profile cannot change programme. Create a new profile instead.")
   }
 
   const updated = saveProfile({

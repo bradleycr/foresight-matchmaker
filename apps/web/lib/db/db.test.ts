@@ -5,7 +5,7 @@ process.env.DATABASE_PATH = ":memory:"
 
 import { saveProfile, listPublicProfiles, getProfilesByEmail, getProfileById, deleteProfile } from "./profiles"
 import { getShortlist, getAllCachedMatches } from "./matches"
-import { requestIntro, respondToIntro, listIntrosFor, rateLimitPer24h } from "./intros"
+import { requestIntro, listIntrosFor, rateLimitPer24h } from "./intros"
 import { listEvents } from "./events"
 import { issueToken } from "../auth/tokens"
 import { getDb } from "./client"
@@ -170,19 +170,17 @@ describe("match cache", () => {
 })
 
 describe("intro flow", () => {
-  it("runs the double opt-in: requested → accepted", () => {
+  it("records an emailed introduction immediately", () => {
     const requested = requestIntro(team.id, holder.id, "Shall we apply together?")
     expect(requested.ok).toBe(true)
     if (!requested.ok) return
-
-    const response = respondToIntro(requested.intro.id, "accepted")
-    expect(response.ok).toBe(true)
-    expect(listIntrosFor(team.id).find((i) => i.id === requested.intro.id)?.state).toBe("accepted")
+    expect(requested.intro.state).toBe("emailed")
+    expect(listIntrosFor(team.id).find((i) => i.id === requested.intro.id)?.state).toBe("emailed")
   })
 
-  it("rejects a duplicate open intro for the same pair", () => {
+  it("rejects a second intro for the same pair", () => {
     const again = requestIntro(team.id, holder.id, "Again?")
-    expect(again).toEqual({ ok: false, error: "duplicate_pending" })
+    expect(again).toEqual({ ok: false, error: "already_contacted" })
   })
 
   it("rejects a self-intro", () => {
@@ -190,7 +188,7 @@ describe("intro flow", () => {
   })
 
   it("rate-limits at 5 outbound requests per 24h", () => {
-    // The accepted intro above already counts as 1 outbound for `team`.
+    // The emailed intro above already counts as 1 outbound for `team`.
     for (let i = 0; i < 4; i++) {
       const target = makeDataHolder(10 + i, { slug: `holder-rl-${i}` })
       expect(requestIntro(team.id, target.id, `Request ${i}`).ok).toBe(true)

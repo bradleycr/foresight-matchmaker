@@ -42,9 +42,10 @@ truth for ranking:
 - Generative UI: the assistant can open curated React surfaces (match cards,
   profile sheets, intro modals) inside the chat, not just dump Markdown.
 
-Keep Recoding Medicine branding and schema as-is for this challenge. Design
-seams so a second challenge (or non-SPRIND matchmaking) is config + content,
-not a rewrite.
+Keep Foresight Matchmaking as the product brand. Recoding Medicine is a
+programme (`challenge_id`), not the platform name. Adding a second challenge
+is catalog + schema variant + copy — not a rewrite of auth, directory, or
+intros. Do not multi-tenant the DB until a second challenge is real.
 
 ---
 
@@ -138,27 +139,33 @@ app owns *how* (directory aesthetic: ink/paper, square corners).
 
 ---
 
-## Multi-challenge / non-SPRIND (later, light)
+## Multi-challenge / non-SPRIND
+
+The product is **Foresight Matchmaking**. Recoding Medicine is programme
+`recoding_medicine` (slug `recoding-medicine`) in `apps/web/lib/challenges/catalog.ts`.
+Profiles carry `challenge_id` (Zod default keeps existing seed valid).
 
 Do **not** multi-tenant the DB before a second challenge is real. Prefer
-**one deployment per challenge**.
+**one Foresight-branded deployment** with additional programme cards, or a
+separate deployment if a different operator needs their own chrome.
 
 Portable already: auth, directory, intros, admin metrics, redaction, LLM gateway.
 
-Challenge-specific today: locales, schema enums, matching weights + golden
-tests, seed, deadlines, partner marks.
+Challenge-specific today: Recoding Medicine locales overlay, schema enums,
+matching weights + golden tests, seed, deadlines, SPRIND as host attribution.
 
-Future seam (document only until needed):
+Adding a programme:
 
 ```
-challenge/
-  id, name, branding, deadline, locales
-  profile schema variant
-  matching weights / blockers
-  seed set
+CHALLENGES catalog entry (id, slug, host, deadline)
+challenge_id enum value
+locale keys challenge.<id>.*
+schema / matching variant if the fields differ
+seed set
 ```
 
-Spinning up another challenge = new config + seed + copy on the same engine.
+Spinning up another Foresight programme = catalog + copy (+ schema if needed)
+on the same engine. A non-Foresight operator is a separate branded deploy.
 
 ---
 
@@ -169,7 +176,7 @@ Spinning up another challenge = new config + seed + copy on the same engine.
 | **0** | This plan; wire `LLM_*` for prefill/rationale; rotate test keys | Env only |
 | **1** | ~~Branch: AI SDK chat + `get_my_matches` → five cards~~ **Done via Remmy Guide** (`/api/v1/remmy/guide` + gen-UI parts; OpenAI-compatible gateway, intent hydration) | Yes (when LLM configured) |
 | **2** | Generative UI: profile sheet, intro modal, register draft | Partial — intro compose + shortlist shipped; profile sheet later |
-| **3** | Challenge config package (branding / copy overlay) | Additive |
+| **3** | Challenge catalog (this: Foresight chrome + Recoding Medicine as first programme) | Additive |
 | **4** | Second challenge deploy from config | Later |
 
 Invariant for every phase: golden tests and route-level redaction tests stay green
@@ -191,5 +198,5 @@ with the LLM disabled.
 
 - LLM on the scoring path
 - Auto-send intros
-- Multi-tenant single DB for many challenges
+- Multi-tenant single DB for many challenges (catalog + `challenge_id` is enough until a second programme is real)
 - Committing API keys or putting them in client bundles

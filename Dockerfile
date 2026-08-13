@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# Recoding Medicine Matchmaker — production image
+# Foresight Matchmaking — production image
 #
 # Multi-stage build for the pnpm monorepo. The final image is the Next.js
 # standalone bundle plus the seed data, running as a non-root user, with the

@@ -1,4 +1,5 @@
 import type {
+  ChallengeId,
   Kind,
   OrgType,
   Language,
@@ -60,6 +61,8 @@ export interface DirectoryProfile {
   id: string
   slug: string
   kind: Kind
+  /** Absent on listings created before programmes were first-class. */
+  challenge_id?: ChallengeId
   org_name: string
   org_type: OrgType
   country: string
@@ -140,4 +143,10 @@ export interface IntroPayload {
     contact_email?: string
     contact_role?: string
   } | null
+}
+
+export interface DirectoryStatsPayload {
+  version: string
+  generated_at: string
+  by_challenge: Record<string, { data_holder: number; ai_team: number; consortium: number }>
 }

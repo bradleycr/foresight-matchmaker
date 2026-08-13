@@ -25,11 +25,14 @@ export async function SiteHeader() {
       </div>
 
       <nav aria-label={t("nav.label")} className="flex flex-wrap gap-x-5 gap-y-1 border-t border-rule py-2 text-sm font-semibold uppercase tracking-wide">
-        <Link href="/directory" className="hover:underline">
-          {t("nav.directory")}
+        <Link href="/#programmes" className="hover:underline">
+          {t("nav.programmes")}
         </Link>
         {session ? (
           <>
+            <Link href="/directory" className="hover:underline">
+              {t("nav.directory")}
+            </Link>
             <Link href="/me/matches" className="hover:underline">
               {t("nav.matches")}
             </Link>

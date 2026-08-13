@@ -138,7 +138,7 @@ export function computeMetrics(): Metrics {
       profiles: profiles.length,
       profiles_with_shortlist_view: shortlistViewers.size,
       intros_requested: intros.length,
-      intros_accepted: intros.filter((i) => i.state === "accepted").length,
+      intros_accepted: intros.filter((i) => i.state === "accepted" || i.state === "emailed").length,
       intros_declined: intros.filter((i) => i.state === "declined").length,
       intros_expired: intros.filter((i) => i.state === "expired").length,
     },

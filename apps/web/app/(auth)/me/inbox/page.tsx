@@ -8,9 +8,8 @@ import { InboxList } from "@/components/inbox-list"
 export const dynamic = "force-dynamic"
 
 /**
- * The inbox: received introduction requests to answer, sent ones to track.
- * Contact details appear only on accepted intros — revealed to both sides
- * simultaneously, server-side.
+ * The contacts log: introductions emailed off-platform, with a record of
+ * who you reached and who reached you. Continue the conversation in email.
  */
 export default async function InboxPage() {
   const session = await getSession()

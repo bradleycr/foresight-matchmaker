@@ -51,6 +51,7 @@ export function buildNeeds(overrides: Partial<DataNeeds> = {}): DataNeeds {
 const shared = () => ({
   id: uuid(),
   slug: `org-${counter}`,
+  challenge_id: "recoding_medicine" as const,
   org_name: `Org ${counter}`,
   org_type: "university" as const,
   country: "DE",

@@ -1,10 +1,10 @@
 import { getT } from "@/lib/i18n/server"
 
 const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
-const UPDATED = "12 August 2026"
+const UPDATED = "13 August 2026"
 
 /**
- * Privacy notice for the Recoding Medicine Matchmaker.
+ * Privacy notice for Foresight Matchmaking.
  * Written for organisation contacts and data-protection officers —
  * plain language, GDPR Art. 12–14 style transparency.
  */

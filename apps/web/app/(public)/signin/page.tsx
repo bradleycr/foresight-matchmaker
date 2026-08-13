@@ -1,14 +1,21 @@
 import { getT } from "@/lib/i18n/server"
 import { magicLinkMode } from "@/lib/auth/mail"
 import { SigninForm } from "@/components/signin-form"
+import { safeNextPath } from "@/lib/auth/next-path"
 
 /**
  * Sign in by email. Copy matches the real delivery mode so we never promise
  * an email that will not be sent.
  */
-export default async function SigninPage() {
+export default async function SigninPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>
+}) {
   const { t } = await getT()
   const mode = magicLinkMode()
+  const { next: rawNext } = await searchParams
+  const next = safeNextPath(rawNext) ?? undefined
 
   const explainer =
     mode === "email"
@@ -21,7 +28,7 @@ export default async function SigninPage() {
     <div className="mx-auto max-w-md py-16">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("signin.title")}</h1>
       <p className="mt-3 leading-relaxed">{explainer}</p>
-      <SigninForm mode={mode} />
+      <SigninForm mode={mode} next={next} />
     </div>
   )
 }

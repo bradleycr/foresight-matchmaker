@@ -1,7 +1,7 @@
 {
   "name": "@rmm/matching",
   "version": "1.0.0",
-  "description": "Pure, deterministic, explainable match scoring for the Recoding Medicine Matchmaker. Zero framework dependencies.",
+  "description": "Pure, deterministic, explainable match scoring for Foresight Matchmaking programmes. Zero framework dependencies.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

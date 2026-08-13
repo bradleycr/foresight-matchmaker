@@ -1,29 +1,22 @@
 import { NextResponse } from "next/server"
 import { listDirectoryProfiles } from "@/lib/db/profiles"
 import { getSession } from "@/lib/auth/session"
+import { unauthorized } from "@/lib/api/respond"
 
 /**
- * GET /api/v1/directory — the directory for the UI.
- *
- * Signed-in callers also receive `authenticated_only` profiles; anonymous
- * callers see `public` only. `hidden` never appears. Everything is redacted.
- *
- * The stable public machine contract for third parties is
- * `/api/v1/directory.json` (public profiles only).
+ * GET /api/v1/directory — members-only listings, redacted.
+ * Hidden never appears. Authenticated-only listings are included.
  */
 export const dynamic = "force-dynamic"
 
 export async function GET(): Promise<NextResponse> {
   const session = await getSession()
-  const profiles = listDirectoryProfiles({ includeAuthenticatedOnly: Boolean(session) })
+  if (!session) return unauthorized("Sign in to browse the directory.")
+
+  const profiles = listDirectoryProfiles({ includeAuthenticatedOnly: true })
 
   return NextResponse.json(
     { version: "v1", generated_at: new Date().toISOString(), profiles },
-    {
-      headers: {
-        // Authenticated responses must not be shared caches.
-        "Cache-Control": session ? "private, no-store" : "public, max-age=60, stale-while-revalidate=300",
-      },
-    },
+    { headers: { "Cache-Control": "private, no-store" } },
   )
 }

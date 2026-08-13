@@ -2,11 +2,11 @@ import { ImageResponse } from "next/og"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 
-export const alt = "Recoding Medicine Matchmaker — SPRIND challenge directory"
+export const alt = "Foresight Matchmaking — Recoding Medicine programme"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-const ORIGIN = process.env.APP_URL ?? "https://matchmaker-sprind.vercel.app"
+const ORIGIN = process.env.APP_URL ?? "https://foresight-matchmaker.vercel.app"
 
 /** Ink-on-paper card for Slack, email, and social link previews. */
 export default async function OpenGraphImage() {
@@ -46,7 +46,7 @@ export default async function OpenGraphImage() {
               color: "#575243",
             }}
           >
-            SPRIND challenge — Recoding Medicine
+            Foresight Institute
           </p>
           <h1
             style={{
@@ -59,7 +59,7 @@ export default async function OpenGraphImage() {
               textTransform: "uppercase",
             }}
           >
-            Recoding Medicine Matchmaker
+            Foresight Matchmaking
           </h1>
           <p
             style={{
@@ -70,7 +70,7 @@ export default async function OpenGraphImage() {
               color: "#575243",
             }}
           >
-            A directory pairing European health-data holders with AI teams for joint SPRIND applications.
+            Pair organisations around open programmes. Recoding Medicine is first — a SPRIND challenge.
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export default async function OpenGraphImage() {
               letterSpacing: "0.06em",
             }}
           >
-            Application deadline · 16 October 2026
+            Recoding Medicine · deadline 16 October 2026
           </div>
 
           <div
@@ -115,9 +115,9 @@ export default async function OpenGraphImage() {
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 36 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={sprindSrc} alt="SPRIND" height={28} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={foresightSrc} alt="Foresight Institute" height={36} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={sprindSrc} alt="SPRIND" height={28} />
             </div>
           </div>
 

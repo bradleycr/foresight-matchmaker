@@ -82,7 +82,7 @@ function resolveOther(
 }
 
 function defaultIntroDraft(subject: Profile, other: DirectoryProfile): string {
-  return `Hello — we are ${subject.org_name}. Your directory profile looks like a strong fit for a joint Recoding Medicine application. We would like to explore a collaboration if you are open to an introduction.`
+  return `Hello — we are ${subject.org_name}. Your directory profile looks like a strong fit. We would like to explore a collaboration — reply to this email to continue.`
 }
 
 const NAV_LABELS: Record<string, string> = {

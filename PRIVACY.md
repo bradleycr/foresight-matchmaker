@@ -1,8 +1,8 @@
-# Privacy Notice — Recoding Medicine Matchmaker
+# Privacy Notice — Foresight Matchmaking
 
-_Last updated: 12 August 2026_
+_Last updated: 13 August 2026_
 
-This notice applies to the **Recoding Medicine Matchmaker** directory and
+This notice applies to the **Foresight Matchmaking** directory and
 matchmaking service. It is written for organisation contacts and data-protection
 officers. It does **not** cover the SPRIND Recoding Medicine challenge application
 process itself — that is operated by SPRIND.
@@ -14,15 +14,15 @@ Website: https://foresight.org
 Privacy contact: see `PRIVACY_CONTACT_EMAIL` on the deployment (default contact
 shown on `/privacy`).
 
-SPRIND (SprinD GmbH) organises the Recoding Medicine challenge. Questions about
-the challenge, funding, or eligibility go to `challenge@sprind.org`, not to this
-directory’s privacy contact.
+SPRIND (SprinD GmbH) organises the Recoding Medicine challenge listed on this
+platform. Questions about the challenge, funding, or eligibility go to
+`challenge@sprind.org`, not to this directory’s privacy contact.
 
 ## What we collect
 
 | Data | Purpose | Visibility |
 | --- | --- | --- |
-| Organisation profile (name, type, country, capabilities, dataset *descriptions*) | Public directory and deterministic matching | Public, except fields marked private |
+| Organisation profile (name, type, country, capabilities, dataset *descriptions*) | Members-only directory and deterministic matching | Visible to signed-in organisations, except fields marked private |
 | One contact person (name, email, role) | Sign-in (magic link) and introductions | **Never public.** Revealed only after mutual acceptance of an introduction |
 | Introduction messages and accept/decline | Double opt-in intro flow | Only the two organisations involved |
 | Self-reported joint-application outcomes | Aggregate reporting on whether the matchmaker worked | Aggregated only |
@@ -42,20 +42,23 @@ datasets; they are not the datasets themselves.
 You may withdraw consent by deleting your profile in **Your profile** (`/me`),
 or by emailing the privacy contact below.
 
-## What is public
+## What is visible to members
 
-Public directory listings show organisation and capability information needed for
+Directory listings are visible only to organisations that have created a profile
+and signed in. Listings show organisation and capability information needed for
 partner discovery. Contact details and private governance notes are never shown
-publicly. Contact details are exchanged only when both sides accept an
-introduction. You can set visibility to hidden or close introductions at any time.
+on listings. When you send an introduction, we email both listed contacts so the
+conversation continues off this platform. You can set visibility to hidden or
+close introductions at any time.
 
 ## Recipients and processors
 
 - **Hosting / application delivery** — this deployment may run on infrastructure
   such as Vercel. Request and security logs may be processed by that provider
   under their terms.
-- **Email delivery** — if SMTP is configured, magic-link emails are sent through
-  the operator’s mail provider.
+- **Email delivery** — if SMTP is configured, magic-link emails and introduction
+  forwards are sent through the operator’s mail provider. Introductions copy the
+  sender and set Reply-To so the thread continues in ordinary email.
 - **Optional AI assistance (Remmy / paste pre-fill)** — only when you use those
   features; prompts are sent to the configured OpenAI-compatible inference
   gateway (e.g. YCluster) to draft profile fields. Drafts are never published

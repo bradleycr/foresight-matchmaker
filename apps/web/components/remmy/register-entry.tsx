@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n/client"
 import { ProfileForm } from "@/components/profile-form"
 import type { PrefillProposal } from "@/lib/llm/prefill"
 import { RemmyChat } from "./chat"
+import type { ChallengeId } from "@rmm/schema"
 
 type Path = "remmy" | "form"
 
@@ -12,7 +13,13 @@ type Path = "remmy" | "form"
  * Register entry — form first; Remmy is optional when an LLM is configured.
  * Chat drafts only; the form submit remains the only publish path.
  */
-export function RegisterEntry({ remmyEnabled }: { remmyEnabled: boolean }) {
+export function RegisterEntry({
+  remmyEnabled,
+  defaultChallengeId,
+}: {
+  remmyEnabled: boolean
+  defaultChallengeId?: ChallengeId
+}) {
   const t = useT()
   const [path, setPath] = useState<Path>("form")
   const [confirmedDraft, setConfirmedDraft] = useState<PrefillProposal | null>(null)
@@ -53,6 +60,7 @@ export function RegisterEntry({ remmyEnabled }: { remmyEnabled: boolean }) {
         prefillEnabled={remmyEnabled}
         initialProposal={confirmedDraft ?? undefined}
         highlightGapsOnMount={Boolean(confirmedDraft)}
+        defaultChallengeId={defaultChallengeId}
       />
     </div>
   )

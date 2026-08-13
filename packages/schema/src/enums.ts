@@ -1,12 +1,13 @@
 import { z } from "zod"
 
 /**
- * Controlled vocabularies for the Recoding Medicine Matchmaker.
+ * Controlled vocabularies for Foresight Matchmaking.
  *
- * Every enum here is a stable contract. Adding a value is backwards
- * compatible; removing or renaming one is a breaking change and requires
- * a schema version bump. Order is meaningful for the "bucketed" enums
- * (n_subjects, volume, team_size, scale scoring depends on ordinal position).
+ * Recoding Medicine is the first programme; its fields live here until a
+ * second challenge needs a variant. Adding a value is backwards compatible;
+ * removing or renaming one is a breaking change and requires a schema
+ * version bump. Order is meaningful for the "bucketed" enums (n_subjects,
+ * volume, team_size — scale scoring depends on ordinal position).
  */
 
 // ---------------------------------------------------------------------------
@@ -16,6 +17,16 @@ import { z } from "zod"
 export const KIND = ["data_holder", "ai_team", "consortium"] as const
 export const kindEnum = z.enum(KIND)
 export type Kind = (typeof KIND)[number]
+
+/**
+ * Which programme a profile is listed for. The platform is Foresight
+ * Matchmaking; each challenge carries its own schema flavour, copy, and
+ * matching rules. Adding an id is backwards compatible.
+ */
+export const CHALLENGE_ID = ["recoding_medicine"] as const
+export const challengeIdEnum = z.enum(CHALLENGE_ID)
+export type ChallengeId = (typeof CHALLENGE_ID)[number]
+export const DEFAULT_CHALLENGE_ID: ChallengeId = "recoding_medicine"
 
 export const ORG_TYPE = [
   "university",
@@ -284,7 +295,7 @@ export type TeamSize = (typeof TEAM_SIZE)[number]
 // Intro-flow vocabularies
 // ---------------------------------------------------------------------------
 
-export const INTRO_STATE = ["requested", "accepted", "declined", "expired"] as const
+export const INTRO_STATE = ["requested", "accepted", "declined", "expired", "emailed"] as const
 export const introStateEnum = z.enum(INTRO_STATE)
 export type IntroState = (typeof INTRO_STATE)[number]
 

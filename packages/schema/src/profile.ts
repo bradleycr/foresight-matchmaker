@@ -16,6 +16,7 @@ import {
   computeEnum,
   privacyCapabilityEnum,
   teamSizeEnum,
+  challengeIdEnum,
 } from "./enums"
 import { datasetSchema, dataNeedsSchema } from "./dataset"
 
@@ -42,6 +43,11 @@ const sharedProfileFields = {
     .min(1)
     .max(120)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "slug must be url-safe kebab-case"),
+  /**
+   * Programme this listing belongs to. Defaults to Recoding Medicine so
+   * existing seed and golden profiles stay valid without a data rewrite.
+   */
+  challenge_id: challengeIdEnum.default("recoding_medicine"),
   org_name: z.string().min(1).max(200),
   org_type: orgTypeEnum,
   /** ISO 3166-1 alpha-2. */

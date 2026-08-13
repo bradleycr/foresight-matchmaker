@@ -49,7 +49,7 @@ export const matches = sqliteTable(
   (t) => [primaryKey({ columns: [t.subjectId, t.otherId] }), index("idx_matches_subject").on(t.subjectId, t.score)],
 )
 
-/** Double opt-in introduction requests. */
+/** Introduction emails forwarded off-platform. Legacy rows may still be requested/accepted. */
 export const intros = sqliteTable(
   "intros",
   {

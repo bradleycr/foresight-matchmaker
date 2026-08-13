@@ -7,7 +7,7 @@ import type { DeliveryMode } from "@/lib/auth/mail"
 
 type Result = { ok: true; mode: DeliveryMode; claim_link?: string }
 
-export function SigninForm({ mode }: { mode: DeliveryMode }) {
+export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }) {
   const t = useT()
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "working" | "done" | "error">("idle")
@@ -22,7 +22,7 @@ export function SigninForm({ mode }: { mode: DeliveryMode }) {
     const res = await fetch("/api/v1/auth/request-link", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, ...(next ? { next } : {}) }),
     })
 
     if (res.status === 429) {

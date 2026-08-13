@@ -1,8 +1,8 @@
-# Recoding Medicine Matchmaker
+# Foresight Matchmaking
 
-A directory and matchmaking prototype that pairs **European health-data holders** with **AI/ML teams** so they can apply jointly to the [SPRIND Recoding Medicine challenge](https://www.sprind.org) (application deadline: **16 October 2026**).
+A Foresight Institute directory that pairs organisations around open programmes. **Recoding Medicine** (a [SPRIND](https://www.sprind.org) challenge, application deadline **16 October 2026**) is the first programme on this instance.
 
-Think of it as a phone book, not a social network: register a structured profile, browse the directory, get a deterministic ranked shortlist of counterparts, and request a **double opt-in introduction**. Contact details are revealed only after both sides agree.
+Think of it as a phone book, not a social network: register a structured profile against a programme, browse the members-only directory, get a deterministic ranked shortlist of counterparts, and **email an introduction**. Both contacts are on the thread so the conversation continues off this platform. Joint applications are filed with the programme host, not here.
 
 > **All seed data is synthetic.** Every organisation, dataset, contact name, and email address under `seed/` is fabricated for demonstration purposes and does not describe any real institution. See `seed/README.md`.
 

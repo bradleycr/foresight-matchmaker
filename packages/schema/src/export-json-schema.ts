@@ -41,14 +41,14 @@ function main() {
   writeSchema("profile", {
     $schema: "http://json-schema.org/draft-07/schema#",
     $id: `https://recoding-medicine.example/schema/${SCHEMA_VERSION}/profile.schema.json`,
-    title: `Recoding Medicine Matchmaker — Profile (${SCHEMA_VERSION})`,
+    title: `Foresight Matchmaking — Profile (${SCHEMA_VERSION})`,
     ...profileJsonSchema,
   })
 
   writeSchema("dataset", {
     $schema: "http://json-schema.org/draft-07/schema#",
     $id: `https://recoding-medicine.example/schema/${SCHEMA_VERSION}/dataset.schema.json`,
-    title: `Recoding Medicine Matchmaker — Dataset (${SCHEMA_VERSION})`,
+    title: `Foresight Matchmaking — Dataset (${SCHEMA_VERSION})`,
     ...datasetJsonSchema,
   })
 }

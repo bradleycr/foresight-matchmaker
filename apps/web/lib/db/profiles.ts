@@ -84,9 +84,8 @@ export function getJointApplicationOutcome(id: string): string | null {
 /**
  * Directory listings, redacted through the schema choke point.
  *
- * - Anonymous / public contract (`directory.json`): `visibility: public` only.
- * - Signed-in UI directory: also includes `authenticated_only`.
- * - `hidden` never appears in either.
+ * Members-only. `hidden` never appears. Signed-in callers also receive
+ * `authenticated_only` listings.
  */
 export function listDirectoryProfiles(opts: { includeAuthenticatedOnly?: boolean } = {}): PublicProfile[] {
   return listProfiles()
@@ -99,9 +98,30 @@ export function listDirectoryProfiles(opts: { includeAuthenticatedOnly?: boolean
     .map(toPublicProfile)
 }
 
-/** Strictly public profiles — the machine-readable `/directory.json` contract. */
+/** Strictly listed profiles — the members-only `/directory.json` contract. */
 export function listPublicProfiles(): PublicProfile[] {
   return listDirectoryProfiles({ includeAuthenticatedOnly: false })
+}
+
+export interface KindCounts {
+  data_holder: number
+  ai_team: number
+  consortium: number
+}
+
+/**
+ * Aggregate listing counts for the public homepage. Names never leave this
+ * function — only how many visible organisations sit in each programme.
+ */
+export function countVisibleProfilesByChallenge(): Record<string, KindCounts> {
+  const out: Record<string, KindCounts> = {}
+  for (const p of listProfiles()) {
+    if (p.visibility === "hidden") continue
+    const id = p.challenge_id ?? "recoding_medicine"
+    const bucket = (out[id] ??= { data_holder: 0, ai_team: 0, consortium: 0 })
+    bucket[p.kind] += 1
+  }
+  return out
 }
 
 // ---------------------------------------------------------------------------

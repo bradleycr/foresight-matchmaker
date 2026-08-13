@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation"
-import { apiFetch } from "@/lib/api/server-fetch"
+import { notFound, redirect } from "next/navigation"
+import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
 import type { DirectoryPayload, PublicDataset } from "@/lib/api/types"
 import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
@@ -7,6 +7,8 @@ import { enumLabel } from "@/lib/i18n/labels"
 import { Tag } from "@/components/ui/primitives"
 import { IntroRequestForm } from "@/components/intro-request-form"
 import type { T } from "@/lib/i18n"
+import { challengeById, challengeIdOf } from "@/lib/challenges/catalog"
+import { signInHref } from "@/lib/auth/next-path"
 
 export const dynamic = "force-dynamic"
 
@@ -60,10 +62,15 @@ function DatasetBlock({ dataset, t }: { dataset: PublicDataset; t: T }) {
 
 export default async function ProfilePage({ params }: Params) {
   const { slug } = await params
-  const { t } = await getT()
   const session = await getSession()
+  if (!session) redirect(signInHref(`/profile/${slug}`))
 
-  const directory = (await apiFetch("/api/v1/directory").then((r) => r.json())) as DirectoryPayload
+  const { t } = await getT()
+
+  const res = await apiFetch("/api/v1/directory")
+  redirectOnAuthFailure(res)
+  if (!res.ok) throw new Error(`Could not load the directory (status ${res.status}).`)
+  const directory = (await res.json()) as DirectoryPayload
   const profile = directory.profiles.find((p) => p.slug === slug)
   if (!profile) notFound()
 
@@ -74,6 +81,11 @@ export default async function ProfilePage({ params }: Params) {
       <header className="border-b-2 border-rule-strong pb-4">
         <div className="flex flex-wrap items-center gap-2">
           <Tag>{enumLabel(t, "kind", profile.kind)}</Tag>
+          <Tag>
+            <a href={`/challenges/${challengeById(profile.challenge_id).slug}`} className="hover:underline">
+              {enumLabel(t, "challenge", challengeIdOf(profile.challenge_id))}
+            </a>
+          </Tag>
           <span className="text-sm text-ink-soft">
             {profile.country} · {enumLabel(t, "org_type", profile.org_type)}
           </span>
@@ -194,14 +206,14 @@ export default async function ProfilePage({ params }: Params) {
         </p>
       )}
 
-      {/* Contact happens only through the double opt-in intro flow. */}
+      {/* Contact is emailed off-platform; this site keeps a record. */}
       {!isOwn && (
         <section aria-labelledby="intro" className="mt-10 border-t-2 border-rule-strong pt-4">
           <h2 id="intro" className="font-listing text-xl font-bold uppercase">
             {t("intro.request_title")}
           </h2>
           {profile.open_to_intros ? (
-            <IntroRequestForm targetId={profile.id} targetName={profile.org_name} signedIn={Boolean(session)} />
+            <IntroRequestForm targetId={profile.id} targetName={profile.org_name} signedIn />
           ) : (
             <p className="mt-2 text-ink-soft">{t("intro.not_open")}</p>
           )}

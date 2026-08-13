@@ -38,6 +38,7 @@ export const introResponseSchema = z.object({
 
 export const requestLinkSchema = z.object({
   email: z.string().email(),
+  next: z.string().max(200).optional(),
 })
 
 export const outcomeSchema = z.object({

@@ -6,9 +6,9 @@ import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 
 /**
- * "Request an introduction" — the action keeps this exact name through the
- * whole flow. Neither side sees contact details until the other accepts;
- * this form only carries the ≤500-character message.
+ * Email an introduction. The recipient (and a copy to you) goes out over
+ * SMTP; the conversation continues in ordinary email. This site keeps a
+ * record under Contacts.
  */
 export function IntroRequestForm({
   targetId,
@@ -23,6 +23,8 @@ export function IntroRequestForm({
   const [message, setMessage] = useState("")
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle")
   const [error, setError] = useState("")
+  const [emailSent, setEmailSent] = useState(true)
+  const [contactEmail, setContactEmail] = useState<string | null>(null)
 
   if (!signedIn) {
     return (
@@ -36,7 +38,23 @@ export function IntroRequestForm({
   }
 
   if (status === "sent") {
-    return <p className="mt-2 border border-ink bg-paper-shade px-3 py-2">{t("intro.sent", { name: targetName })}</p>
+    return (
+      <div className="mt-2 border border-ink bg-paper-shade px-3 py-2">
+        <p>{emailSent ? t("intro.sent", { name: targetName }) : t("intro.sent_logged", { name: targetName })}</p>
+        {contactEmail ? (
+          <p className="mt-2 text-sm">
+            <a href={`mailto:${contactEmail}`} className="font-semibold underline">
+              {contactEmail}
+            </a>
+          </p>
+        ) : null}
+        <p className="mt-2 text-sm">
+          <Link href="/me/inbox" className="font-semibold underline">
+            {t("intro.view_contacts")}
+          </Link>
+        </p>
+      </div>
+    )
   }
 
   async function submit(e: React.FormEvent) {
@@ -50,10 +68,17 @@ export function IntroRequestForm({
       body: JSON.stringify({ to_id: targetId, message }),
     })
 
+    const body = (await res.json().catch(() => ({}))) as {
+      error?: string
+      email_sent?: boolean
+      intro?: { counterpart?: { contact_email?: string } }
+    }
+
     if (res.ok) {
+      setEmailSent(body.email_sent !== false)
+      setContactEmail(body.intro?.counterpart?.contact_email ?? null)
       setStatus("sent")
     } else {
-      const body = (await res.json().catch(() => ({}))) as { error?: string }
       setError(body.error ?? t("intro.error_generic"))
       setStatus("error")
     }

@@ -7,6 +7,7 @@ import { getProfilesByEmail } from "@/lib/db/profiles"
 import { issueToken } from "@/lib/auth/tokens"
 import { magicLinkMode, sendMagicLink, revealLinksAllowed } from "@/lib/auth/mail"
 import { rateLimit } from "@/lib/auth/rate-limit"
+import { safeNextPath } from "@/lib/auth/next-path"
 
 export const dynamic = "force-dynamic"
 
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest): Promise<Response> {
   const origin = process.env.APP_URL ?? req.nextUrl.origin
   const mode = magicLinkMode()
   const reveal = revealLinksAllowed()
+  const next = safeNextPath(input.next)
+  const nextQuery = next ? `?next=${encodeURIComponent(next)}` : ""
 
   let claimLink: string | undefined
 
@@ -55,13 +58,13 @@ export async function POST(req: NextRequest): Promise<Response> {
     // the oldest so behaviour is deterministic.
     const profile = profiles[0]!
     const token = issueToken(email, profile.id)
-    const link = `${origin}/claim/${token}`
+    const link = `${origin}/claim/${token}${nextQuery}`
     await sendMagicLink(email, link)
     if (reveal) claimLink = link
   } else if (reveal) {
     // Decoy: same URL shape, never stored — claim fails with the generic error.
     // Equalises response shape so existence cannot be inferred from JSON keys.
-    claimLink = `${origin}/claim/${randomBytes(32).toString("base64url")}`
+    claimLink = `${origin}/claim/${randomBytes(32).toString("base64url")}${nextQuery}`
     // Rough timing parity with issueToken + log path.
     await new Promise((r) => setTimeout(r, 5))
   } else {

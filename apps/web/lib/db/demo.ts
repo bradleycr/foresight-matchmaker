@@ -1,53 +1,47 @@
 /**
  * Scripted demo state. Run with: pnpm --filter @rmm/web db:demo
  *
- * Resets and reseeds (see reset-core.ts), then pre-loads one pending
- * received introduction and one already-accepted introduction into a known
- * demo profile's inbox — so the double opt-in flow, including the revealed
- * contact block, can be shown on stage without live-typing both sides of an
- * exchange. The sign-in email is printed at the end; it is also documented
- * in DEMO_RUNBOOK.md.
+ * Resets and reseeds, then records two emailed introductions into a known
+ * demo profile's contacts log — so the off-platform email record can be
+ * shown on stage. The sign-in email is printed at the end.
  *
  * All three profiles below are golden fixtures (seed/golden/), so their
  * slugs are stable across reseeds.
  */
 import { resetAndReseed } from "./reset-core"
 import { getProfileBySlug } from "./profiles"
-import { requestIntro, respondToIntro } from "./intros"
+import { requestIntro } from "./intros"
 
-const DEMO_SLUG = "rpaz-zuid" // Stichting Regionaal Pathologie Archief Zuid
-const PENDING_FROM_SLUG = "elbe-vision-lab" // Elbe Vision Lab, TU Nordharz — sends the pending request
-const ACCEPTED_FROM_SLUG = "federation-neuro-ia-lyon" // Fédération Neuro-IA, Lyon — already accepted
+const DEMO_SLUG = "rpaz-zuid"
+const FROM_A = "elbe-vision-lab"
+const FROM_B = "federation-neuro-ia-lyon"
 
 const count = resetAndReseed()
 
 const demo = getProfileBySlug(DEMO_SLUG)
-const pendingFrom = getProfileBySlug(PENDING_FROM_SLUG)
-const acceptedFrom = getProfileBySlug(ACCEPTED_FROM_SLUG)
+const fromA = getProfileBySlug(FROM_A)
+const fromB = getProfileBySlug(FROM_B)
 
-if (!demo || !pendingFrom || !acceptedFrom) {
+if (!demo || !fromA || !fromB) {
   throw new Error(
-    `db:demo expects the golden profiles "${DEMO_SLUG}", "${PENDING_FROM_SLUG}", and "${ACCEPTED_FROM_SLUG}" ` +
+    `db:demo expects the golden profiles "${DEMO_SLUG}", "${FROM_A}", and "${FROM_B}" ` +
       "to exist after seeding — check seed/golden/ for renamed or removed slugs.",
   )
 }
 
-const pending = requestIntro(
-  pendingFrom.id,
+const a = requestIntro(
+  fromA.id,
   demo.id,
-  "We reviewed your pathology archive and think there's a strong fit for the Recoding Medicine application — would you be open to a short call this week?",
+  "We reviewed your pathology archive and think there's a strong fit — would you be open to a short call this week?",
 )
-if (!pending.ok) throw new Error(`Could not seed the pending demo intro: ${pending.error}`)
+if (!a.ok) throw new Error(`Could not seed demo intro A: ${a.error}`)
 
-const accepted = requestIntro(
-  acceptedFrom.id,
+const b = requestIntro(
+  fromB.id,
   demo.id,
-  "Following up after the webinar — our federated pipeline should work well against your on-premises constraint. Keen to discuss a joint application.",
+  "Following up after the webinar — our federated pipeline should work well against your on-premises constraint.",
 )
-if (!accepted.ok) throw new Error(`Could not seed the accepted demo intro: ${accepted.error}`)
-respondToIntro(accepted.intro.id, "accepted")
+if (!b.ok) throw new Error(`Could not seed demo intro B: ${b.error}`)
 
-console.log(
-  `Demo state ready — reset, reseeded ${count} profiles, and loaded 1 pending + 1 accepted intro into ${DEMO_SLUG}'s inbox.`,
-)
+console.log(`Demo state ready — reset, reseeded ${count} profiles, and loaded 2 emailed intros into ${DEMO_SLUG}'s contacts.`)
 console.log(`Sign in as: ${demo.contact_email}`)

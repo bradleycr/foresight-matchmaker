@@ -1,7 +1,8 @@
 /**
- * @rmm/schema — the single source of truth for the Recoding Medicine
- * Matchmaker data model. Zero framework dependencies. Zod defines everything;
- * TypeScript types are inferred and JSON Schema is generated from these.
+ * @rmm/schema — the single source of truth for Foresight Matchmaking
+ * profile data. Recoding Medicine is the first programme (`challenge_id`).
+ * Zero framework dependencies. Zod defines everything; TypeScript types
+ * are inferred and JSON Schema is generated from these.
  */
 
 export const SCHEMA_VERSION = "v1" as const

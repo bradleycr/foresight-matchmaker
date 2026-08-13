@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
 
-export function ClaimForm({ token }: { token: string }) {
+export function ClaimForm({ token, next }: { token: string; next?: string }) {
   const t = useT()
   const router = useRouter()
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle")
@@ -20,7 +20,7 @@ export function ClaimForm({ token }: { token: string }) {
     })
 
     if (res.ok) {
-      router.push("/me")
+      router.push(next ?? "/me")
       router.refresh()
     } else {
       const body = (await res.json().catch(() => ({}))) as { error?: string }

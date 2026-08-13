@@ -6,18 +6,15 @@ import { intros } from "./schema"
 import { logEvent } from "./events"
 
 /**
- * The double opt-in intro flow.
+ * Introduction records. New contacts are emailed immediately (state
+ * `emailed`) so the conversation continues off-platform. The table still
+ * accepts legacy requested/accepted/declined/expired rows.
  *
- * State machine: requested → accepted | declined | expired. Contact details
- * are NEVER stored or transmitted through this table — the reveal happens in
- * the API layer, and only for intros in `accepted` state, read fresh from the
- * profile at request time. Declining reveals nothing.
+ * Contact details are NEVER stored here — they are read from profiles when
+ * serialising an emailed (or historically accepted) intro.
  *
- * Expiry is applied lazily: any read that touches a `requested` intro past
- * its `expires_at` transitions it first. No cron needed at this scale.
+ * Expiry is applied lazily for leftover `requested` rows. No cron.
  */
-
-const EXPIRY_DAYS = 14
 
 /**
  * Outbound intro requests allowed per profile per rolling 24h. Configurable
@@ -93,10 +90,12 @@ export function listAllIntros(): Intro[] {
   return getDb().select().from(intros).all().map(withLazyExpiry).map(rowToIntro)
 }
 
-/** True when an accepted intro connects the two profiles (either direction). */
+/** True when an emailed (or historically accepted) intro connects the two profiles. */
 export function haveAcceptedIntro(a: string, b: string): boolean {
   return listIntrosFor(a).some(
-    (i) => i.state === "accepted" && ((i.fromId === a && i.toId === b) || (i.fromId === b && i.toId === a)),
+    (i) =>
+      (i.state === "emailed" || i.state === "accepted") &&
+      ((i.fromId === a && i.toId === b) || (i.fromId === b && i.toId === a)),
   )
 }
 
@@ -106,7 +105,7 @@ export function haveAcceptedIntro(a: string, b: string): boolean {
 
 export type RequestIntroResult =
   | { ok: true; intro: Intro }
-  | { ok: false; error: "rate_limited" | "duplicate_pending" | "self_intro" }
+  | { ok: false; error: "rate_limited" | "already_contacted" | "self_intro" }
 
 export function requestIntro(fromId: string, toId: string, message: string): RequestIntroResult {
   if (fromId === toId) return { ok: false, error: "self_intro" }
@@ -114,7 +113,6 @@ export function requestIntro(fromId: string, toId: string, message: string): Req
   const db = getDb()
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-  // Max N outbound requests per profile per rolling 24h — see rateLimitPer24h().
   const recent = db
     .select({ id: intros.id })
     .from(intros)
@@ -122,36 +120,33 @@ export function requestIntro(fromId: string, toId: string, message: string): Req
     .all()
   if (recent.length >= rateLimitPer24h()) return { ok: false, error: "rate_limited" }
 
-  // One open request per pair at a time.
-  const pending = db
+  const existing = db
     .select()
     .from(intros)
     .where(
-      and(
-        or(
-          and(eq(intros.fromId, fromId), eq(intros.toId, toId)),
-          and(eq(intros.fromId, toId), eq(intros.toId, fromId)),
-        ),
+      or(
+        and(eq(intros.fromId, fromId), eq(intros.toId, toId)),
+        and(eq(intros.fromId, toId), eq(intros.toId, fromId)),
       ),
     )
     .all()
     .map(withLazyExpiry)
-  if (pending.some((r) => r.state === "requested" || r.state === "accepted")) {
-    return { ok: false, error: "duplicate_pending" }
-  }
+  if (existing.length > 0) return { ok: false, error: "already_contacted" }
 
   const now = new Date()
+  const iso = now.toISOString()
   const row: typeof intros.$inferInsert = {
     id: randomUUID(),
     fromId,
     toId,
     message,
-    state: "requested",
-    createdAt: now.toISOString(),
-    expiresAt: new Date(now.getTime() + EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+    state: "emailed",
+    createdAt: iso,
+    respondedAt: iso,
+    expiresAt: iso,
   }
   db.insert(intros).values(row).run()
-  logEvent("intro_requested", fromId, { intro_id: row.id, to: toId })
+  logEvent("intro_emailed", fromId, { intro_id: row.id, to: toId })
 
   return { ok: true, intro: rowToIntro(row as IntroRow) }
 }

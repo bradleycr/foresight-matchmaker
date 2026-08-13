@@ -19,26 +19,26 @@ const archivoNarrow = Archivo_Narrow({ subsets: ["latin"], variable: "--font-arc
 
 const dictionaries = { en, de, fr } as const
 
-const ORIGIN = process.env.APP_URL ?? "https://matchmaker-sprind.vercel.app"
+const ORIGIN = process.env.APP_URL ?? "https://foresight-matchmaker.vercel.app"
 
 export const metadata: Metadata = {
   metadataBase: new URL(ORIGIN),
-  title: "Recoding Medicine Matchmaker",
+  title: "Foresight Matchmaking",
   description:
-    "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge. Application deadline: 16 October 2026.",
+    "A Foresight Institute directory for pairing organisations around open programmes. Recoding Medicine is the first: European health-data holders and AI teams forming joint SPRIND applications.",
   openGraph: {
-    title: "Recoding Medicine Matchmaker",
+    title: "Foresight Matchmaking",
     description:
-      "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge. Application deadline: 16 October 2026.",
+      "A Foresight Institute directory for pairing organisations around open programmes. Recoding Medicine is the first: European health-data holders and AI teams forming joint SPRIND applications.",
     type: "website",
     locale: "en_GB",
-    siteName: "Recoding Medicine Matchmaker",
+    siteName: "Foresight Matchmaking",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recoding Medicine Matchmaker",
+    title: "Foresight Matchmaking",
     description:
-      "A directory pairing European health-data holders with AI teams for the SPRIND Recoding Medicine challenge.",
+      "A Foresight Institute directory for pairing organisations around open programmes.",
   },
   icons: {
     icon: [

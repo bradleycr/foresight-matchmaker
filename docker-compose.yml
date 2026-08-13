@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# Recoding Medicine Matchmaker — single-container deployment for a Linux VM.
+# Foresight Matchmaking — single-container deployment for a Linux VM.
 #
 #   cp .env.example .env      # set SESSION_SECRET and ADMIN_SECRET
 #   docker compose up -d --build

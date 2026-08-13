@@ -7,8 +7,9 @@ deploy that path by accident: it needs a bind-mounted volume and a different
 `DATABASE_PATH`, and mixing the two up is how you end up presenting the wrong
 database.
 
-**Production URL:** https://matchmaker-sprind.vercel.app
-**Vercel project:** `bradley-royes-projects/matchmaker-sprind` (`prj_kyy37fkdoAST7LzShqfkLFFJvNbm`)
+**Production URL:** https://foresight-matchmaker.vercel.app
+**Vercel project:** `bradley-royes-projects/foresight-matchmaker` (`prj_kyy37fkdoAST7LzShqfkLFFJvNbm`)
+The previous hostname `matchmaker-sprind.vercel.app` forwards here.
 
 ## Why Vercel's SQLite is safe to demo on, with one caveat
 
@@ -37,6 +38,7 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | `AUTH_REVEAL_LINKS` | `true` | **Load-bearing.** With no SMTP configured, this is the only way anyone — including you, on stage — can sign in. Without it, magic links go to the server log only and `/signin` becomes unusable live. |
 | `SEED_ON_EMPTY` | `true` | Auto-seeds the 118 synthetic profiles on a cold `/tmp`. |
 | `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
+| `APP_URL` | `https://foresight-matchmaker.vercel.app` | Canonical origin for Open Graph, robots, and magic links — so a hit on the old forwarding hostname still mints links on the new one. |
 | `RATE_LIMIT_PER_24H` | `20` (recommended for the demo) | Outbound intro requests allowed per profile per rolling 24h. Defaults to 5, which a few rehearsal run-throughs from the same account will exhaust — set it higher for the demo so a live retry never trips `rate_limited` on stage. |
 
 `/signin` already states which delivery mode is live (`lib/auth/mail.ts` →
@@ -51,7 +53,7 @@ From a clean checkout, to redeploy from scratch:
 ```bash
 pnpm install
 vercel login                       # if not already authenticated
-vercel link --project matchmaker-sprind --scope bradley-royes-projects --yes
+vercel link --project foresight-matchmaker --scope bradley-royes-projects --yes
 vercel env ls --scope bradley-royes-projects   # confirm the table above
 vercel deploy --prod --scope bradley-royes-projects --yes
 ```
@@ -66,12 +68,14 @@ doubled path).
 ## Smoke-test after every deploy
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' https://matchmaker-sprind.vercel.app/
-curl -s -o /dev/null -w '%{http_code}\n' https://matchmaker-sprind.vercel.app/signin
-curl -s https://matchmaker-sprind.vercel.app/api/v1/directory.json | python3 -c "import json,sys;d=json.load(sys.stdin);print(len(d['profiles']),'profiles')"
+curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/
+curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/signin
+curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/directory
+curl -s https://foresight-matchmaker.vercel.app/api/v1/stats | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['by_challenge'])"
+curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/api/v1/directory.json
 ```
 
-Expect `200`, `200`, and `118 profiles`.
+Expect `200`, `200`, `307`/`302` (directory redirects unsigned visitors to sign-in), programme counts, and `401` on the members-only directory API.
 
 ## Resetting between rehearsals
 

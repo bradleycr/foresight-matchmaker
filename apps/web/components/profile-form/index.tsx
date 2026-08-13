@@ -24,10 +24,13 @@ import {
   ANNOTATION,
   LINKAGE,
   STANDARDS,
+  CHALLENGE_ID,
+  DEFAULT_CHALLENGE_ID,
   EU_COUNTRIES,
   EFTA_COUNTRIES,
   OTHER_ELIGIBLE_COUNTRIES,
   type Kind,
+  type ChallengeId,
   type Dataset,
   type Profile,
 } from "@rmm/schema"
@@ -51,9 +54,10 @@ import { mergeProposalIntoForm } from "@/lib/profile-form-apply"
 
 /**
  * The profile form — create and edit in one component. Sections appear and
- * disappear with the chosen kind, mirroring SPRIND's three applicant
- * profiles. Validation is the server's job (the same Zod schema as the API
- * contract); this form renders whatever the server rejects, field by field.
+ * disappear with the chosen kind. Recoding Medicine is the first programme;
+ * the fields that follow are that programme's schema. Validation is the
+ * server's job (the same Zod schema as the API contract); this form renders
+ * whatever the server rejects, field by field.
  */
 
 // Non-eligible countries are listed too: eligibility is derived server-side
@@ -68,6 +72,7 @@ const COUNTRY_CODES = [
 
 interface FormState {
   kind: Kind
+  challenge_id: ChallengeId
   org_name: string
   org_type: (typeof ORG_TYPE)[number]
   country: string
@@ -105,9 +110,10 @@ interface FormState {
   still_seeking: (typeof LOOKING_FOR)[number][]
 }
 
-function blankState(): FormState {
+function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState {
   return {
     kind: "data_holder",
+    challenge_id: challengeId,
     org_name: "",
     org_type: "hospital",
     country: "DE",
@@ -152,6 +158,7 @@ function stateFromProfile(p: Profile): FormState {
   return {
     ...base,
     kind: p.kind,
+    challenge_id: p.challenge_id ?? DEFAULT_CHALLENGE_ID,
     org_name: p.org_name,
     org_type: p.org_type,
     country: p.country,
@@ -198,6 +205,7 @@ function toPayload(s: FormState): Record<string, unknown> {
 
   const shared = {
     kind: s.kind,
+    challenge_id: s.challenge_id,
     org_name: s.org_name,
     org_type: s.org_type,
     country: s.country,
@@ -254,6 +262,7 @@ export function ProfileForm({
   prefillEnabled = false,
   initialProposal,
   highlightGapsOnMount = false,
+  defaultChallengeId = DEFAULT_CHALLENGE_ID,
 }: {
   initial?: Profile
   profileId?: string
@@ -262,12 +271,14 @@ export function ProfileForm({
   initialProposal?: PrefillProposal
   /** After a Remmy draft is applied, spotlight fields still empty. */
   highlightGapsOnMount?: boolean
+  /** Programme selected on /register?challenge=… */
+  defaultChallengeId?: ChallengeId
 }) {
   const t = useT()
   const locale = useLocale()
   const router = useRouter()
   const [state, setState] = useState<FormState>(() => {
-    const base = initial ? stateFromProfile(initial) : blankState()
+    const base = initial ? stateFromProfile(initial) : blankState(defaultChallengeId)
     return initialProposal ? mergeProposalIntoForm(base, initialProposal, COUNTRY_CODES) : base
   })
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
@@ -437,21 +448,36 @@ export function ProfileForm({
         </div>
       )}
 
-      {/* Kind — fixed after creation. */}
+      {/* Programme first — schema flavour follows. Kind is fixed after create. */}
       {isCreate ? (
-        <EnumChips
-          label={t("field.kind")}
-          group="kind"
-          options={KIND}
-          value={[state.kind]}
-          onChange={(v) => {
-            const next = v.filter((k) => k !== state.kind)[0]
-            if (next) set("kind", next)
-          }}
-          hint={t("form.kind_hint")}
-        />
+        <>
+          <EnumChips
+            label={t("field.challenge")}
+            group="challenge"
+            options={CHALLENGE_ID}
+            value={[state.challenge_id]}
+            onChange={(v) => {
+              const next = v.filter((id) => id !== state.challenge_id)[0]
+              if (next) set("challenge_id", next)
+            }}
+            hint={t("form.challenge_hint")}
+          />
+          <EnumChips
+            label={t("field.kind")}
+            group="kind"
+            options={KIND}
+            value={[state.kind]}
+            onChange={(v) => {
+              const next = v.filter((k) => k !== state.kind)[0]
+              if (next) set("kind", next)
+            }}
+            hint={t("form.kind_hint")}
+          />
+        </>
       ) : (
         <p className="text-sm text-ink-soft">
+          {t("field.challenge")}: <strong className="uppercase">{t(`enum.challenge.${state.challenge_id}`)}</strong>
+          {" · "}
           {t("field.kind")}: <strong className="uppercase">{t(`enum.kind.${state.kind}`)}</strong>
         </p>
       )}

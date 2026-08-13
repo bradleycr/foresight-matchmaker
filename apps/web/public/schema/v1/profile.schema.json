@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://recoding-medicine.example/schema/v1/profile.schema.json",
-  "title": "Recoding Medicine Matchmaker — Profile (v1)",
+  "title": "Foresight Matchmaking — Profile (v1)",
   "$ref": "#/definitions/Profile",
   "definitions": {
     "Profile": {
@@ -18,6 +18,13 @@
               "minLength": 1,
               "maxLength": 120,
               "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "challenge_id": {
+              "type": "string",
+              "enum": [
+                "recoding_medicine"
+              ],
+              "default": "recoding_medicine"
             },
             "org_name": {
               "type": "string",
@@ -432,6 +439,13 @@
               "minLength": 1,
               "maxLength": 120,
               "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "challenge_id": {
+              "type": "string",
+              "enum": [
+                "recoding_medicine"
+              ],
+              "default": "recoding_medicine"
             },
             "org_name": {
               "type": "string",
@@ -872,6 +886,13 @@
               "minLength": 1,
               "maxLength": 120,
               "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "challenge_id": {
+              "type": "string",
+              "enum": [
+                "recoding_medicine"
+              ],
+              "default": "recoding_medicine"
             },
             "org_name": {
               "type": "string",

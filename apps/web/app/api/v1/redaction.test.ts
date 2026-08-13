@@ -168,20 +168,25 @@ afterEach(() => {
   cookieJar.clear()
 })
 
-describe("GET /api/v1/directory.json — the public contract", () => {
+describe("GET /api/v1/directory.json — members-only", () => {
+  it("rejects without a session", async () => {
+    const res = await directoryJsonGET()
+    expect(res.status).toBe(401)
+  })
+
   it("contains no private key, no hidden profile, and no non-public dataset", async () => {
-    const res = directoryJsonGET()
+    await signInAs(isea!.id, isea!.contact_email)
+    const res = await directoryJsonGET()
     const body = (await res.json()) as { profiles: Array<Record<string, unknown>> }
     const text = JSON.stringify(body)
 
     for (const key of PRIVATE_KEYS) expect(text).not.toContain(`"${key}"`)
-    // The actual private values on the golden fixture, not just the key names.
     expect(text).not.toContain("Küng")
     expect(text).not.toContain("b.kueng@example.invalid")
     expect(text).not.toContain("430 trios")
 
     expect(body.profiles.some((p) => p.slug === "test-hidden-profile")).toBe(false)
-    expect(body.profiles.some((p) => p.slug === "test-auth-only-profile")).toBe(false)
+    expect(body.profiles.some((p) => p.slug === "test-auth-only-profile")).toBe(true)
 
     const entry = body.profiles.find((p) => p.slug === "isea-alpenraum") as { datasets: unknown[] } | undefined
     expect(entry).toBeDefined()
@@ -189,8 +194,17 @@ describe("GET /api/v1/directory.json — the public contract", () => {
   })
 })
 
-describe("GET /api/v1/profiles/:id — unauthenticated", () => {
-  it("returns the redacted public shape for a public profile, dropping the private dataset", async () => {
+describe("GET /api/v1/profiles/:id", () => {
+  it("rejects without a session", async () => {
+    const res = await profileGET(jsonRequest(`/api/v1/profiles/${isea!.id}`, "GET"), {
+      params: Promise.resolve({ id: isea!.id }),
+    })
+    expect(res.status).toBe(401)
+  })
+
+  it("returns the redacted shape to another signed-in organisation, dropping the private dataset", async () => {
+    const viewer = makeAiTeam("test-directory-viewer")
+    await signInAs(viewer.id, viewer.contact_email)
     const res = await profileGET(jsonRequest(`/api/v1/profiles/${isea!.id}`, "GET"), {
       params: Promise.resolve({ id: isea!.id }),
     })
@@ -204,17 +218,12 @@ describe("GET /api/v1/profiles/:id — unauthenticated", () => {
   })
 
   it("returns 404 for a hidden profile instead of leaking its existence", async () => {
+    const viewer = makeAiTeam("test-hidden-viewer")
+    await signInAs(viewer.id, viewer.contact_email)
     const res = await profileGET(jsonRequest(`/api/v1/profiles/${hidden!.id}`, "GET"), {
       params: Promise.resolve({ id: hidden!.id }),
     })
     expect(res.status).toBe(404)
-  })
-
-  it("returns 401 for an authenticated_only profile with no session", async () => {
-    const res = await profileGET(jsonRequest(`/api/v1/profiles/${authOnly!.id}`, "GET"), {
-      params: Promise.resolve({ id: authOnly!.id }),
-    })
-    expect(res.status).toBe(401)
   })
 
   it("returns the full record, private fields included, to the owner", async () => {
@@ -280,44 +289,26 @@ describe("POST /api/v1/profiles — derived fields are server-owned", () => {
   })
 })
 
-describe("POST /api/v1/intros then PATCH /api/v1/intros/:id — the double opt-in reveal", () => {
-  it("reveals contact details only on acceptance, and nothing on decline", async () => {
+describe("POST /api/v1/intros — email forward, no accept/decline", () => {
+  it("records the contact with counterpart email and refuses PATCH", async () => {
     const team = makeAiTeam("test-intro-team")
-    const holderAccept = makeDataHolder("test-intro-holder-accept")
-    const holderDecline = makeDataHolder("test-intro-holder-decline")
+    const holder = makeDataHolder("test-intro-holder")
 
-    // 1. The team requests an intro to each holder — no contact info yet.
     await signInAs(team.id, team.contact_email)
-    const reqAccept = await introsPOST(jsonRequest("/api/v1/intros", "POST", { to_id: holderAccept.id, message: "Hi" }))
-    expect(reqAccept.status).toBe(201)
-    const reqAcceptBody = (await reqAccept.json()) as { intro: { id: string; counterpart: Record<string, unknown> } }
-    expect(reqAcceptBody.intro.counterpart.contact_email).toBeUndefined()
-
-    const reqDecline = await introsPOST(jsonRequest("/api/v1/intros", "POST", { to_id: holderDecline.id, message: "Hi" }))
-    const reqDeclineBody = (await reqDecline.json()) as { intro: { id: string } }
-
-    // 2. Holder A accepts — both sides get the counterpart's contact block.
-    await signInAs(holderAccept.id, holderAccept.contact_email)
-    const accepted = await introPATCH(jsonRequest(`/api/v1/intros/${reqAcceptBody.intro.id}`, "PATCH", { action: "accepted" }), {
-      params: Promise.resolve({ id: reqAcceptBody.intro.id }),
-    })
-    expect(accepted.status).toBe(200)
-    const acceptedBody = (await accepted.json()) as {
-      intro: { state: string; counterpart_contact?: { contact_email: string } }
+    const sent = await introsPOST(jsonRequest("/api/v1/intros", "POST", { to_id: holder.id, message: "Hi" }))
+    expect(sent.status).toBe(201)
+    const sentBody = (await sent.json()) as {
+      email_sent: boolean
+      intro: { id: string; state: string; counterpart: Record<string, unknown> }
     }
-    expect(acceptedBody.intro.state).toBe("accepted")
-    expect(acceptedBody.intro.counterpart_contact?.contact_email).toBe(team.contact_email)
+    expect(sentBody.intro.state).toBe("emailed")
+    expect(sentBody.intro.counterpart.contact_email).toBe(holder.contact_email)
+    expect(sentBody.email_sent).toBe(false)
 
-    // 3. Holder B declines — the response reveals nothing, not even a hint.
-    await signInAs(holderDecline.id, holderDecline.contact_email)
-    const declined = await introPATCH(
-      jsonRequest(`/api/v1/intros/${reqDeclineBody.intro.id}`, "PATCH", { action: "declined", decline_reason: "other" }),
-      { params: Promise.resolve({ id: reqDeclineBody.intro.id }) },
-    )
-    expect(declined.status).toBe(200)
-    const declinedText = JSON.stringify(await declined.json())
-    for (const key of PRIVATE_KEYS) expect(declinedText).not.toContain(`"${key}"`)
-    expect(declinedText).not.toContain("counterpart_contact")
+    const patch = await introPATCH(jsonRequest(`/api/v1/intros/${sentBody.intro.id}`, "PATCH", { action: "accepted" }), {
+      params: Promise.resolve({ id: sentBody.intro.id }),
+    })
+    expect(patch.status).toBe(410)
   })
 })
 
