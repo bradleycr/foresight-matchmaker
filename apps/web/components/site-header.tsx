@@ -19,7 +19,7 @@ export async function SiteHeader() {
           <span className="block font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
             {t("app.title")}
           </span>
-          <span className="mt-1 block text-sm text-ink-soft">{t("app.tagline")}</span>
+          <span className="mt-1 block text-sm text-teal-deep">{t("app.tagline")}</span>
         </Link>
         <LocaleSwitcher />
       </div>

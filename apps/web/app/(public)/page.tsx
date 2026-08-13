@@ -32,7 +32,7 @@ export default async function LandingPage({
         </p>
       ) : null}
 
-      <p className="font-listing text-sm font-bold uppercase tracking-widest text-ink-soft">{t("landing.kicker")}</p>
+      <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">{t("landing.kicker")}</p>
       <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-6xl">
         {t("landing.headline")}
       </h1>
@@ -47,14 +47,14 @@ export default async function LandingPage({
         </Link>
         <Link
           href="/register"
-          className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
+          className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
         >
           {t("landing.cta_register")}
         </Link>
       </div>
 
       <section id="programmes" aria-labelledby="programmes-heading" className="mt-16">
-        <h2 id="programmes-heading" className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
+        <h2 id="programmes-heading" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
           {t("landing.programmes_title")}
         </h2>
         <p className="mt-3 max-w-2xl text-ink-soft">{t("landing.programmes_body")}</p>
@@ -66,9 +66,9 @@ export default async function LandingPage({
               <li key={challenge.id}>
                 <Link
                   href={`/challenges/${challenge.slug}`}
-                  className="block border-2 border-rule-strong p-5 hover:bg-paper-shade"
+                  className="block border-2 border-rule-strong border-l-4 border-l-teal bg-paper p-5 hover:bg-paper-shade"
                 >
-                  <p className="font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">
+                  <p className="font-listing text-xs font-bold uppercase tracking-widest text-teal">
                     {t(`challenge.${challenge.id}.kicker`)}
                   </p>
                   <h3 className="mt-1 font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">

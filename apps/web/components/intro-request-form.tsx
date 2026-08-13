@@ -86,7 +86,6 @@ export function IntroRequestForm({
 
   return (
     <form onSubmit={submit} className="mt-3 flex max-w-xl flex-col gap-2">
-      <p className="text-sm text-ink-soft">{t("intro.explainer")}</p>
       <Textarea
         required
         maxLength={500}

@@ -3,26 +3,30 @@
 /* ---------------------------------------------------------------------------
  * Foresight Matchmaking — design tokens.
  *
- * The anchor concept is a printed phone directory. Ink on paper; rules
- * between rows, not shadows; square corners; dense listing typography with
- * tabular numerals; exactly ONE saturated colour (directory yellow), used
- * only as a functional marker — category tabs, active filter state, match
- * score. Everything else is ink.
+ * Still a printed directory: ink, rules, square corners, dense listing type.
+ * Paper is Foresight’s cool powder blue (not warm cream). Yellow remains the
+ * functional marker — CTAs, active filters, match scores. Teal is the second
+ * brand accent, borrowed from foresight.org, for programmes and identity.
  * ------------------------------------------------------------------------ */
 
 @theme {
-  /* Paper and ink. */
-  --color-paper: #faf8f2;
-  --color-paper-shade: #f1eee4;
+  /* Paper and ink — cool Foresight wash, near-black ink. */
+  --color-paper: #e5f0f6;
+  --color-paper-shade: #d5e6ee;
   --color-ink: #17150f;
-  --color-ink-soft: #575243;
-  --color-ink-faint: #8c8674;
-  --color-rule: #d9d4c5;
+  --color-ink-soft: #3a4a4e;
+  --color-ink-faint: #6a7c82;
+  --color-rule: #b8cdd4;
   --color-rule-strong: #17150f;
 
-  /* The one saturated colour. Functional marker only. */
+  /* Primary mark — directory yellow. Functional only. */
   --color-mark: #ffd200;
   --color-mark-ink: #171200;
+
+  /* Secondary brand — foresight.org teal / mint. */
+  --color-teal: #2f9f96;
+  --color-teal-deep: #1f7a74;
+  --color-mint: #c8ead1;
 
   /* Semantic states stay ink-adjacent, not decorative. */
   --color-alert: #a4262c;
@@ -70,6 +74,11 @@
 
   .font-listing {
     font-family: var(--font-listing);
+  }
+
+  /* Thin foresight.org band: sky → teal → mint. */
+  .brand-band {
+    background: linear-gradient(90deg, #5bb8d4 0%, #2f9f96 48%, #7ed6a5 100%);
   }
 
   /* The ONLY motion in the app: a 120ms state transition on filter chips. */

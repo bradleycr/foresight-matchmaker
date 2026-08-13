@@ -28,7 +28,7 @@ export default async function OpenGraphImage() {
           justifyContent: "space-between",
           width: "100%",
           height: "100%",
-          background: "#faf8f2",
+          background: "#e5f0f6",
           color: "#17150f",
           padding: "56px 64px",
           border: "4px solid #17150f",
@@ -43,7 +43,7 @@ export default async function OpenGraphImage() {
               fontWeight: 700,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "#575243",
+              color: "#2f9f96",
             }}
           >
             Foresight Institute
@@ -67,7 +67,7 @@ export default async function OpenGraphImage() {
               maxWidth: 880,
               fontSize: 28,
               lineHeight: 1.35,
-              color: "#575243",
+              color: "#3a4a4e",
             }}
           >
             Pair organisations around open programmes. Recoding Medicine is first — a SPRIND challenge.
@@ -121,7 +121,7 @@ export default async function OpenGraphImage() {
             </div>
           </div>
 
-          <p style={{ margin: 0, fontSize: 16, color: "#8c8674" }}>{ORIGIN.replace(/^https?:\/\//, "")}</p>
+          <p style={{ margin: 0, fontSize: 16, color: "#6a7c82" }}>{ORIGIN.replace(/^https?:\/\//, "")}</p>
         </div>
       </div>
     ),

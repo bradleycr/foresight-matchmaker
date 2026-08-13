@@ -25,7 +25,6 @@ export default async function InboxPage() {
   return (
     <div className="py-6">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("inbox.title")}</h1>
-      <p className="mt-1 max-w-2xl text-ink-soft">{t("inbox.explainer")}</p>
       <InboxList intros={intros} />
     </div>
   )

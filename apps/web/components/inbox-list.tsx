@@ -26,7 +26,6 @@ function ContactBlock({ intro, t }: { intro: IntroPayload; t: ReturnType<typeof 
           {c.contact_email}
         </a>
       </p>
-      <p className="mt-1 text-ink-soft">{t("inbox.continue_by_email")}</p>
     </div>
   )
 }

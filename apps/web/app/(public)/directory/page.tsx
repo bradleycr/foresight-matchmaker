@@ -24,7 +24,6 @@ export default async function DirectoryPage() {
   return (
     <div className="py-6">
       <h1 className="mb-4 font-listing text-3xl font-bold uppercase tracking-tight">{t("directory.title")}</h1>
-      <p className="mb-6 max-w-2xl text-ink-soft">{t("directory.members_only")}</p>
       <DirectoryBrowser profiles={directory.profiles} />
     </div>
   )

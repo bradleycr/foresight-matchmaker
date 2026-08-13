@@ -57,7 +57,7 @@ export default async function ChallengePage({
 
   return (
     <div className="py-8">
-      <p className="font-listing text-sm font-bold uppercase tracking-widest text-ink-soft">
+      <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
         {t(`challenge.${id}.kicker`)}
       </p>
       <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl">
@@ -74,7 +74,7 @@ export default async function ChallengePage({
         </Link>
         <Link
           href={`/register?challenge=${challenge.id}`}
-          className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
+          className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
         >
           {t("challenge.cta_register")}
         </Link>
@@ -96,7 +96,7 @@ export default async function ChallengePage({
       </dl>
 
       <section aria-labelledby="facts" className="mt-12 max-w-3xl">
-        <h2 id="facts" className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
+        <h2 id="facts" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
           {t("landing.facts_title")}
         </h2>
         <dl className="divide-y divide-rule">
