@@ -17,9 +17,9 @@ export async function SiteHeader() {
       <div className="flex items-start justify-between gap-4 pt-5 pb-3">
         <Link
           href="/"
-          className="group flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-5"
+          className="group flex min-w-0 flex-1 flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5"
         >
-          <ForesightMark className="shrink-0" />
+          <ForesightMark className="h-8 sm:h-9" />
           <span
             aria-hidden="true"
             className="hidden h-8 w-px shrink-0 bg-rule-strong sm:block"

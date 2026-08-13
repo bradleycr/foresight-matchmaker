@@ -1,15 +1,18 @@
 /**
- * Official Foresight wordmark — clean on paper, no plate behind it.
+ * Official Foresight wordmark — intrinsic ratio, never stretched.
+ * Height is set on the wrapper; the image fills it with object-contain.
  */
 export function ForesightMark({ className = "" }: { className?: string }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/partners/foresight.png"
-      alt="Foresight Institute"
-      width={140}
-      height={52}
-      className={`h-8 w-auto opacity-90 transition-opacity duration-150 group-hover:opacity-100 sm:h-9 ${className}`}
-    />
+    <span className={`inline-flex shrink-0 self-start ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/partners/foresight.png"
+        alt="Foresight Institute"
+        width={513}
+        height={192}
+        className="h-full w-auto max-w-none object-contain object-left"
+      />
+    </span>
   )
 }
