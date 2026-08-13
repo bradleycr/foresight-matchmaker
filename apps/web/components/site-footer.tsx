@@ -51,14 +51,6 @@ export async function SiteFooter() {
               </a>
               <span className="mt-0.5 block text-xs text-ink-faint">{PRIVACY_EMAIL}</span>
             </li>
-            {programme ? (
-              <li>
-                <a href={`mailto:${programme.hostEmail}`} className="underline underline-offset-2">
-                  {t("footer.challenge_contact")}
-                </a>
-                <span className="mt-0.5 block text-xs text-ink-faint">{programme.hostEmail}</span>
-              </li>
-            ) : null}
           </ul>
         </div>
       </div>
