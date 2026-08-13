@@ -1,6 +1,5 @@
 import { z } from "zod"
 import {
-  kindEnum,
   orgTypeEnum,
   languageEnum,
   lookingForEnum,
@@ -83,7 +82,7 @@ const sharedProfileFields = {
 }
 
 // ---------------------------------------------------------------------------
-// AI team fields (shared by ai_team and consortium)
+// AI capability fields (shared by ai_team, consortium, and individual)
 // ---------------------------------------------------------------------------
 
 const aiTeamFields = {
@@ -101,7 +100,7 @@ const aiTeamFields = {
 }
 
 // ---------------------------------------------------------------------------
-// The three profile kinds
+// The four profile kinds
 // ---------------------------------------------------------------------------
 
 export const dataHolderSchema = z.object({
@@ -128,11 +127,27 @@ export const consortiumSchema = z.object({
 })
 export type Consortium = z.infer<typeof consortiumSchema>
 
-/** Discriminated union across the three SPRIND applicant profiles. */
+/**
+ * An independent expert — same AI capability fields as an AI team, but the
+ * listing is a person. `org_name` is their display name. Matched as the AI
+ * side against data holders and seeking consortia. Pairing with an AI team
+ * (joining an existing group) is a second matching mode, not yet scored.
+ */
+export const individualSchema = z.object({
+  ...sharedProfileFields,
+  kind: z.literal("individual"),
+  ...aiTeamFields,
+  /** Optional current institution, lab, or employer. */
+  affiliation: z.string().max(200).optional(),
+})
+export type Individual = z.infer<typeof individualSchema>
+
+/** Discriminated union across applicant profiles. */
 export const profileSchema = z.discriminatedUnion("kind", [
   dataHolderSchema,
   aiTeamSchema,
   consortiumSchema,
+  individualSchema,
 ])
 export type Profile = z.infer<typeof profileSchema>
 

@@ -1,3 +1,5 @@
+import type { Kind } from "@rmm/schema"
+
 /**
  * After Remmy / paste-prefill applies a draft, these fields are still empty
  * (or kind-required and missing). Contact is almost always here — models
@@ -27,7 +29,7 @@ export type GapField =
 
 /** Minimal shape — anything the profile form can hand to gap detection. */
 export interface GapInspectable {
-  kind: "data_holder" | "ai_team" | "consortium"
+  kind: Kind
   org_name: string
   one_liner: string
   summary: string
@@ -69,7 +71,7 @@ export function findManualGaps(state: GapInspectable): GapField[] {
   if (empty(state.contact_email)) gaps.push("contact_email")
   if (empty(state.website)) gaps.push("website")
 
-  const showAi = state.kind === "ai_team" || state.kind === "consortium"
+  const showAi = state.kind === "ai_team" || state.kind === "consortium" || state.kind === "individual"
   const showData = state.kind === "data_holder" || state.kind === "consortium"
 
   if (showAi) {

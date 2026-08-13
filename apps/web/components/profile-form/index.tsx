@@ -108,6 +108,7 @@ interface FormState {
   needs_linkage: (typeof LINKAGE)[number][]
   needs_standards: (typeof STANDARDS)[number][]
   still_seeking: (typeof LOOKING_FOR)[number][]
+  affiliation: string
 }
 
 function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState {
@@ -149,6 +150,7 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     needs_linkage: [],
     needs_standards: [],
     still_seeking: [],
+    affiliation: "",
   }
 }
 
@@ -194,6 +196,7 @@ function stateFromProfile(p: Profile): FormState {
     needs_linkage: ai?.data_needs.linkage_required ?? [],
     needs_standards: ai?.data_needs.standards_preferred ?? [],
     still_seeking: p.kind === "consortium" ? p.still_seeking : [],
+    affiliation: p.kind === "individual" ? (p.affiliation ?? "") : "",
   }
 }
 
@@ -248,6 +251,14 @@ function toPayload(s: FormState): Record<string, unknown> {
 
   if (s.kind === "data_holder") return { ...shared, datasets: filterDatasetsForSubmit(s.datasets) }
   if (s.kind === "ai_team") return { ...shared, ...aiFields }
+  if (s.kind === "individual") {
+    return {
+      ...shared,
+      ...aiFields,
+      org_type: "individual",
+      affiliation: s.affiliation.trim() || undefined,
+    }
+  }
   return { ...shared, ...aiFields, datasets: filterDatasetsForSubmit(s.datasets), still_seeking: s.still_seeking }
 }
 
@@ -295,7 +306,8 @@ export function ProfileForm({
 
   const isCreate = !profileId
   const showDatasets = state.kind === "data_holder" || state.kind === "consortium"
-  const showAiFields = state.kind === "ai_team" || state.kind === "consortium"
+  const showAiFields = state.kind === "ai_team" || state.kind === "consortium" || state.kind === "individual"
+  const isPerson = state.kind === "individual"
 
   const gaps = useMemo(() => (spotlightGaps ? findManualGaps(state) : []), [spotlightGaps, state])
   const gapSet = useMemo(() => new Set<GapField>(gaps), [gaps])
@@ -469,7 +481,15 @@ export function ProfileForm({
             value={[state.kind]}
             onChange={(v) => {
               const next = v.filter((k) => k !== state.kind)[0]
-              if (next) set("kind", next)
+              if (!next) return
+              setClientIssues([])
+              setState((s) => ({
+                ...s,
+                kind: next,
+                ...(next === "individual"
+                  ? { org_type: "individual" as const, team_size: "1" as const, looking_for: s.looking_for.includes("join_team") ? s.looking_for : [...s.looking_for, "join_team" as const] }
+                  : {}),
+              }))
             }}
             hint={t("form.kind_hint")}
           />
@@ -485,13 +505,30 @@ export function ProfileForm({
       {/* Organisation. */}
       <section className="flex flex-col gap-4">
         <h2 className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
-          {t("form.section_org")}
+          {t(isPerson ? "form.section_you" : "form.section_org")}
         </h2>
-        <Field label={t("field.org_name")} htmlFor="org_name" required attention={needs("org_name")} id="gap-org_name">
+        <Field
+          label={t(isPerson ? "field.person_name" : "field.org_name")}
+          htmlFor="org_name"
+          required
+          attention={needs("org_name")}
+          id="gap-org_name"
+        >
           <Input id="org_name" required maxLength={200} value={state.org_name} onChange={(e) => set("org_name", e.target.value)} />
         </Field>
+        {isPerson ? (
+          <Field label={t("field.affiliation")} htmlFor="affiliation" hint={t("form.affiliation_hint")}>
+            <Input id="affiliation" maxLength={200} value={state.affiliation} onChange={(e) => set("affiliation", e.target.value)} />
+          </Field>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2">
-          <EnumSelect label={t("field.org_type")} group="org_type" options={ORG_TYPE} value={state.org_type} onChange={(v) => v && set("org_type", v)} id="org_type" />
+          {isPerson ? (
+            <Field label={t("field.org_type")} htmlFor="org_type">
+              <Input id="org_type" readOnly value={t("enum.org_type.individual")} />
+            </Field>
+          ) : (
+            <EnumSelect label={t("field.org_type")} group="org_type" options={ORG_TYPE} value={state.org_type} onChange={(v) => v && set("org_type", v)} id="org_type" />
+          )}
           <Field label={t("field.country")} htmlFor="country" hint={t("form.country_hint")} required>
             <Select id="country" value={state.country} onChange={(e) => set("country", e.target.value)}>
               {COUNTRY_CODES.map((code) => (
@@ -603,7 +640,7 @@ export function ProfileForm({
           </Field>
 
           <h3 className="mt-2 border-b border-rule pb-1 font-listing text-lg font-bold uppercase">
-            {t("form.section_needs")}
+            {t(isPerson ? "form.section_needs_person" : "form.section_needs")}
           </h3>
           <EnumChips label={t("field.modality")} group="modality" options={MODALITY} value={state.needs_modality} onChange={(v) => set("needs_modality", v)} attention={needs("needs_modality")} fieldId="gap-needs_modality" />
           <EnumChips label={t("field.disease_area")} group="disease_area" options={DISEASE_AREA} value={state.needs_disease_area} onChange={(v) => set("needs_disease_area", v)} attention={needs("needs_disease_area")} fieldId="gap-needs_disease_area" />

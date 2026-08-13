@@ -1,4 +1,4 @@
-import type { Profile, Dataset, DataNeeds, Blocker, PairingSides } from "./types"
+import type { Profile, Dataset, DataNeeds, Blocker, PairingSides, PeoplePairingSides } from "./types"
 import { consortiumIsSeeking } from "./helpers"
 
 /**
@@ -32,7 +32,7 @@ function teamOnlyExports(needsSideAiCaps: readonly string[]): boolean {
 }
 
 function aiCapabilitiesOf(p: Profile): readonly string[] {
-  if (p.kind === "ai_team" || p.kind === "consortium") return p.privacy_capability
+  if (p.kind === "ai_team" || p.kind === "consortium" || p.kind === "individual") return p.privacy_capability
   return []
 }
 
@@ -154,12 +154,12 @@ function softBlockers(sides: PairingSides): Blocker[] {
     })
   }
 
-  if (aiSide.kind === "ai_team" || aiSide.kind === "consortium") {
+  if (aiSide.kind === "ai_team" || aiSide.kind === "consortium" || aiSide.kind === "individual") {
     if (aiSide.clinical_partner === "need") {
       out.push({
         key: "clinical_partner_needed",
         severity: "soft",
-        note: "The AI team still needs a clinical partner, which this data holder may or may not provide.",
+        note: "The AI side still needs a clinical partner, which this data holder may or may not provide.",
       })
     }
   }
@@ -254,6 +254,58 @@ export function computeBlockers(a: Profile, b: Profile, oriented: PairingSides |
   }
 
   // De-duplicate by key, keeping the most severe.
+  return dedupeBlockers(out)
+}
+
+/** Blockers for a person joining a team — no dataset access checks. */
+export function computePeopleBlockers(
+  a: Profile,
+  b: Profile,
+  people: PeoplePairingSides | null,
+): Blocker[] {
+  const out: Blocker[] = []
+
+  if (a.kind === b.kind) {
+    out.push({
+      key: "same_kind",
+      severity: "hard",
+      note: "Two individuals are not a team pairing.",
+    })
+  }
+
+  if (people === null) {
+    out.push({
+      key: "no_pairing",
+      severity: "hard",
+      note: "Individuals are matched with AI teams and seeking consortia, not with data holders.",
+    })
+  }
+
+  const aCanLead = a.eligible_hq && !a.partner_only
+  const bCanLead = b.eligible_hq && !b.partner_only
+  if (!aCanLead && !bCanLead) {
+    out.push({
+      key: "no_eligible_lead",
+      severity: "hard",
+      note:
+        "Neither organisation can lead an application (HQ outside the eligible region or marked collaboration-only).",
+    })
+  }
+
+  if (!consortiumIsSeeking(a)) {
+    out.push({ key: "a.consortium_complete", severity: "hard", note: "This consortium is not currently seeking partners." })
+  }
+  if (!consortiumIsSeeking(b)) {
+    out.push({ key: "b.consortium_complete", severity: "hard", note: "This consortium is not currently seeking partners." })
+  }
+
+  out.push(...profileHardBlockers(a, "a"))
+  out.push(...profileHardBlockers(b, "b"))
+  out.push(...profileSoftBlockers(a, b))
+  return dedupeBlockers(out)
+}
+
+function dedupeBlockers(out: Blocker[]): Blocker[] {
   const byKey = new Map<string, Blocker>()
   for (const b2 of out) {
     const existing = byKey.get(b2.key)

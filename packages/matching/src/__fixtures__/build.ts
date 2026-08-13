@@ -90,6 +90,7 @@ const aiFields = () => ({
 type DataHolder = Extract<Profile, { kind: "data_holder" }>
 type AiTeam = Extract<Profile, { kind: "ai_team" }>
 type Consortium = Extract<Profile, { kind: "consortium" }>
+type Individual = Extract<Profile, { kind: "individual" }>
 
 export function buildDataHolder(overrides: Partial<DataHolder> = {}): DataHolder {
   return {
@@ -116,6 +117,19 @@ export function buildConsortium(overrides: Partial<Consortium> = {}): Consortium
     datasets: [buildDataset()],
     ...aiFields(),
     still_seeking: ["clinical_partner" as const],
+    ...overrides,
+  }
+}
+
+export function buildIndividual(overrides: Partial<Individual> = {}): Individual {
+  return {
+    ...shared(),
+    org_name: `Alex Expert ${counter}`,
+    org_type: "individual",
+    kind: "individual",
+    ...aiFields(),
+    team_size: "1",
+    looking_for: ["join_team"],
     ...overrides,
   }
 }

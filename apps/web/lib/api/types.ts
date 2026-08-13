@@ -84,7 +84,7 @@ export interface DirectoryProfile {
   completeness: number
   // data_holder / consortium
   datasets?: PublicDataset[]
-  // ai_team / consortium
+  // ai_team / consortium / individual
   methods?: Methods[]
   application_target?: ApplicationTarget[]
   domain_expertise?: DiseaseArea[]
@@ -105,6 +105,8 @@ export interface DirectoryProfile {
   }
   // consortium
   still_seeking?: LookingFor[]
+  // individual
+  affiliation?: string
 }
 
 export interface DirectoryPayload {
@@ -148,5 +150,5 @@ export interface IntroPayload {
 export interface DirectoryStatsPayload {
   version: string
   generated_at: string
-  by_challenge: Record<string, { data_holder: number; ai_team: number; consortium: number }>
+  by_challenge: Record<string, { data_holder: number; ai_team: number; consortium: number; individual: number }>
 }

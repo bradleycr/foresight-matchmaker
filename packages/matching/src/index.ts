@@ -1,7 +1,7 @@
 export { score, topMatches } from "./score"
-export { computeBlockers, hasHardBlocker } from "./blockers"
-export { computeFactors, sumFactors } from "./factors"
-export { orientPairing } from "./pairing"
+export { computeBlockers, computePeopleBlockers, hasHardBlocker } from "./blockers"
+export { computeFactors, computePeopleFactors, sumFactors } from "./factors"
+export { orientPairing, orientPeoplePairing } from "./pairing"
 export { jaccard, overlaps, unique, consortiumIsSeeking, hasDatasets, hasAiFields } from "./helpers"
 export type {
   Factor,
@@ -9,6 +9,7 @@ export type {
   ScoreResult,
   MatchEntry,
   PairingSides,
+  PeoplePairingSides,
   Profile,
   Dataset,
   DataNeeds,

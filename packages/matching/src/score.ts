@@ -1,23 +1,36 @@
 import type { Profile, ScoreResult, MatchEntry } from "./types"
-import { orientPairing } from "./pairing"
-import { computeBlockers, hasHardBlocker } from "./blockers"
-import { computeFactors, sumFactors } from "./factors"
+import { orientPairing, orientPeoplePairing } from "./pairing"
+import { computeBlockers, computePeopleBlockers, hasHardBlocker } from "./blockers"
+import { computeFactors, computePeopleFactors, sumFactors } from "./factors"
 import { consortiumIsSeeking } from "./helpers"
 
 /**
- * Score an ordered pair of profiles for the SPRIND Rare-disease Matchmaker.
+ * Score an ordered pair of profiles.
  *
  * Pipeline:
- *   1. Orient the pairing (who supplies data, who supplies AI). If no valid
- *      data/AI orientation exists, the pairing is structurally impossible.
- *   2. Collect blockers. Any HARD blocker forces score 0 (but every blocker,
+ *   1. If either side is an individual, score a person↔team pairing
+ *      (AI team or seeking consortium). Data holders are excluded.
+ *   2. Otherwise orient data side + AI side. If no valid orientation
+ *      exists, the pairing is structurally impossible.
+ *   3. Collect blockers. Any HARD blocker forces score 0 (but every blocker,
  *      hard and soft, is still returned so the friction is visible).
- *   3. Otherwise sum the weighted soft factors into a 0–100 score.
+ *   4. Otherwise sum the weighted soft factors into a 0–100 score.
  *
  * The function is pure and deterministic — identical inputs always produce an
  * identical result, which the test-suite relies on.
  */
 export function score(a: Profile, b: Profile): ScoreResult {
+  if (a.kind === "individual" || b.kind === "individual") {
+    const people = orientPeoplePairing(a, b)
+    const blockers = computePeopleBlockers(a, b, people)
+    if (people === null || hasHardBlocker(blockers)) {
+      return { score: 0, factors: [], blockers }
+    }
+    const factors = computePeopleFactors(people)
+    const raw = sumFactors(factors)
+    return { score: Math.max(0, Math.min(100, raw)), factors, blockers }
+  }
+
   const oriented = orientPairing(a, b)
   const blockers = computeBlockers(a, b, oriented)
 

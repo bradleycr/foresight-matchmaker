@@ -157,7 +157,7 @@ ethics_approval: ${ETHICS_APPROVAL.join(", ")}
 
 Text: org_name, one_liner (<=140), summary (<=600), website, track_record (up to 5 URLs).
 Data holders: datasets[] with name, modality, disease_area, n_subjects, access_model, etc.
-AI teams: data_needs { modality, disease_area, min_n_subjects, annotation_required, linkage_required, standards_preferred }.`
+AI teams and independent experts: data_needs { modality, disease_area, min_n_subjects, annotation_required, linkage_required, standards_preferred }. Independent people use kind "individual" (org_name is their name).`
 
 /**
  * Map prose or a chat transcript → validated PrefillProposal.

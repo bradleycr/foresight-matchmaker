@@ -42,7 +42,7 @@ export default async function ChallengePage({
 
   const { t } = await getT()
   const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
-  const counts = stats.by_challenge?.[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0 }
+  const counts = stats.by_challenge?.[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const id = challenge.id
 
   const facts = [
@@ -80,12 +80,13 @@ export default async function ChallengePage({
         </Link>
       </div>
 
-      <dl className="mt-12 grid grid-cols-1 gap-px border border-rule-strong bg-rule-strong sm:grid-cols-3">
+      <dl className="mt-12 grid grid-cols-1 gap-px border border-rule-strong bg-rule-strong sm:grid-cols-2 lg:grid-cols-4">
         {(
           [
             ["data_holder", t("landing.count_data_holders")],
             ["ai_team", t("landing.count_ai_teams")],
             ["consortium", t("landing.count_consortia")],
+            ["individual", t("landing.count_individuals")],
           ] as const
         ).map(([kind, label]) => (
           <div key={kind} className="bg-paper px-4 py-5">

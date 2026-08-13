@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://recoding-medicine.example/schema/v1/dataset.schema.json",
+  "$id": "https://foresight-matchmaker.vercel.app/schema/v1/dataset.schema.json",
   "title": "Foresight Matchmaking — Dataset (v1)",
   "$ref": "#/definitions/Dataset",
   "definitions": {

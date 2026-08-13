@@ -107,6 +107,11 @@ export interface KindCounts {
   data_holder: number
   ai_team: number
   consortium: number
+  individual: number
+}
+
+export function emptyKindCounts(): KindCounts {
+  return { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
 }
 
 /**
@@ -118,7 +123,7 @@ export function countVisibleProfilesByChallenge(): Record<string, KindCounts> {
   for (const p of listProfiles()) {
     if (p.visibility === "hidden") continue
     const id = p.challenge_id ?? "recoding_medicine"
-    const bucket = (out[id] ??= { data_holder: 0, ai_team: 0, consortium: 0 })
+    const bucket = (out[id] ??= emptyKindCounts())
     bucket[p.kind] += 1
   }
   return out

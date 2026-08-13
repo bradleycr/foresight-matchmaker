@@ -1,13 +1,14 @@
+import { hasAiCapabilityKind, hasDatasetKind } from "@rmm/schema"
 import type { Profile, Dataset, DataNeeds } from "./types"
 
 /** Does this profile carry datasets (data_holder or consortium)? */
 export function hasDatasets(p: Profile): p is Extract<Profile, { datasets: Dataset[] }> {
-  return p.kind === "data_holder" || p.kind === "consortium"
+  return hasDatasetKind(p.kind)
 }
 
-/** Does this profile carry AI-team fields (ai_team or consortium)? */
+/** Does this profile carry AI capability fields (ai_team, consortium, or individual)? */
 export function hasAiFields(p: Profile): p is Extract<Profile, { data_needs: DataNeeds }> {
-  return p.kind === "ai_team" || p.kind === "consortium"
+  return hasAiCapabilityKind(p.kind)
 }
 
 /**

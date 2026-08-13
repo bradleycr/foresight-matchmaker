@@ -5,8 +5,9 @@ import { NextResponse } from "next/server"
 /**
  * GET /api/v1/schema — the versioned JSON Schema contract, generated from
  * the Zod definitions by `pnpm schema:export`. Together with
- * Together with the members-only `/api/v1/directory.json` this is the
- * schema a signed-in client needs to build against the matchmaker.
+ * `/api/v1/directory.json` (session required) this is the contract a
+ * client or agent should build against. See also `/llms.txt` and
+ * `/openapi.json`.
  */
 export function GET(): NextResponse {
   const file = path.join(process.cwd(), "public", "schema", "v1", "profile.schema.json")

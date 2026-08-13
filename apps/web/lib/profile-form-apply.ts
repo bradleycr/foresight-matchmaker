@@ -104,12 +104,21 @@ function resetForKind<T extends ProposalMergeTarget>(state: T, kind: Kind): T {
     }
   }
 
-  if (kind === "ai_team") {
+  if (kind === "ai_team" || kind === "individual") {
     return {
       ...state,
       kind,
       datasets: [emptyDataset()],
       still_seeking: [],
+      ...(kind === "individual"
+        ? {
+            org_type: "individual" as const,
+            team_size: "1" as const,
+            looking_for: state.looking_for.includes("join_team")
+              ? state.looking_for
+              : [...state.looking_for, "join_team" as const],
+          }
+        : {}),
     }
   }
 

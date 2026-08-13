@@ -14,9 +14,19 @@ import { z } from "zod"
 // Shared profile vocabularies
 // ---------------------------------------------------------------------------
 
-export const KIND = ["data_holder", "ai_team", "consortium"] as const
+export const KIND = ["data_holder", "ai_team", "consortium", "individual"] as const
 export const kindEnum = z.enum(KIND)
 export type Kind = (typeof KIND)[number]
+
+/** Kinds that carry datasets and can occupy the data side of a pairing. */
+export function hasDatasetKind(kind: Kind): boolean {
+  return kind === "data_holder" || kind === "consortium"
+}
+
+/** Kinds that carry AI capability and can occupy the AI side of a data pairing. */
+export function hasAiCapabilityKind(kind: Kind): boolean {
+  return kind === "ai_team" || kind === "consortium"
+}
 
 /**
  * Which programme a profile is listed for. The platform is Foresight
@@ -72,6 +82,8 @@ export const LOOKING_FOR = [
   "clinical_partner",
   "data_governance_support",
   "compute",
+  "join_team",
+  "individual_expert",
   "not_looking",
 ] as const
 export const lookingForEnum = z.enum(LOOKING_FOR)

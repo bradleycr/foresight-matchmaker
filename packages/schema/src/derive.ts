@@ -53,7 +53,7 @@ export function computeCompleteness(profile: Partial<Profile> & { kind: Profile[
   if (profile.kind === "data_holder" || profile.kind === "consortium") {
     fields.push("datasets")
   }
-  if (profile.kind === "ai_team" || profile.kind === "consortium") {
+  if (profile.kind === "ai_team" || profile.kind === "consortium" || profile.kind === "individual") {
     fields.push(...AI_FIELDS)
   }
   if (profile.kind === "consortium") {

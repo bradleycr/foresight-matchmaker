@@ -7,8 +7,8 @@ import {
   type DiseaseArea,
   type Annotation,
 } from "@rmm/schema"
-import type { Factor, PairingSides, Dataset, DataNeeds, Profile } from "./types"
-import { overlaps } from "./helpers"
+import type { Factor, PairingSides, Dataset, DataNeeds, Profile, PeoplePairingSides } from "./types"
+import { overlaps, jaccard } from "./helpers"
 
 /**
  * Soft scoring factors for an oriented pairing, exactly as specified:
@@ -280,4 +280,82 @@ function scaleNote(r: number): string {
 
 export function sumFactors(factors: readonly Factor[]): number {
   return Math.round(factors.reduce((acc, f) => acc + f.earned, 0))
+}
+
+function statedOverlap(a: readonly string[], b: readonly string[]): number {
+  if (a.length === 0 || b.length === 0) return 0.5
+  return jaccard(a, b)
+}
+
+function teamWantsPerson(team: PeoplePairingSides["team"]): boolean {
+  if (team.looking_for.includes("individual_expert")) return true
+  return team.kind === "consortium" && team.still_seeking.includes("individual_expert")
+}
+
+/**
+ * Soft factors for a person joining a team. Weights sum to 100. Unstated
+ * lists score 0.5 so they neither reward nor punish.
+ */
+export function computePeopleFactors(sides: PeoplePairingSides): Factor[] {
+  const { person, team } = sides
+  const domain = statedOverlap(person.domain_expertise, team.domain_expertise)
+  const methods = statedOverlap(person.methods, team.methods)
+  const target = statedOverlap(person.application_target, team.application_target)
+  const privacy = statedOverlap(person.privacy_capability, team.privacy_capability)
+  const language = overlaps(person.languages, team.languages) ? 1 : 0
+  const colocation = colocationRatio(person, team)
+  const seeking = teamWantsPerson(team) && person.looking_for.includes("join_team")
+    ? 1
+    : teamWantsPerson(team) || person.looking_for.includes("join_team")
+      ? 0.75
+      : 0.5
+
+  return [
+    {
+      key: "domain_expertise_fit",
+      weight: 28,
+      earned: pts(28, domain),
+      note: domain >= 0.75 ? "Clinical domain lines up well." : domain >= 0.4 ? "Partial clinical domain overlap." : "Limited clinical domain overlap.",
+    },
+    {
+      key: "methods_fit",
+      weight: 22,
+      earned: pts(22, methods),
+      note: methods >= 0.75 ? "Methods overlap strongly." : methods >= 0.4 ? "Some shared methods." : "Little method overlap.",
+    },
+    {
+      key: "application_target_fit",
+      weight: 18,
+      earned: pts(18, target),
+      note: target >= 0.75 ? "Application targets align." : target >= 0.4 ? "Partial target overlap." : "Different application targets.",
+    },
+    {
+      key: "privacy_fit",
+      weight: 12,
+      earned: pts(12, privacy),
+      note: privacy >= 0.75 ? "Privacy capabilities overlap." : privacy >= 0.4 ? "Partial privacy overlap." : "Privacy capabilities differ.",
+    },
+    {
+      key: "language_fit",
+      weight: 8,
+      earned: pts(8, language),
+      note: language ? "Shared working language." : "No shared working language listed.",
+    },
+    {
+      key: "colocation_fit",
+      weight: 7,
+      earned: pts(7, colocation),
+      note: colocation ? "Same country or attending the same event." : "No shared location or event.",
+    },
+    {
+      key: "seeking_fit",
+      weight: 5,
+      earned: pts(5, seeking),
+      note: seeking >= 1
+        ? "The team is seeking an individual and the person wants to join a team."
+        : seeking >= 0.75
+          ? "One side has marked the join-a-team intent."
+          : "Join-a-team intent is not yet marked.",
+    },
+  ]
 }

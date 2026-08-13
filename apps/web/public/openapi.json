@@ -1,0 +1,192 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Foresight Matchmaking",
+    "version": "v1",
+    "description": "Headless contract for the Foresight Institute directory. Recoding Medicine is the first programme. Matching is deterministic (no LLM on the score). Contact details and dataset governance notes never appear in public payloads. Session cookie after magic-link sign-in; no API keys yet.",
+    "contact": {
+      "name": "Foresight Institute",
+      "url": "https://foresight.org",
+      "email": "bradley@foresight.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://foresight-matchmaker.vercel.app",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    { "name": "public", "description": "No authentication." },
+    { "name": "directory", "description": "Signed-in member session required." },
+    { "name": "write", "description": "Create or update a listing." }
+  ],
+  "paths": {
+    "/api/v1/schema": {
+      "get": {
+        "tags": ["public"],
+        "summary": "Profile JSON Schema (v1)",
+        "operationId": "getProfileSchema",
+        "responses": {
+          "200": {
+            "description": "JSON Schema generated from the Zod source of truth.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stats": {
+      "get": {
+        "tags": ["public"],
+        "summary": "Public listing counts by programme and kind",
+        "operationId": "getStats",
+        "responses": {
+          "200": {
+            "description": "Aggregates only. No organisation names.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Stats" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/directory.json": {
+      "get": {
+        "tags": ["directory"],
+        "summary": "Machine-readable directory dump",
+        "description": "Redacted listings. Requires a signed-in session cookie. Hidden profiles are omitted. Contact fields are never included.",
+        "operationId": "getDirectory",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Directory payload",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Directory" }
+              }
+            }
+          },
+          "401": { "description": "Not signed in." }
+        }
+      }
+    },
+    "/api/v1/profiles": {
+      "post": {
+        "tags": ["write"],
+        "summary": "Create a listing",
+        "description": "Public. Kind cannot change after create. Server derives eligible_hq and completeness. Signs the submitter in.",
+        "operationId": "createProfile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["kind", "org_name"],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": ["data_holder", "ai_team", "consortium", "individual"]
+                  },
+                  "org_name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Created profile (redacted) plus claim_link when reveal is allowed." },
+          "400": { "description": "Validation error." }
+        }
+      }
+    },
+    "/api/v1/profiles/{id}": {
+      "get": {
+        "tags": ["directory"],
+        "summary": "Get one listing",
+        "operationId": "getProfile",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Owner/admin see the full profile; other members see the redacted shape." },
+          "401": { "description": "Not signed in." },
+          "404": { "description": "Unknown or hidden." }
+        }
+      }
+    },
+    "/api/v1/matches": {
+      "get": {
+        "tags": ["directory"],
+        "summary": "Ranked shortlist for the signed-in listing",
+        "description": "Top matches with factor breakdown and blockers. Score is deterministic.",
+        "operationId": "getMatches",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Shortlist." },
+          "401": { "description": "Not signed in." }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "rmm_session",
+        "description": "HTTP session issued after magic-link sign-in. Cookie name may vary; treat as an opaque session cookie. Machine API keys are not issued yet."
+      }
+    },
+    "schemas": {
+      "Kind": {
+        "type": "string",
+        "enum": ["data_holder", "ai_team", "consortium", "individual"]
+      },
+      "Stats": {
+        "type": "object",
+        "required": ["version", "generated_at", "by_challenge"],
+        "properties": {
+          "version": { "type": "string" },
+          "generated_at": { "type": "string", "format": "date-time" },
+          "by_challenge": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "data_holder": { "type": "integer" },
+                "ai_team": { "type": "integer" },
+                "consortium": { "type": "integer" },
+                "individual": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "Directory": {
+        "type": "object",
+        "required": ["version", "generated_at", "profiles"],
+        "properties": {
+          "version": { "type": "string" },
+          "generated_at": { "type": "string", "format": "date-time" },
+          "profiles": {
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import type { Dataset } from "@rmm/schema"
+import type { Dataset, Kind } from "@rmm/schema"
 import { parseUrlLines, tryNormalizeUrl } from "./normalize-url"
 
 /** A dataset the user never started — safe to drop before submit. */
@@ -20,7 +20,7 @@ export type ValidationIssue = {
 }
 
 interface ValidateInput {
-  kind: "data_holder" | "ai_team" | "consortium"
+  kind: Kind
   website: string
   track_record: string
   datasets: Dataset[]

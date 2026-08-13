@@ -1,0 +1,50 @@
+# Foresight Matchmaking
+
+A Foresight Institute directory that pairs listings around open programmes.
+Recoding Medicine (SPRIND) is the first programme. Matching is deterministic:
+no LLM on the score.
+
+Operator: Foresight Institute — https://foresight.org
+Product: https://foresight-matchmaker.vercel.app
+
+## What this is
+
+Listings have a kind: data_holder, ai_team, consortium, or individual.
+Individuals are independent experts (not yet on a team). They match with
+AI teams and seeking consortia. They do not appear on data-holder shortlists
+(holders want a team that can apply). Introductions in the directory are
+not gated by match score.
+
+Contact details and dataset governance notes never appear in public payloads.
+
+## Machine-readable contract (start here)
+
+- JSON Schema (profiles): https://foresight-matchmaker.vercel.app/api/v1/schema
+- JSON Schema (files): https://foresight-matchmaker.vercel.app/schema/v1/profile.schema.json
+- OpenAPI 3.1: https://foresight-matchmaker.vercel.app/openapi.json
+- Public aggregates: https://foresight-matchmaker.vercel.app/api/v1/stats
+- Directory dump (session cookie required): https://foresight-matchmaker.vercel.app/api/v1/directory.json
+- Human schema pack for SPRIND: see docs/sprind/recoding-medicine-schema.md in the source repo
+
+## Auth today
+
+Human sign-in is a magic link; subsequent calls use an HTTP session cookie.
+There is no API-key or OAuth machine credential yet. Agents and other
+directories can read schema + stats without auth. Full listings require a
+signed-in member session. Do not scrape HTML; use the JSON routes.
+
+## MCP
+
+Not live. When shipped it will be a thin adapter over this REST surface
+(search_directory, get_profile, get_schema, get_matches), not a second
+source of truth. Prefer OpenAPI + JSON Schema until then.
+
+## Matching rules (summary)
+
+- Orient organisation pairs as data side + AI side.
+- Same kind is a hard block (except consortium ↔ consortium).
+- individual ↔ ai_team and individual ↔ seeking consortium: scored (join a team).
+- individual ↔ data_holder: not ranked.
+- Hard blockers zero the score but are still returned (governance friction
+  is the research output).
+- Score is 0–100, deterministic, explainable factors.

@@ -36,12 +36,23 @@ export interface MatchEntry extends ScoreResult {
  * The "data side" and "AI side" of a candidate pairing. A pairing has meaning
  * only when one side supplies data and the other supplies AI capability.
  * Consortia can occupy either side depending on what they are still seeking.
+ * Individuals never occupy this orientation — they join teams, they do not
+ * substitute for one.
  */
 export interface PairingSides {
   dataSide: Profile
   datasets: Dataset[]
   aiSide: Profile
   needs: DataNeeds
+}
+
+/**
+ * A person joining a team. Ranked against AI teams and seeking consortia,
+ * never against data holders (holders want a team that can apply).
+ */
+export interface PeoplePairingSides {
+  person: Extract<Profile, { kind: "individual" }>
+  team: Extract<Profile, { kind: "ai_team" | "consortium" }>
 }
 
 export type { Profile, Dataset, DataNeeds }

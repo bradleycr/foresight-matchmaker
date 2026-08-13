@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { dataHolderSchema, aiTeamSchema, consortiumSchema } from "@rmm/schema"
+import { dataHolderSchema, aiTeamSchema, consortiumSchema, individualSchema } from "@rmm/schema"
 
 /**
  * Client-facing write schemas. These are the full profile schemas minus every
@@ -22,6 +22,7 @@ export const profileInputSchema = z.discriminatedUnion("kind", [
   dataHolderSchema.omit(SERVER_OWNED),
   aiTeamSchema.omit(SERVER_OWNED),
   consortiumSchema.omit(SERVER_OWNED),
+  individualSchema.omit(SERVER_OWNED),
 ])
 
 export type ProfileInput = z.infer<typeof profileInputSchema>

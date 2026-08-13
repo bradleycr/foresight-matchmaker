@@ -40,14 +40,14 @@ function main() {
 
   writeSchema("profile", {
     $schema: "http://json-schema.org/draft-07/schema#",
-    $id: `https://recoding-medicine.example/schema/${SCHEMA_VERSION}/profile.schema.json`,
+    $id: `https://foresight-matchmaker.vercel.app/schema/${SCHEMA_VERSION}/profile.schema.json`,
     title: `Foresight Matchmaking — Profile (${SCHEMA_VERSION})`,
     ...profileJsonSchema,
   })
 
   writeSchema("dataset", {
     $schema: "http://json-schema.org/draft-07/schema#",
-    $id: `https://recoding-medicine.example/schema/${SCHEMA_VERSION}/dataset.schema.json`,
+    $id: `https://foresight-matchmaker.vercel.app/schema/${SCHEMA_VERSION}/dataset.schema.json`,
     title: `Foresight Matchmaking — Dataset (${SCHEMA_VERSION})`,
     ...datasetJsonSchema,
   })

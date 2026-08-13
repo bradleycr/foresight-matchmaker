@@ -1,13 +1,14 @@
 import { describe, it, expect } from "vitest"
 import { score, topMatches } from "./score"
 import { computeBlockers } from "./blockers"
-import { orientPairing } from "./pairing"
+import { orientPairing, orientPeoplePairing } from "./pairing"
 import { jaccard, overlaps } from "./helpers"
 import { modalityOverlap, diseaseOverlap, accessModelRatio, scaleRatio, readinessRatio } from "./factors"
 import {
   buildDataHolder,
   buildAiTeam,
   buildConsortium,
+  buildIndividual,
   buildDataset,
   buildNeeds,
 } from "./__fixtures__/build"
@@ -55,6 +56,35 @@ describe("orientPairing", () => {
   it("orients a consortium against an ai_team", () => {
     expect(orientPairing(buildConsortium(), buildAiTeam())).not.toBeNull()
   })
+  it("does not put an individual on the data/AI axis", () => {
+    expect(orientPairing(buildDataHolder(), buildIndividual())).toBeNull()
+    expect(orientPairing(buildIndividual(), buildAiTeam())).toBeNull()
+  })
+})
+
+describe("orientPeoplePairing", () => {
+  it("orients an individual against an AI team", () => {
+    const person = buildIndividual()
+    const team = buildAiTeam()
+    const oriented = orientPeoplePairing(person, team)
+    expect(oriented?.person.id).toBe(person.id)
+    expect(oriented?.team.id).toBe(team.id)
+  })
+  it("orients regardless of argument order", () => {
+    const person = buildIndividual()
+    const team = buildAiTeam()
+    const oriented = orientPeoplePairing(team, person)
+    expect(oriented?.person.id).toBe(person.id)
+  })
+  it("orients an individual against a seeking consortium", () => {
+    expect(orientPeoplePairing(buildIndividual(), buildConsortium())).not.toBeNull()
+  })
+  it("does not orient an individual against a data holder", () => {
+    expect(orientPeoplePairing(buildIndividual(), buildDataHolder())).toBeNull()
+  })
+  it("does not orient an individual against a complete consortium", () => {
+    expect(orientPeoplePairing(buildIndividual(), buildConsortium({ still_seeking: [] }))).toBeNull()
+  })
 })
 
 describe("score — happy path", () => {
@@ -62,6 +92,18 @@ describe("score — happy path", () => {
     const result = score(buildDataHolder(), buildAiTeam())
     expect(result.score).toBeGreaterThan(70)
     expect(result.blockers.filter((b) => b.severity === "hard")).toHaveLength(0)
+  })
+
+  it("scores an individual against an AI team with no hard blockers", () => {
+    const result = score(buildIndividual(), buildAiTeam())
+    expect(result.score).toBeGreaterThan(50)
+    expect(result.blockers.filter((b) => b.severity === "hard")).toHaveLength(0)
+  })
+
+  it("does not rank an individual against a data holder", () => {
+    const result = score(buildDataHolder(), buildIndividual())
+    expect(result.score).toBe(0)
+    expect(result.blockers.some((b) => b.key === "no_pairing")).toBe(true)
   })
 
   it("is deterministic — identical inputs give identical output", () => {

@@ -21,7 +21,7 @@ export default async function LandingPage({
   const { deleted } = await searchParams
   const session = await getSession()
   const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
-  const empty = { data_holder: 0, ai_team: 0, consortium: 0 }
+  const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const directoryHref = session ? "/directory" : signInHref("/directory")
 
   return (
@@ -90,6 +90,10 @@ export default async function LandingPage({
                       <div>
                         <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.consortium}</dd>{" "}
                         <dt className="inline uppercase tracking-wide">{t("landing.count_consortia")}</dt>
+                      </div>
+                      <div>
+                        <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.individual}</dd>{" "}
+                        <dt className="inline uppercase tracking-wide">{t("landing.count_individuals")}</dt>
                       </div>
                     </dl>
                   ) : null}
