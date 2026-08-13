@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
 import { PartnerLogos } from "./partner-logos"
-import { CHALLENGES } from "@/lib/challenges/catalog"
+import { CHALLENGES, PLATFORM } from "@/lib/challenges/catalog"
 
 const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 
@@ -16,7 +16,16 @@ export async function SiteFooter() {
         <div>
           <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.platform")}</h2>
           <p className="leading-relaxed">{t("footer.platform_body")}</p>
-          <p className="mt-3">{t("footer.operator")}</p>
+          <p className="mt-3">
+            <a
+              href={PLATFORM.operatorUrl}
+              className="font-semibold text-ink underline underline-offset-2"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {t("footer.operator")}
+            </a>
+          </p>
         </div>
 
         <div>
