@@ -5,9 +5,8 @@ import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
 
 /**
- * Masthead: Foresight’s publisher plate beside the product title, then a
- * plain destination row. The yellow plate is the brand signal; condensed
- * listing type carries the product name.
+ * Masthead: Foresight’s publisher plate beside the product title in ABC
+ * Arizona Text, then a plain Unica destination row.
  */
 export async function SiteHeader() {
   const { t } = await getT()
@@ -22,7 +21,7 @@ export async function SiteHeader() {
         >
           <ForesightMark />
           <span className="min-w-0">
-            <span className="block font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
+            <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
               {t("app.title")}
             </span>
             <span className="mt-1.5 block text-sm text-teal-deep">{t("app.tagline")}</span>

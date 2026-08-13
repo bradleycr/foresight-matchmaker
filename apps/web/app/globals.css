@@ -3,10 +3,9 @@
 /* ---------------------------------------------------------------------------
  * Foresight Matchmaking — design tokens.
  *
- * Still a printed directory: ink, rules, square corners, dense listing type.
- * Paper is Foresight’s cool powder blue (not warm cream). Yellow remains the
- * functional marker — CTAs, active filters, match scores. Teal is the second
- * brand accent, borrowed from foresight.org, for programmes and identity.
+ * Type matches foresight.org exactly: Neue Haas Unica Pro for UI, ABC Arizona
+ * Text for display headings. Paper is Foresight’s cool powder blue. Yellow is
+ * the functional mark; teal is the second brand accent.
  * ------------------------------------------------------------------------ */
 
 @theme {
@@ -31,8 +30,9 @@
   /* Semantic states stay ink-adjacent, not decorative. */
   --color-alert: #a4262c;
 
-  --font-sans: var(--font-archivo), 'Helvetica Neue', Arial, sans-serif;
-  --font-listing: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  --font-sans: var(--font-unica), 'Helvetica Neue', Arial, sans-serif;
+  --font-listing: var(--font-arizona), 'Georgia', 'Times New Roman', serif;
+  --font-serif: var(--font-arizona), 'Georgia', 'Times New Roman', serif;
 
   --radius: 0;
 }
@@ -50,6 +50,7 @@
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -72,8 +73,18 @@
     font-feature-settings: 'tnum';
   }
 
+  /*
+   * Display face — ABC Arizona Text (foresight.org headings).
+   * Site serves only weight 300; keep it light even when callers ask for bold.
+   */
   .font-listing {
     font-family: var(--font-listing);
+    font-weight: 300 !important;
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+    font-weight: 300 !important;
   }
 
   /* Thin foresight.org band: sky → teal → mint. */

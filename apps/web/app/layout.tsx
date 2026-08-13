@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Archivo, Archivo_Narrow } from "next/font/google"
+import localFont from "next/font/local"
 import { I18nProvider } from "@/lib/i18n/client"
 import { getT } from "@/lib/i18n/server"
 import { SiteHeader } from "@/components/site-header"
@@ -10,12 +10,36 @@ import fr from "@/locales/fr.json"
 import "./globals.css"
 
 /**
- * Two typefaces, total. Archivo carries the UI; Archivo Narrow is the
- * condensed grotesque for the dense listing rows, with tabular numerals
- * enabled where figures must align.
+ * Exact foresight.org faces — Neue Haas Unica Pro (UI) and ABC Arizona Text
+ * (display). Medium (500) is remapped to 600/700 so existing font-semibold /
+ * font-bold utility classes resolve without faux-bolding.
  */
-const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo" })
-const archivoNarrow = Archivo_Narrow({ subsets: ["latin"], variable: "--font-archivo-narrow" })
+const unica = localFont({
+  src: [
+    { path: "../fonts/unica-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/unica-400-italic.woff2", weight: "400", style: "italic" },
+    { path: "../fonts/unica-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/unica-500-italic.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/unica-500.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/unica-500-italic.woff2", weight: "600", style: "italic" },
+    { path: "../fonts/unica-500.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/unica-500-italic.woff2", weight: "700", style: "italic" },
+  ],
+  variable: "--font-unica",
+  display: "swap",
+})
+
+const arizona = localFont({
+  src: [
+    { path: "../fonts/arizona-text-300.woff2", weight: "300", style: "normal" },
+    { path: "../fonts/arizona-text-300-italic.woff2", weight: "300", style: "italic" },
+    // Display-only cut on foresight.org — map heavier requests to the light file.
+    { path: "../fonts/arizona-text-300.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/arizona-text-300.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-arizona",
+  display: "swap",
+})
 
 const dictionaries = { en, de, fr } as const
 
@@ -59,7 +83,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang={locale}>
-      <body className={`${archivo.variable} ${archivoNarrow.variable} font-sans`}>
+      <body className={`${unica.variable} ${arizona.variable} font-sans`}>
         <I18nProvider locale={locale} dict={dictionaries[locale]} fallback={dictionaries.en}>
           {/* Full-bleed foresight.org sky→teal→mint signal above the directory chrome. */}
           <div className="brand-band h-1.5 w-full" aria-hidden="true" />
