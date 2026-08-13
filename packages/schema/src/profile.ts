@@ -129,9 +129,8 @@ export type Consortium = z.infer<typeof consortiumSchema>
 
 /**
  * An independent expert — same AI capability fields as an AI team, but the
- * listing is a person. `org_name` is their display name. Matched as the AI
- * side against data holders and seeking consortia. Pairing with an AI team
- * (joining an existing group) is a second matching mode, not yet scored.
+ * listing is a person. `org_name` is their display name. Matched with AI
+ * teams and seeking consortia, not with data holders.
  */
 export const individualSchema = z.object({
   ...sharedProfileFields,

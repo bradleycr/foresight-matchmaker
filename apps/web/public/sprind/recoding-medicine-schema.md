@@ -2,22 +2,22 @@
 
 Field list for Foresight Matchmaking listings around Recoding Medicine. Foresight Institute independently operates this directory. SPRIND does not operate matchmaking here and assumes no liability for it.
 
-Three listing types. Please mark any field that is wrong, missing, or should not be collected.
+Four listing types. Please mark any field that is wrong, missing, or should not be collected.
 
 ---
 
-## Shared (all three)
+## Shared (all four)
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| Organisation name | yes | |
+| Organisation name | yes | For an individual, this is the person’s name |
 | Organisation type | yes | university, research institute, hospital, biobank/registry, company, startup, incubator, individual, other |
-| Country of HQ | yes | ISO 3166-1 alpha-2. Eligibility (EU, EFTA, UK, Israel) is derived from this. |
+| Country of HQ | yes | ISO 3166-1 alpha-2 of HQ or residence. Eligibility (EU, EFTA, UK, Israel) is derived from this. |
 | One-liner | yes | ≤ 140 characters |
 | Summary | yes | ≤ 600 characters |
 | Website | no | |
 | Working languages | no | en, de, fr, nl, es, it, pl, sv, da, he, fi, pt, el, cs, hu, ro, other |
-| Looking for | no | dataset access, AI partner, clinical partner, data-governance support, compute, not looking |
+| Looking for | no | dataset access, AI partner, clinical partner, data-governance support, compute, join an existing team, individual expert, not looking |
 | Application status | yes | undecided, intend to apply, applying with a partner, team complete, not applying |
 | Parallel public funding | yes | yes / no / unsure |
 | Challenge events attending | no | webinar 20 Aug 2026, Sept events 1–3, remote only |
@@ -88,3 +88,15 @@ Plus:
 | Field | Required | Notes |
 | --- | --- | --- |
 | Still seeking | no | same options as “looking for”. Empty means the team is complete (listed, not matched). |
+
+---
+
+## 4. Individual
+
+An independent AI expert, not yet on a team. Same capability fields as an AI team. Organisation type is locked to individual. Team size is typically 1.
+
+Plus:
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| Affiliation | no | Current lab, university, company — or blank if independent |

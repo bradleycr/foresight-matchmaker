@@ -68,22 +68,22 @@
         · Print this page to save a PDF
       </p>
       <h1>Recoding Medicine — applicant schemas</h1>
-      <p class="lede">Field list for Foresight Matchmaking listings around Recoding Medicine. Foresight Institute independently operates this directory. SPRIND does not operate matchmaking here and assumes no liability for it. Please mark any field that is wrong, missing, or should not be collected.</p>
+      <p class="lede">Field list for Foresight Matchmaking listings around Recoding Medicine. Foresight Institute independently operates this directory. SPRIND does not operate matchmaking here and assumes no liability for it. Four listing types. Please mark any field that is wrong, missing, or should not be collected.</p>
 
-      <h2>Shared (all three)</h2>
+      <h2>Shared (all four)</h2>
       <table>
         <thead>
           <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
         </thead>
         <tbody>
-          <tr><td>Organisation name</td><td>yes</td><td></td></tr>
+          <tr><td>Organisation name</td><td>yes</td><td>For an individual, this is the person’s name</td></tr>
           <tr><td>Organisation type</td><td>yes</td><td>university, research institute, hospital, biobank/registry, company, startup, incubator, individual, other</td></tr>
-          <tr><td>Country of HQ</td><td>yes</td><td>ISO 3166-1 alpha-2. Eligibility (EU, EFTA, UK, Israel) is derived from this.</td></tr>
+          <tr><td>Country of HQ</td><td>yes</td><td>ISO 3166-1 alpha-2 of HQ or residence. Eligibility (EU, EFTA, UK, Israel) is derived from this.</td></tr>
           <tr><td>One-liner</td><td>yes</td><td>≤ 140 characters</td></tr>
           <tr><td>Summary</td><td>yes</td><td>≤ 600 characters</td></tr>
           <tr><td>Website</td><td>no</td><td></td></tr>
           <tr><td>Working languages</td><td>no</td><td>en, de, fr, nl, es, it, pl, sv, da, he, fi, pt, el, cs, hu, ro, other</td></tr>
-          <tr><td>Looking for</td><td>no</td><td>dataset access, AI partner, clinical partner, data-governance support, compute, not looking</td></tr>
+          <tr><td>Looking for</td><td>no</td><td>dataset access, AI partner, clinical partner, data-governance support, compute, join an existing team, individual expert, not looking</td></tr>
           <tr><td>Application status</td><td>yes</td><td>undecided, intend to apply, applying with a partner, team complete, not applying</td></tr>
           <tr><td>Parallel public funding</td><td>yes</td><td>yes / no / unsure</td></tr>
           <tr><td>Challenge events attending</td><td>no</td><td>webinar 20 Aug 2026, Sept events 1–3, remote only</td></tr>
@@ -153,6 +153,17 @@
         </thead>
         <tbody>
           <tr><td>Still seeking</td><td>no</td><td>same options as “looking for”. Empty means the team is complete (listed, not matched).</td></tr>
+        </tbody>
+      </table>
+
+      <h2>4. Individual</h2>
+      <p>An independent AI expert, not yet on a team. Same capability fields as an AI team. Organisation type is locked to individual. Team size is typically 1.</p>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Affiliation</td><td>no</td><td>Current lab, university, company — or blank if independent</td></tr>
         </tbody>
       </table>
     </main>
