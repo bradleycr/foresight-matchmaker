@@ -21,7 +21,7 @@ the programme host inbox listed on `/privacy`, not to this directory’s privacy
 
 | Data | Purpose | Visibility |
 | --- | --- | --- |
-| Organisation profile (name, type, country, capabilities, dataset *descriptions*) | Members-only directory and deterministic matching | Visible to signed-in organisations, except fields marked private |
+| Organisation profile (name, type, country, capabilities, dataset *descriptions*) | Directory listing and deterministic matching | Visible after sign-in, except fields marked private |
 | One contact person (name, email, role) | Sign-in (magic link) and introductions | **Never public.** Revealed only after mutual acceptance of an introduction |
 | Introduction messages and accept/decline | Double opt-in intro flow | Only the two organisations involved |
 | Self-reported joint-application outcomes | Aggregate reporting on whether the matchmaker worked | Aggregated only |
