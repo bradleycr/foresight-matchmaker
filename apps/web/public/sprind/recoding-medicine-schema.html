@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recoding Medicine — applicant schemas</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1a1a1a;
+        --muted: #5c5c5c;
+        --rule: #d4d4d4;
+        --paper: #fff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 2.5rem 1.25rem 4rem;
+        font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      main { max-width: 52rem; margin: 0 auto; }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.5rem;
+      }
+      .lede { color: var(--muted); margin: 0 0 2rem; }
+      h2 {
+        font-size: 1.15rem;
+        margin: 2.25rem 0 0.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--rule);
+      }
+      h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
+      p { margin: 0 0 1rem; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        margin: 0 0 1rem;
+      }
+      th, td {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.45rem 0.6rem 0.45rem 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      th { font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+      td:first-child { font-weight: 600; width: 28%; }
+      td:nth-child(2) { width: 12%; white-space: nowrap; }
+      .actions { margin: 0 0 2rem; font-size: 0.9rem; }
+      .actions a { color: var(--ink); }
+      @media print {
+        body { padding: 0; }
+        .actions { display: none; }
+        h2 { break-after: avoid; }
+        table { break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="actions">
+        <a href="recoding-medicine-schema.md">Download markdown</a>
+        · Print this page to save a PDF
+      </p>
+      <h1>Recoding Medicine — applicant schemas</h1>
+      <p class="lede">Three listing types. Please mark any field that is wrong, missing, or should not be collected.</p>
+
+      <h2>Shared (all three)</h2>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Organisation name</td><td>yes</td><td></td></tr>
+          <tr><td>Organisation type</td><td>yes</td><td>university, research institute, hospital, biobank/registry, company, startup, incubator, individual, other</td></tr>
+          <tr><td>Country of HQ</td><td>yes</td><td>ISO 3166-1 alpha-2. Eligibility (EU, EFTA, UK, Israel) is derived from this.</td></tr>
+          <tr><td>One-liner</td><td>yes</td><td>≤ 140 characters</td></tr>
+          <tr><td>Summary</td><td>yes</td><td>≤ 600 characters</td></tr>
+          <tr><td>Website</td><td>no</td><td></td></tr>
+          <tr><td>Working languages</td><td>no</td><td>en, de, fr, nl, es, it, pl, sv, da, he, fi, pt, el, cs, hu, ro, other</td></tr>
+          <tr><td>Looking for</td><td>no</td><td>dataset access, AI partner, clinical partner, data-governance support, compute, not looking</td></tr>
+          <tr><td>Application status</td><td>yes</td><td>undecided, intend to apply, applying with a partner, team complete, not applying</td></tr>
+          <tr><td>Parallel public funding</td><td>yes</td><td>yes / no / unsure</td></tr>
+          <tr><td>Challenge events attending</td><td>no</td><td>webinar 20 Aug 2026, Sept events 1–3, remote only</td></tr>
+          <tr><td>Open to introductions</td><td>yes</td><td></td></tr>
+          <tr><td>Contact name</td><td>yes</td><td>private</td></tr>
+          <tr><td>Contact email</td><td>yes</td><td>private</td></tr>
+          <tr><td>Contact role</td><td>no</td><td>private</td></tr>
+        </tbody>
+      </table>
+      <p>Collaboration-only flag: HQ outside the eligible region may list as a partner (cannot lead).</p>
+
+      <h2>1. Data holder</h2>
+      <p>Brings one or more datasets. At least one dataset is required.</p>
+      <h3>Dataset</h3>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Required</th><th>Values</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Name</td><td>yes</td><td></td></tr>
+          <tr><td>Modality</td><td>≥1</td><td>MRI, CT, X-ray, histopathology, other imaging, genomics, transcriptomics, proteomics, metabolomics, multi-omics, structured EHR, clinical notes, registry, longitudinal cohort, waveform (ECG/EEG), wearable/sensor, claims, biospecimens, other</td></tr>
+          <tr><td>Disease area</td><td>≥1</td><td>oncology, cardiovascular, neurology, psychiatry, rare disease, infectious, metabolic/endocrine, respiratory, musculoskeletal, women’s health, paediatrics, geriatrics, multi-domain, other</td></tr>
+          <tr><td>N subjects</td><td>yes</td><td>&lt;1k, 1k–10k, 10k–100k, 100k–1m, &gt;1m</td></tr>
+          <tr><td>Volume</td><td>yes</td><td>&lt;100GB, 100GB–1TB, 1–10TB, 10–100TB, &gt;100TB</td></tr>
+          <tr><td>Time span (years)</td><td>no</td><td></td></tr>
+          <tr><td>Longitudinal</td><td>yes</td><td>yes / no</td></tr>
+          <tr><td>Annotation</td><td>yes</td><td>none, partial, expert-labelled, outcome-linked</td></tr>
+          <tr><td>Linkage</td><td>≥1</td><td>outcomes, mortality, genomics, imaging, medication, none</td></tr>
+          <tr><td>Standards</td><td>≥1</td><td>DICOM, FHIR, OMOP CDM, BIDS, VCF, HL7v2, SNOMED, proprietary, none</td></tr>
+          <tr><td>Readiness</td><td>yes</td><td>raw, partially curated, AI-ready, benchmark-ready</td></tr>
+          <tr><td>Consent basis</td><td>yes</td><td>broad consent, study-specific consent, public task Art. 6(1)(e), research Art. 9(2)(j), fully anonymised, pseudonymised, unclear</td></tr>
+          <tr><td>Access model</td><td>yes</td><td>open download, registered access, DUA required, secure processing environment only, federated (no movement), synthetic derivative only, undecided</td></tr>
+          <tr><td>Data can leave the institution</td><td>yes</td><td>yes / no / unsure</td></tr>
+          <tr><td>Ethics approval</td><td>yes</td><td>approved, in progress, not started, not required</td></tr>
+          <tr><td>Available from</td><td>no</td><td>date</td></tr>
+          <tr><td>Publicly describable</td><td>yes</td><td>if no: used for matching, not shown in the directory</td></tr>
+          <tr><td>Governance notes</td><td>no</td><td>private</td></tr>
+        </tbody>
+      </table>
+
+      <h2>2. AI team</h2>
+      <p>Brings methods. Describes what data they need.</p>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Required</th><th>Values</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Methods</td><td>no</td><td>foundation models, computer vision, clinical NLP, multimodal, graph/knowledge, causal inference, survival/longitudinal, synthetic data, federated learning, privacy tech, classical ML/biostat</td></tr>
+          <tr><td>Application target</td><td>no</td><td>biomarker discovery, diagnostics, clinical decision support, drug repurposing, prognosis/risk, triage/workflow, trial design, other</td></tr>
+          <tr><td>Domain expertise</td><td>no</td><td>same list as dataset disease area</td></tr>
+          <tr><td>Clinical partner</td><td>yes</td><td>have / need / not needed</td></tr>
+          <tr><td>Regulatory experience</td><td>no</td><td>MDR, IVDR, CE marking, GDPR DPIA, none</td></tr>
+          <tr><td>Compute</td><td>yes</td><td>own cluster, cloud budget, need compute, unsure</td></tr>
+          <tr><td>Compute scale</td><td>no</td><td>free text</td></tr>
+          <tr><td>Privacy capability</td><td>no</td><td>can work in a TRE, federated-capable, differential privacy, on-prem only, requires data export, synthetic only</td></tr>
+          <tr><td>Team size</td><td>yes</td><td>1, 2–5, 6–15, &gt;15</td></tr>
+          <tr><td>Track record</td><td>no</td><td>up to 5 URLs</td></tr>
+          <tr><td>Data needs</td><td>yes</td><td>modality, disease area, minimum n subjects, annotation required, linkage required, standards preferred (same vocabularies as the dataset)</td></tr>
+        </tbody>
+      </table>
+
+      <h2>3. Consortium</h2>
+      <p>Already has both: at least one dataset (same schema as data holder) and the AI-team fields above.</p>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Still seeking</td><td>no</td><td>same options as “looking for”. Empty means the team is complete (listed, not matched).</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>
