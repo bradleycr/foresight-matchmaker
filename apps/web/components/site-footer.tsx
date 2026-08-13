@@ -64,7 +64,9 @@ export async function SiteFooter() {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col gap-3 border-t border-rule pt-5 sm:flex-row sm:items-center sm:justify-between">
+      <p className="mt-8 max-w-3xl text-xs leading-relaxed">{t("footer.disclaimer")}</p>
+
+      <div className="mt-5 flex flex-col gap-3 border-t border-rule pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-ink">{t("footer.partners")}</p>
         <PartnerLogos />
       </div>

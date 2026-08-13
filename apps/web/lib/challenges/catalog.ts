@@ -27,6 +27,7 @@ export const CHALLENGES: readonly ChallengeDef[] = [
     slug: "recoding-medicine",
     host: "SPRIND",
     hostUrl: "https://www.sprind.org/taten/challenges/recoding-medicine",
+    /** Application inbox for the programme — never shown as a directory contact. */
     hostEmail: "challenge@sprind.org",
     deadlineLabel: "16 October 2026, 18:00 CET",
   },

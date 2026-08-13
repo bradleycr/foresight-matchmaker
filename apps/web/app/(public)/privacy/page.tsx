@@ -15,6 +15,7 @@ export default async function PrivacyPage() {
 
   const sections: Array<{ title: string; body: string }> = [
     { title: t("privacy.who_title"), body: t("privacy.who_body") },
+    { title: t("privacy.independent_title"), body: t("privacy.independent_body") },
     { title: t("privacy.collected_title"), body: t("privacy.collected_body") },
     { title: t("privacy.purpose_title"), body: t("privacy.purpose_body") },
     { title: t("privacy.legal_basis_title"), body: t("privacy.legal_basis_body") },
@@ -54,8 +55,13 @@ export default async function PrivacyPage() {
         {programme ? (
           <p className="mt-2 text-sm text-ink-soft">
             {t("privacy.contact_challenge")}{" "}
-            <a className="underline" href={`mailto:${programme.hostEmail}`}>
-              {programme.hostEmail}
+            <a
+              className="underline"
+              href={programme.hostUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {t("footer.challenge_page")}
             </a>
           </p>
         ) : null}

@@ -1,8 +1,10 @@
 # Foresight Matchmaking
 
 A Foresight Institute directory that pairs listings around open programmes.
-Recoding Medicine (SPRIND) is the first programme. Matching is deterministic:
-no LLM on the score.
+Recoding Medicine is the first programme listed. Matching is deterministic:
+no LLM on the score. Foresight Institute independently operates this
+directory. SPRIND does not operate, control, or assume liability for
+matchmaking here.
 
 Operator: Foresight Institute — https://foresight.org
 Product: https://foresight-matchmaker.vercel.app
@@ -24,7 +26,7 @@ Contact details and dataset governance notes never appear in public payloads.
 - OpenAPI 3.1: https://foresight-matchmaker.vercel.app/openapi.json
 - Public aggregates: https://foresight-matchmaker.vercel.app/api/v1/stats
 - Directory dump (session cookie required): https://foresight-matchmaker.vercel.app/api/v1/directory.json
-- Human schema pack for SPRIND: see docs/sprind/recoding-medicine-schema.md in the source repo
+- Human schema pack for Recoding Medicine listings: https://foresight-matchmaker.vercel.app/sprind/recoding-medicine-schema.html
 
 ## Auth today
 

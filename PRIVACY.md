@@ -3,9 +3,10 @@
 _Last updated: 13 August 2026_
 
 This notice applies to the **Foresight Matchmaking** directory and
-matchmaking service. It is written for organisation contacts and data-protection
-officers. It does **not** cover the Recoding Medicine programme application
-process itself — that is handled by the programme host.
+matchmaking service, operated solely by **Foresight Institute**. It does
+**not** cover Recoding Medicine applications. SPRIND does not operate this
+directory, is not a joint controller of data processed here, and assumes no
+liability for listings, matches, or introductions.
 
 ## Who operates this service
 
@@ -14,8 +15,10 @@ Website: https://foresight.org
 Privacy contact: see `PRIVACY_CONTACT_EMAIL` on the deployment (default contact
 shown on `/privacy`).
 
-Questions about Recoding Medicine eligibility, funding, or applications go to
-the programme host inbox listed on `/privacy`, not to this directory’s privacy contact.
+Recoding Medicine eligibility, funding, and applications are handled on the
+official programme site. Using this directory does not constitute an
+application to Recoding Medicine and does not create any relationship with
+SPRIND.
 
 ## What we collect
 
