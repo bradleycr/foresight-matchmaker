@@ -57,7 +57,6 @@ export default async function LandingPage({
         <h2 id="programmes-heading" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
           {t("landing.programmes_title")}
         </h2>
-        <p className="mt-3 max-w-2xl text-ink-soft">{t("landing.programmes_body")}</p>
 
         <ul className="mt-6 grid gap-4">
           {CHALLENGES.map((challenge) => {
