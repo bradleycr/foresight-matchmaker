@@ -11,6 +11,7 @@ const UPDATED = "13 August 2026"
  */
 export default async function PrivacyPage() {
   const { t } = await getT()
+  const programme = CHALLENGES[0]
 
   const sections: Array<{ title: string; body: string }> = [
     { title: t("privacy.who_title"), body: t("privacy.who_body") },
@@ -50,12 +51,14 @@ export default async function PrivacyPage() {
             {PRIVACY_EMAIL}
           </a>
         </p>
-        <p className="mt-2 text-sm text-ink-soft">
-          {t("privacy.contact_challenge")}{" "}
-          <a className="underline" href="mailto:challenge@sprind.org">
-            challenge@sprind.org
-          </a>
-        </p>
+        {programme ? (
+          <p className="mt-2 text-sm text-ink-soft">
+            {t("privacy.contact_challenge")}{" "}
+            <a className="underline" href={`mailto:${programme.hostEmail}`}>
+              {programme.hostEmail}
+            </a>
+          </p>
+        ) : null}
       </section>
     </article>
   )
