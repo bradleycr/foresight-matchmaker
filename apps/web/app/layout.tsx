@@ -25,11 +25,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(ORIGIN),
   title: "Foresight Matchmaking",
   description:
-    "A Foresight Institute directory for pairing organisations around open programmes. Recoding Medicine is the first: European health-data holders and AI teams forming joint SPRIND applications.",
+    "A Foresight Institute directory for pairing organisations around open programmes. Recoding Medicine is the first: European health-data holders and AI teams forming joint applications.",
   openGraph: {
     title: "Foresight Matchmaking",
     description:
-      "A Foresight Institute directory for pairing organisations around open programmes. Recoding Medicine is the first: European health-data holders and AI teams forming joint SPRIND applications.",
+      "A Foresight Institute directory for pairing organisations around open programmes. Recoding Medicine is the first: European health-data holders and AI teams forming joint applications.",
     type: "website",
     locale: "en_GB",
     siteName: "Foresight Matchmaking",

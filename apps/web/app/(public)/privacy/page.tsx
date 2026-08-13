@@ -1,4 +1,5 @@
 import { getT } from "@/lib/i18n/server"
+import { CHALLENGES } from "@/lib/challenges/catalog"
 
 const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 const UPDATED = "13 August 2026"

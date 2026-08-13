@@ -5,7 +5,7 @@ import { CHALLENGES } from "@/lib/challenges/catalog"
 
 const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 
-/** Site colophon: Foresight operates the platform; SPRIND hosts Recoding Medicine. */
+/** Site colophon: Foresight operates the platform. */
 export async function SiteFooter() {
   const { t } = await getT()
   const programme = CHALLENGES[0]
@@ -23,7 +23,6 @@ export async function SiteFooter() {
           <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.challenge")}</h2>
           <p>{t("footer.deadline")}</p>
           <p className="mt-1">{t("footer.webinar")}</p>
-          <p className="mt-3">{t("footer.sprind")}</p>
           {programme ? (
             <p className="mt-3">
               <a

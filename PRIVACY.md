@@ -4,8 +4,8 @@ _Last updated: 13 August 2026_
 
 This notice applies to the **Foresight Matchmaking** directory and
 matchmaking service. It is written for organisation contacts and data-protection
-officers. It does **not** cover the SPRIND Recoding Medicine challenge application
-process itself — that is operated by SPRIND.
+officers. It does **not** cover the Recoding Medicine programme application
+process itself — that is handled by the programme host.
 
 ## Who operates this service
 
@@ -14,9 +14,8 @@ Website: https://foresight.org
 Privacy contact: see `PRIVACY_CONTACT_EMAIL` on the deployment (default contact
 shown on `/privacy`).
 
-SPRIND (SprinD GmbH) organises the Recoding Medicine challenge listed on this
-platform. Questions about the challenge, funding, or eligibility go to
-`challenge@sprind.org`, not to this directory’s privacy contact.
+Questions about Recoding Medicine eligibility, funding, or applications go to
+the programme host inbox listed on `/privacy`, not to this directory’s privacy contact.
 
 ## What we collect
 

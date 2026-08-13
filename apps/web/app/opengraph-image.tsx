@@ -11,12 +11,7 @@ const ORIGIN = process.env.APP_URL ?? "https://foresight-matchmaker.vercel.app"
 /** Ink-on-paper card for Slack, email, and social link previews. */
 export default async function OpenGraphImage() {
   const assetDir = join(process.cwd(), "public/partners")
-  const [sprindSvg, foresightPng] = await Promise.all([
-    readFile(join(assetDir, "sprind.svg")),
-    readFile(join(assetDir, "foresight.png")),
-  ])
-
-  const sprindSrc = `data:image/svg+xml;base64,${Buffer.from(sprindSvg).toString("base64")}`
+  const foresightPng = await readFile(join(assetDir, "foresight.png"))
   const foresightSrc = `data:image/png;base64,${Buffer.from(foresightPng).toString("base64")}`
 
   return new ImageResponse(
@@ -70,7 +65,7 @@ export default async function OpenGraphImage() {
               color: "#3a4a4e",
             }}
           >
-            Pair organisations around open programmes. Recoding Medicine is first — a SPRIND challenge.
+            Pair organisations around open programmes. Recoding Medicine is first.
           </p>
         </div>
 
@@ -111,13 +106,11 @@ export default async function OpenGraphImage() {
                 textTransform: "uppercase",
               }}
             >
-              With
+              Foresight Institute
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 36 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={foresightSrc} alt="Foresight Institute" height={36} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={sprindSrc} alt="SPRIND" height={28} />
             </div>
           </div>
 

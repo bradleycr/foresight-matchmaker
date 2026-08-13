@@ -5,7 +5,7 @@ import { useT } from "@/lib/i18n/client"
 import { Chip } from "@/components/ui/primitives"
 
 /**
- * The one-click self-report SPRIND actually cares about: "Did this lead to
+ * The one-click self-report on whether a pairing led to
  * a joint application?" One tap, no form, straight to the metrics.
  */
 export function OutcomeReport({

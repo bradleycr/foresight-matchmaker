@@ -2,7 +2,7 @@
   "name": "recoding-medicine-matchmaker",
   "version": "0.1.0",
   "private": true,
-  "description": "Foresight Matchmaking — a Foresight Institute directory. Recoding Medicine (SPRIND) is the first programme.",
+  "description": "Foresight Matchmaking — a Foresight Institute directory. Recoding Medicine is the first programme.",
   "scripts": {
     "dev": "pnpm --filter @rmm/web dev",
     "build": "pnpm -r build",
