@@ -5,8 +5,8 @@ import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
 
 /**
- * Masthead: Foresight’s publisher plate beside the product title in ABC
- * Arizona Text, then a plain Unica destination row.
+ * Masthead: clean Foresight wordmark beside the product title, then a
+ * plain Unica destination row.
  */
 export async function SiteHeader() {
   const { t } = await getT()
@@ -17,9 +17,13 @@ export async function SiteHeader() {
       <div className="flex items-start justify-between gap-4 pt-5 pb-3">
         <Link
           href="/"
-          className="group flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
+          className="group flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-5"
         >
-          <ForesightMark />
+          <ForesightMark className="shrink-0" />
+          <span
+            aria-hidden="true"
+            className="hidden h-8 w-px shrink-0 bg-rule-strong sm:block"
+          />
           <span className="min-w-0">
             <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
               {t("app.title")}
