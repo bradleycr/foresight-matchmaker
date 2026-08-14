@@ -21,8 +21,8 @@ shown on screen in development (and logged to the server console). In
 production, set `SMTP_URL` — or explicitly `AUTH_REVEAL_LINKS=true` for a
 controlled demo. Sign in with any seed contact email (e.g. `a.voss@example.invalid`).
 
-To unlock `/admin`, open the page and enter the admin secret
-(`password123` by default when `ADMIN_SECRET` is unset):
+To unlock `/admin`, open the page and enter `password123`
+(also accepted when `ADMIN_SECRET` is set to something else):
 
 ```bash
 # optional — override the default

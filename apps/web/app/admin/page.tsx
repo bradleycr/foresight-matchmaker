@@ -1,7 +1,5 @@
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 import { apiFetch } from "@/lib/api/server-fetch"
-import { isAdmin, verifyAdminSecret, grantAdminCookie } from "@/lib/auth/admin"
+import { isAdmin } from "@/lib/auth/admin"
 import { getT } from "@/lib/i18n/server"
 import type { Metrics } from "@/lib/metrics"
 import type { T } from "@/lib/i18n"
@@ -9,20 +7,11 @@ import type { T } from "@/lib/i18n"
 export const dynamic = "force-dynamic"
 
 /**
- * /admin — reporting, gated by ADMIN_SECRET (defaults to password123 when
- * unset). Exchanged once via the form for a signed cookie.
+ * /admin — reporting, gated by the demo password `password123` (and by
+ * ADMIN_SECRET when that is also set). The form posts to /api/admin/login
+ * so the signed cookie is set on a 303, not dropped by a Server Action
+ * redirect.
  */
-
-async function signInAction(formData: FormData) {
-  "use server"
-  const secret = String(formData.get("secret") ?? "")
-  if (verifyAdminSecret(secret)) {
-    await grantAdminCookie()
-    revalidatePath("/admin")
-    redirect("/admin")
-  }
-  redirect("/admin?error=1")
-}
 
 function CountTable({ title, data, t }: { title: string; data: Record<string, number>; t: T }) {
   const entries = Object.entries(data).sort((a, b) => b[1] - a[1])
@@ -90,7 +79,7 @@ export default async function AdminPage({
     return (
       <div className="mx-auto max-w-md py-16">
         <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("admin.title")}</h1>
-        <form action={signInAction} className="mt-6 flex flex-col gap-3">
+        <form action="/api/admin/login" method="post" className="mt-6 flex flex-col gap-3">
           <label htmlFor="admin-secret" className="text-sm font-semibold uppercase tracking-wide">
             {t("admin.secret_label")}
           </label>

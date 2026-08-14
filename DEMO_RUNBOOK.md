@@ -34,7 +34,7 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | Variable | Value | Why |
 | --- | --- | --- |
 | `SESSION_SECRET` | random, generated | Required in production — the app now refuses to boot without it (see `instrumentation.ts`). |
-| `ADMIN_SECRET` | random, generated | Unlocks `/admin`. Retrieve with `vercel env pull .env.vercel.local --environment production` (gitignored — never commit it). |
+| `ADMIN_SECRET` | `password123` | Unlocks `/admin`. The page also accepts `password123` even if this env value is rotated. |
 | `AUTH_REVEAL_LINKS` | `true` | **Load-bearing.** With no SMTP configured, this is the only way anyone — including you, on stage — can sign in. Without it, magic links go to the server log only and `/signin` becomes unusable live. |
 | `SEED_ON_EMPTY` | `true` | Auto-seeds the 118 synthetic profiles on a cold `/tmp`. |
 | `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
@@ -128,8 +128,7 @@ demonstrate *sending* a fresh request live:
 
 ## Admin
 
-1. Retrieve the secret: `vercel env pull .env.vercel.local --environment production --scope bradley-royes-projects`, then read `ADMIN_SECRET` out of that file. Do not commit it; it's already gitignored (`.env*`).
-2. Visit `/admin`, paste the secret.
+1. Visit `/admin` and enter `password123`.
 
 ## If something looks wrong right before you go on
 
