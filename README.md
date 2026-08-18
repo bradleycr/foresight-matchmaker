@@ -38,8 +38,12 @@ pnpm typecheck
 
 ## Deployment (Linux VM, Docker)
 
+For the Foresight / YCluster box (hostname `foresight-matchmaker.dev.ycluster.net`), follow **[DEPLOY.md](DEPLOY.md)** — that is the sysops one-pager.
+
 ```bash
-cp .env.example .env    # set SESSION_SECRET and ADMIN_SECRET
+git clone https://github.com/bradleycr/foresight-matchmaker.git
+cd foresight-matchmaker
+cp .env.example .env    # set SESSION_SECRET, ADMIN_SECRET, APP_URL, LLM_*
 docker compose up -d --build
 ```
 

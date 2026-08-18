@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 # Foresight Matchmaking — single-container deployment for a Linux VM.
 #
-#   cp .env.example .env      # set SESSION_SECRET and ADMIN_SECRET
+#   cp .env.example .env      # see DEPLOY.md for the YCluster values
 #   docker compose up -d --build
 #
 # The SQLite database lives in ./data on the host (bind-mounted to /data);
