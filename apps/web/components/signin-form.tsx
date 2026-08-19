@@ -1,18 +1,46 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button, Field, Input } from "@/components/ui/primitives"
 import type { DeliveryMode } from "@/lib/auth/mail"
 
 type Result = { ok: true; mode: DeliveryMode; claim_link?: string }
 
+function tokenFromClaimLink(link: string): string | null {
+  try {
+    const path = new URL(link, "http://local").pathname
+    const parts = path.split("/").filter(Boolean)
+    const i = parts.indexOf("claim")
+    const token = i >= 0 ? parts[i + 1] : null
+    return token || null
+  } catch {
+    return null
+  }
+}
+
 export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }) {
   const t = useT()
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "working" | "done" | "error">("idle")
   const [result, setResult] = useState<Result | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  async function claimAndEnter(link: string): Promise<boolean> {
+    const token = tokenFromClaimLink(link)
+    if (!token) return false
+    const res = await fetch("/api/v1/auth/claim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    })
+    if (!res.ok) return false
+    router.push(next ?? "/me")
+    router.refresh()
+    return true
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -37,27 +65,25 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
       return
     }
 
-    setResult((await res.json()) as Result)
+    const body = (await res.json()) as Result
+
+    // On-screen demo hosts: consume the token here so the person never
+    // sees a raw URL or a second "confirm sign-in" page.
+    if (body.claim_link) {
+      const entered = await claimAndEnter(body.claim_link)
+      if (entered) return
+      setError(t("claim.error_generic"))
+      setStatus("error")
+      return
+    }
+
+    setResult(body)
     setStatus("done")
   }
 
   if (status === "done" && result) {
     return (
-      <div className="mt-6">
-        {result.claim_link ? (
-          <div className="border border-ink bg-paper-shade p-4">
-            <p className="font-semibold">{t("signin.copy_link_warning")}</p>
-            <p className="mt-1 text-sm text-ink-soft">{t("signin.copy_link_note")}</p>
-            <p className="mt-2 break-all">
-              <a href={result.claim_link} className="tnum underline">
-                {result.claim_link}
-              </a>
-            </p>
-          </div>
-        ) : (
-          <p className="border border-ink px-3 py-2">{t("signin.email_sent")}</p>
-        )}
-      </div>
+      <p className="mt-6 border border-ink px-3 py-2">{t("signin.email_sent")}</p>
     )
   }
 
@@ -80,7 +106,11 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
         />
       </Field>
       <Button type="submit" variant="primary" disabled={status === "working"} className="self-start">
-        {mode === "on_screen" ? t("signin.button_reveal") : t("signin.button")}
+        {status === "working"
+          ? t("signin.signing_in")
+          : mode === "on_screen"
+            ? t("signin.button_reveal")
+            : t("signin.button")}
       </Button>
     </form>
   )

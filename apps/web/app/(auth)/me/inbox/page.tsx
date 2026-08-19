@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
-import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
+import { apiFetch } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
+import { redirectIfOwnListingGone } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import type { IntroPayload } from "@/lib/api/types"
 import { InboxList } from "@/components/inbox-list"
@@ -17,7 +18,7 @@ export default async function InboxPage() {
 
   const { t } = await getT()
   const res = await apiFetch("/api/v1/intros")
-  redirectOnAuthFailure(res)
+  await redirectIfOwnListingGone(res)
   if (!res.ok) throw new Error(`Could not load your inbox (status ${res.status}).`)
 
   const { intros } = (await res.json()) as { intros: IntroPayload[] }

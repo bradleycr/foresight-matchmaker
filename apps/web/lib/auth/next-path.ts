@@ -7,6 +7,7 @@ export function safeNextPath(raw: string | undefined | null): string | null {
   if (!raw.startsWith("/")) return null
   if (raw.startsWith("//") || raw.includes("://")) return null
   if (raw.startsWith("/signin") || raw.startsWith("/claim")) return null
+  if (raw.startsWith("/api")) return null
   return raw.slice(0, 200)
 }
 

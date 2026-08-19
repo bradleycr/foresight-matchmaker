@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
-import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
+import { apiFetch } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
+import { redirectIfOwnListingGone } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { enumLabel } from "@/lib/i18n/labels"
 import { llmEnabled } from "@/lib/llm/client"
@@ -10,6 +11,7 @@ import type { MatchPayload } from "@/lib/api/types"
 import { Tag } from "@/components/ui/primitives"
 import { MatchRationale } from "@/components/match-rationale"
 import { MatchesTabs } from "@/components/remmy/matches-tabs"
+import { CollapsedList } from "@/components/matches/collapsed-list"
 import { nudgeField } from "@/lib/match-nudge"
 import type { T } from "@/lib/i18n"
 
@@ -70,29 +72,49 @@ function ClassicMatchList({
   matches,
   polish,
   profile,
+  othersVisible,
   t,
 }: {
   matches: MatchPayload[]
   polish: boolean
   profile: Profile
+  othersVisible: number
   t: T
 }) {
   if (matches.length === 0) {
     return (
       <div className="max-w-xl border border-ink p-4">
-        <p className="font-semibold">{t("matches.empty_title")}</p>
-        <p className="mt-1">{t(`matches.empty_nudge.${nudgeField(profile)}`)}</p>
-        <Link href="/me" className="mt-3 inline-block font-semibold underline">
-          {t("matches.empty_cta")}
+        <p className="font-semibold">
+          {othersVisible === 0 ? t("matches.empty_first") : t("matches.empty_title")}
+        </p>
+        {othersVisible > 0 ? <p className="mt-1">{t(`matches.empty_nudge.${nudgeField(profile)}`)}</p> : null}
+        <Link href={othersVisible === 0 ? "/directory" : "/me"} className="mt-3 inline-block font-semibold underline">
+          {othersVisible === 0 ? t("nav.directory") : t("matches.empty_cta")}
         </Link>
       </div>
     )
   }
 
   return (
-    <ol>
-      {matches.map((match) => (
-        <li key={match.profile.id} className="border-b border-rule py-4">
+    <CollapsedList
+      preview={matches.slice(0, 5).map((match) => (
+        <MatchRow key={match.profile.id} match={match} polish={polish} t={t} />
+      ))}
+      rest={
+        matches.length > 5
+          ? matches.slice(5).map((match) => (
+              <MatchRow key={match.profile.id} match={match} polish={polish} t={t} />
+            ))
+          : null
+      }
+      moreLabel={t("matches.show_more", { n: matches.length - 5 })}
+    />
+  )
+}
+
+function MatchRow({ match, polish, t }: { match: MatchPayload; polish: boolean; t: T }) {
+  return (
+        <li className="border-b border-rule py-4">
           <div className="flex items-start gap-4">
             <span
               aria-label={t("matches.score_label", { score: match.score })}
@@ -136,8 +158,6 @@ function ClassicMatchList({
             </div>
           </div>
         </li>
-      ))}
-    </ol>
   )
 }
 
@@ -156,23 +176,36 @@ export default async function MatchesPage() {
     apiFetch("/api/v1/matches"),
     apiFetch(`/api/v1/profiles/${session.profileId}`),
   ])
-  redirectOnAuthFailure(matchRes)
-  redirectOnAuthFailure(profileRes)
+  await redirectIfOwnListingGone(matchRes)
+  await redirectIfOwnListingGone(profileRes)
   if (!matchRes.ok) throw new Error(`Could not load matches (status ${matchRes.status}).`)
   if (!profileRes.ok) throw new Error(`Could not load your profile (status ${profileRes.status}).`)
 
-  const { matches } = (await matchRes.json()) as { matches: MatchPayload[] }
+  const { matches, others_visible: othersVisible = 0 } = (await matchRes.json()) as {
+    matches: MatchPayload[]
+    others_visible?: number
+  }
   const { profile } = (await profileRes.json()) as { profile: Profile }
 
   return (
     <div className="py-6">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("matches.title")}</h1>
-      <p className="mt-1 max-w-2xl text-ink-soft">{t("matches.explainer")}</p>
+      {matches.length > 0 ? (
+        <p className="mt-1 max-w-xl text-sm text-ink-soft">{t("matches.explainer")}</p>
+      ) : null}
 
       <div className="mt-6">
         <MatchesTabs
           remmyEnabled={polish}
-          list={<ClassicMatchList matches={matches} polish={polish} profile={profile} t={t} />}
+          list={
+            <ClassicMatchList
+              matches={matches}
+              polish={polish}
+              profile={profile}
+              othersVisible={othersVisible}
+              t={t}
+            />
+          }
         />
       </div>
     </div>

@@ -37,15 +37,15 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
-    DATABASE_PATH=/data/app.db \
-    SEED_ON_EMPTY=true
+    DATABASE_PATH=/data/app.db
 
 # The standalone output preserves the monorepo layout: server.js lives at
 # apps/web/server.js and expects static assets alongside it.
 COPY --from=build --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=node:node /app/apps/web/public ./apps/web/public
-# Synthetic seed data for first-boot auto-seeding (SEED_ON_EMPTY).
+# Seed files stay in the image so a rehearsal host can opt in with
+# SEED_ON_EMPTY=true. Production must leave that unset.
 COPY --chown=node:node seed ./seed
 
 RUN mkdir -p /data && chown node:node /data

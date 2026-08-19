@@ -28,7 +28,6 @@ const SHARED_FIELDS = [
   "languages",
   "looking_for",
   "application_status",
-  "parallel_public_funding",
   "attending",
   "contact_name",
   "contact_email",

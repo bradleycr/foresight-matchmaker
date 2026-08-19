@@ -85,6 +85,7 @@ export const LOOKING_FOR = [
   "join_team",
   "individual_expert",
   "not_looking",
+  "other",
 ] as const
 export const lookingForEnum = z.enum(LOOKING_FOR)
 export type LookingFor = (typeof LOOKING_FOR)[number]
@@ -113,6 +114,20 @@ export const ATTENDING = [
 export const attendingEnum = z.enum(ATTENDING)
 export type Attending = (typeof ATTENDING)[number]
 
+/** Hide the webinar chip after Thursday 20 August 2026. */
+export const WEBINAR_ATTENDING: Attending = "webinar_2026_08_20"
+const WEBINAR_HIDE_AFTER_MS = Date.UTC(2026, 7, 21, 0, 0, 0)
+
+export function isWebinarOpen(now = new Date()): boolean {
+  return now.getTime() < WEBINAR_HIDE_AFTER_MS
+}
+
+/** Attending chips for the form — webinar drops off after the session. */
+export function attendingChoices(now = new Date()): Attending[] {
+  if (isWebinarOpen(now)) return [...ATTENDING]
+  return ATTENDING.filter((v) => v !== WEBINAR_ATTENDING)
+}
+
 export const VISIBILITY = ["public", "authenticated_only", "hidden"] as const
 export const visibilityEnum = z.enum(VISIBILITY)
 export type Visibility = (typeof VISIBILITY)[number]
@@ -131,6 +146,9 @@ export const MODALITY = [
   "transcriptomics",
   "proteomics",
   "metabolomics",
+  "epigenomics",
+  "microbiome",
+  "spatial_omics",
   "multi_omics",
   "ehr_structured",
   "clinical_notes",
@@ -140,6 +158,8 @@ export const MODALITY = [
   "wearable_sensor",
   "claims",
   "biospecimens",
+  "patient_reported_outcomes",
+  "voice_data",
   "other",
 ] as const
 export const modalityEnum = z.enum(MODALITY)
@@ -167,6 +187,11 @@ export const DISEASE_AREA = [
   "womens_health",
   "paediatrics",
   "geriatrics",
+  "immunology",
+  "dermatology",
+  "ophthalmology",
+  "critical_care",
+  "dentistry",
   "multi_domain",
   "other",
 ] as const

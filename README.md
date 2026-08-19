@@ -47,7 +47,7 @@ cp .env.example .env    # set SESSION_SECRET, ADMIN_SECRET, APP_URL, LLM_*
 docker compose up -d --build
 ```
 
-The SQLite database lives in `./data` on the host (bind-mounted to `/data`). On first boot with an empty database the container seeds the synthetic directory automatically (`SEED_ON_EMPTY=true`); an existing database is never touched. No US-hosted managed database is involved — the data stays on the VM.
+The SQLite database lives in `./data` on the host (bind-mounted to `/data`). An existing database is never touched. Production leaves `SEED_ON_EMPTY` unset so a fresh volume stays empty until real organisations register. For a local rehearsal only, set `SEED_ON_EMPTY=true` in `.env`. No US-hosted managed database is involved — the data stays on the VM.
 
 Every environment variable is documented in [`.env.example`](.env.example).
 
@@ -78,7 +78,7 @@ The machine-readable contract:
 | `GET /api/v1/directory.json` | Stable public machine contract: redacted `public` profiles only (no contact details, ever). What the footer links and third parties should call. |
 | `GET /api/v1/directory` | UI corpus: same shape, but signed-in callers also receive `authenticated_only` profiles. Anonymous callers see `public` only. Pages self-fetch this; do not treat it as the public dump. |
 | `GET /api/v1/schema/v1/profile.schema.json` | JSON Schema of the profile |
-| `POST /api/v1/profiles` | Register a profile (returns a claim link) |
+| `POST /api/v1/profiles` | Register a profile (signs the submitter in; optional email magic link if SMTP is set) |
 | `GET /api/v1/profiles/:id` · `PATCH` · `DELETE` | Read public profile / edit own / GDPR erase own (session) |
 | `GET /api/v1/matches` | Ranked shortlist for the signed-in profile |
 | `GET /api/v1/intros` · `POST` · `PATCH /:id` | Double opt-in introduction flow |
@@ -94,7 +94,7 @@ Redaction is enforced server-side: `contact_name`, `contact_email`, `contact_rol
 
 Matching, search, and ranking are fully deterministic — no LLM is ever on an interactive path. Two optional conveniences light up when `LLM_API_KEY` and `LLM_MODEL` are set (any OpenAI-compatible endpoint via `LLM_BASE_URL`):
 
-1. **Profile pre-fill** — paste a paragraph on the registration page and a draft profile is proposed for review. Never auto-published; with no LLM configured the box simply doesn't appear.
+1. **Remmy / profile pre-fill** — chat or paste on `/register`. Remmy fills the form (tappable chips for modality, disease area, methods). Nothing is published until submit. AI teams and individuals can skip “data I need”; data holders still need dataset modality and disease area. With no LLM configured the chat simply doesn't appear.
 2. **Match rationale** — each match carries a two-sentence plain-language explanation. This is assembled deterministically from the factor breakdown, so it works identically with the LLM disabled.
 
 The whole test suite passes with no LLM configured.

@@ -105,22 +105,15 @@ describe("golden fixtures — soft blockers and scale", () => {
   const holders = loadGolden("data-holders.json")
   const teams = loadGolden("ai-teams.json")
 
-  it("Aurora parallel_public_funding:unsure is a soft blocker, not a hard block", () => {
-    const aurora = bySlug(holders, "aurora-registry-node")
-    const sentinel = bySlug(teams, "sentinel-health-analytics")
-    const result = score(aurora, sentinel)
-    expect(hasHardBlocker(result.blockers)).toBe(false)
-    expect(result.blockers.some((b) => b.key.includes("parallel_public_funding_unsure"))).toBe(true)
-    expect(result.score).toBeGreaterThan(0)
-  })
-
   it("Aurora available_from after Stage 1 surfaces as a soft timeline warning", () => {
     const aurora = bySlug(holders, "aurora-registry-node")
     const sentinel = bySlug(teams, "sentinel-health-analytics")
     const result = score(aurora, sentinel)
+    expect(hasHardBlocker(result.blockers)).toBe(false)
     expect(result.blockers.some((b) => b.key === "available_from_after_stage1" && b.severity === "soft")).toBe(
       true,
     )
+    expect(result.score).toBeGreaterThan(0)
   })
 
   it("ISEA (n<1k) × Aleph (needs 10k+): high score with graded scale penalty", () => {

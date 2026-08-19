@@ -1,16 +1,15 @@
 import { z } from "zod"
 import { complete } from "./client"
 import { extractJsonObject } from "./json"
+import { formatGapsForRemmy } from "@/lib/profile-form-gaps"
+import { isAskId, resolveAsk, type AskId } from "@/lib/remmy/ask"
 
 /**
  * Remmy — conversational interviewer only.
  *
- * Best-practice split (2026 conversational intake):
- * - Remmy asks one question at a time and tracks what is still missing.
- * - Structured fields are extracted separately via proposeProfile() — never
- *   embedded in chat JSON, which reasoning models often fill in draft_summary
- *   but leave proposal empty.
- * - The UI shows a human review card before anything reaches the form.
+ * Chat collects facts; structured fields are extracted separately via
+ * proposeProfile(). Vocabulary questions hydrate as tappable chips in the
+ * UI (the model names the vocabulary, never the option list).
  */
 
 export type RemmyMode = "create" | "update"
@@ -26,6 +25,8 @@ export interface RemmyTurnResult {
   /** Remmy believes enough was shared to run the schema extractor. */
   ready_for_review: boolean
   draft_summary: string[]
+  /** Schema-hydrated chip group. Null when the question is free text. */
+  ask: AskId | null
 }
 
 const turnSchema = z.object({
@@ -40,13 +41,20 @@ const turnSchema = z.object({
       z.array(z.string()),
     )
     .catch([]),
+  ask: z.string().optional().catch(undefined),
 })
 
-function systemPrompt(mode: RemmyMode, currentProfileJson: string | null): string {
+function systemPrompt(
+  mode: RemmyMode,
+  currentProfileJson: string | null,
+  openGapsText: string,
+): string {
   const role =
     mode === "create"
       ? "You are helping a new organisation create a directory profile."
       : "You are helping an organisation update their existing directory profile."
+
+  const formOpen = Boolean(currentProfileJson || openGapsText)
 
   return `You are Remmy, the Foresight Matchmaking guide. ${role}
 
@@ -58,23 +66,40 @@ Hard rules:
 - Ask exactly ONE question at a time (TWO only if they are a natural pair, e.g. org name + HQ country). Never three.
 - Keep replies to 1–3 short sentences plus the question(s).
 - This platform lists organisations against open programmes. Recoding Medicine is the current programme — fields follow from that.
-- If the user pastes an About page or long description (roughly 400+ characters), set ready_for_review=true immediately — ask no further questions; acknowledge and tell them to use "Fill form from chat".
-- Set ready_for_review=true when you have: kind, organisation name, country, what they do, and what they are looking for (or equivalent for updates).
+- If the user pastes an About page or long description (roughly 400+ characters), set ready_for_review=true immediately — ask no further questions; acknowledge that the form will fill from that text, and mention they can still chat to add more.
+- Set ready_for_review=true when you have: kind, organisation name, country, what they do, and what they are looking for (or equivalent for updates). Contact email is typed on the form — never ask for it in chat.
+${
+  formOpen
+    ? `- The form is already on screen. Do not re-ask fields that are already filled unless they want to change them.
+- Ask about the most important OPEN field next.
+- Data holders / consortia: prefer dataset name, then modality, then disease area. Those ARE the listing.
+- AI teams and independent experts: prefer methods, application target, and domain expertise (the disease areas they work in). Do NOT grill them on data modalities, cohort size, or annotation unless they already said they know what data they need. "Not sure yet" is a complete answer for data needs.
+- Set ready_for_review=true when they have given NEW facts that should be merged into the form.`
+    : ""
+}
+- When the question is a controlled vocabulary, set "ask" so the UI shows tappable chips. Do NOT list the options in the reply.
+  ask values: kind, looking_for, languages, methods, application_target, domain_expertise, privacy_capability, modality, disease_area.
+  Use domain_expertise (not disease_area) for an AI person's field of work. Use modality / disease_area for a data holder's dataset.
+  Use kind only if they have not said whether they are a data holder, AI team, consortium, or individual.
+  Omit "ask" for free-text questions (name, country, what they do).
 - draft_summary: bullets of what you understood AND what the human must still enter (especially contact email). Do NOT return structured profile fields — a separate extractor handles that.
 
 Return ONLY JSON:
 {
   "reply": "what Remmy says",
   "ready_for_review": true|false,
-  "draft_summary": ["bullet", "..."]
+  "draft_summary": ["bullet", "..."],
+  "ask": "kind" | "looking_for" | "languages" | "methods" | "application_target" | "domain_expertise" | "privacy_capability" | "modality" | "disease_area" | null
 }
-${currentProfileJson ? `\nCurrent profile (update context):\n${currentProfileJson}` : ""}`
+${currentProfileJson ? `\nCurrent form (not yet published — do not claim it is saved):\n${currentProfileJson}` : ""}
+${openGapsText ? `\nOpen fields still empty — ask about these, one at a time:\n${openGapsText}` : ""}`
 }
 
 export async function remmyTurn(input: {
   mode: RemmyMode
   messages: RemmyMessage[]
   currentProfile?: Record<string, unknown> | null
+  openGaps?: string[] | null
 }): Promise<RemmyTurnResult | null> {
   const history = input.messages
     .slice(-16)
@@ -84,10 +109,11 @@ export async function remmyTurn(input: {
   const currentProfileJson = input.currentProfile
     ? JSON.stringify(stripForRemmyContext(input.currentProfile)).slice(0, 6000)
     : null
+  const openGapsText = formatGapsForRemmy(input.openGaps ?? [])
 
   const raw = await complete(
     [
-      { role: "system", content: systemPrompt(input.mode, currentProfileJson) },
+      { role: "system", content: systemPrompt(input.mode, currentProfileJson, openGapsText) },
       { role: "user", content: `Conversation so far:\n\n${history}\n\nRespond as Remmy with the JSON object.` },
     ],
     { json: true },
@@ -95,7 +121,21 @@ export async function remmyTurn(input: {
   if (!raw) return null
 
   try {
-    return turnSchema.parse(JSON.parse(extractJsonObject(raw)))
+    const parsed = turnSchema.parse(JSON.parse(extractJsonObject(raw)))
+    const profile = input.currentProfile ?? null
+    const kind = typeof profile?.kind === "string" ? profile.kind : null
+    const llmAsk = isAskId(parsed.ask) ? parsed.ask : undefined
+    // Don't re-ask kind once the form already has one.
+    const ask =
+      llmAsk === "kind" && kind
+        ? resolveAsk(undefined, input.openGaps ?? [], profile)
+        : resolveAsk(llmAsk, input.openGaps ?? [], profile)
+    return {
+      reply: parsed.reply,
+      ready_for_review: parsed.ready_for_review,
+      draft_summary: parsed.draft_summary,
+      ask,
+    }
   } catch {
     return null
   }

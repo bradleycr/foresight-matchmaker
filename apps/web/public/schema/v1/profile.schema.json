@@ -109,10 +109,15 @@
                   "compute",
                   "join_team",
                   "individual_expert",
-                  "not_looking"
+                  "not_looking",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "looking_for_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_status": {
               "type": "string",
@@ -130,7 +135,8 @@
                 "yes",
                 "no",
                 "unsure"
-              ]
+              ],
+              "default": "no"
             },
             "attending": {
               "type": "array",
@@ -158,6 +164,22 @@
                 "hidden"
               ],
               "default": "public"
+            },
+            "org_type_other": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "intended_public_contribution": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "funding_mainly_needed_for": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "best_public_dataset": {
+              "type": "string",
+              "maxLength": 400
             },
             "contact_name": {
               "type": "string",
@@ -217,6 +239,9 @@
                         "transcriptomics",
                         "proteomics",
                         "metabolomics",
+                        "epigenomics",
+                        "microbiome",
+                        "spatial_omics",
                         "multi_omics",
                         "ehr_structured",
                         "clinical_notes",
@@ -226,6 +251,8 @@
                         "wearable_sensor",
                         "claims",
                         "biospecimens",
+                        "patient_reported_outcomes",
+                        "voice_data",
                         "other"
                       ]
                     },
@@ -248,6 +275,11 @@
                         "womens_health",
                         "paediatrics",
                         "geriatrics",
+                        "immunology",
+                        "dermatology",
+                        "ophthalmology",
+                        "critical_care",
+                        "dentistry",
                         "multi_domain",
                         "other"
                       ]
@@ -418,7 +450,6 @@
             "one_liner",
             "summary",
             "application_status",
-            "parallel_public_funding",
             "contact_name",
             "contact_email",
             "created_at",
@@ -532,10 +563,15 @@
                   "compute",
                   "join_team",
                   "individual_expert",
-                  "not_looking"
+                  "not_looking",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "looking_for_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_status": {
               "type": "string",
@@ -553,7 +589,8 @@
                 "yes",
                 "no",
                 "unsure"
-              ]
+              ],
+              "default": "no"
             },
             "attending": {
               "type": "array",
@@ -581,6 +618,22 @@
                 "hidden"
               ],
               "default": "public"
+            },
+            "org_type_other": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "intended_public_contribution": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "funding_mainly_needed_for": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "best_public_dataset": {
+              "type": "string",
+              "maxLength": 400
             },
             "contact_name": {
               "type": "string",
@@ -670,6 +723,11 @@
                   "womens_health",
                   "paediatrics",
                   "geriatrics",
+                  "immunology",
+                  "dermatology",
+                  "ophthalmology",
+                  "critical_care",
+                  "dentistry",
                   "multi_domain",
                   "other"
                 ]
@@ -761,6 +819,9 @@
                       "transcriptomics",
                       "proteomics",
                       "metabolomics",
+                      "epigenomics",
+                      "microbiome",
+                      "spatial_omics",
                       "multi_omics",
                       "ehr_structured",
                       "clinical_notes",
@@ -770,6 +831,8 @@
                       "wearable_sensor",
                       "claims",
                       "biospecimens",
+                      "patient_reported_outcomes",
+                      "voice_data",
                       "other"
                     ]
                   },
@@ -792,6 +855,11 @@
                       "womens_health",
                       "paediatrics",
                       "geriatrics",
+                      "immunology",
+                      "dermatology",
+                      "ophthalmology",
+                      "critical_care",
+                      "dentistry",
                       "multi_domain",
                       "other"
                     ]
@@ -864,7 +932,6 @@
             "one_liner",
             "summary",
             "application_status",
-            "parallel_public_funding",
             "contact_name",
             "contact_email",
             "created_at",
@@ -981,10 +1048,15 @@
                   "compute",
                   "join_team",
                   "individual_expert",
-                  "not_looking"
+                  "not_looking",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "looking_for_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_status": {
               "type": "string",
@@ -1002,7 +1074,8 @@
                 "yes",
                 "no",
                 "unsure"
-              ]
+              ],
+              "default": "no"
             },
             "attending": {
               "type": "array",
@@ -1030,6 +1103,22 @@
                 "hidden"
               ],
               "default": "public"
+            },
+            "org_type_other": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "intended_public_contribution": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "funding_mainly_needed_for": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "best_public_dataset": {
+              "type": "string",
+              "maxLength": 400
             },
             "contact_name": {
               "type": "string",
@@ -1089,6 +1178,9 @@
                         "transcriptomics",
                         "proteomics",
                         "metabolomics",
+                        "epigenomics",
+                        "microbiome",
+                        "spatial_omics",
                         "multi_omics",
                         "ehr_structured",
                         "clinical_notes",
@@ -1098,6 +1190,8 @@
                         "wearable_sensor",
                         "claims",
                         "biospecimens",
+                        "patient_reported_outcomes",
+                        "voice_data",
                         "other"
                       ]
                     },
@@ -1120,6 +1214,11 @@
                         "womens_health",
                         "paediatrics",
                         "geriatrics",
+                        "immunology",
+                        "dermatology",
+                        "ophthalmology",
+                        "critical_care",
+                        "dentistry",
                         "multi_domain",
                         "other"
                       ]
@@ -1333,6 +1432,11 @@
                   "womens_health",
                   "paediatrics",
                   "geriatrics",
+                  "immunology",
+                  "dermatology",
+                  "ophthalmology",
+                  "critical_care",
+                  "dentistry",
                   "multi_domain",
                   "other"
                 ]
@@ -1424,6 +1528,9 @@
                       "transcriptomics",
                       "proteomics",
                       "metabolomics",
+                      "epigenomics",
+                      "microbiome",
+                      "spatial_omics",
                       "multi_omics",
                       "ehr_structured",
                       "clinical_notes",
@@ -1433,6 +1540,8 @@
                       "wearable_sensor",
                       "claims",
                       "biospecimens",
+                      "patient_reported_outcomes",
+                      "voice_data",
                       "other"
                     ]
                   },
@@ -1455,6 +1564,11 @@
                       "womens_health",
                       "paediatrics",
                       "geriatrics",
+                      "immunology",
+                      "dermatology",
+                      "ophthalmology",
+                      "critical_care",
+                      "dentistry",
                       "multi_domain",
                       "other"
                     ]
@@ -1528,7 +1642,8 @@
                   "compute",
                   "join_team",
                   "individual_expert",
-                  "not_looking"
+                  "not_looking",
+                  "other"
                 ]
               },
               "default": []
@@ -1544,7 +1659,6 @@
             "one_liner",
             "summary",
             "application_status",
-            "parallel_public_funding",
             "contact_name",
             "contact_email",
             "created_at",
@@ -1662,10 +1776,15 @@
                   "compute",
                   "join_team",
                   "individual_expert",
-                  "not_looking"
+                  "not_looking",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "looking_for_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_status": {
               "type": "string",
@@ -1683,7 +1802,8 @@
                 "yes",
                 "no",
                 "unsure"
-              ]
+              ],
+              "default": "no"
             },
             "attending": {
               "type": "array",
@@ -1711,6 +1831,22 @@
                 "hidden"
               ],
               "default": "public"
+            },
+            "org_type_other": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "intended_public_contribution": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "funding_mainly_needed_for": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "best_public_dataset": {
+              "type": "string",
+              "maxLength": 400
             },
             "contact_name": {
               "type": "string",
@@ -1800,6 +1936,11 @@
                   "womens_health",
                   "paediatrics",
                   "geriatrics",
+                  "immunology",
+                  "dermatology",
+                  "ophthalmology",
+                  "critical_care",
+                  "dentistry",
                   "multi_domain",
                   "other"
                 ]
@@ -1891,6 +2032,9 @@
                       "transcriptomics",
                       "proteomics",
                       "metabolomics",
+                      "epigenomics",
+                      "microbiome",
+                      "spatial_omics",
                       "multi_omics",
                       "ehr_structured",
                       "clinical_notes",
@@ -1900,6 +2044,8 @@
                       "wearable_sensor",
                       "claims",
                       "biospecimens",
+                      "patient_reported_outcomes",
+                      "voice_data",
                       "other"
                     ]
                   },
@@ -1922,6 +2068,11 @@
                       "womens_health",
                       "paediatrics",
                       "geriatrics",
+                      "immunology",
+                      "dermatology",
+                      "ophthalmology",
+                      "critical_care",
+                      "dentistry",
                       "multi_domain",
                       "other"
                     ]
@@ -1998,7 +2149,6 @@
             "one_liner",
             "summary",
             "application_status",
-            "parallel_public_funding",
             "contact_name",
             "contact_email",
             "created_at",

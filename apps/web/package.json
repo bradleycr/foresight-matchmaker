@@ -11,7 +11,8 @@
     "test": "vitest run",
     "db:seed": "tsx lib/db/seed.ts",
     "db:reset": "tsx lib/db/reset.ts",
-    "db:demo": "tsx lib/db/demo.ts"
+    "db:demo": "tsx lib/db/demo.ts",
+    "db:purge-synthetic": "tsx lib/db/purge-synthetic.ts"
   },
   "dependencies": {
     "@rmm/matching": "workspace:*",

@@ -11,16 +11,18 @@ Four listing types. Please mark any field that is wrong, missing, or should not 
 | Field | Required | Notes |
 | --- | --- | --- |
 | Organisation name | yes | For an individual, this is the person’s name |
-| Organisation type | yes | university, research institute, hospital, biobank/registry, company, startup, incubator, individual, other |
+| Organisation type | yes | university, research institute, hospital, biobank/registry, company, startup, incubator, individual, other. When Other is chosen, a free-text definition is required. |
 | Country of HQ | yes | ISO 3166-1 alpha-2 of HQ or residence. Eligibility (EU, EFTA, UK, Israel) is derived from this. |
 | One-liner | yes | ≤ 140 characters |
 | Summary | yes | ≤ 600 characters |
 | Website | no | |
 | Working languages | no | en, de, fr, nl, es, it, pl, sv, da, he, fi, pt, el, cs, hu, ro, other |
-| Looking for | no | dataset access, AI partner, clinical partner, data-governance support, compute, join an existing team, individual expert, not looking |
-| Application status | yes | undecided, intend to apply, applying with a partner, team complete, not applying |
-| Parallel public funding | yes | yes / no / unsure |
-| Challenge events attending | no | webinar 20 Aug 2026, Sept events 1–3, remote only |
+| Looking for | no | dataset access, AI partner, clinical partner, data-governance support, compute, join an existing team, individual expert, not looking, other (please define) |
+| Application status | yes | undecided, looking for a partner to apply with, applying with a partner, team complete, not applying |
+| Challenge events attending | no | webinar 20 Aug 2026 (hidden after 20 Aug), Berlin 3 Sep, Paris 9 Sep, Stockholm 17 Sep, remote only |
+| Intended public contribution | no | optional free text |
+| Funding mainly needed for | no | optional free text (compute, personnel, …) |
+| Best publicly available dataset | no | optional free text |
 | Open to introductions | yes | |
 | Contact name | yes | private |
 | Contact email | yes | private |
@@ -39,8 +41,8 @@ Brings one or more datasets. At least one dataset is required.
 | Field | Required | Values |
 | --- | --- | --- |
 | Name | yes | |
-| Modality | ≥1 | MRI, CT, X-ray, histopathology, other imaging, genomics, transcriptomics, proteomics, metabolomics, multi-omics, structured EHR, clinical notes, registry, longitudinal cohort, waveform (ECG/EEG), wearable/sensor, claims, biospecimens, other |
-| Disease area | ≥1 | oncology, cardiovascular, neurology, psychiatry, rare disease, infectious, metabolic/endocrine, respiratory, musculoskeletal, women’s health, paediatrics, geriatrics, multi-domain, other |
+| Modality | ≥1 | MRI, CT, X-ray, histopathology, other imaging, genomics, transcriptomics, proteomics, metabolomics, epigenomics, microbiome, spatial omics, multi-omics, structured EHR, clinical notes, registry, longitudinal cohort, waveform (ECG/EEG), wearable/sensor, claims, biospecimens, patient-reported outcomes, voice data, other |
+| Disease area | ≥1 | oncology, cardiovascular, neurology, psychiatry, rare disease, infectious, metabolic/endocrine, respiratory, musculoskeletal, women’s health, paediatrics, geriatrics, immunology, dermatology, ophthalmology, critical care, dentistry, multi-domain, other |
 | N subjects | yes | &lt;1k, 1k–10k, 10k–100k, 100k–1m, &gt;1m |
 | Volume | yes | &lt;100GB, 100GB–1TB, 1–10TB, 10–100TB, &gt;100TB |
 | Time span (years) | no | |

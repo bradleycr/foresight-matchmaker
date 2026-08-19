@@ -16,15 +16,15 @@ The previous hostname `matchmaker-sprind.vercel.app` forwards here.
 `DATABASE_PATH=/tmp/rmm-app.db` on Vercel is **ephemeral**: it survives across
 requests served by the same warm serverless instance, but a cold start (new
 deployment, or an instance recycled after inactivity) starts from an empty
-`/tmp` and `SEED_ON_EMPTY=true` reseeds the 118 synthetic profiles
-automatically. That means:
+`/tmp`. Production must **not** set `SEED_ON_EMPTY=true` — otherwise every
+cold start refills ~118 fabricated profiles and looks like an applicant pool.
 
-- Anything registered live on stage can disappear if the instance recycles
-  mid-demo. Don't rely on state surviving between the morning rehearsal and
-  the afternoon slot — re-verify right before you go on.
-- This is also the mechanism for resetting between rehearsals (see below).
-- It is **not** durable prod. If SPRIND asks to keep this running past the
-  demo, that's the Docker/VM path with a bind-mounted volume, not this one.
+- Real registrations on Vercel also disappear on cold start. That is why
+  durable production is the Docker/VM path with a bind-mounted volume.
+- To empty a live Vercel instance that was seeded earlier: set
+  `SEED_ON_EMPTY` to empty/false for Production, redeploy, and (if the
+  instance is still warm) use `/admin` → Remove seed listings, or wait for
+  the next cold start.
 
 ## Required environment variables (already set on Vercel)
 
@@ -36,7 +36,7 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | `SESSION_SECRET` | random, generated | Required in production — the app now refuses to boot without it (see `instrumentation.ts`). |
 | `ADMIN_SECRET` | `password123` | Unlocks `/admin`. The page also accepts `password123` even if this env value is rotated. |
 | `AUTH_REVEAL_LINKS` | `true` | **Load-bearing.** With no SMTP configured, this is the only way anyone — including you, on stage — can sign in. Without it, magic links go to the server log only and `/signin` becomes unusable live. |
-| `SEED_ON_EMPTY` | `true` | Auto-seeds the 118 synthetic profiles on a cold `/tmp`. |
+| `SEED_ON_EMPTY` | unset / `false` on Production | Must stay off on any host real applicants see. `true` only for a rehearsal deploy that should show fabricated listings. |
 | `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
 | `APP_URL` | `https://foresight-matchmaker.vercel.app` | Canonical origin for Open Graph, robots, and magic links — so a hit on the old forwarding hostname still mints links on the new one. |
 | `RATE_LIMIT_PER_24H` | `20` (recommended for the demo) | Outbound intro requests allowed per profile per rolling 24h. Defaults to 5, which a few rehearsal run-throughs from the same account will exhaust — set it higher for the demo so a live retry never trips `rate_limited` on stage. |
@@ -98,15 +98,17 @@ serverless instance:
 vercel deploy --prod --scope bradley-royes-projects --yes
 ```
 
-A new deployment gets a fresh `/tmp`, so `SEED_ON_EMPTY` reseeds the pristine
-118-profile directory (no accepted/pending intros — that's local-only via
-`db:demo` for now; there is no remote-safe way to run `db:demo`'s intro
-seeding against the live deployment). This takes roughly 30–60 seconds;
-don't do it in the middle of a live demo, only between rehearsal runs or
-right before you go on. If you need the demo-intro state on the *deployed*
-URL specifically, run the app against `apps/web/.env` locally
-(`DATABASE_PATH` unset → local `./data/app.db`) for that part of the
-rehearsal instead.
+A new deployment gets a fresh `/tmp`. With `SEED_ON_EMPTY` unset, that
+directory is empty — which is what production should show. A rehearsal
+deploy that still needs the 118 fabricated profiles must set
+`SEED_ON_EMPTY=true` **only on that environment**, then:
+
+```bash
+vercel deploy --prod --scope bradley-royes-projects --yes
+```
+
+Do not do that in the middle of a live session with real visitors. Local
+`pnpm db:demo` still loads intros into `./data/app.db` for a laptop rehearsal.
 
 ## Signing in during the demo
 

@@ -156,8 +156,8 @@ data_can_leave_institution: ${YES_NO_UNSURE.join(", ")}
 ethics_approval: ${ETHICS_APPROVAL.join(", ")}
 
 Text: org_name, one_liner (<=140), summary (<=600), website, track_record (up to 5 URLs).
-Data holders: datasets[] with name, modality, disease_area, n_subjects, access_model, etc.
-AI teams and independent experts: data_needs { modality, disease_area, min_n_subjects, annotation_required, linkage_required, standards_preferred }. Independent people use kind "individual" (org_name is their name).`
+Data holders / consortia: datasets[] with name, modality, disease_area, n_subjects, access_model — extract every modality and disease area the text supports (canonical enum strings, not display labels).
+AI teams and independent experts: methods, application_target, domain_expertise (disease areas they work in). Fill data_needs ONLY when they explicitly named data they want to work with; omit it when they have not decided. Independent people use kind "individual" (org_name is their name).`
 
 /**
  * Map prose or a chat transcript → validated PrefillProposal.

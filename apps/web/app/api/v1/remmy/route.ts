@@ -18,13 +18,14 @@ const bodySchema = z.object({
   mode: z.enum(["create", "update"]).default("create"),
   messages: z.array(messageSchema).min(1).max(24),
   current_profile: z.record(z.unknown()).optional().nullable(),
+  open_gaps: z.array(z.string().max(64)).max(24).optional(),
 })
 
 /**
  * POST /api/v1/remmy — one conversational turn (interview only).
  *
  * Structured profile fields are extracted separately via POST /api/v1/prefill
- * once Remmy signals ready_for_review or the user clicks "Fill form from chat".
+ * once Remmy signals ready_for_review or the user clicks "Fill form".
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!llmEnabled()) {
@@ -59,7 +60,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const turn = await remmyTurn({
     mode: parsed.data.mode,
     messages: parsed.data.messages,
-    currentProfile: parsed.data.mode === "update" ? parsed.data.current_profile ?? null : null,
+    currentProfile: parsed.data.current_profile ?? null,
+    openGaps: parsed.data.open_gaps ?? [],
   })
 
   if (!turn) {

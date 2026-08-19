@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useImperativeHandle, useMemo, useState, type Ref } from "react"
 import { useRouter } from "next/navigation"
 import {
   KIND,
@@ -8,8 +8,10 @@ import {
   LANGUAGE,
   LOOKING_FOR,
   APPLICATION_STATUS,
-  YES_NO_UNSURE,
   ATTENDING,
+  attendingChoices,
+  isWebinarOpen,
+  WEBINAR_ATTENDING,
   VISIBILITY,
   METHODS,
   APPLICATION_TARGET,
@@ -81,8 +83,8 @@ interface FormState {
   website: string
   languages: (typeof LANGUAGE)[number][]
   looking_for: (typeof LOOKING_FOR)[number][]
+  looking_for_other: string
   application_status: (typeof APPLICATION_STATUS)[number]
-  parallel_public_funding: (typeof YES_NO_UNSURE)[number]
   attending: (typeof ATTENDING)[number][]
   open_to_intros: boolean
   visibility: (typeof VISIBILITY)[number]
@@ -109,6 +111,10 @@ interface FormState {
   needs_standards: (typeof STANDARDS)[number][]
   still_seeking: (typeof LOOKING_FOR)[number][]
   affiliation: string
+  org_type_other: string
+  intended_public_contribution: string
+  funding_mainly_needed_for: string
+  best_public_dataset: string
 }
 
 function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState {
@@ -123,8 +129,8 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     website: "",
     languages: [],
     looking_for: [],
+    looking_for_other: "",
     application_status: "undecided",
-    parallel_public_funding: "no",
     attending: [],
     open_to_intros: true,
     visibility: "public",
@@ -151,6 +157,10 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     needs_standards: [],
     still_seeking: [],
     affiliation: "",
+    org_type_other: "",
+    intended_public_contribution: "",
+    funding_mainly_needed_for: "",
+    best_public_dataset: "",
   }
 }
 
@@ -169,8 +179,8 @@ function stateFromProfile(p: Profile): FormState {
     website: p.website ?? "",
     languages: p.languages,
     looking_for: p.looking_for,
+    looking_for_other: p.looking_for_other ?? "",
     application_status: p.application_status,
-    parallel_public_funding: p.parallel_public_funding,
     attending: p.attending,
     open_to_intros: p.open_to_intros,
     visibility: p.visibility,
@@ -197,6 +207,10 @@ function stateFromProfile(p: Profile): FormState {
     needs_standards: ai?.data_needs.standards_preferred ?? [],
     still_seeking: p.kind === "consortium" ? p.still_seeking : [],
     affiliation: p.kind === "individual" ? (p.affiliation ?? "") : "",
+    org_type_other: p.org_type_other ?? "",
+    intended_public_contribution: p.intended_public_contribution ?? "",
+    funding_mainly_needed_for: p.funding_mainly_needed_for ?? "",
+    best_public_dataset: p.best_public_dataset ?? "",
   }
 }
 
@@ -217,12 +231,20 @@ function toPayload(s: FormState): Record<string, unknown> {
     website,
     languages: s.languages,
     looking_for: s.looking_for,
+    looking_for_other:
+      s.looking_for.includes("other") || s.still_seeking.includes("other")
+        ? s.looking_for_other.trim() || undefined
+        : undefined,
     application_status: s.application_status,
-    parallel_public_funding: s.parallel_public_funding,
-    attending: s.attending,
+    parallel_public_funding: "no",
+    attending: isWebinarOpen() ? s.attending : s.attending.filter((v) => v !== WEBINAR_ATTENDING),
     open_to_intros: s.open_to_intros,
     visibility: s.visibility,
     partner_only: s.partner_only,
+    org_type_other: s.org_type === "other" ? s.org_type_other.trim() || undefined : undefined,
+    intended_public_contribution: s.intended_public_contribution.trim() || undefined,
+    funding_mainly_needed_for: s.funding_mainly_needed_for.trim() || undefined,
+    best_public_dataset: s.best_public_dataset.trim() || undefined,
     contact_name: s.contact_name,
     contact_email: s.contact_email,
     contact_role: s.contact_role || undefined,
@@ -267,7 +289,49 @@ interface ApiError {
   details?: Array<{ path: string; message: string }>
 }
 
+/** Live form snapshot Remmy reads so it can ask about remaining gaps. */
+function remmySnapshot(s: FormState): Record<string, unknown> {
+  return {
+    kind: s.kind,
+    org_name: s.org_name,
+    org_type: s.org_type,
+    country: s.country,
+    one_liner: s.one_liner,
+    summary: s.summary,
+    website: s.website,
+    languages: s.languages,
+    looking_for: s.looking_for,
+    attending: s.attending,
+    methods: s.methods,
+    application_target: s.application_target,
+    domain_expertise: s.domain_expertise,
+    privacy_capability: s.privacy_capability,
+    team_size: s.team_size,
+    datasets: s.datasets
+      .filter((d) => d.name.trim() || d.modality.length || d.disease_area.length)
+      .map((d) => ({
+        name: d.name,
+        modality: d.modality,
+        disease_area: d.disease_area,
+        n_subjects: d.n_subjects,
+        access_model: d.access_model,
+      })),
+    data_needs: {
+      modality: s.needs_modality,
+      disease_area: s.needs_disease_area,
+      min_n_subjects: s.needs_min_n_subjects,
+      annotation_required: s.needs_annotation,
+    },
+  }
+}
+
+export type ProfileFormHandle = {
+  applyDraft: (proposal: PrefillProposal, opts?: { spotlight?: boolean }) => void
+  getContext: () => { open_gaps: GapField[]; current_profile: Record<string, unknown> }
+}
+
 export function ProfileForm({
+  ref,
   initial,
   profileId,
   prefillEnabled = false,
@@ -275,10 +339,11 @@ export function ProfileForm({
   highlightGapsOnMount = false,
   defaultChallengeId = DEFAULT_CHALLENGE_ID,
 }: {
+  ref?: Ref<ProfileFormHandle>
   initial?: Profile
   profileId?: string
   prefillEnabled?: boolean
-  /** Remmy (or paste-prefill) draft already confirmed by the user. */
+  /** Remmy (or paste-prefill) draft to apply on first mount. */
   initialProposal?: PrefillProposal
   /** After a Remmy draft is applied, spotlight fields still empty. */
   highlightGapsOnMount?: boolean
@@ -293,7 +358,6 @@ export function ProfileForm({
     return initialProposal ? mergeProposalIntoForm(base, initialProposal, COUNTRY_CODES) : base
   })
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
-  const [claimLink, setClaimLink] = useState<string | null>(null)
   const [apiError, setApiError] = useState<ApiError | null>(null)
   const [clientIssues, setClientIssues] = useState<ValidationIssue[]>([])
   const [spotlightGaps, setSpotlightGaps] = useState(highlightGapsOnMount)
@@ -313,15 +377,25 @@ export function ProfileForm({
   const gapSet = useMemo(() => new Set<GapField>(gaps), [gaps])
   const needs = (key: GapField) => gapSet.has(key)
 
-  function applyDraft(proposal: PrefillProposal) {
+  function applyDraft(proposal: PrefillProposal, opts?: { spotlight?: boolean }) {
     setState((s) => mergeProposalIntoForm(s, proposal, COUNTRY_CODES))
-    setSpotlightGaps(true)
+    const spotlight = opts?.spotlight !== false
+    if (spotlight) setSpotlightGaps(true)
     setClientIssues([])
-    // Next paint — scroll the checklist into view.
-    queueMicrotask(() => {
-      document.getElementById("form-gaps")?.scrollIntoView({ behavior: "smooth", block: "start" })
-    })
+    if (spotlight) {
+      queueMicrotask(() => {
+        document.getElementById("form-gaps")?.scrollIntoView({ behavior: "smooth", block: "start" })
+      })
+    }
   }
+
+  useImperativeHandle(ref, () => ({
+    applyDraft,
+    getContext: () => ({
+      open_gaps: findManualGaps(state),
+      current_profile: remmySnapshot(state),
+    }),
+  }))
 
   useEffect(() => {
     if (highlightGapsOnMount && gaps.length > 0) {
@@ -340,6 +414,11 @@ export function ProfileForm({
       website: state.website,
       track_record: state.track_record,
       datasets: state.datasets,
+      org_type: state.org_type,
+      org_type_other: state.org_type_other,
+      looking_for: state.looking_for,
+      still_seeking: state.still_seeking,
+      looking_for_other: state.looking_for_other,
     })
 
     if (issues.length > 0) {
@@ -367,10 +446,9 @@ export function ProfileForm({
     }
 
     if (isCreate) {
-      const body = (await res.json()) as { claim_link?: string }
-      setClaimLink(body.claim_link ?? null)
       setStatus("created")
       window.scrollTo({ top: 0 })
+      router.refresh()
     } else {
       router.push("/me?saved=1")
       router.refresh()
@@ -382,16 +460,6 @@ export function ProfileForm({
       <div className="border border-ink bg-paper-shade p-6">
         <h2 className="font-listing text-2xl font-bold uppercase">{t("form.created_title")}</h2>
         <p className="mt-2">{t("form.created_body")}</p>
-        {claimLink && (
-          <div className="mt-4 border border-ink bg-paper p-4">
-            <p className="font-semibold">{t("signin.copy_link_warning")}</p>
-            <p className="mt-2 break-all">
-              <a href={claimLink} className="tnum underline">
-                {claimLink}
-              </a>
-            </p>
-          </div>
-        )}
         <div className="mt-4 flex gap-3">
           <Button variant="primary" onClick={() => router.push("/me/matches")}>
             {t("form.created_cta_matches")}
@@ -527,7 +595,14 @@ export function ProfileForm({
               <Input id="org_type" readOnly value={t("enum.org_type.individual")} />
             </Field>
           ) : (
-            <EnumSelect label={t("field.org_type")} group="org_type" options={ORG_TYPE} value={state.org_type} onChange={(v) => v && set("org_type", v)} id="org_type" />
+            <EnumSelect
+              label={t("field.org_type")}
+              group="org_type"
+              options={ORG_TYPE}
+              value={state.org_type}
+              onChange={(v) => v && set("org_type", v)}
+              id="org_type"
+            />
           )}
           <Field label={t("field.country")} htmlFor="country" hint={t("form.country_hint")} required>
             <Select id="country" value={state.country} onChange={(e) => set("country", e.target.value)}>
@@ -539,6 +614,22 @@ export function ProfileForm({
             </Select>
           </Field>
         </div>
+        {!isPerson && state.org_type === "other" ? (
+          <Field
+            label={t("field.org_type_other")}
+            htmlFor="org_type_other"
+            required
+            hint={t("form.org_type_other_hint")}
+          >
+            <Input
+              id="org_type_other"
+              required
+              maxLength={200}
+              value={state.org_type_other}
+              onChange={(e) => set("org_type_other", e.target.value)}
+            />
+          </Field>
+        ) : null}
         <Field label={t("field.one_liner")} htmlFor="one_liner" hint={t("form.one_liner_hint")} required attention={needs("one_liner")} id="gap-one_liner">
           <Input id="one_liner" required maxLength={140} value={state.one_liner} onChange={(e) => set("one_liner", e.target.value)} />
         </Field>
@@ -557,19 +648,50 @@ export function ProfileForm({
           {t("form.section_application")}
         </h2>
         <EnumChips label={t("field.looking_for")} group="looking_for" options={LOOKING_FOR} value={state.looking_for} onChange={(v) => set("looking_for", v)} attention={needs("looking_for")} fieldId="gap-looking_for" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <EnumSelect label={t("field.application_status")} group="application_status" options={APPLICATION_STATUS} value={state.application_status} onChange={(v) => v && set("application_status", v)} id="application_status" />
-          <EnumSelect
-            label={t("field.parallel_public_funding")}
-            group="yes_no_unsure"
-            options={YES_NO_UNSURE}
-            value={state.parallel_public_funding}
-            onChange={(v) => v && set("parallel_public_funding", v)}
-            hint={t("form.parallel_funding_hint")}
-            id="parallel_public_funding"
-          />
-        </div>
-        <EnumChips label={t("field.attending")} group="attending" options={ATTENDING} value={state.attending} onChange={(v) => set("attending", v)} attention={needs("attending")} fieldId="gap-attending" />
+        {state.looking_for.includes("other") ? (
+          <Field
+            label={t("field.looking_for_other")}
+            htmlFor="looking_for_other"
+            required
+            hint={t("form.looking_for_other_hint")}
+          >
+            <Input
+              id="looking_for_other"
+              required
+              maxLength={200}
+              value={state.looking_for_other}
+              onChange={(e) => set("looking_for_other", e.target.value)}
+            />
+          </Field>
+        ) : null}
+        <EnumSelect
+          label={t("field.application_status")}
+          group="application_status"
+          options={APPLICATION_STATUS}
+          value={state.application_status}
+          onChange={(v) => v && set("application_status", v)}
+          id="application_status"
+        />
+        <EnumChips
+          label={t("field.attending")}
+          group="attending"
+          options={attendingChoices()}
+          value={state.attending}
+          onChange={(v) => set("attending", v)}
+          attention={needs("attending")}
+          fieldId="gap-attending"
+          hint={t("form.attending_hint")}
+        />
+        <p className="text-sm">
+          <a
+            href="https://www.sprind.org/taten/challenges/recoding-medicine"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold underline"
+          >
+            {isWebinarOpen() ? t("form.attending_events_link") : t("form.webinar_recording_link")}
+          </a>
+        </p>
       </section>
 
       {/* Datasets. */}
@@ -579,7 +701,6 @@ export function ProfileForm({
             {t("form.section_datasets")}
           </h2>
           <p className="text-sm text-ink-soft">{t("form.datasets_hint")}</p>
-          <p className="text-sm font-semibold text-ink-soft">{t("form.datasets_required_summary")}</p>
           {needs("datasets") && (
             <p className="border border-alert bg-alert/5 px-3 py-2 text-sm font-semibold text-alert">
               {t("form.gaps_datasets_nudge")}
@@ -598,6 +719,15 @@ export function ProfileForm({
           <Button type="button" onClick={() => set("datasets", [...state.datasets, emptyDataset()])} className="self-start">
             {t("form.add_dataset")}
           </Button>
+          <Field label={t("field.best_public_dataset")} htmlFor="best_public_dataset" hint={t("form.best_public_dataset_hint")}>
+            <Textarea
+              id="best_public_dataset"
+              rows={2}
+              maxLength={400}
+              value={state.best_public_dataset}
+              onChange={(e) => set("best_public_dataset", e.target.value)}
+            />
+          </Field>
         </section>
       )}
 
@@ -623,7 +753,7 @@ export function ProfileForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <EnumSelect label={t("field.clinical_partner")} group="clinical_partner" options={CLINICAL_PARTNER} value={state.clinical_partner} onChange={(v) => v && set("clinical_partner", v)} id="clinical_partner" />
             <EnumSelect label={t("field.compute")} group="compute" options={COMPUTE} value={state.compute} onChange={(v) => v && set("compute", v)} id="compute" />
-            <Field label={t("field.compute_scale")} htmlFor="compute_scale" attention={needs("compute_scale")} id="gap-compute_scale">
+            <Field label={t("field.compute_scale")} htmlFor="compute_scale" id="gap-compute_scale">
               <Input id="compute_scale" maxLength={120} placeholder="8× H100" value={state.compute_scale} onChange={(e) => set("compute_scale", e.target.value)} />
             </Field>
             <EnumSelect label={t("field.team_size")} group="team_size" options={TEAM_SIZE} value={state.team_size} onChange={(v) => v && set("team_size", v)} id="team_size" />
@@ -642,25 +772,54 @@ export function ProfileForm({
           <h3 className="mt-2 border-b border-rule pb-1 font-listing text-lg font-bold uppercase">
             {t(isPerson ? "form.section_needs_person" : "form.section_needs")}
           </h3>
-          <EnumChips label={t("field.modality")} group="modality" options={MODALITY} value={state.needs_modality} onChange={(v) => set("needs_modality", v)} attention={needs("needs_modality")} fieldId="gap-needs_modality" />
-          <EnumChips label={t("field.disease_area")} group="disease_area" options={DISEASE_AREA} value={state.needs_disease_area} onChange={(v) => set("needs_disease_area", v)} attention={needs("needs_disease_area")} fieldId="gap-needs_disease_area" />
+          <p className="text-sm text-ink-soft">{t("form.section_needs_hint")}</p>
+          <EnumChips label={t("field.modality")} group="modality" options={MODALITY} value={state.needs_modality} onChange={(v) => set("needs_modality", v)} fieldId="gap-needs_modality" />
+          <EnumChips label={t("field.disease_area")} group="disease_area" options={DISEASE_AREA} value={state.needs_disease_area} onChange={(v) => set("needs_disease_area", v)} fieldId="gap-needs_disease_area" />
           <div className="grid gap-4 sm:grid-cols-2">
-            <EnumSelect label={t("field.min_n_subjects")} group="n_subjects" options={N_SUBJECTS} value={state.needs_min_n_subjects} onChange={(v) => set("needs_min_n_subjects", v)} allowEmpty id="needs_min_n" attention={needs("needs_min_n_subjects")} fieldId="gap-needs_min_n_subjects" />
-            <EnumSelect label={t("field.annotation_required")} group="annotation" options={ANNOTATION} value={state.needs_annotation} onChange={(v) => set("needs_annotation", v)} allowEmpty id="needs_annotation" attention={needs("needs_annotation")} fieldId="gap-needs_annotation" />
+            <EnumSelect label={t("field.min_n_subjects")} group="n_subjects" options={N_SUBJECTS} value={state.needs_min_n_subjects} onChange={(v) => set("needs_min_n_subjects", v)} allowEmpty id="needs_min_n" fieldId="gap-needs_min_n_subjects" />
+            <EnumSelect label={t("field.annotation_required")} group="annotation" options={ANNOTATION} value={state.needs_annotation} onChange={(v) => set("needs_annotation", v)} allowEmpty id="needs_annotation" fieldId="gap-needs_annotation" />
           </div>
           <EnumChips label={t("field.linkage_required")} group="linkage" options={LINKAGE} value={state.needs_linkage} onChange={(v) => set("needs_linkage", v)} />
           <EnumChips label={t("field.standards_preferred")} group="standards" options={STANDARDS} value={state.needs_standards} onChange={(v) => set("needs_standards", v)} />
+          {!showDatasets ? (
+            <Field label={t("field.best_public_dataset")} htmlFor="best_public_dataset" hint={t("form.best_public_dataset_hint")}>
+              <Textarea
+                id="best_public_dataset"
+                rows={2}
+                maxLength={400}
+                value={state.best_public_dataset}
+                onChange={(e) => set("best_public_dataset", e.target.value)}
+              />
+            </Field>
+          ) : null}
         </section>
       )}
 
       {state.kind === "consortium" && (
-        <EnumChips label={t("field.still_seeking")} group="looking_for" options={LOOKING_FOR} value={state.still_seeking} onChange={(v) => set("still_seeking", v)} hint={t("form.still_seeking_hint")} />
+        <>
+          <EnumChips label={t("field.still_seeking")} group="looking_for" options={LOOKING_FOR} value={state.still_seeking} onChange={(v) => set("still_seeking", v)} hint={t("form.still_seeking_hint")} />
+          {state.still_seeking.includes("other") && !state.looking_for.includes("other") ? (
+            <Field
+              label={t("field.looking_for_other")}
+              htmlFor="looking_for_other"
+              required
+              hint={t("form.looking_for_other_hint")}
+            >
+              <Input
+                id="looking_for_other"
+                required
+                maxLength={200}
+                value={state.looking_for_other}
+                onChange={(e) => set("looking_for_other", e.target.value)}
+              />
+            </Field>
+          ) : null}
+        </>
       )}
 
       {/* Contact — private, always. */}
       <section className="flex flex-col gap-4 border-2 border-ink p-4">
         <h2 className="font-listing text-xl font-bold uppercase">{t("form.section_contact")}</h2>
-        <p className="text-sm text-ink-soft">{t("form.contact_privacy_note")}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t("field.contact_name")} htmlFor="contact_name" required attention={needs("contact_name")} id="gap-contact_name">
             <Input id="contact_name" required maxLength={160} value={state.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
@@ -700,6 +859,30 @@ export function ProfileForm({
             <span className="pl-7 text-sm text-ink-soft">{t("form.partner_only_hint")}</span>
           </label>
         )}
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
+          {t("form.section_ministry")}
+        </h2>
+        <Field label={t("field.intended_public_contribution")} htmlFor="intended_public_contribution">
+          <Textarea
+            id="intended_public_contribution"
+            rows={3}
+            maxLength={600}
+            value={state.intended_public_contribution}
+            onChange={(e) => set("intended_public_contribution", e.target.value)}
+          />
+        </Field>
+        <Field label={t("field.funding_mainly_needed_for")} htmlFor="funding_mainly_needed_for">
+          <Input
+            id="funding_mainly_needed_for"
+            maxLength={200}
+            placeholder={t("form.funding_mainly_needed_placeholder")}
+            value={state.funding_mainly_needed_for}
+            onChange={(e) => set("funding_mainly_needed_for", e.target.value)}
+          />
+        </Field>
       </section>
 
       <Button type="submit" variant="primary" disabled={status === "saving"} className="self-start">

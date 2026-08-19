@@ -70,10 +70,10 @@ function Histogram({ title, data, t }: { title: string; data: Record<string, num
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; purged?: string; kept?: string }>
 }) {
   const { t } = await getT()
-  const { error } = await searchParams
+  const { error, purged, kept } = await searchParams
 
   if (!(await isAdmin())) {
     return (
@@ -117,6 +117,25 @@ export default async function AdminPage({
           {t("admin.export_csv")}
         </a>
       </div>
+
+      {purged !== undefined ? (
+        <p role="status" className="mt-4 border border-ink bg-paper-shade px-3 py-2">
+          {t("admin.purge_synthetic_done", { removed: purged, kept: kept ?? "0" })}
+        </p>
+      ) : null}
+
+      <section className="mt-6 border border-rule-strong p-4">
+        <h2 className="font-listing text-base font-bold uppercase">{t("admin.purge_synthetic_title")}</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("admin.purge_synthetic_body")}</p>
+        <form action="/api/admin/purge-synthetic" method="post" className="mt-3">
+          <button
+            type="submit"
+            className="min-h-11 border border-alert px-4 text-sm font-semibold uppercase tracking-wide text-alert hover:bg-alert hover:text-paper"
+          >
+            {t("admin.purge_synthetic")}
+          </button>
+        </form>
+      </section>
 
       {/* Headline figures. */}
       <dl className="mt-6 grid grid-cols-2 gap-px border border-rule-strong bg-rule-strong sm:grid-cols-4">

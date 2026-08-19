@@ -65,11 +65,21 @@ const sharedProfileFields = {
   website: z.string().url().optional(),
   languages: z.array(languageEnum).default([]),
   looking_for: z.array(lookingForEnum).default([]),
+  looking_for_other: z.string().max(200).optional(),
   application_status: applicationStatusEnum,
-  parallel_public_funding: yesNoUnsureEnum,
+  /**
+   * Kept on stored profiles so existing rows still parse. No longer shown
+   * on the form and no longer used in matching — SPRIND confirmed it does
+   * not affect the decision.
+   */
+  parallel_public_funding: yesNoUnsureEnum.default("no"),
   attending: z.array(attendingEnum).default([]),
   open_to_intros: z.boolean().default(true),
   visibility: visibilityEnum.default("public"),
+  org_type_other: z.string().max(200).optional(),
+  intended_public_contribution: z.string().max(600).optional(),
+  funding_mainly_needed_for: z.string().max(200).optional(),
+  best_public_dataset: z.string().max(400).optional(),
   // PRIVATE — redacted from public payloads.
   contact_name: contactSchema.shape.contact_name,
   contact_email: contactSchema.shape.contact_email,
@@ -142,12 +152,28 @@ export const individualSchema = z.object({
 export type Individual = z.infer<typeof individualSchema>
 
 /** Discriminated union across applicant profiles. */
-export const profileSchema = z.discriminatedUnion("kind", [
-  dataHolderSchema,
-  aiTeamSchema,
-  consortiumSchema,
-  individualSchema,
-])
+export const profileSchema = z
+  .discriminatedUnion("kind", [dataHolderSchema, aiTeamSchema, consortiumSchema, individualSchema])
+  .superRefine((data, ctx) => {
+    if (data.org_type === "other" && !data.org_type_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["org_type_other"],
+        message: "Please define the organisation type.",
+      })
+    }
+    const looking = [
+      ...(data.looking_for ?? []),
+      ...("still_seeking" in data ? (data.still_seeking ?? []) : []),
+    ]
+    if (looking.includes("other") && !data.looking_for_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["looking_for_other"],
+        message: "Please define what you are looking for.",
+      })
+    }
+  })
 export type Profile = z.infer<typeof profileSchema>
 
 // ---------------------------------------------------------------------------

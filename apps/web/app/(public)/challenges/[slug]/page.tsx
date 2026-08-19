@@ -5,6 +5,8 @@ import { apiFetch } from "@/lib/api/server-fetch"
 import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES, challengeBySlug } from "@/lib/challenges/catalog"
+import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
+import { ListingCounts } from "@/components/listing-counts"
 
 export const dynamic = "force-dynamic"
 
@@ -52,7 +54,6 @@ export default async function ChallengePage({
     [t("landing.fact_funding_label"), t("landing.fact_funding")],
     [t("landing.fact_hq_label"), t("landing.fact_hq")],
     [t("landing.fact_dataset_label"), t("landing.fact_dataset")],
-    [t("landing.fact_funding_rule_label"), t("landing.fact_funding_rule")],
   ] as const
 
   return (
@@ -63,7 +64,10 @@ export default async function ChallengePage({
       <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl">
         {t(`challenge.${id}.name`)}
       </h1>
-      <p className="mt-4 max-w-2xl text-lg leading-relaxed">{t(`challenge.${id}.intro`)}</p>
+
+      <DirectoryDisclaimer className="mt-6" />
+
+      <p className="mt-5 max-w-xl text-ink-soft">{t(`challenge.${id}.intro`)}</p>
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
@@ -76,25 +80,13 @@ export default async function ChallengePage({
           href={`/register?challenge=${challenge.id}`}
           className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
         >
-          {t("challenge.cta_register")}
+          {t("nav.register")}
         </Link>
       </div>
 
-      <dl className="mt-12 grid grid-cols-1 gap-px border border-rule-strong bg-rule-strong sm:grid-cols-2 lg:grid-cols-4">
-        {(
-          [
-            ["data_holder", t("landing.count_data_holders")],
-            ["ai_team", t("landing.count_ai_teams")],
-            ["consortium", t("landing.count_consortia")],
-            ["individual", t("landing.count_individuals")],
-          ] as const
-        ).map(([kind, label]) => (
-          <div key={kind} className="bg-paper px-4 py-5">
-            <dd className="tnum font-listing text-5xl font-bold">{counts[kind]}</dd>
-            <dt className="mt-1 text-sm font-semibold uppercase tracking-wide text-ink-soft">{label}</dt>
-          </div>
-        ))}
-      </dl>
+      <div className="mt-12">
+        <ListingCounts counts={counts} t={t} />
+      </div>
 
       <section aria-labelledby="facts" className="mt-12 max-w-3xl">
         <h2 id="facts" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
@@ -110,9 +102,8 @@ export default async function ChallengePage({
         </dl>
       </section>
 
-      <p className="mt-8 max-w-2xl text-sm text-ink-soft">
-        {t(`challenge.${id}.host_note`)}{" "}
-        <a href={challenge.hostUrl} className="font-semibold text-ink underline" rel="noopener noreferrer" target="_blank">
+      <p className="mt-8">
+        <a href={challenge.hostUrl} className="font-semibold underline" rel="noopener noreferrer" target="_blank">
           {t("footer.challenge_page")}
         </a>
       </p>

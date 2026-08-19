@@ -29,7 +29,14 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
 
   const { id } = await params
   const profile = getProfileById(id)
-  if (!profile) return notFound("No profile with that id.")
+  if (!profile) {
+    // Cookie valid, row gone (typical on Vercel /tmp after a cold start).
+    if (session.profileId === id) {
+      await destroySession()
+      return unauthorized("Your listing is no longer on this instance. Add it again.")
+    }
+    return notFound("No profile with that id.")
+  }
 
   const owner = session.profileId === profile.id
 
@@ -91,13 +98,19 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
     return badRequest("A profile cannot change programme. Create a new profile instead.")
   }
 
-  const updated = saveProfile({
-    ...input,
-    id: profile.id,
-    slug: profile.slug,
-    created_at: profile.created_at,
-    claimed_at: profile.claimed_at,
-  })
+  let updated
+  try {
+    updated = saveProfile({
+      ...input,
+      id: profile.id,
+      slug: profile.slug,
+      created_at: profile.created_at,
+      claimed_at: profile.claimed_at,
+    })
+  } catch (e) {
+    if (e instanceof ZodError) return zodError(e)
+    throw e
+  }
 
   return ok({ profile: updated })
 }

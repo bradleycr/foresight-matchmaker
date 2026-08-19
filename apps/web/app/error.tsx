@@ -16,10 +16,10 @@ import { useT } from "@/lib/i18n/client"
  */
 export default function ErrorBoundary({
   error,
-  retry,
+  reset,
 }: {
   error: Error & { digest?: string }
-  retry: () => void
+  reset: () => void
 }) {
   const t = useT()
 
@@ -36,10 +36,10 @@ export default function ErrorBoundary({
           {t("error.digest_label")}: <span className="tnum">{error.digest}</span>
         </p>
       )}
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="button"
-          onClick={() => retry()}
+          onClick={() => reset()}
           className="min-h-11 border border-ink bg-mark px-4 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
         >
           {t("error.retry")}
@@ -49,6 +49,12 @@ export default function ErrorBoundary({
           className="inline-flex min-h-11 items-center border border-ink px-4 text-sm font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
         >
           {t("error.back")}
+        </Link>
+        <Link
+          href="/register"
+          className="inline-flex min-h-11 items-center border border-ink px-4 text-sm font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
+        >
+          {t("error.register_again")}
         </Link>
       </div>
     </div>

@@ -1,10 +1,9 @@
 /**
  * Runs once when the Next.js server boots (dev and production alike).
  *
- * With SEED_ON_EMPTY=true — the Docker default — a fresh volume gets the
- * synthetic demo directory automatically, so `docker compose up` produces a
- * working, browsable app with zero manual steps. A database that already
- * has profiles is never modified.
+ * With SEED_ON_EMPTY=true a fresh database gets the synthetic demo directory.
+ * Production hosts must leave that unset so real applicants never see
+ * fabricated listings.
  */
 
 /**
@@ -42,11 +41,9 @@ export async function register(): Promise<void> {
 
   checkRequiredEnv()
 
-  // Auto-seed on Vercel preview/prod smoke deploys (ephemeral /tmp DB) and
-  // when the Docker image explicitly opts in.
-  const shouldSeed =
-    process.env.SEED_ON_EMPTY === "true" ||
-    (process.env.VERCEL === "1" && process.env.SEED_ON_EMPTY !== "false")
+  // Fabricated seed profiles only when explicitly opted in. Live hosts that
+  // real applicants will see must not refill the directory on a cold start.
+  const shouldSeed = process.env.SEED_ON_EMPTY === "true"
   if (!shouldSeed) return
 
   const { seedIfEmpty } = await import("./lib/db/seed-core")

@@ -4,6 +4,7 @@ import { describe, it, expect, beforeAll } from "vitest"
 process.env.DATABASE_PATH = ":memory:"
 
 import { saveProfile, listPublicProfiles, getProfilesByEmail, getProfileById, deleteProfile } from "./profiles"
+import { isSyntheticContactEmail, purgeSyntheticProfiles } from "./purge-core"
 import { getShortlist, getAllCachedMatches } from "./matches"
 import { requestIntro, listIntrosFor, rateLimitPer24h } from "./intros"
 import { listEvents } from "./events"
@@ -112,6 +113,107 @@ function makeAiTeam(n: number, overrides: Record<string, unknown> = {}) {
         linkage_required: ["outcomes"],
         standards_preferred: ["dicom"],
       },
+      ...overrides,
+    },
+    { isNew: true },
+  )
+}
+
+function makeIndividual(n: number, overrides: Record<string, unknown> = {}) {
+  return saveProfile(
+    {
+      kind: "individual",
+      org_name: `Expert ${n}`,
+      slug: `expert-${n}`,
+      org_type: "individual",
+      country: "NL",
+      one_liner: "An independent imaging expert.",
+      summary: "Synthetic test individual.",
+      languages: ["en"],
+      looking_for: ["join_team"],
+      application_status: "intend_to_apply",
+      parallel_public_funding: "no",
+      attending: [],
+      open_to_intros: true,
+      visibility: "public",
+      contact_name: `Expert ${n}`,
+      contact_email: `expert-${n}@example.org`,
+      methods: ["computer_vision"],
+      application_target: ["diagnostics"],
+      domain_expertise: ["oncology"],
+      clinical_partner: "not_needed",
+      regulatory_experience: [],
+      compute: "cloud_budget",
+      privacy_capability: ["can_work_in_tre"],
+      team_size: "1",
+      track_record: [],
+      data_needs: {
+        modality: ["imaging_mri"],
+        disease_area: ["oncology"],
+        linkage_required: [],
+        standards_preferred: [],
+      },
+      affiliation: "Independent",
+      ...overrides,
+    },
+    { isNew: true },
+  )
+}
+
+function makeConsortium(n: number, overrides: Record<string, unknown> = {}) {
+  return saveProfile(
+    {
+      kind: "consortium",
+      org_name: `Consortium ${n}`,
+      slug: `consortium-${n}`,
+      org_type: "university",
+      country: "SE",
+      one_liner: "A mixed data-and-AI consortium.",
+      summary: "Synthetic test consortium.",
+      languages: ["en"],
+      looking_for: ["clinical_partner"],
+      application_status: "intend_to_apply",
+      parallel_public_funding: "no",
+      attending: [],
+      open_to_intros: true,
+      visibility: "public",
+      contact_name: `Lead ${n}`,
+      contact_email: `consortium-${n}@example.org`,
+      datasets: [
+        {
+          name: "Consortium cohort",
+          modality: ["genomics"],
+          disease_area: ["immunology"],
+          n_subjects: "1k_10k",
+          volume: "100gb_1tb",
+          longitudinal: false,
+          annotation: "partial",
+          linkage: ["outcomes"],
+          standards: ["vcf"],
+          readiness: "partially_curated",
+          consent_basis: "broad_consent",
+          access_model: "dua_required",
+          data_can_leave_institution: "yes",
+          ethics_approval: "approved",
+          publicly_describable: true,
+        },
+      ],
+      methods: ["foundation_models"],
+      application_target: ["biomarker_discovery"],
+      domain_expertise: ["immunology"],
+      clinical_partner: "need",
+      regulatory_experience: ["gdpr_dpia"],
+      compute: "own_cluster",
+      privacy_capability: ["federated_capable"],
+      team_size: "6_15",
+      track_record: [],
+      data_needs: {
+        modality: ["ehr_structured"],
+        disease_area: ["immunology"],
+        linkage_required: [],
+        standards_preferred: [],
+      },
+      still_seeking: ["clinical_partner"],
       ...overrides,
     },
     { isNew: true },
@@ -274,5 +376,84 @@ describe("GDPR profile erasure", () => {
 
   it("returns false for an unknown id", () => {
     expect(deleteProfile("no-such-profile")).toBe(false)
+  })
+})
+
+describe("purge synthetic seed listings", () => {
+  it("recognises reserved .invalid contact emails", () => {
+    expect(isSyntheticContactEmail("a.voss@example.invalid")).toBe(true)
+    expect(isSyntheticContactEmail("bradley@foresight.org")).toBe(false)
+    expect(isSyntheticContactEmail("holder-1@example.org")).toBe(false)
+  })
+
+  it("removes .invalid contacts and keeps real listings", () => {
+    const fake = makeDataHolder(200, {
+      slug: "synthetic-holder",
+      contact_email: "demo@example.invalid",
+    })
+    const real = makeAiTeam(200, {
+      slug: "real-operator",
+      contact_email: "bradley@foresight.org",
+    })
+
+    const { removed, kept } = purgeSyntheticProfiles()
+    expect(getProfileById(fake.id)).toBeNull()
+    expect(getProfileById(real.id)).not.toBeNull()
+    expect(removed).toBeGreaterThanOrEqual(1)
+    expect(kept).toBeGreaterThanOrEqual(1)
+  })
+})
+
+describe("every applicant kind on a live directory", () => {
+  it("creates and updates an individual listing", () => {
+    const person = makeIndividual(1)
+    expect(person.kind).toBe("individual")
+    expect(getShortlist(person.id)).toEqual(expect.any(Array))
+
+    const edited = saveProfile({
+      ...person,
+      one_liner: "Updated individual one-liner.",
+    })
+    expect(edited.id).toBe(person.id)
+    expect(edited.one_liner).toBe("Updated individual one-liner.")
+    expect(getProfileById(person.id)?.one_liner).toBe("Updated individual one-liner.")
+  })
+
+  it("creates and updates a consortium listing", () => {
+    const group = makeConsortium(1)
+    expect(group.kind).toBe("consortium")
+    expect(getShortlist(group.id)).toEqual(expect.any(Array))
+
+    const edited = saveProfile({
+      ...group,
+      still_seeking: ["ai_partner"],
+    })
+    expect(edited.kind).toBe("consortium")
+    if (edited.kind === "consortium") {
+      expect(edited.still_seeking).toEqual(["ai_partner"])
+    }
+  })
+
+  it("creates a data holder with organisation type Other defined", () => {
+    const other = makeDataHolder(50, {
+      slug: "holder-other-type",
+      org_type: "other",
+      org_type_other: "Patient advocacy network",
+      looking_for: ["other"],
+      looking_for_other: "Regulatory writing",
+    })
+    expect(other.org_type).toBe("other")
+    expect(other.org_type_other).toBe("Patient advocacy network")
+    expect(other.looking_for_other).toBe("Regulatory writing")
+  })
+
+  it("rejects organisation type Other without a definition", () => {
+    expect(() =>
+      makeDataHolder(51, {
+        slug: "holder-other-blank",
+        org_type: "other",
+        org_type_other: "",
+      }),
+    ).toThrow()
   })
 })

@@ -4,9 +4,9 @@
 #   cp .env.example .env      # see DEPLOY.md for the YCluster values
 #   docker compose up -d --build
 #
-# The SQLite database lives in ./data on the host (bind-mounted to /data);
-# the container seeds the synthetic demo directory on first boot and never
-# touches existing data.
+# The SQLite database lives in ./data on the host (bind-mounted to /data).
+# Production does not auto-seed fabricated profiles. Set SEED_ON_EMPTY=true
+# in .env only for a local or rehearsal demo.
 # ---------------------------------------------------------------------------
 
 services:
@@ -18,7 +18,6 @@ services:
       - .env
     environment:
       DATABASE_PATH: /data/app.db
-      SEED_ON_EMPTY: "true"
     volumes:
       # SQLite database persists on the host, next to the repo.
       - ./data:/data

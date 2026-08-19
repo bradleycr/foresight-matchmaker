@@ -73,11 +73,16 @@ export interface DirectoryProfile {
   website?: string
   languages: Language[]
   looking_for: LookingFor[]
+  looking_for_other?: string
   application_status: ApplicationStatus
   parallel_public_funding: YesNoUnsure
   attending: Attending[]
   open_to_intros: boolean
   visibility: Visibility
+  org_type_other?: string
+  intended_public_contribution?: string
+  funding_mainly_needed_for?: string
+  best_public_dataset?: string
   created_at: string
   updated_at: string
   claimed_at?: string

@@ -4,8 +4,8 @@
  * Foresight Matchmaking — design tokens.
  *
  * Type matches foresight.org exactly: Neue Haas Unica Pro for UI, ABC Arizona
- * Text for display headings. Paper is Foresight’s cool powder blue. Yellow is
- * the functional mark; teal is the second brand accent.
+ * Text for display headings. Paper is Foresight’s cool powder blue. The mark
+ * is a softened gold (not highlighter yellow); teal is the second accent.
  * ------------------------------------------------------------------------ */
 
 @theme {
@@ -18,8 +18,9 @@
   --color-rule: #b8cdd4;
   --color-rule-strong: #17150f;
 
-  /* Primary mark — directory yellow. Functional only. */
-  --color-mark: #ffd200;
+  /* Primary mark — butter gold. Same family as the old chrome yellow,
+   * chroma pulled back so it sits with the dusty paper and teal. */
+  --color-mark: #edcf5a;
   --color-mark-ink: #171200;
 
   /* Secondary brand — foresight.org teal / mint. */

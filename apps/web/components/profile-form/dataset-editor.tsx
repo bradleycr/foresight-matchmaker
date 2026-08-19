@@ -19,6 +19,7 @@ import { useT } from "@/lib/i18n/client"
 import { isDatasetBlank } from "@/lib/profile-form-validate"
 import { Button, Field, Input, Textarea } from "@/components/ui/primitives"
 import { EnumChips, EnumSelect } from "./enum-controls"
+import { cn } from "@/lib/utils"
 
 /** A blank dataset with the safest defaults for every enum. */
 export function emptyDataset(): Dataset {
@@ -69,12 +70,17 @@ export function DatasetEditor({
   const started = !isDatasetBlank(dataset)
 
   return (
-    <fieldset className="border border-rule-strong p-4">
+    <fieldset
+      className={cn(
+        "p-4",
+        started && missing.length > 0
+          ? "border-2 border-alert bg-alert/5"
+          : "border border-rule-strong",
+      )}
+    >
       <legend className="bg-mark px-2 py-0.5 font-listing text-sm font-bold uppercase text-mark-ink">
         {t("form.dataset_legend", { n: index + 1 })}
       </legend>
-
-      <p className="mt-2 text-sm text-ink-soft">{t("form.dataset_required_hint")}</p>
 
       {started && missing.length > 0 && (
         <p role="status" className="mt-2 border border-alert bg-alert/5 px-3 py-2 text-sm text-alert">
@@ -120,7 +126,6 @@ export function DatasetEditor({
         <h3 className="mt-2 border-t border-rule pt-4 font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">
           {t("form.dataset_section_optional")}
         </h3>
-        <p className="text-sm text-ink-faint">{t("form.dataset_optional_hint")}</p>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <EnumSelect label={t("field.n_subjects")} group="n_subjects" options={N_SUBJECTS} value={dataset.n_subjects} onChange={(v) => v && set("n_subjects", v)} id={`ds-nsub-${index}`} />

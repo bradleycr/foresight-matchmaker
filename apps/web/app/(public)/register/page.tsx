@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation"
-import { getSession } from "@/lib/auth/session"
+import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { llmEnabled } from "@/lib/llm/client"
 import { RegisterEntry } from "@/components/remmy/register-entry"
+import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { challengeIdOf } from "@/lib/challenges/catalog"
 
 /**
@@ -16,8 +17,8 @@ export default async function RegisterPage({
 }: {
   searchParams: Promise<{ challenge?: string }>
 }) {
-  const session = await getSession()
-  if (session) redirect("/me")
+  const live = await peekLiveSession()
+  if (live) redirect("/me")
 
   const { t } = await getT()
   const remmy = llmEnabled()
@@ -27,9 +28,10 @@ export default async function RegisterPage({
   return (
     <div className="py-6">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("register.title")}</h1>
-      <p className="mt-2 max-w-2xl leading-relaxed">
-        {remmy ? t("register.explainer_remmy") : t("register.explainer")}
-      </p>
+      <DirectoryDisclaimer className="mt-6" />
+      {!remmy ? (
+        <p className="mt-4 max-w-xl text-sm text-ink-soft">{t("register.explainer")}</p>
+      ) : null}
       <div className="mt-8">
         <RegisterEntry remmyEnabled={remmy} defaultChallengeId={defaultChallengeId} />
       </div>

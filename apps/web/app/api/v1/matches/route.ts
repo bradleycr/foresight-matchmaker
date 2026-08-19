@@ -1,8 +1,8 @@
 import { toPublicProfile } from "@rmm/schema"
-import { ok, unauthorized, notFound } from "@/lib/api/respond"
-import { getSession } from "@/lib/auth/session"
-import { getProfileById } from "@/lib/db/profiles"
+import { ok, unauthorized } from "@/lib/api/respond"
+import { getProfileById, listProfiles } from "@/lib/db/profiles"
 import { getShortlist } from "@/lib/db/matches"
+import { resolveLiveSession } from "@/lib/auth/live-session"
 import { logEvent } from "@/lib/db/events"
 import { templateRationale } from "@/lib/llm/rationale"
 
@@ -20,14 +20,14 @@ export const dynamic = "force-dynamic"
  * LLM polish lives at POST /api/v1/matches/rationale.
  */
 export async function GET(): Promise<Response> {
-  const session = await getSession()
-  if (!session) return unauthorized()
-
-  const subject = getProfileById(session.profileId)
-  if (!subject) return notFound("Your profile no longer exists.")
+  const live = await resolveLiveSession()
+  if (!live) return unauthorized()
+  const { profile: subject } = live
 
   const shortlist = getShortlist(subject.id)
   logEvent("shortlist_viewed", subject.id, { count: shortlist.length })
+
+  const othersVisible = listProfiles().filter((p) => p.id !== subject.id && p.visibility !== "hidden").length
 
   const matches = shortlist.flatMap((entry) => {
     const other = getProfileById(entry.otherId)
@@ -49,5 +49,5 @@ export async function GET(): Promise<Response> {
     ]
   })
 
-  return ok({ matches })
+  return ok({ matches, others_visible: othersVisible })
 }

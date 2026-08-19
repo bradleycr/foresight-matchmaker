@@ -58,16 +58,19 @@ function matchesFilters(p: DirectoryProfile, f: Filters): boolean {
   return true
 }
 
-/** The right-hand tabular figure for a listing row. */
+/** The right-hand tabular figure for a listing row — labelled so scale and team size cannot be confused. */
 function rowFigure(p: DirectoryProfile, t: ReturnType<typeof useT>): string {
   if (p.datasets && p.datasets.length > 0) {
     const biggest = p.datasets.reduce((acc, d) => {
       const order = ["lt_1k", "1k_10k", "10k_100k", "100k_1m", "gt_1m"]
       return order.indexOf(d.n_subjects) > order.indexOf(acc) ? d.n_subjects : acc
     }, p.datasets[0].n_subjects)
-    return `${p.datasets.length} × ${enumLabel(t, "n_subjects", biggest)}`
+    return t("directory.scale_figure", {
+      count: p.datasets.length,
+      scale: enumLabel(t, "n_subjects", biggest),
+    })
   }
-  if (p.team_size) return enumLabel(t, "team_size", p.team_size)
+  if (p.team_size) return t("directory.team_figure", { size: enumLabel(t, "team_size", p.team_size) })
   return ""
 }
 
@@ -222,7 +225,9 @@ export function DirectoryBrowser({ profiles }: { profiles: DirectoryProfile[] })
         {/* The listings. */}
         <div className="min-w-0 flex-1">
           {visible.length === 0 ? (
-            <p className="py-8 text-ink-soft">{t("directory.empty")}</p>
+            <p className="py-8 text-ink-soft">
+              {profiles.length === 0 ? t("directory.empty_none") : t("directory.empty")}
+            </p>
           ) : (
             groups.map(([letter, entries]) => (
               <section key={letter} id={`letter-${letter}`} aria-label={letter}>

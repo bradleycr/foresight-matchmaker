@@ -33,8 +33,8 @@ export function proposalWarnings(p: PrefillProposal): string[] {
   if (skipped.length > 0) {
     warnings.push(
       skipped.length === 1
-        ? "One dataset draft is incomplete — finish name, modality, and disease area on the form."
-        : `${skipped.length} dataset drafts are incomplete — finish name, modality, and disease area on the form.`,
+        ? "Dataset details are still open — add a name, modality, and disease area on the form (or ignore this if you are not listing data)."
+        : "Some datasets are still open — add each dataset’s name, modality, and disease area on the form.",
     )
   }
   if (!p.kind) warnings.push("Profile type (data holder / AI team / consortium) was not detected — pick it on the form.")

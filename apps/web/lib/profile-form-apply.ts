@@ -19,13 +19,15 @@ import type {
   Standards,
 } from "@rmm/schema"
 import type { PrefillProposal } from "@/lib/llm/prefill"
-import { sanitizeProposal, datasetRowIsComplete } from "@/lib/llm/sanitize-proposal"
+import { sanitizeProposal, datasetRowHasSignal } from "@/lib/llm/sanitize-proposal"
 import { emptyDataset } from "@/components/profile-form/dataset-editor"
+import { isDatasetBlank } from "@/lib/profile-form-validate"
 
 /**
  * Shared merge logic for Remmy chat, paste-prefill, and register handoff.
- * Sanitizes upstream, resets kind-incompatible leftovers, and only applies
- * dataset fields the extractor actually returned.
+ * Sanitizes upstream, resets kind-incompatible leftovers, and applies
+ * dataset rows the extractor actually returned — including thin ones so
+ * the form can highlight what is still open.
  */
 
 export interface ProposalMergeTarget {
@@ -165,10 +167,52 @@ export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
   }
 
   if (p.datasets.length) {
-    const rows = p.datasets.map(mergePartialDataset)
-    const complete = rows.filter(datasetRowIsComplete)
-    next = { ...next, datasets: complete.length > 0 ? complete : rows }
+    // Keep thin rows (a name from an About page, no modality yet) so the form
+    // can highlight what is still open instead of looking empty.
+    const rows = p.datasets.map(mergePartialDataset).filter(datasetRowHasSignal)
+    next = { ...next, datasets: mergeDatasetLists(next.datasets, rows) }
   }
 
   return next
+}
+
+/**
+ * First fill replaces a blank list. Later Remmy turns overlay by dataset name
+ * so a second chat does not wipe modality the human already typed.
+ */
+function mergeDatasetLists(current: Dataset[], incoming: Dataset[]): Dataset[] {
+  if (incoming.length === 0) return current.length > 0 ? current : [emptyDataset()]
+
+  const started = current.filter((d) => !isDatasetBlank(d))
+  if (started.length === 0) return incoming
+
+  const next = started.map((d) => ({ ...d }))
+  for (const row of incoming) {
+    const key = row.name.trim().toLowerCase()
+    const idx = key ? next.findIndex((d) => d.name.trim().toLowerCase() === key) : -1
+    if (idx >= 0) {
+      next[idx] = overlayDataset(next[idx]!, row)
+    } else if (!key) {
+      // Chip-by-chip fill (modality, then disease) has no name yet — fold
+      // into the first unfinished row instead of spawning a second dataset.
+      const thinIdx = next.findIndex(
+        (d) => !d.name.trim() || d.modality.length === 0 || d.disease_area.length === 0,
+      )
+      if (thinIdx >= 0) next[thinIdx] = overlayDataset(next[thinIdx]!, row)
+      else next.push(row)
+    } else {
+      next.push(row)
+    }
+  }
+  return next
+}
+
+function overlayDataset(base: Dataset, incoming: Dataset): Dataset {
+  return {
+    ...incoming,
+    ...base,
+    name: base.name.trim() || incoming.name,
+    modality: base.modality.length > 0 ? base.modality : incoming.modality,
+    disease_area: base.disease_area.length > 0 ? base.disease_area : incoming.disease_area,
+  }
 }

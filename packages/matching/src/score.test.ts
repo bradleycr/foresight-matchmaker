@@ -174,8 +174,11 @@ describe("score — hard blockers force 0", () => {
     expect(score(buildDataHolder(), buildAiTeam({ visibility: "hidden" })).score).toBe(0)
   })
 
-  it("parallel public funding hard-blocks", () => {
-    expect(score(buildDataHolder(), buildAiTeam({ parallel_public_funding: "yes" })).score).toBe(0)
+  it("parallel public funding does not affect the score", () => {
+    const withFunding = score(buildDataHolder(), buildAiTeam({ parallel_public_funding: "yes" }))
+    const without = score(buildDataHolder(), buildAiTeam({ parallel_public_funding: "no" }))
+    expect(withFunding.score).toBe(without.score)
+    expect(withFunding.blockers.some((b) => b.key.includes("parallel_public_funding"))).toBe(false)
   })
 
   it("not_applying status hard-blocks", () => {

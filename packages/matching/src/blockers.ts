@@ -55,13 +55,6 @@ function profileHardBlockers(p: Profile, label: "a" | "b"): Blocker[] {
       note: "Headquarters is outside the eligible region (EU, EFTA, UK, or Israel).",
     })
   }
-  if (p.parallel_public_funding === "yes") {
-    out.push({
-      key: `${label}.parallel_public_funding`,
-      severity: "hard",
-      note: "This work is funded in parallel by other public sources, which the challenge does not allow.",
-    })
-  }
   if (p.application_status === "not_applying" || p.application_status === "team_complete") {
     out.push({
       key: `${label}.application_status`,
@@ -180,14 +173,6 @@ function profileSoftBlockers(a: Profile, b: Profile): Blocker[] {
         severity: "soft",
         note:
           "This organisation can collaborate but cannot lead an application (HQ outside the eligible region).",
-      })
-    }
-    if (p.parallel_public_funding === "unsure") {
-      out.push({
-        key: `${label}.parallel_public_funding_unsure`,
-        severity: "soft",
-        note:
-          "Parallel public funding is marked unsure — resolve this before applying; 'yes' would hard-block the match.",
       })
     }
   }

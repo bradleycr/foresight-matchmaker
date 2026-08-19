@@ -79,11 +79,9 @@ export function findManualGaps(state: GapInspectable): GapField[] {
     if (state.application_target.length === 0) gaps.push("application_target")
     if (state.domain_expertise.length === 0) gaps.push("domain_expertise")
     if (state.privacy_capability.length === 0) gaps.push("privacy_capability")
-    if (state.needs_modality.length === 0) gaps.push("needs_modality")
-    if (state.needs_disease_area.length === 0) gaps.push("needs_disease_area")
-    if (!state.needs_min_n_subjects) gaps.push("needs_min_n_subjects")
-    if (!state.needs_annotation) gaps.push("needs_annotation")
-    if (empty(state.compute_scale)) gaps.push("compute_scale")
+    // data_needs (modality, disease, cohort size, annotation) stay off this
+    // list: an AI expert often does not know which datasets they want yet.
+    // Matching can nudge those later; they must not block creating a profile.
   }
 
   if (showData) {
@@ -99,4 +97,37 @@ export function findManualGaps(state: GapInspectable): GapField[] {
   }
 
   return gaps
+}
+
+/** English hints Remmy reads when the form is already open. */
+export const GAP_REMMY_HINT: Record<GapField, string> = {
+  org_name: "organisation name",
+  one_liner: "one-line description",
+  summary: "short summary of what they do",
+  languages: "working languages",
+  looking_for: "what they are looking for",
+  attending: "which events they plan to attend",
+  contact_name: "contact name (they type this — never invent it)",
+  contact_email: "contact email (they type this — never invent it)",
+  methods: "AI/ML methods",
+  application_target: "application target",
+  domain_expertise: "domain / disease expertise",
+  privacy_capability: "privacy-preserving methods they can use",
+  needs_modality: "data modalities they already know they need (optional — skip if unknown)",
+  needs_disease_area: "disease areas they already know they need data in (optional)",
+  needs_min_n_subjects: "minimum cohort size they need (optional)",
+  needs_annotation: "annotation they need on the data (optional)",
+  datasets: "dataset details — name, modality, disease area, scale, and access model",
+  website: "website URL",
+  compute_scale: "compute they have access to",
+}
+
+export function formatGapsForRemmy(gaps: readonly string[]): string {
+  if (gaps.length === 0) return ""
+  return gaps
+    .map((g) => {
+      const hint = (GAP_REMMY_HINT as Record<string, string>)[g]
+      return hint ? `- ${g}: ${hint}` : `- ${g}`
+    })
+    .join("\n")
 }

@@ -75,7 +75,7 @@ export default async function OpenGraphImage() {
               display: "flex",
               alignItems: "center",
               gap: 12,
-              background: "#ffd200",
+              background: "#edcf5a",
               color: "#171200",
               padding: "14px 18px",
               border: "2px solid #17150f",

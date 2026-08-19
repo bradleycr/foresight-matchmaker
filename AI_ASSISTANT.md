@@ -1,6 +1,6 @@
 # AI assistant — living plan
 
-Status: **Remmy onboarding shipped** (create + update chat, mandatory draft review).
+Status: **Remmy onboarding shipped** (create + update chat; chips for vocabularies; draft applies to the form immediately).
 **Remmy Guide shipped** for signed-in match exploration (generative shortlist,
 intro compose, gaps) on `/me/matches` when `LLM_*` is configured.
 
@@ -13,11 +13,12 @@ YCluster inference gateway ([docs](https://gitlab.com/devrandom01/ycluster/-/blo
 
 - `POST /api/v1/remmy` — conversational turn; **never writes the DB**.
 - UI: `/register` chooser (Remmy vs form); `/me` optional “Update with Remmy”.
-- Mandatory **draft review** card (confirm / revise / discard) before applying to `ProfileForm`.
+- Vocabulary questions hydrate as **tappable chips** (kind, modality, disease area, methods). The model names the vocabulary; the schema supplies the options.
+- Draft applies to the form immediately (no confirm/revise card). Remaining identity/contact gaps can be highlighted; AI **data_needs** (modalities they want) are optional and must not block create.
 - Form submit / Save remains the only publish path.
 - Update mode requires a session; IP rate limit on the route.
 
-Do not auto-publish from chat. Do not skip the review card.
+Do not auto-publish from chat. Do not require AI experts to pick dataset modalities at registration.
 
 ## Shipped: Remmy Guide (logged-in matches)
 

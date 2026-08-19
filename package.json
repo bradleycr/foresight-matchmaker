@@ -14,7 +14,8 @@
     "seed:validate": "pnpm --filter @rmm/schema validate-seed",
     "db:seed": "pnpm --filter @rmm/web db:seed",
     "db:reset": "pnpm --filter @rmm/web db:reset",
-    "db:demo": "pnpm --filter @rmm/web db:demo"
+    "db:demo": "pnpm --filter @rmm/web db:demo",
+    "db:purge-synthetic": "pnpm --filter @rmm/web db:purge-synthetic"
   },
   "devDependencies": {
     "typescript": "5.7.3",

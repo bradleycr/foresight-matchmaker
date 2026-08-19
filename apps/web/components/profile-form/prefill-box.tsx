@@ -5,23 +5,26 @@ import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
 import type { PrefillProposal } from "@/lib/llm/prefill"
 import { fetchPrefill } from "@/lib/llm/fetch-prefill"
-import { summaryFromProposal } from "@/lib/llm/proposal-utils"
-import { RemmyDraftReview } from "@/components/remmy/draft-review"
+import { pasteLooksLikeUrlOnly } from "@/lib/paste-is-url"
 
 /**
- * Paste an About page → structured draft on the form via the same extractor
- * and human review checkpoint as Remmy chat.
+ * Paste an About page → structured draft applied immediately to the form.
+ * Remaining gaps are highlighted; nothing is published until submit.
  */
 export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) => void }) {
   const t = useT()
   const [text, setText] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState<{ proposal: PrefillProposal; summary: string[] } | null>(null)
 
   async function propose() {
     const body = text.trim()
     if (body.length < 40) return
+
+    if (pasteLooksLikeUrlOnly(body)) {
+      setError(t("form.prefill_url_only"))
+      return
+    }
 
     setBusy(true)
     setError(null)
@@ -34,7 +37,8 @@ export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) =>
       return
     }
 
-    setPending({ proposal: result.proposal, summary: summaryFromProposal(result.proposal) })
+    onProposal(result.proposal)
+    setText("")
   }
 
   return (
@@ -42,47 +46,25 @@ export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) =>
       <h2 className="font-listing text-lg font-bold uppercase">{t("form.prefill_title")}</h2>
       <p className="mt-1 text-sm text-ink-soft">{t("form.prefill_hint")}</p>
 
-      {pending ? (
-        <div className="mt-4">
-          <RemmyDraftReview
-            mode="create"
-            proposal={pending.proposal}
-            summary={pending.summary}
-            onConfirm={() => {
-              onProposal(pending.proposal)
-              setPending(null)
-              setText("")
-            }}
-            onRevise={() => setPending(null)}
-            onDiscard={() => {
-              setPending(null)
-              setText("")
-            }}
-          />
-        </div>
-      ) : (
-        <>
-          <Textarea
-            aria-label={t("form.prefill_title")}
-            rows={6}
-            maxLength={8000}
-            placeholder={t("form.prefill_placeholder")}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="mt-3 bg-paper"
-          />
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <Button type="button" variant="primary" disabled={busy || text.trim().length < 40} onClick={() => void propose()}>
-              {busy ? t("form.prefill_busy") : t("form.prefill_button")}
-            </Button>
-            {error && (
-              <span role="alert" className="text-sm text-alert">
-                {error}
-              </span>
-            )}
-          </div>
-        </>
-      )}
+      <Textarea
+        aria-label={t("form.prefill_title")}
+        rows={6}
+        maxLength={8000}
+        placeholder={t("form.prefill_placeholder")}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className="mt-3 bg-paper"
+      />
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Button type="button" variant="primary" disabled={busy || text.trim().length < 40} onClick={() => void propose()}>
+          {busy ? t("form.prefill_busy") : t("form.prefill_button")}
+        </Button>
+        {error && (
+          <span role="alert" className="text-sm text-alert">
+            {error}
+          </span>
+        )}
+      </div>
     </section>
   )
 }

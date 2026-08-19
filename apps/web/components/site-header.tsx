@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { getSession } from "@/lib/auth/session"
+import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
+import { SignOutButton } from "./sign-out-button"
 
 /**
  * Masthead: clean Foresight wordmark beside the product title, then a
@@ -10,7 +11,7 @@ import { LocaleSwitcher } from "./locale-switcher"
  */
 export async function SiteHeader() {
   const { t } = await getT()
-  const session = await getSession()
+  const live = await peekLiveSession()
 
   return (
     <header className="border-b-2 border-rule-strong">
@@ -28,7 +29,7 @@ export async function SiteHeader() {
             <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
               {t("app.title")}
             </span>
-            <span className="mt-1.5 block text-sm text-teal-deep">{t("app.tagline")}</span>
+            <span className="mt-1.5 hidden text-sm text-teal-deep sm:block">{t("app.tagline")}</span>
           </span>
         </Link>
         <LocaleSwitcher />
@@ -41,7 +42,7 @@ export async function SiteHeader() {
         <Link href="/#programmes" className="hover:underline">
           {t("nav.programmes")}
         </Link>
-        {session ? (
+        {live ? (
           <>
             <Link href="/directory" className="hover:underline">
               {t("nav.directory")}
@@ -55,6 +56,7 @@ export async function SiteHeader() {
             <Link href="/me" className="hover:underline">
               {t("nav.me")}
             </Link>
+            <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
           </>
         ) : (
           <>

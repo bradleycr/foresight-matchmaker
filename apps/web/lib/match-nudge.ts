@@ -5,7 +5,6 @@ import type { Profile } from "@rmm/schema"
  * empty-state and Remmy’s generative “gaps” card.
  */
 export function nudgeField(profile: Profile): string {
-  if (profile.parallel_public_funding === "yes") return "parallel_public_funding"
   if (profile.application_status === "not_applying" || profile.application_status === "team_complete") {
     return "application_status"
   }

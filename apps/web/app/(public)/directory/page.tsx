@@ -4,6 +4,7 @@ import { getT } from "@/lib/i18n/server"
 import { getSession } from "@/lib/auth/session"
 import { redirect } from "next/navigation"
 import { signInHref } from "@/lib/auth/next-path"
+import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { DirectoryBrowser } from "@/components/directory/browser"
 
 export const dynamic = "force-dynamic"
@@ -24,6 +25,7 @@ export default async function DirectoryPage() {
   return (
     <div className="py-6">
       <h1 className="mb-4 font-listing text-3xl font-bold uppercase tracking-tight">{t("directory.title")}</h1>
+      <DirectoryDisclaimer className="mb-6" />
       <DirectoryBrowser profiles={directory.profiles} />
     </div>
   )

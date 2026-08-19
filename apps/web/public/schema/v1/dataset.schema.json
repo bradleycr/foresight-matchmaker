@@ -26,6 +26,9 @@
               "transcriptomics",
               "proteomics",
               "metabolomics",
+              "epigenomics",
+              "microbiome",
+              "spatial_omics",
               "multi_omics",
               "ehr_structured",
               "clinical_notes",
@@ -35,6 +38,8 @@
               "wearable_sensor",
               "claims",
               "biospecimens",
+              "patient_reported_outcomes",
+              "voice_data",
               "other"
             ]
           },
@@ -57,6 +62,11 @@
               "womens_health",
               "paediatrics",
               "geriatrics",
+              "immunology",
+              "dermatology",
+              "ophthalmology",
+              "critical_care",
+              "dentistry",
               "multi_domain",
               "other"
             ]

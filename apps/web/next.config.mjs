@@ -11,7 +11,7 @@ const nextConfig = {
     ? { output: "standalone" }
     : {}),
   // Trace from the monorepo root so workspace packages + seed/ ship with
-  // serverless functions (needed for SEED_ON_EMPTY on Vercel).
+  // serverless functions (opt-in via SEED_ON_EMPTY=true).
   outputFileTracingRoot: monorepoRoot,
   outputFileTracingIncludes: {
     "/**": ["../../seed/**/*"],

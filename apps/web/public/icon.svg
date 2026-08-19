@@ -3,11 +3,11 @@
     Matchmaker mark: a six-node molecular wheel on directory yellow.
     Reads as Foresight’s nanoscale heritage at a glance; at 16px it
     collapses to a bold radial silhouette that still holds the tab.
-    Colours are the product tokens — mark (#ffd200) and ink (#17150f) —
+    Colours are the product tokens — mark (#edcf5a) and ink (#17150f) —
     and stay fixed (no prefers-color-scheme flip) so the yellow remains
     the recognisable signal on both light and dark browser chrome.
   -->
-  <rect width="32" height="32" fill="#ffd200"/>
+  <rect width="32" height="32" fill="#edcf5a"/>
   <g stroke="#17150f" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
     <!-- Hex perimeter -->
     <line x1="16" y1="7.5" x2="23.5" y2="11.8"/>

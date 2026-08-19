@@ -10,11 +10,11 @@ import { safeNextPath } from "@/lib/auth/next-path"
 export default async function SigninPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; stale?: string }>
 }) {
   const { t } = await getT()
   const mode = magicLinkMode()
-  const { next: rawNext } = await searchParams
+  const { next: rawNext, stale } = await searchParams
   const next = safeNextPath(rawNext) ?? undefined
 
   const explainer =
@@ -27,6 +27,11 @@ export default async function SigninPage({
   return (
     <div className="mx-auto max-w-md py-16">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("signin.title")}</h1>
+      {stale && (
+        <p role="status" className="mt-3 border border-ink bg-paper-shade px-3 py-2 text-sm">
+          {t("signin.stale")}
+        </p>
+      )}
       <p className="mt-3 leading-relaxed">{explainer}</p>
       <SigninForm mode={mode} next={next} />
     </div>

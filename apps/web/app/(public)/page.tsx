@@ -2,9 +2,11 @@ import Link from "next/link"
 import { apiFetch } from "@/lib/api/server-fetch"
 import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { getT } from "@/lib/i18n/server"
-import { getSession } from "@/lib/auth/session"
+import { peekLiveSession } from "@/lib/auth/live-session"
 import { signInHref } from "@/lib/auth/next-path"
 import { CHALLENGES } from "@/lib/challenges/catalog"
+import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
+import { kindCountTotal } from "@/components/listing-counts"
 
 export const dynamic = "force-dynamic"
 
@@ -19,10 +21,10 @@ export default async function LandingPage({
 }) {
   const { t } = await getT()
   const { deleted } = await searchParams
-  const session = await getSession()
+  const live = await peekLiveSession()
   const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
-  const directoryHref = session ? "/directory" : signInHref("/directory")
+  const directoryHref = live ? "/directory" : signInHref("/directory")
 
   return (
     <div className="py-10">
@@ -38,6 +40,8 @@ export default async function LandingPage({
       </h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed">{t("landing.subhead")}</p>
 
+      <DirectoryDisclaimer className="mt-8" />
+
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href={directoryHref}
@@ -49,7 +53,7 @@ export default async function LandingPage({
           href="/register"
           className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
         >
-          {t("landing.cta_register")}
+          {t("nav.register")}
         </Link>
       </div>
 
@@ -67,33 +71,30 @@ export default async function LandingPage({
                   href={`/challenges/${challenge.slug}`}
                   className="block border-2 border-rule-strong border-l-4 border-l-teal bg-paper p-5 hover:bg-paper-shade"
                 >
-                  <p className="font-listing text-xs font-bold uppercase tracking-widest text-teal">
-                    {t(`challenge.${challenge.id}.kicker`)}
-                  </p>
-                  <h3 className="mt-1 font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
+                  <h3 className="font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
                     {t(`challenge.${challenge.id}.name`)}
                   </h3>
-                  <p className="mt-3 max-w-2xl leading-relaxed">{t(`challenge.${challenge.id}.blurb`)}</p>
-                  <p className="mt-3 text-sm font-semibold uppercase tracking-wide">
+                  <p className="mt-2 max-w-xl text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
+                  <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
                     {t("landing.programme_deadline", { date: challenge.deadlineLabel })}
                   </p>
-                  {counts ? (
-                    <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-ink-soft">
+                  {kindCountTotal(counts) > 0 ? (
+                    <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
                       <div>
                         <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.data_holder}</dd>{" "}
-                        <dt className="inline uppercase tracking-wide">{t("landing.count_data_holders")}</dt>
+                        <dt className="inline">{t("landing.count_data_holders")}</dt>
                       </div>
                       <div>
                         <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.ai_team}</dd>{" "}
-                        <dt className="inline uppercase tracking-wide">{t("landing.count_ai_teams")}</dt>
+                        <dt className="inline">{t("landing.count_ai_teams")}</dt>
                       </div>
                       <div>
                         <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.consortium}</dd>{" "}
-                        <dt className="inline uppercase tracking-wide">{t("landing.count_consortia")}</dt>
+                        <dt className="inline">{t("landing.count_consortia")}</dt>
                       </div>
                       <div>
                         <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.individual}</dd>{" "}
-                        <dt className="inline uppercase tracking-wide">{t("landing.count_individuals")}</dt>
+                        <dt className="inline">{t("landing.count_individuals")}</dt>
                       </div>
                     </dl>
                   ) : null}

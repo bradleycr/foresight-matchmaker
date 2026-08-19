@@ -16,14 +16,14 @@ export async function SiteFooter() {
         <div>
           <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.platform")}</h2>
           <p className="leading-relaxed">{t("footer.platform_body")}</p>
-          <p className="mt-3">
+          <p className="mt-2">
             <a
               href={PLATFORM.operatorUrl}
               className="font-semibold text-ink underline underline-offset-2"
               rel="noopener noreferrer"
               target="_blank"
             >
-              {t("footer.operator")}
+              foresight.org
             </a>
           </p>
         </div>
@@ -31,7 +31,6 @@ export async function SiteFooter() {
         <div>
           <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.challenge")}</h2>
           <p>{t("footer.deadline")}</p>
-          <p className="mt-1">{t("footer.webinar")}</p>
           {programme ? (
             <p className="mt-3">
               <a

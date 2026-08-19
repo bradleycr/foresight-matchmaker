@@ -24,6 +24,11 @@ interface ValidateInput {
   website: string
   track_record: string
   datasets: Dataset[]
+  org_type?: string
+  org_type_other?: string
+  looking_for?: string[]
+  still_seeking?: string[]
+  looking_for_other?: string
 }
 
 /** Client-side checks with human-readable issue keys — run before hitting the API. */
@@ -42,6 +47,15 @@ export function collectValidationIssues(input: ValidateInput): ValidationIssue[]
       messageKey: "form.validation.track_record_invalid",
       params: { lines: invalidLines.slice(0, 3).join("; ") },
     })
+  }
+
+  if (input.org_type === "other" && !input.org_type_other?.trim()) {
+    issues.push({ fieldId: "org_type_other", messageKey: "form.validation.org_type_other" })
+  }
+
+  const looking = [...(input.looking_for ?? []), ...(input.still_seeking ?? [])]
+  if (looking.includes("other") && !input.looking_for_other?.trim()) {
+    issues.push({ fieldId: "looking_for_other", messageKey: "form.validation.looking_for_other" })
   }
 
   const showData = input.kind === "data_holder" || input.kind === "consortium"
@@ -98,6 +112,8 @@ export function fieldIdFromApiPath(path: string): string | null {
   if (path === "org_name") return "gap-org_name"
   if (path === "one_liner") return "gap-one_liner"
   if (path === "contact_email") return "gap-contact_email"
+  if (path === "org_type_other") return "org_type_other"
+  if (path === "looking_for_other") return "looking_for_other"
   return null
 }
 

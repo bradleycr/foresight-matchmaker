@@ -1,17 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import Link from "next/link"
 import type { Profile } from "@rmm/schema"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
-import { ProfileForm } from "@/components/profile-form"
+import { ProfileForm, type ProfileFormHandle } from "@/components/profile-form"
 import type { PrefillProposal } from "@/lib/llm/prefill"
 import { RemmyChat } from "./chat"
 
 /**
  * Signed-in profile editor with an optional Remmy update path.
- * Remmy drafts still require confirmation; Save on the form remains the write.
+ * Drafts apply to the form immediately; Save on the form remains the write.
  * Matchmaking chat lives on /me/matches (generative UI).
  */
 export function MeEditor({
@@ -22,9 +22,23 @@ export function MeEditor({
   remmyEnabled: boolean
 }) {
   const t = useT()
+  const formRef = useRef<ProfileFormHandle>(null)
   const [showRemmy, setShowRemmy] = useState(false)
-  const [proposal, setProposal] = useState<PrefillProposal | null>(null)
-  const [formKey, setFormKey] = useState(0)
+  const [applied, setApplied] = useState(false)
+
+  const applyFromRemmy = useCallback((proposal: PrefillProposal) => {
+    setApplied(true)
+    formRef.current?.applyDraft(proposal)
+  }, [])
+
+  const getFormContext = useCallback(
+    () =>
+      formRef.current?.getContext() ?? {
+        open_gaps: [] as string[],
+        current_profile: profile as unknown as Record<string, unknown>,
+      },
+    [profile],
+  )
 
   return (
     <div className="space-y-4">
@@ -42,37 +56,35 @@ export function MeEditor({
               {t("remmy.me_matches_cta")}
             </Link>
             <Button type="button" variant="outline" onClick={() => setShowRemmy((v) => !v)}>
-              {showRemmy ? t("remmy.me_hide") : t("remmy.me_show")}
+              {showRemmy ? t("remmy.hide_chat") : t("remmy.me_show")}
             </Button>
           </div>
         </div>
       )}
 
-      {showRemmy && remmyEnabled && !proposal && (
+      {showRemmy && remmyEnabled && (
         <RemmyChat
           mode="update"
+          compact
+          formAlreadyOpen
           currentProfile={profile as unknown as Record<string, unknown>}
-          onDraftConfirmed={(p) => {
-            setProposal(p)
-            setShowRemmy(false)
-            setFormKey((k) => k + 1)
-          }}
+          getFormContext={getFormContext}
+          onDraftApplied={applyFromRemmy}
           onUseFormInstead={() => setShowRemmy(false)}
         />
       )}
 
-      {proposal && (
+      {applied && (
         <p role="status" className="border border-ink bg-paper-shade px-3 py-2 text-sm">
           {t("remmy.applied_to_form_update")}
         </p>
       )}
 
       <ProfileForm
-        key={formKey}
+        ref={formRef}
         initial={profile}
         profileId={profile.id}
-        initialProposal={proposal ?? undefined}
-        highlightGapsOnMount={Boolean(proposal)}
+        highlightGapsOnMount={false}
         prefillEnabled={false}
       />
     </div>
