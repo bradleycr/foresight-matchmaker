@@ -45,7 +45,7 @@ const COPY: Record<AuthEmailKind, AuthEmailCopy> = {
     preheader: "Valid for 24 hours.",
     kicker: "Foresight Matchmaking",
     title: "Sign in",
-    body: "Use this link to open your profile.",
+    body: "Use this link to sign in. If you do not have a profile yet, you can add one after confirming.",
     button: "Sign in",
     expiry: "Valid for 24 hours.",
     ignore: "If you did not request this, ignore it.",

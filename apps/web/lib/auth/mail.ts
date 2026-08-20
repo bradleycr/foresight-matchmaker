@@ -49,8 +49,19 @@ export function magicLinkMode(): DeliveryMode {
 
 export type MailResult = { sent: true } | { sent: false; reason: "no_smtp" | "smtp_error" }
 
+const SEND_TIMEOUT_MS = 8_000
+const RETRY_WAIT_MS = 400
+
 function fromAddress(): string {
   return process.env.SMTP_FROM?.trim() || DEFAULT_FROM
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function retryableHttp(status: number): boolean {
+  return status === 429 || status >= 500
 }
 
 function asList(value: string | string[] | undefined): string[] | undefined {
@@ -69,34 +80,68 @@ async function sendViaResend(opts: {
   const key = process.env.RESEND_API_KEY
   if (!key) return { sent: false, reason: "no_smtp" }
 
-  try {
-    const res = await fetch(RESEND_API, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-        "User-Agent": "foresight-matchmaker/mail",
-      },
-      body: JSON.stringify({
-        from: fromAddress(),
-        to: asList(opts.to),
-        cc: asList(opts.cc),
-        reply_to: opts.replyTo,
-        subject: opts.subject,
-        text: opts.text,
-        html: opts.html,
-      }),
-    })
-    if (!res.ok) {
+  const payload = JSON.stringify({
+    from: fromAddress(),
+    to: asList(opts.to),
+    cc: asList(opts.cc),
+    reply_to: opts.replyTo,
+    subject: opts.subject,
+    text: opts.text,
+    html: opts.html,
+  })
+
+  // One retry on timeout / 429 / 5xx — a webinar burst of ~50 concurrent
+  // sign-ins is well inside Resend's API; a single blip should not drop a seat.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(RESEND_API, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "User-Agent": "foresight-matchmaker/mail",
+        },
+        body: payload,
+        signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
+      })
+      if (res.ok) return { sent: true }
       const detail = await res.text().catch(() => "")
       console.error("[mail] Resend rejected:", res.status, detail.slice(0, 500))
+      if (retryableHttp(res.status) && attempt < 2) {
+        const retryAfter = Number(res.headers.get("retry-after"))
+        await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 2_000) : RETRY_WAIT_MS)
+        continue
+      }
+      return { sent: false, reason: "smtp_error" }
+    } catch (error) {
+      console.error("[mail] Resend send failed:", error)
+      if (attempt < 2) {
+        await sleep(RETRY_WAIT_MS)
+        continue
+      }
       return { sent: false, reason: "smtp_error" }
     }
-    return { sent: true }
-  } catch (error) {
-    console.error("[mail] Resend send failed:", error)
-    return { sent: false, reason: "smtp_error" }
   }
+
+  return { sent: false, reason: "smtp_error" }
+}
+
+/** Reused across invocations on a warm function so SMTP does not handshake 50 times. */
+let smtpTransport: { sendMail: (mail: object) => Promise<unknown> } | undefined
+
+function smtpPool() {
+  if (!smtpTransport) {
+    smtpTransport = nodemailer.createTransport({
+      url: process.env.SMTP_URL,
+      pool: true,
+      maxConnections: 8,
+      maxMessages: 100,
+      connectionTimeout: SEND_TIMEOUT_MS,
+      greetingTimeout: SEND_TIMEOUT_MS,
+      socketTimeout: 12_000,
+    })
+  }
+  return smtpTransport
 }
 
 export async function sendMail(opts: {
@@ -120,8 +165,7 @@ export async function sendMail(opts: {
   if (process.env.RESEND_API_KEY) return sendViaResend(opts)
 
   try {
-    const transport = nodemailer.createTransport(process.env.SMTP_URL)
-    await transport.sendMail({
+    await smtpPool().sendMail({
       from: fromAddress(),
       to: opts.to,
       cc: opts.cc,

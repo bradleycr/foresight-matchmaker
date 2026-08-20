@@ -23,11 +23,11 @@ export function isBrowsePath(path: string | null): boolean {
 }
 
 /**
- * Unknown emails on these paths still get a real confirmation link
- * (directory browse, add a listing). Bare /signin stays anti-enumeration.
+ * Every sign-in path confirms the mailbox. A new address still gets a
+ * real link — claim then sends them to add a profile.
  */
-export function needsEmailVerify(path: string | null): boolean {
-  return isRegisterPath(path) || isBrowsePath(path)
+export function needsEmailVerify(_path: string | null): boolean {
+  return true
 }
 
 export function isRegisterPath(path: string | null): boolean {

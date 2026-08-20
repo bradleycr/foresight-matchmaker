@@ -129,7 +129,7 @@ Do **not** set `DATABASE_PATH` in `.env` — `docker-compose.yml` already points
 
 `APP_URL` must match the public HTTPS origin. Magic links and Open Graph use it.
 
-If Resend/SMTP is unset, set `AUTH_REVEAL_LINKS=true` so `/signin` and `/register` can show a link (unknown emails still get a decoy). Prefer real mail in production.
+If Resend/SMTP is unset, set `AUTH_REVEAL_LINKS=true` so `/signin` and `/register` can show a link. Prefer real mail in production.
 
 `LLM_*` unset is fine: `/register` is the form only, no Remmy chat. Do not put OpenAI or Anthropic keys in `.env`.
 

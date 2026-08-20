@@ -30,7 +30,7 @@ describe("POST /api/v1/auth/request-link browse", () => {
     expect(body.claim_link).toContain("next=%2Fdirectory")
   })
 
-  it("keeps a decoy (unsigned) link on bare sign-in for an unknown email", async () => {
+  it("mints a real signed link on bare sign-in for an unknown email", async () => {
     vi.stubEnv("AUTH_REVEAL_LINKS", "true")
     vi.stubEnv("RESEND_API_KEY", "")
     vi.stubEnv("SMTP_URL", "")
@@ -39,6 +39,7 @@ describe("POST /api/v1/auth/request-link browse", () => {
     expect(res.status).toBe(200)
     const body = (await res.json()) as { claim_link?: string }
     expect(body.claim_link).toBeTruthy()
-    expect(body.claim_link).not.toContain("~")
+    expect(body.claim_link).toContain("~")
+    expect(body.claim_link).toContain("/claim/")
   })
 })

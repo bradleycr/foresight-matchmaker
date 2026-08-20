@@ -142,6 +142,8 @@ function open(): { db: Db; sqlite: Database.Database } {
   const sqlite = openOrExplain(file)
 
   sqlite.pragma("journal_mode = WAL")
+  // Wait for a lock instead of failing under a webinar burst of writes.
+  sqlite.pragma("busy_timeout = 5000")
   // WAL defaults to synchronous=NORMAL, which does not fsync on commit: a host
   // power-cut or hard reset can drop the last few transactions. Every write
   // here is someone's profile typed in by hand, and the write rate is a few

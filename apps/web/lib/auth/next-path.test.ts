@@ -36,12 +36,12 @@ describe("isRegisterPath", () => {
 })
 
 describe("needsEmailVerify", () => {
-  it("issues a real link for directory browse and register, not bare sign-in", () => {
+  it("confirms every mailbox, including bare sign-in with no listing yet", () => {
     expect(needsEmailVerify("/directory")).toBe(true)
     expect(needsEmailVerify("/directory?challenge=recoding_medicine")).toBe(true)
     expect(needsEmailVerify("/register")).toBe(true)
-    expect(needsEmailVerify(null)).toBe(false)
-    expect(needsEmailVerify("/me")).toBe(false)
+    expect(needsEmailVerify(null)).toBe(true)
+    expect(needsEmailVerify("/me")).toBe(true)
     expect(isBrowsePath("/me")).toBe(false)
   })
 })
