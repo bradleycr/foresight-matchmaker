@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react"
 import type { ChallengeId } from "@rmm/schema"
 
 /**
@@ -12,16 +11,14 @@ import type { ChallengeId } from "@rmm/schema"
  */
 
 export interface ChallengeTheme {
-  /** Page background — replaces `--color-paper` inside `.programme-surface`. */
+  /** Full-page background (via `html[data-programme]`). */
   paper: string
   /** Cards, hovers, inset panels. */
   paperShade: string
   /** Dividers and borders. */
   rule: string
-  /** Kicker, section rules, primary chips — falls back to platform teal. */
+  /** Kicker, section rules, primary chips. */
   accent: string
-  /** Optional thin band above programme content (defaults to platform band). */
-  band?: string
 }
 
 /** Platform default — cool Foresight powder blue (matches globals.css). */
@@ -30,7 +27,6 @@ export const PLATFORM_THEME: ChallengeTheme = {
   paperShade: "#d5e6ee",
   rule: "#b8cdd4",
   accent: "#2f9f96",
-  band: "linear-gradient(90deg, #5bb8d4 0%, #2f9f96 48%, #7ed6a5 100%)",
 }
 
 const CHALLENGE_THEMES: Partial<Record<ChallengeId, Partial<ChallengeTheme>>> = {
@@ -39,7 +35,6 @@ const CHALLENGE_THEMES: Partial<Record<ChallengeId, Partial<ChallengeTheme>>> = 
     paperShade: "#d6e6e2",
     rule: "#b4ccc4",
     accent: "#2a8f86",
-    band: "linear-gradient(90deg, #8ec4b8 0%, #2a8f86 52%, #a8dcc8 100%)",
   },
 }
 
@@ -47,15 +42,4 @@ export function challengeTheme(id: ChallengeId): ChallengeTheme {
   const overrides = CHALLENGE_THEMES[id]
   if (!overrides) return PLATFORM_THEME
   return { ...PLATFORM_THEME, ...overrides }
-}
-
-/** Inline custom properties for a `.programme-surface` wrapper. */
-export function challengeThemeStyle(theme: ChallengeTheme): CSSProperties {
-  return {
-    "--programme-paper": theme.paper,
-    "--programme-paper-shade": theme.paperShade,
-    "--programme-rule": theme.rule,
-    "--programme-accent": theme.accent,
-    "--programme-band": theme.band ?? PLATFORM_THEME.band,
-  } as CSSProperties
 }
