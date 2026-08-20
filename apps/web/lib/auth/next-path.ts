@@ -16,7 +16,20 @@ export function signInHref(next?: string): string {
   return path ? `/signin?next=${encodeURIComponent(path)}` : "/signin"
 }
 
-/** True when this return path is the listing form (with or without ?challenge=). */
+/** True when this return path is browsing a programme directory. */
+export function isBrowsePath(path: string | null): boolean {
+  if (!path) return false
+  return path === "/directory" || path.startsWith("/directory?")
+}
+
+/**
+ * Unknown emails on these paths still get a real confirmation link
+ * (directory browse, add a listing). Bare /signin stays anti-enumeration.
+ */
+export function needsEmailVerify(path: string | null): boolean {
+  return isRegisterPath(path) || isBrowsePath(path)
+}
+
 export function isRegisterPath(path: string | null): boolean {
   if (!path) return false
   return path === "/register" || path.startsWith("/register?")

@@ -5,10 +5,10 @@ import type { Kind } from "@rmm/schema"
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Button, Textarea } from "@/components/ui/primitives"
-import type { PrefillProposal } from "@/lib/llm/prefill"
+import { blankProposal, type PrefillProposal } from "@/lib/llm/prefill"
 import { fetchPrefill } from "@/lib/llm/fetch-prefill"
 import { transcriptForExtraction } from "@/lib/llm/proposal-utils"
-import { pasteLooksLikeUrlOnly } from "@/lib/paste-is-url"
+import { websiteFromPaste } from "@/lib/paste-is-url"
 import { ASK_CATALOG, activeChipTurn, answeredAsksFromMessages, gapsWithoutAnswered, isAskId, overlayAskOnProfile, proposalFromAsk, type AskId } from "@/lib/remmy/ask"
 import { AskChipsPart } from "./parts/ask-chips"
 
@@ -42,8 +42,8 @@ function hydrateAsk(value: string | undefined): AskId | undefined {
  * 3. Schema extractor maps the transcript → form fields.
  * 4. Fill form (or a ready signal) applies the draft; chat stays available.
  *
- * When the form is on screen, only the current question stays open. The
- * rest of the transcript is a scrollable drawer — not a second page.
+ * The full transcript lives in one scrollable pane so people never wonder
+ * whether they left the conversation.
  */
 export function RemmyChat({
   mode,
@@ -85,7 +85,6 @@ export function RemmyChat({
   const [input, setInput] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [historyOpen, setHistoryOpen] = useState(false)
 
   useEffect(() => {
     if (restored.current) {
@@ -188,14 +187,21 @@ export function RemmyChat({
     setBusy(true)
     setError(null)
 
+    const website = websiteFromPaste(trimmed)
+    if (website) {
+      try {
+        onDraftApplied(blankProposal({ website }), { spotlight: false })
+        setMessages([...nextMessages, { role: "assistant", content: t("remmy.url_saved") }])
+      } finally {
+        setBusy(false)
+      }
+      return
+    }
+
     const longPaste = trimmed.length >= LONG_PASTE_CHARS
 
     try {
       if (longPaste) {
-        if (pasteLooksLikeUrlOnly(trimmed)) {
-          setError(t("form.prefill_url_only"))
-          return
-        }
         const extracted = await extractDraft(nextMessages)
         if (extracted.ok) {
           setMessages((m) => [...m, { role: "assistant", content: t("remmy.paste_ready") }])
@@ -280,9 +286,6 @@ export function RemmyChat({
   }
 
   const chipTurn = activeChipTurn(messages)
-  const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant")
-  const prior = lastAssistantIndex > 0 ? messages.slice(0, lastAssistantIndex) : []
-  const live = lastAssistantIndex >= 0 ? messages.slice(lastAssistantIndex) : messages
 
   function bubble(m: RemmyChatMessage, i: number, showChips: boolean) {
     return (
@@ -312,23 +315,13 @@ export function RemmyChat({
   }
 
   return (
-    <div className="flex flex-col border-2 border-ink bg-paper">
+    <div className="flex flex-col border-2 border-ink bg-paper" aria-busy={busy}>
       <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-paper-shade px-4 py-3">
         <div>
           <p className="font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">{t("remmy.kicker")}</p>
           <h2 className="font-listing text-xl font-bold uppercase tracking-tight sm:text-2xl">{t("remmy.name")}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
-          {prior.length > 0 && (
-            <Button
-              type="button"
-              className="text-sm"
-              aria-expanded={historyOpen}
-              onClick={() => setHistoryOpen((v) => !v)}
-            >
-              {historyOpen ? t("remmy.hide_history") : t("remmy.show_history")}
-            </Button>
-          )}
           <Button
             type="button"
             variant="primary"
@@ -346,25 +339,30 @@ export function RemmyChat({
         </div>
       </header>
 
-      {historyOpen && prior.length > 0 && (
-        <div
-          ref={scroller}
-          className="max-h-[min(20rem,45vh)] space-y-3 overflow-y-auto overscroll-contain border-b border-rule px-4 py-3"
-        >
-          {prior.map((m, i) => bubble(m, i, false))}
-        </div>
-      )}
-
-      <div className="space-y-3 px-4 py-3">
-        {live.map((m, offset) => {
-          const i = lastAssistantIndex >= 0 ? lastAssistantIndex + offset : offset
+      <div
+        ref={scroller}
+        className="max-h-[min(32rem,60vh)] space-y-3 overflow-y-auto overscroll-contain px-4 py-3"
+      >
+        {messages.map((m, i) => {
           const showChips = chipTurn !== null && i === chipTurn.index && m.ask === chipTurn.ask && !m.askDone
           return bubble(m, i, showChips)
         })}
         {busy && (
-          <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft" aria-live="polite">
-            {t("remmy.thinking")}
-          </p>
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-start gap-3 border border-ink bg-mark/40 px-3 py-3"
+          >
+            <span className="mt-1 inline-flex gap-1" aria-hidden="true">
+              <span className="size-2 animate-pulse rounded-full bg-ink" />
+              <span className="size-2 animate-pulse rounded-full bg-ink [animation-delay:150ms]" />
+              <span className="size-2 animate-pulse rounded-full bg-ink [animation-delay:300ms]" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide">{t("remmy.thinking")}</p>
+              <p className="mt-0.5 text-xs text-ink-soft">{t("remmy.thinking_hint")}</p>
+            </div>
+          </div>
         )}
       </div>
 

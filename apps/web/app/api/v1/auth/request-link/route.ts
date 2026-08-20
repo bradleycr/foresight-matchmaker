@@ -7,17 +7,16 @@ import { getProfilesByEmail } from "@/lib/db/profiles"
 import { issueToken } from "@/lib/auth/tokens"
 import { magicLinkMode, sendMagicLink, revealLinksAllowed } from "@/lib/auth/mail"
 import { rateLimit } from "@/lib/auth/rate-limit"
-import { isRegisterPath, safeNextPath } from "@/lib/auth/next-path"
+import { isRegisterPath, needsEmailVerify, safeNextPath } from "@/lib/auth/next-path"
 
 export const dynamic = "force-dynamic"
 
 /**
  * POST /api/v1/auth/request-link
  *
- * Response shape is identical for known and unknown emails on the sign-in
- * path (anti-enumeration). The register path is different on purpose: a
- * new address must receive a real confirmation link so they can verify
- * before filling a listing.
+ * Response shape is identical for known and unknown emails on bare sign-in
+ * (anti-enumeration). Directory browse and register still mint a real
+ * confirmation link so a new address can enter.
  */
 export async function POST(req: NextRequest): Promise<Response> {
   let body: unknown
@@ -50,7 +49,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   const mode = magicLinkMode()
   const reveal = revealLinksAllowed()
   const next = safeNextPath(input.next)
-  const signup = isRegisterPath(next)
+  const verifyUnknown = needsEmailVerify(next)
   const nextQuery = next ? `?next=${encodeURIComponent(next)}` : ""
 
   let claimLink: string | undefined
@@ -65,11 +64,12 @@ export async function POST(req: NextRequest): Promise<Response> {
     // Only reveal on-screen when the inbox did not get the link — otherwise
     // auto-claim burns the token and the emailed button fails.
     if (reveal && !mail.sent) claimLink = link
-  } else if (signup) {
-    // Confirm the address first; the listing does not exist yet.
+  } else if (verifyUnknown) {
+    // Confirm the address first (add a listing, or browse with no listing yet).
     const token = issueToken(email)
     const link = `${origin}/claim/${token}${nextQuery}`
-    const mail = await sendMagicLink(email, link, "welcome")
+    const kind = isRegisterPath(next) ? "welcome" : "signin"
+    const mail = await sendMagicLink(email, link, kind)
     if (reveal && !mail.sent) claimLink = link
   } else if (reveal) {
     // Decoy: same URL shape, never stored — claim fails with the generic error.

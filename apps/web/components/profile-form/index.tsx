@@ -401,7 +401,7 @@ export function ProfileForm({
     const merged = initialProposal ? mergeProposalIntoForm(restored, initialProposal, COUNTRY_CODES) : restored
     return lockedEmail ? { ...merged, contact_email: lockedEmail } : merged
   })
-  const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
+  const [status, setStatus] = useState<"idle" | "saving">("idle")
   const [apiError, setApiError] = useState<ApiError | null>(null)
   const [clientIssues, setClientIssues] = useState<ValidationIssue[]>([])
   const [spotlightGaps, setSpotlightGaps] = useState(highlightGapsOnMount)
@@ -514,28 +514,12 @@ export function ProfileForm({
 
     if (isCreate) {
       onPublished?.()
-      setStatus("created")
-      window.scrollTo({ top: 0 })
+      router.push("/me?created=1")
       router.refresh()
-    } else {
-      router.push("/me?saved=1")
-      router.refresh()
+      return
     }
-  }
-
-  if (status === "created") {
-    return (
-      <div className="border border-ink bg-paper-shade p-6">
-        <h2 className="font-listing text-2xl font-bold uppercase">{t("form.created_title")}</h2>
-        <p className="mt-2">{t("form.created_body")}</p>
-        <div className="mt-4 flex gap-3">
-          <Button variant="primary" onClick={() => router.push("/me/matches")}>
-            {t("form.created_cta_matches")}
-          </Button>
-          <Button onClick={() => router.push("/directory")}>{t("nav.directory")}</Button>
-        </div>
-      </div>
-    )
+    router.push("/me?saved=1")
+    router.refresh()
   }
 
   return (

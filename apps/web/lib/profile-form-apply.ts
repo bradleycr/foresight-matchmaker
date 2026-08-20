@@ -239,14 +239,21 @@ export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
 }
 
 /**
- * First fill replaces a blank list. Later Remmy turns overlay by dataset name
- * so a second chat does not wipe modality the human already typed.
+ * First fill replaces a blank list. Signup almost always has one dataset;
+ * later Remmy turns overlay that row so extra details do not spawn a second.
+ * Two-or-more started rows still match by name.
  */
 function mergeDatasetLists(current: Dataset[], incoming: Dataset[]): Dataset[] {
   if (incoming.length === 0) return current.length > 0 ? current : [emptyDataset()]
 
   const started = current.filter((d) => !isDatasetBlank(d))
   if (started.length === 0) return incoming
+
+  if (started.length === 1) {
+    let merged = started[0]!
+    for (const row of incoming) merged = overlayDataset(merged, row)
+    return [merged]
+  }
 
   const next = started.map((d) => ({ ...d }))
   for (const row of incoming) {
@@ -255,8 +262,6 @@ function mergeDatasetLists(current: Dataset[], incoming: Dataset[]): Dataset[] {
     if (idx >= 0) {
       next[idx] = overlayDataset(next[idx]!, row)
     } else if (!key) {
-      // Chip-by-chip fill (modality, then disease) has no name yet — fold
-      // into the first unfinished row instead of spawning a second dataset.
       const thinIdx = next.findIndex(
         (d) => !d.name.trim() || d.modality.length === 0 || d.disease_area.length === 0,
       )
@@ -269,31 +274,40 @@ function mergeDatasetLists(current: Dataset[], incoming: Dataset[]): Dataset[] {
   return next
 }
 
+function sameDefault<K extends keyof Dataset>(incoming: Dataset, blank: Dataset, key: K): boolean {
+  const a = incoming[key]
+  const b = blank[key]
+  if (Array.isArray(a)) {
+    if (a.length === 0) return true
+    return Array.isArray(b) && JSON.stringify(a) === JSON.stringify(b)
+  }
+  return a === b
+}
+
 function overlayDataset(base: Dataset, incoming: Dataset): Dataset {
-  const named = incoming.name.trim().length > 0
-  const next: Dataset = {
+  const blank = emptyDataset()
+  const scalar = <K extends keyof Dataset>(key: K): Dataset[K] =>
+    sameDefault(incoming, blank, key) ? base[key] : incoming[key]
+
+  return {
     ...base,
     name: base.name.trim() || incoming.name,
     modality: base.modality.length > 0 ? base.modality : incoming.modality,
     disease_area: base.disease_area.length > 0 ? base.disease_area : incoming.disease_area,
-  }
-  if (!named) return next
-  return {
-    ...next,
-    n_subjects: incoming.n_subjects,
-    volume: incoming.volume,
-    time_span_years: incoming.time_span_years ?? next.time_span_years,
-    longitudinal: incoming.longitudinal,
-    annotation: incoming.annotation,
-    linkage: incoming.linkage.length > 0 ? incoming.linkage : next.linkage,
-    standards: incoming.standards.length > 0 ? incoming.standards : next.standards,
-    readiness: incoming.readiness,
-    consent_basis: incoming.consent_basis,
-    access_model: incoming.access_model,
-    data_can_leave_institution: incoming.data_can_leave_institution,
-    ethics_approval: incoming.ethics_approval,
-    available_from: incoming.available_from ?? next.available_from,
-    publicly_describable: incoming.publicly_describable,
-    governance_notes: incoming.governance_notes ?? next.governance_notes,
+    n_subjects: scalar("n_subjects"),
+    volume: scalar("volume"),
+    time_span_years: incoming.time_span_years ?? base.time_span_years,
+    longitudinal: scalar("longitudinal"),
+    annotation: scalar("annotation"),
+    linkage: sameDefault(incoming, blank, "linkage") ? base.linkage : incoming.linkage,
+    standards: sameDefault(incoming, blank, "standards") ? base.standards : incoming.standards,
+    readiness: scalar("readiness"),
+    consent_basis: scalar("consent_basis"),
+    access_model: scalar("access_model"),
+    data_can_leave_institution: scalar("data_can_leave_institution"),
+    ethics_approval: scalar("ethics_approval"),
+    available_from: incoming.available_from ?? base.available_from,
+    publicly_describable: scalar("publicly_describable"),
+    governance_notes: incoming.governance_notes || base.governance_notes,
   }
 }

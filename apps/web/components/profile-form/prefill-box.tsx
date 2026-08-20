@@ -3,28 +3,33 @@
 import { useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Button, Textarea } from "@/components/ui/primitives"
-import type { PrefillProposal } from "@/lib/llm/prefill"
+import { blankProposal, type PrefillProposal } from "@/lib/llm/prefill"
 import { fetchPrefill } from "@/lib/llm/fetch-prefill"
-import { pasteLooksLikeUrlOnly } from "@/lib/paste-is-url"
+import { websiteFromPaste } from "@/lib/paste-is-url"
 
 /**
  * Paste an About page → structured draft applied immediately to the form.
- * Remaining gaps are highlighted; nothing is published until submit.
+ * A URL-only paste fills Website instead of erroring.
  */
 export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) => void }) {
   const t = useT()
   const [text, setText] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const website = websiteFromPaste(text)
+  const canPropose = Boolean(website) || text.trim().length >= 40
 
   async function propose() {
     const body = text.trim()
-    if (body.length < 40) return
-
-    if (pasteLooksLikeUrlOnly(body)) {
-      setError(t("form.prefill_url_only"))
+    const url = websiteFromPaste(body)
+    if (url) {
+      onProposal(blankProposal({ website: url }))
+      setText("")
+      setError(null)
       return
     }
+
+    if (body.length < 40) return
 
     setBusy(true)
     setError(null)
@@ -56,7 +61,7 @@ export function PrefillBox({ onProposal }: { onProposal: (p: PrefillProposal) =>
         className="mt-3 bg-paper"
       />
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Button type="button" variant="primary" disabled={busy || text.trim().length < 40} onClick={() => void propose()}>
+        <Button type="button" variant="primary" disabled={busy || !canPropose} onClick={() => void propose()}>
           {busy ? t("form.prefill_busy") : t("form.prefill_button")}
         </Button>
         {error && (

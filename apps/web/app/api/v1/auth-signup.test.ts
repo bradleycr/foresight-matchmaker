@@ -185,4 +185,23 @@ describe("verify email before listing", () => {
     const recreatedBody = (await recreated.json()) as { profile: { kind: string } }
     expect(recreatedBody.profile.kind).toBe("data_holder")
   })
+
+  it("issues a real confirmation link when browsing the directory without a listing", async () => {
+    const requested = await requestLink(
+      jsonRequest("/api/v1/auth/request-link", "POST", {
+        email: "browser@example.invalid",
+        next: "/directory",
+      }),
+    )
+    expect(requested.status).toBe(200)
+    const { claim_link } = (await requested.json()) as { claim_link: string }
+    expect(claim_link).toContain("~")
+    expect(claim_link).toContain("next=%2Fdirectory")
+
+    const claimed = await claim(jsonRequest("/api/v1/auth/claim", "POST", { token: tokenFromClaimLink(claim_link) }))
+    expect(claimed.status).toBe(200)
+    const session = await getSession()
+    expect(session?.email).toBe("browser@example.invalid")
+    expect(session?.profileId).toBeNull()
+  })
 })

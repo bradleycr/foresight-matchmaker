@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { afterClaimHref, isRegisterPath, safeNextPath, signInHref } from "./next-path"
+import { afterClaimHref, isBrowsePath, isRegisterPath, needsEmailVerify, safeNextPath, signInHref } from "./next-path"
 
 describe("safeNextPath", () => {
   it("accepts same-origin relative pages", () => {
@@ -35,11 +35,29 @@ describe("isRegisterPath", () => {
   })
 })
 
+describe("needsEmailVerify", () => {
+  it("issues a real link for directory browse and register, not bare sign-in", () => {
+    expect(needsEmailVerify("/directory")).toBe(true)
+    expect(needsEmailVerify("/directory?challenge=recoding_medicine")).toBe(true)
+    expect(needsEmailVerify("/register")).toBe(true)
+    expect(needsEmailVerify(null)).toBe(false)
+    expect(needsEmailVerify("/me")).toBe(false)
+    expect(isBrowsePath("/me")).toBe(false)
+  })
+})
+
 describe("afterClaimHref", () => {
   it("sends a confirmed address with no listing to the form", () => {
     expect(afterClaimHref(null, "/register")).toBe("/register")
     expect(afterClaimHref(null, "/register?challenge=x")).toBe("/register?challenge=x")
     expect(afterClaimHref(null)).toBe("/register")
+  })
+
+  it("sends confirmed visitors to the directory they asked for, even without a listing yet", () => {
+    expect(afterClaimHref(null, "/directory")).toBe("/directory")
+    expect(afterClaimHref(null, "/directory?challenge=recoding_medicine")).toBe(
+      "/directory?challenge=recoding_medicine",
+    )
   })
 
   it("sends an existing listing to /me, not back through register", () => {

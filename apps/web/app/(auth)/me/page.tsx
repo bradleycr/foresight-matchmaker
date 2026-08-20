@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { apiFetch } from "@/lib/api/server-fetch"
@@ -15,13 +16,13 @@ export const dynamic = "force-dynamic"
 const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 
 /** Edit your own profile. The owner sees the full record, private fields included. */
-export default async function MePage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+export default async function MePage({ searchParams }: { searchParams: Promise<{ saved?: string; created?: string }> }) {
   const session = await getSession()
   if (!session) redirect("/signin")
   if (!session.profileId) redirect("/register")
 
   const { t } = await getT()
-  const { saved } = await searchParams
+  const { saved, created } = await searchParams
 
   const res = await apiFetch(`/api/v1/profiles/${session.profileId}`)
   await redirectIfOwnListingGone(res)
@@ -43,6 +44,21 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
         </div>
         <SignOutButton />
       </div>
+
+      {created ? (
+        <div role="status" className="mt-4 border border-ink bg-paper-shade px-3 py-3">
+          <p>{t("me.created")}</p>
+          <p className="mt-2 text-sm">
+            <Link href="/me/matches" className="font-semibold underline underline-offset-2">
+              {t("form.created_cta_matches")}
+            </Link>
+            {" · "}
+            <Link href="/directory" className="font-semibold underline underline-offset-2">
+              {t("nav.directory")}
+            </Link>
+          </p>
+        </div>
+      ) : null}
 
       {saved && (
         <p role="status" className="mt-4 border border-ink bg-paper-shade px-3 py-2">

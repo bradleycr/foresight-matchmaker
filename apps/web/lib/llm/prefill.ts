@@ -139,6 +139,11 @@ export const prefillProposalSchema = z.object({
 
 export type PrefillProposal = z.infer<typeof prefillProposalSchema>
 
+/** A valid empty draft plus any fields the caller already knows (e.g. a website). */
+export function blankProposal(partial: Partial<PrefillProposal> = {}): PrefillProposal {
+  return prefillProposalSchema.parse(partial)
+}
+
 function asStringList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return []
   return raw.filter((x): x is string => typeof x === "string" && x.trim().length > 0)

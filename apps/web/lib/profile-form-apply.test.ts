@@ -259,4 +259,72 @@ describe("mergeProposalIntoForm", () => {
     expect(next.looking_for).toEqual(["other"])
     expect(next.looking_for_other).toBe("A federated compute partner")
   })
+
+  it("folds a later named dataset into the one already started, even when names differ", () => {
+    const started = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({
+        kind: "data_holder",
+        datasets: [{ name: "Berlin MRI", modality: ["imaging_mri"], disease_area: ["oncology"], linkage: [], standards: [] }],
+      }),
+      COUNTRIES,
+    )
+    const next = mergeProposalIntoForm(
+      started,
+      proposal({
+        datasets: [
+          {
+            name: "Oncology imaging cohort",
+            modality: [],
+            disease_area: [],
+            n_subjects: "10k_100k",
+            access_model: "dua_required",
+            linkage: [],
+            standards: [],
+          },
+        ],
+      }),
+      COUNTRIES,
+    )
+    expect(next.datasets).toHaveLength(1)
+    expect(next.datasets[0]?.name).toBe("Berlin MRI")
+    expect(next.datasets[0]?.modality).toEqual(["imaging_mri"])
+    expect(next.datasets[0]?.disease_area).toEqual(["oncology"])
+    expect(next.datasets[0]?.n_subjects).toBe("10k_100k")
+    expect(next.datasets[0]?.access_model).toBe("dua_required")
+  })
+
+  it("does not reset scale to empty-dataset defaults on a later named overlay", () => {
+    const started = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({
+        kind: "data_holder",
+        datasets: [
+          {
+            name: "Berlin MRI",
+            modality: ["imaging_mri"],
+            disease_area: ["oncology"],
+            n_subjects: "10k_100k",
+            volume: "1_10tb",
+            access_model: "dua_required",
+            linkage: ["outcomes"],
+            standards: ["dicom"],
+          },
+        ],
+      }),
+      COUNTRIES,
+    )
+    const next = mergeProposalIntoForm(
+      started,
+      proposal({
+        datasets: [{ name: "Berlin MRI", modality: [], disease_area: [], linkage: [], standards: [] }],
+      }),
+      COUNTRIES,
+    )
+    expect(next.datasets).toHaveLength(1)
+    expect(next.datasets[0]?.n_subjects).toBe("10k_100k")
+    expect(next.datasets[0]?.volume).toBe("1_10tb")
+    expect(next.datasets[0]?.access_model).toBe("dua_required")
+    expect(next.datasets[0]?.linkage).toEqual(["outcomes"])
+  })
 })

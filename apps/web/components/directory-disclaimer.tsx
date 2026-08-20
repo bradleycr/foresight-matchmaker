@@ -18,6 +18,7 @@ export async function DirectoryDisclaimer({ className }: { className?: string })
       )}
     >
       <p className="text-sm leading-snug sm:text-base">{t("directory.disclaimer_body")}</p>
+      <p className="mt-2 text-sm leading-snug sm:text-base">{t("listing.glossary")}</p>
       <p className="mt-2 text-lg font-bold leading-tight sm:text-xl">
         {t("directory.disclaimer_not_application")}
       </p>

@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n/server"
 import { magicLinkMode } from "@/lib/auth/mail"
 import { SigninForm } from "@/components/signin-form"
-import { safeNextPath } from "@/lib/auth/next-path"
+import { isBrowsePath, safeNextPath } from "@/lib/auth/next-path"
 
 /**
  * Sign in by email. Copy matches the real delivery mode so we never promise
@@ -16,9 +16,11 @@ export default async function SigninPage({
   const mode = magicLinkMode()
   const { next: rawNext, stale } = await searchParams
   const next = safeNextPath(rawNext) ?? undefined
+  const browsing = isBrowsePath(next ?? null)
 
-  const explainer =
-    mode === "email"
+  const explainer = browsing
+    ? t("signin.browse_explainer")
+    : mode === "email"
       ? t("signin.explainer_email")
       : mode === "on_screen"
         ? t("signin.explainer_on_screen")
@@ -26,14 +28,22 @@ export default async function SigninPage({
 
   return (
     <div className="mx-auto max-w-md py-16">
-      <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("signin.title")}</h1>
+      <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">
+        {browsing ? t("signin.browse_title") : t("signin.title")}
+      </h1>
       {stale && (
         <p role="status" className="mt-3 border border-ink bg-paper-shade px-3 py-2 text-sm">
           {t("signin.stale")}
         </p>
       )}
       <p className="mt-3 leading-relaxed">{explainer}</p>
-      <SigninForm mode={mode} next={next} />
+      <SigninForm mode={mode} next={next} intent={browsing ? "browse" : "signin"} />
+      <p className="mt-6 text-sm text-ink-soft">
+        {browsing ? t("signin.no_listing_hint") : t("signin.no_listing_yet")}{" "}
+        <a href="/register" className="font-semibold underline underline-offset-2">
+          {t("nav.register")}
+        </a>
+      </p>
     </div>
   )
 }
