@@ -8,6 +8,7 @@ import en from "@/locales/en.json"
 import de from "@/locales/de.json"
 import fr from "@/locales/fr.json"
 import { publicOrigin } from "@/lib/public-origin"
+import { contactEmail } from "@/lib/contact"
 import "./globals.css"
 
 /**
@@ -84,7 +85,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang={locale}>
-      <body className={`${unica.variable} ${arizona.variable} font-sans`}>
+      <body className={`${unica.variable} ${arizona.variable} font-sans`} data-contact-email={contactEmail()}>
         <I18nProvider locale={locale} dict={dictionaries[locale]} fallback={dictionaries.en}>
           {/* Full-bleed foresight.org sky→teal→mint signal above the directory chrome. */}
           <div className="brand-band h-1.5 w-full" aria-hidden="true" />

@@ -2,6 +2,8 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
+import { ErrorReportPanel } from "@/components/bug-report"
+import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
 import { useT } from "@/lib/i18n/client"
 
 /**
@@ -28,7 +30,7 @@ export default function ErrorBoundary({
   }, [error])
 
   return (
-    <div className="mx-auto max-w-md py-16">
+    <div className="mx-auto max-w-lg py-16">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("error.title")}</h1>
       <p className="mt-3 leading-relaxed text-ink-soft">{t("error.body")}</p>
       {error.digest && (
@@ -57,6 +59,7 @@ export default function ErrorBoundary({
           {t("error.register_again")}
         </Link>
       </div>
+      <ErrorReportPanel email={DEFAULT_CONTACT_EMAIL} error={error} />
     </div>
   )
 }

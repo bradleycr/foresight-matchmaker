@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth/session"
 import { signInHref } from "@/lib/auth/next-path"
 import { browseDirectoryPath } from "@/lib/challenges/catalog"
 import { getT } from "@/lib/i18n/server"
+import { BetaBadge } from "./beta-badge"
 import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
 import { SignOutButton } from "./sign-out-button"
@@ -31,8 +32,12 @@ export async function SiteHeader() {
             className="hidden h-8 w-px shrink-0 bg-rule-strong sm:block"
           />
           <span className="min-w-0">
-            <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
-              {t("app.title")}
+            <span className="flex items-center gap-2.5">
+              <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
+                {t("app.title")}
+              </span>
+              <BetaBadge>{t("app.beta")}</BetaBadge>
+              <span className="sr-only">{t("app.beta_hint")}</span>
             </span>
             <span className="mt-1.5 hidden text-sm text-teal-deep sm:block">{t("app.tagline")}</span>
           </span>

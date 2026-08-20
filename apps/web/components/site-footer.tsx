@@ -1,14 +1,15 @@
 import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
+import { contactEmail } from "@/lib/contact"
+import { BugReportMailto } from "./bug-report"
 import { PartnerLogos } from "./partner-logos"
 import { CHALLENGES, PLATFORM } from "@/lib/challenges/catalog"
-
-const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 
 /** Site colophon: Foresight operates the platform. */
 export async function SiteFooter() {
   const { t } = await getT()
   const programme = CHALLENGES[0]
+  const inbox = contactEmail()
 
   return (
     <footer className="border-t-2 border-rule-strong py-8 text-sm text-ink-soft">
@@ -54,10 +55,17 @@ export async function SiteFooter() {
               </Link>
             </li>
             <li>
-              <a href={`mailto:${PRIVACY_EMAIL}`} className="underline underline-offset-2">
+              <a href={`mailto:${inbox}`} className="underline underline-offset-2">
                 {t("footer.privacy_contact")}
               </a>
-              <span className="mt-0.5 block text-xs text-ink-faint">{PRIVACY_EMAIL}</span>
+              <span className="mt-0.5 block text-xs text-ink-faint">{inbox}</span>
+            </li>
+            <li id="beta" className="pt-2">
+              <p className="font-semibold uppercase tracking-wide text-ink">{t("footer.beta_title")}</p>
+              <p className="mt-1 leading-relaxed">{t("footer.beta_body")}</p>
+              <BugReportMailto email={inbox} className="mt-1.5 inline-block font-semibold text-ink underline underline-offset-2">
+                {t("footer.beta_report")}
+              </BugReportMailto>
             </li>
           </ul>
         </div>

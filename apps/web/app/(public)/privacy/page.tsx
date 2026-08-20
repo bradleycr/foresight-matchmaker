@@ -1,7 +1,8 @@
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES } from "@/lib/challenges/catalog"
+import { contactEmail } from "@/lib/contact"
+import { BugReportMailto } from "@/components/bug-report"
 
-const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
 const UPDATED = "19 August 2026"
 
 /**
@@ -12,6 +13,7 @@ const UPDATED = "19 August 2026"
 export default async function PrivacyPage() {
   const { t } = await getT()
   const programme = CHALLENGES[0]
+  const inbox = contactEmail()
 
   const sections: Array<{ title: string; body: string }> = [
     { title: t("privacy.who_title"), body: t("privacy.who_body") },
@@ -25,7 +27,7 @@ export default async function PrivacyPage() {
     { title: t("privacy.cookies_title"), body: t("privacy.cookies_body") },
     { title: t("privacy.retention_title"), body: t("privacy.retention_body") },
     { title: t("privacy.rights_title"), body: t("privacy.rights_body") },
-    { title: t("privacy.deletion_title"), body: t("privacy.deletion_body", { email: PRIVACY_EMAIL }) },
+    { title: t("privacy.deletion_title"), body: t("privacy.deletion_body", { email: inbox }) },
     { title: t("privacy.complaint_title"), body: t("privacy.complaint_body") },
   ]
 
@@ -48,9 +50,15 @@ export default async function PrivacyPage() {
         <h2 className="font-listing text-lg font-bold uppercase">{t("privacy.contact_box_title")}</h2>
         <p className="mt-2 leading-relaxed">
           {t("privacy.contact_box_body")}{" "}
-          <a className="font-semibold underline" href={`mailto:${PRIVACY_EMAIL}`}>
-            {PRIVACY_EMAIL}
+          <a className="font-semibold underline" href={`mailto:${inbox}`}>
+            {inbox}
           </a>
+        </p>
+        <p className="mt-3 leading-relaxed">
+          {t("privacy.beta_body")}{" "}
+          <BugReportMailto email={inbox} className="font-semibold underline">
+            {t("footer.beta_report")}
+          </BugReportMailto>
         </p>
         {programme ? (
           <p className="mt-2 text-sm text-ink-soft">
