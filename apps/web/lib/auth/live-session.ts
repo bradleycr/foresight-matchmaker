@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
-import { getProfileById } from "@/lib/db/profiles"
-import { destroySession, getSession, type Session } from "@/lib/auth/session"
+import { getProfileById, getProfilesByEmail } from "@/lib/db/profiles"
+import { createSession, destroySession, getSession, type Session } from "@/lib/auth/session"
 import { safeNextPath } from "@/lib/auth/next-path"
 
 /**
@@ -19,22 +19,51 @@ import { safeNextPath } from "@/lib/auth/next-path"
  */
 
 export const CLEAR_SESSION_PATH = "/api/v1/auth/logout"
+export const RECONCILE_SESSION_PATH = "/api/v1/auth/reconcile"
 
-export async function peekLiveSession(): Promise<{ session: Session & { profileId: string }; profile: Profile } | null> {
+export interface LiveSession {
+  session: Session & { profileId: string }
+  profile: Profile
+  /** The profile was recovered by verified email, so the cookie needs repair. */
+  needsReconcile: boolean
+}
+
+/**
+ * Resolve ownership by the signed profile id first, then by verified email.
+ *
+ * The fallback closes an important gap: an email can own a profile even when
+ * an older or partially-created session still carries `profileId: null`.
+ */
+export function findOwnedProfile(session: Session): Profile | null {
+  if (session.profileId) {
+    const profile = getProfileById(session.profileId)
+    if (profile) return profile
+  }
+  return getProfilesByEmail(session.email)[0] ?? null
+}
+
+export async function peekLiveSession(): Promise<LiveSession | null> {
   const session = await getSession()
-  if (!session?.profileId) return null
-  const profile = getProfileById(session.profileId)
+  if (!session) return null
+  const profile = findOwnedProfile(session)
   if (!profile) return null
-  return { session: session as Session & { profileId: string }, profile }
+  return {
+    session: { ...session, profileId: profile.id },
+    profile,
+    needsReconcile: session.profileId !== profile.id,
+  }
 }
 
 /**
  * Route-handler variant: may delete the cookie. Do not call from RSC.
  * A verified-email session with no listing is kept — they still need /register.
  */
-export async function resolveLiveSession(): Promise<{ session: Session & { profileId: string }; profile: Profile } | null> {
+export async function resolveLiveSession(): Promise<LiveSession | null> {
   const live = await peekLiveSession()
-  if (live) return live
+  if (live) {
+    if (live.needsReconcile) await createSession(live.profile.id, live.session.email)
+    return live
+  }
   const session = await getSession()
   if (session?.profileId) await destroySession()
   return null

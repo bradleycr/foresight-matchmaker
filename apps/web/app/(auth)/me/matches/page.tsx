@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { apiFetch } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
-import { redirectIfOwnListingGone } from "@/lib/auth/live-session"
+import { peekLiveSession, RECONCILE_SESSION_PATH, redirectIfOwnListingGone } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { enumLabel } from "@/lib/i18n/labels"
 import { llmEnabled } from "@/lib/llm/client"
@@ -159,16 +159,19 @@ function MatchRow({ match, polish, t }: { match: MatchPayload; polish: boolean; 
  * is a second tab — not the default surface.
  */
 export default async function MatchesPage() {
-  const session = await getSession()
-  if (!session) redirect("/signin")
-  if (!session.profileId) redirect("/register")
+  const live = await peekLiveSession()
+  if (!live) {
+    const session = await getSession()
+    redirect(session ? "/register" : "/signin")
+  }
+  if (live.needsReconcile) redirect(`${RECONCILE_SESSION_PATH}?next=%2Fme%2Fmatches`)
 
   const { t } = await getT()
   const polish = llmEnabled()
 
   const [matchRes, profileRes] = await Promise.all([
     apiFetch("/api/v1/matches"),
-    apiFetch(`/api/v1/profiles/${session.profileId}`),
+    apiFetch(`/api/v1/profiles/${live.profile.id}`),
   ])
   await redirectIfOwnListingGone(matchRes)
   await redirectIfOwnListingGone(profileRes)

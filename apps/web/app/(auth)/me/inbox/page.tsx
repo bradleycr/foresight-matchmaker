@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { apiFetch } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
-import { redirectIfOwnListingGone } from "@/lib/auth/live-session"
+import { peekLiveSession, RECONCILE_SESSION_PATH, redirectIfOwnListingGone } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import type { IntroPayload } from "@/lib/api/types"
 import { InboxList } from "@/components/inbox-list"
@@ -13,9 +13,12 @@ export const dynamic = "force-dynamic"
  * who you reached and who reached you. Continue the conversation in email.
  */
 export default async function InboxPage() {
-  const session = await getSession()
-  if (!session) redirect("/signin")
-  if (!session.profileId) redirect("/register")
+  const live = await peekLiveSession()
+  if (!live) {
+    const session = await getSession()
+    redirect(session ? "/register" : "/signin")
+  }
+  if (live.needsReconcile) redirect(`${RECONCILE_SESSION_PATH}?next=%2Fme%2Finbox`)
 
   const { t } = await getT()
   const res = await apiFetch("/api/v1/intros")

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useImperativeHandle, useMemo, useState, type Ref } from "react"
-import { useRouter } from "next/navigation"
 import {
   KIND,
   ORG_TYPE,
@@ -394,7 +393,6 @@ export function ProfileForm({
 }) {
   const t = useT()
   const locale = useLocale()
-  const router = useRouter()
   const [state, setState] = useState<FormState>(() => {
     const base = initial ? stateFromProfile(initial) : blankState(defaultChallengeId)
     const restored = !initial ? applySnapshot(base, initialSnapshot) : base
@@ -514,12 +512,13 @@ export function ProfileForm({
 
     if (isCreate) {
       onPublished?.()
-      router.push("/me?created=1")
-      router.refresh()
+      // Publishing replaces the verified-only cookie with an owned-profile
+      // session. A document navigation guarantees every cached layout,
+      // especially the masthead, reads that new cookie immediately.
+      window.location.assign("/me?created=1")
       return
     }
-    router.push("/me?saved=1")
-    router.refresh()
+    window.location.assign("/me?saved=1")
   }
 
   return (

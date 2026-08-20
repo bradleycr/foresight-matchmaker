@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { apiFetch } from "@/lib/api/server-fetch"
 import type { DirectoryStatsPayload } from "@/lib/api/types"
+import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS } from "@/lib/challenges/catalog"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
@@ -42,8 +43,12 @@ export default async function ChallengePage({
   const challenge = challengeBySlug(slug)
   if (!challenge) notFound()
 
-  const { t } = await getT()
-  const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
+  const [{ t }, live, statsResponse] = await Promise.all([
+    getT(),
+    peekLiveSession(),
+    apiFetch("/api/v1/stats"),
+  ])
+  const stats = (await statsResponse.json()) as DirectoryStatsPayload
   const counts = stats.by_challenge?.[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const id = challenge.id
 
@@ -77,10 +82,10 @@ export default async function ChallengePage({
           {t("challenge.cta_directory")}
         </Link>
         <Link
-          href={`/register?challenge=${challenge.id}`}
+          href={live ? "/me" : `/register?challenge=${challenge.id}`}
           className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
         >
-          {t("nav.register")}
+          {t(live ? "nav.me" : "nav.register")}
         </Link>
       </div>
 

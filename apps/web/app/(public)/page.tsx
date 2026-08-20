@@ -28,6 +28,8 @@ export default async function LandingPage({
   const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")
+  const profileHref = live ? "/me" : "/register"
+  const profileLabel = live ? t("nav.me") : t("nav.register")
 
   return (
     <div className="py-10">
@@ -59,10 +61,10 @@ export default async function LandingPage({
           {t("landing.cta_browse")}
         </Link>
         <Link
-          href="/register"
+          href={profileHref}
           className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
         >
-          {t("nav.register")}
+          {profileLabel}
         </Link>
       </div>
 

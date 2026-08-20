@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { peekLiveSession } from "@/lib/auth/live-session"
+import { peekLiveSession, RECONCILE_SESSION_PATH } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { llmEnabled } from "@/lib/llm/client"
@@ -20,7 +20,7 @@ export default async function RegisterPage({
   searchParams: Promise<{ challenge?: string; deleted?: string }>
 }) {
   const live = await peekLiveSession()
-  if (live) redirect("/me")
+  if (live) redirect(live.needsReconcile ? `${RECONCILE_SESSION_PATH}?next=%2Fme` : "/me")
 
   const session = await getSession()
   const { t } = await getT()

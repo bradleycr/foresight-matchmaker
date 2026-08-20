@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { apiFetch } from "@/lib/api/server-fetch"
 import { getSession } from "@/lib/auth/session"
-import { redirectIfOwnListingGone } from "@/lib/auth/live-session"
+import { peekLiveSession, RECONCILE_SESSION_PATH, redirectIfOwnListingGone } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { llmEnabled } from "@/lib/llm/client"
 import { MeEditor } from "@/components/remmy/me-editor"
@@ -17,14 +17,17 @@ const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@fore
 
 /** Edit your own profile. The owner sees the full record, private fields included. */
 export default async function MePage({ searchParams }: { searchParams: Promise<{ saved?: string; created?: string }> }) {
-  const session = await getSession()
-  if (!session) redirect("/signin")
-  if (!session.profileId) redirect("/register")
+  const live = await peekLiveSession()
+  if (!live) {
+    const session = await getSession()
+    redirect(session ? "/register" : "/signin")
+  }
+  if (live.needsReconcile) redirect(`${RECONCILE_SESSION_PATH}?next=%2Fme`)
 
   const { t } = await getT()
   const { saved, created } = await searchParams
 
-  const res = await apiFetch(`/api/v1/profiles/${session.profileId}`)
+  const res = await apiFetch(`/api/v1/profiles/${live.profile.id}`)
   await redirectIfOwnListingGone(res)
   if (!res.ok) throw new Error(`Could not load your profile (status ${res.status}).`)
   const body = (await res.json()) as {
