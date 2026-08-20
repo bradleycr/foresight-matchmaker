@@ -38,12 +38,6 @@ export default async function SigninPage({
       )}
       <p className="mt-3 leading-relaxed">{explainer}</p>
       <SigninForm mode={mode} next={next} intent={browsing ? "browse" : "signin"} />
-      <p className="mt-6 text-sm text-ink-soft">
-        {browsing ? t("signin.no_listing_hint") : t("signin.no_listing_yet")}{" "}
-        <a href="/register" className="font-semibold underline underline-offset-2">
-          {t("nav.register")}
-        </a>
-      </p>
     </div>
   )
 }

@@ -128,53 +128,57 @@ export function SigninForm({
       <div className="mt-8 border-2 border-ink bg-paper-shade px-5 py-6">
         <p className="font-listing text-2xl font-bold uppercase tracking-tight">{t(titleKey)}</p>
         <p className="mt-3 leading-relaxed">{t(bodyKey)}</p>
-        {intent === "browse" ? (
-          <p className="mt-4 text-sm text-ink-soft">
-            {t("signin.no_listing_hint")}{" "}
-            <a href="/register" className="font-semibold underline underline-offset-2">
-              {t("nav.register")}
-            </a>
-          </p>
-        ) : null}
       </div>
     )
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
-      {error && (
-        <p role="alert" className="border border-alert px-3 py-2 text-alert">
-          {error}
-        </p>
-      )}
-      <Field
-        label={t(intent === "signup" ? "register.verify_email_label" : "signin.email_label")}
-        htmlFor="signin-email"
-        required
-      >
-        <Input
-          id="signin-email"
-          type="email"
+    <div>
+      <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
+        {error && (
+          <p role="alert" className="border border-alert px-3 py-2 text-alert">
+            {error}
+          </p>
+        )}
+        <Field
+          label={t(intent === "signup" ? "register.verify_email_label" : "signin.email_label")}
+          htmlFor="signin-email"
           required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@organisation.eu"
-        />
-      </Field>
-      <Button type="submit" variant="primary" disabled={status === "working"} className="self-start">
-        {status === "working"
-          ? t(intent === "signup" ? "register.verify_working" : "signin.signing_in")
-          : intent === "signup"
-            ? mode === "on_screen"
-              ? t("register.verify_button_reveal")
-              : t("register.verify_button")
-            : intent === "browse"
-              ? t("signin.browse_button")
-              : mode === "on_screen"
-                ? t("signin.button_reveal")
-                : t("signin.button")}
-      </Button>
-    </form>
+        >
+          <Input
+            id="signin-email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@organisation.eu"
+          />
+        </Field>
+        <Button type="submit" variant="primary" disabled={status === "working"} className="self-start">
+          {status === "working"
+            ? t(intent === "signup" ? "register.verify_working" : "signin.signing_in")
+            : intent === "signup"
+              ? mode === "on_screen"
+                ? t("register.verify_button_reveal")
+                : t("register.verify_button")
+              : intent === "browse"
+                ? t("signin.browse_button")
+                : mode === "on_screen"
+                  ? t("signin.button_reveal")
+                  : t("signin.button")}
+        </Button>
+      </form>
+      {/* Only before a link is requested — after "email sent", this CTA restarts
+          verification on /register and feels like a loop. */}
+      {intent !== "signup" ? (
+        <p className="mt-6 text-sm text-ink-soft">
+          {intent === "browse" ? t("signin.no_listing_hint") : t("signin.no_listing_yet")}{" "}
+          <a href="/register" className="font-semibold underline underline-offset-2">
+            {t("nav.register")}
+          </a>
+        </p>
+      ) : null}
+    </div>
   )
 }
