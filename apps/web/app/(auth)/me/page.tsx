@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { apiFetch } from "@/lib/api/server-fetch"
@@ -10,6 +9,7 @@ import { MeEditor } from "@/components/remmy/me-editor"
 import { OutcomeReport } from "@/components/outcome-report"
 import { SignOutButton } from "@/components/sign-out-button"
 import { DeleteAccountPanel } from "@/components/delete-account-panel"
+import { ProfileCompleteChoices } from "@/components/profile-complete-choices"
 
 export const dynamic = "force-dynamic"
 
@@ -36,6 +36,8 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
   }
   const { profile } = body
 
+  if (created) return <ProfileCompleteChoices profile={profile} t={t} />
+
   return (
     <div className="py-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -47,21 +49,6 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
         </div>
         <SignOutButton />
       </div>
-
-      {created ? (
-        <div role="status" className="mt-4 border border-ink bg-paper-shade px-3 py-3">
-          <p>{t("me.created")}</p>
-          <p className="mt-2 text-sm">
-            <Link href="/me/matches" className="font-semibold underline underline-offset-2">
-              {t("form.created_cta_matches")}
-            </Link>
-            {" · "}
-            <Link href="/directory" className="font-semibold underline underline-offset-2">
-              {t("nav.directory")}
-            </Link>
-          </p>
-        </div>
-      ) : null}
 
       {saved && (
         <p role="status" className="mt-4 border border-ink bg-paper-shade px-3 py-2">
