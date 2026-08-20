@@ -19,7 +19,7 @@
   "tags": [
     { "name": "public", "description": "No authentication." },
     { "name": "directory", "description": "Signed-in member session required." },
-    { "name": "write", "description": "Create or update a listing." }
+    { "name": "write", "description": "Create or update a profile." }
   ],
   "paths": {
     "/api/v1/schema": {
@@ -42,7 +42,7 @@
     "/api/v1/stats": {
       "get": {
         "tags": ["public"],
-        "summary": "Public listing counts by programme and kind",
+        "summary": "Public profile counts by programme and kind",
         "operationId": "getStats",
         "responses": {
           "200": {
@@ -60,7 +60,7 @@
       "get": {
         "tags": ["directory"],
         "summary": "Machine-readable directory dump",
-        "description": "Redacted listings. Requires a signed-in session cookie. Hidden profiles are omitted. Contact fields are never included.",
+        "description": "Redacted profiles. Requires a signed-in session cookie. Hidden profiles are omitted. Contact fields are never included.",
         "operationId": "getDirectory",
         "security": [{ "sessionCookie": [] }],
         "responses": {
@@ -79,7 +79,7 @@
     "/api/v1/profiles": {
       "post": {
         "tags": ["write"],
-        "summary": "Create a listing",
+        "summary": "Create a profile",
         "description": "Public. Kind cannot change after create. Server derives eligible_hq and completeness. Signs the submitter in.",
         "operationId": "createProfile",
         "requestBody": {
@@ -109,7 +109,7 @@
     "/api/v1/profiles/{id}": {
       "get": {
         "tags": ["directory"],
-        "summary": "Get one listing",
+        "summary": "Get one profile",
         "operationId": "getProfile",
         "security": [{ "sessionCookie": [] }],
         "parameters": [
@@ -130,7 +130,7 @@
     "/api/v1/matches": {
       "get": {
         "tags": ["directory"],
-        "summary": "Ranked shortlist for the signed-in listing",
+        "summary": "Ranked shortlist for the signed-in profile",
         "description": "Top matches with factor breakdown and blockers. Score is deterministic.",
         "operationId": "getMatches",
         "security": [{ "sessionCookie": [] }],

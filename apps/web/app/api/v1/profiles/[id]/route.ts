@@ -33,7 +33,7 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
     // Cookie valid, row gone (typical on Vercel /tmp after a cold start).
     if (session.profileId === id) {
       await destroySession()
-      return unauthorized("Your listing is no longer on this instance. Add it again.")
+      return unauthorized("Your profile is no longer on this instance. Add it again.")
     }
     return notFound("No profile with that id.")
   }
@@ -91,11 +91,11 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
     throw e
   }
   if (input.kind !== profile.kind) {
-    return badRequest("Profile type cannot be changed. Delete this listing in Your profile, then add a new one.")
+    return badRequest("Profile type cannot be changed. Delete this profile in Your profile, then add a new one.")
   }
   const existingChallenge = profile.challenge_id ?? "recoding_medicine"
   if (input.challenge_id !== existingChallenge) {
-    return badRequest("Programme cannot be changed. Delete this listing in Your profile, then add a new one.")
+    return badRequest("Programme cannot be changed. Delete this profile in Your profile, then add a new one.")
   }
 
   let updated

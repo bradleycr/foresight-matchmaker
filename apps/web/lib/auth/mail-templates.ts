@@ -32,10 +32,10 @@ export interface AuthEmailCopy {
 const COPY: Record<AuthEmailKind, AuthEmailCopy> = {
   welcome: {
     subject: "Confirm your email — Foresight Matchmaking",
-    preheader: "Then fill in the listing.",
+    preheader: "Then fill in the profile.",
     kicker: "Foresight Matchmaking",
     title: "Confirm your email",
-    body: "Confirm your email address. Then you can fill in a listing.",
+    body: "Confirm your email address. Then you can fill in a profile.",
     button: "Confirm email",
     expiry: "Valid for 24 hours.",
     ignore: "If you did not request this, ignore it.",
@@ -45,7 +45,7 @@ const COPY: Record<AuthEmailKind, AuthEmailCopy> = {
     preheader: "Valid for 24 hours.",
     kicker: "Foresight Matchmaking",
     title: "Sign in",
-    body: "Use this link to open your listing.",
+    body: "Use this link to open your profile.",
     button: "Sign in",
     expiry: "Valid for 24 hours.",
     ignore: "If you did not request this, ignore it.",

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const session = await getSession()
-  if (!session) return unauthorized("Confirm your email before pre-filling a listing.")
+  if (!session) return unauthorized("Confirm your email before pre-filling a profile.")
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
   const limited = rateLimit(`prefill:${ip}`, { limit: 20, windowMs: 15 * 60 * 1000 })

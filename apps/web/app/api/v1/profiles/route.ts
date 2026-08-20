@@ -16,14 +16,14 @@ export const dynamic = "force-dynamic"
  */
 export async function POST(req: NextRequest): Promise<Response> {
   const session = await getSession()
-  if (!session) return unauthorized("Confirm your email before adding a listing.")
+  if (!session) return unauthorized("Confirm your email before adding a profile.")
   if (hasListing(session)) {
-    return badRequest("This email already has a listing. Sign in to edit it, or delete it in Your profile to add a new one.")
+    return badRequest("This email already has a profile. Sign in to edit it, or delete it in Your profile to add a new one.")
   }
 
   const existing = getProfilesByEmail(session.email)
   if (existing.length > 0) {
-    return badRequest("This email already has a listing. Sign in to edit it, or delete it in Your profile to add a new one.")
+    return badRequest("This email already has a profile. Sign in to edit it, or delete it in Your profile to add a new one.")
   }
 
   let body: unknown

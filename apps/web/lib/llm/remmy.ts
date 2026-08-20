@@ -72,7 +72,7 @@ ${
   formOpen
     ? `- The form is already on screen. Do not re-ask fields that are already filled unless they want to change them.
 - Ask about the most important OPEN field next.
-- Data holders / consortia: prefer dataset name, then modality, then disease area. Those ARE the listing.
+- Data holders / consortia: prefer dataset name, then modality, then disease area. Those ARE the profile.
 - AI teams and independent experts: prefer methods, application target, and privacy capability. Do NOT ask for a clinical disease area unless they already named one — many people here are methods, privacy, or infrastructure, not oncology/cardiology specialists. Do NOT grill them on data modalities, cohort size, or annotation unless they already said they know what data they need. "No specific disease area" and "Not sure yet" are complete answers.
 - Vocabularies include Other. If they pick Other, or describe something not on the list, the chips capture "other" — then ask them to define it in a few words (free text, ask=null). Never invent that definition. Open fields looking_for_other, methods_other, or org_type_other mean they already chose Other: ask what they mean, then stop.
 - Set ready_for_review=true when they have given NEW facts that should be merged into the form.`
