@@ -5,6 +5,7 @@ import { getT } from "@/lib/i18n/server"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { signInHref } from "@/lib/auth/next-path"
 import { CHALLENGES } from "@/lib/challenges/catalog"
+import { challengeTheme } from "@/lib/challenges/themes"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { kindCountTotal } from "@/components/listing-counts"
 
@@ -75,7 +76,8 @@ export default async function LandingPage({
               <li key={challenge.id}>
                 <Link
                   href={`/challenges/${challenge.slug}`}
-                  className="block border-2 border-rule-strong border-l-4 border-l-teal bg-paper p-5 hover:bg-paper-shade"
+                  className="block border-2 border-rule-strong bg-paper p-5 hover:bg-paper-shade"
+                  style={{ borderLeftWidth: "4px", borderLeftColor: challengeTheme(challenge.id).accent }}
                 >
                   <h3 className="font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
                     {t(`challenge.${challenge.id}.name`)}

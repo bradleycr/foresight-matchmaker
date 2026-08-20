@@ -93,6 +93,27 @@
     background: linear-gradient(90deg, #5bb8d4 0%, #2f9f96 48%, #7ed6a5 100%);
   }
 
+  /*
+   * Programme pages — subtle per-challenge paper wash. Set `--programme-*`
+   * on `.programme-surface` (see lib/challenges/themes.ts).
+   */
+  .programme-surface {
+    --color-paper: var(--programme-paper, #e5f0f6);
+    --color-paper-shade: var(--programme-paper-shade, #d5e6ee);
+    --color-rule: var(--programme-rule, #b8cdd4);
+    --color-teal: var(--programme-accent, #2f9f96);
+    --color-teal-deep: color-mix(in srgb, var(--programme-accent, #2f9f96) 78%, #17150f);
+    background: var(--color-paper);
+    min-height: 100%;
+  }
+
+  .programme-band {
+    background: var(
+      --programme-band,
+      linear-gradient(90deg, #5bb8d4 0%, #2f9f96 48%, #7ed6a5 100%)
+    );
+  }
+
   /* The ONLY motion in the app: a 120ms state transition on filter chips. */
   .chip-transition {
     transition:

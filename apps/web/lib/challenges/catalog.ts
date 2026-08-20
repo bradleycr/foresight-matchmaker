@@ -3,7 +3,8 @@ import { CHALLENGE_ID, DEFAULT_CHALLENGE_ID, type ChallengeId } from "@rmm/schem
 /**
  * Foresight Matchmaking is the product. Challenges are programmes listed
  * on it — Recoding Medicine is the first. Copy lives in locales; this
- * catalog is the stable id / URL / host contract.
+ * catalog is the stable id / URL / host contract. Per-programme colour
+ * washes live in `./themes.ts`.
  */
 
 export const PLATFORM = {
