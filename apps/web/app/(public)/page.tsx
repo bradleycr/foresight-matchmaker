@@ -3,8 +3,9 @@ import { apiFetch } from "@/lib/api/server-fetch"
 import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { getT } from "@/lib/i18n/server"
 import { peekLiveSession } from "@/lib/auth/live-session"
+import { getSession } from "@/lib/auth/session"
 import { signInHref } from "@/lib/auth/next-path"
-import { CHALLENGES } from "@/lib/challenges/catalog"
+import { CHALLENGES, browseDirectoryPath } from "@/lib/challenges/catalog"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { kindCountTotal } from "@/components/listing-counts"
@@ -23,9 +24,10 @@ export default async function LandingPage({
   const { t } = await getT()
   const { deleted } = await searchParams
   const live = await peekLiveSession()
+  const session = live ? live.session : await getSession()
   const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
-  const directoryHref = live ? "/directory" : signInHref("/directory")
+  const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")
 
   return (
     <div className="py-10">

@@ -17,8 +17,8 @@ import { matches, profiles } from "./schema"
  * histogram is built from them. Shortlist reads filter them out.
  */
 
-const MIN_SCORE = 35
-const SHORTLIST_LIMIT = 10
+/** Interactive shortlist cutoff — same number the empty-state copy quotes. */
+export const MIN_SCORE = 35
 
 export interface CachedMatch extends MatchEntry {
   computedAt: string
@@ -104,7 +104,7 @@ export function recomputeAllMatches(): void {
   })
 }
 
-/** The ranked shortlist for one profile: top 10, threshold 35, unblocked. */
+/** Ranked shortlist for one profile: score ≥ 35, unblocked, best first. */
 export function getShortlist(subjectId: string): CachedMatch[] {
   return getDb()
     .select()
@@ -113,7 +113,6 @@ export function getShortlist(subjectId: string): CachedMatch[] {
     .all()
     .filter((r) => r.score >= MIN_SCORE)
     .sort((a, b) => (b.score !== a.score ? b.score - a.score : a.otherId < b.otherId ? -1 : 1))
-    .slice(0, SHORTLIST_LIMIT)
     .map((r) => ({
       otherId: r.otherId,
       score: r.score,

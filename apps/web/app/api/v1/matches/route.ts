@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic"
 /**
  * GET /api/v1/matches — the signed-in profile's ranked shortlist.
  *
- * Top 10 above the score-35 threshold, each entry carrying its full factor
+ * Every pairing above the score-35 threshold, each entry carrying its full factor
  * breakdown and blocker list (soft blockers are displayed, never hidden),
  * with the counterpart embedded in redacted public form.
  *

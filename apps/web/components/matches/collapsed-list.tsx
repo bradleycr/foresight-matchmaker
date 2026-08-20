@@ -2,34 +2,35 @@
 
 import { useState, type ReactNode } from "react"
 
+export const MATCHES_PAGE_SIZE = 5
+
 /**
- * Ranked list that opens at five entries so the first look is a shortlist,
- * not a wall. The rest stay one click away.
+ * Ranked shortlist in pages of five. First look is the top five above
+ * threshold; each click reveals the next page, never a wall of scores.
  */
 export function CollapsedList({
-  preview,
-  rest,
+  items,
+  pageSize = MATCHES_PAGE_SIZE,
   moreLabel,
 }: {
-  preview: ReactNode
-  rest: ReactNode
-  moreLabel: string
+  items: ReactNode[]
+  pageSize?: number
+  moreLabel: (n: number) => string
 }) {
-  const [open, setOpen] = useState(false)
+  const [shown, setShown] = useState(() => Math.min(pageSize, items.length))
+  const remaining = items.length - shown
+  const nextChunk = remaining > 0 ? Math.min(pageSize, remaining) : 0
 
   return (
     <>
-      <ol>
-        {preview}
-        {open ? rest : null}
-      </ol>
-      {!open && rest ? (
+      <ol>{items.slice(0, shown)}</ol>
+      {nextChunk > 0 ? (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => setShown((n) => Math.min(n + pageSize, items.length))}
           className="mt-4 min-h-11 border border-ink px-4 text-sm font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
         >
-          {moreLabel}
+          {moreLabel(nextChunk)}
         </button>
       ) : null}
     </>

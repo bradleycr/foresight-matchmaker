@@ -4,7 +4,9 @@ A Foresight Institute directory that pairs organisations around open programmes.
 
 Think of it as a phone book, not a social network: add a structured **listing** against a programme, browse the directory, get a deterministic ranked shortlist of counterparts, and **email an introduction**. Both contacts are on the thread so the conversation continues off this platform. Joint applications are filed with the programme host, not here.
 
-**Production (Vercel):** https://foresightmatchmaker.app — see [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for deploy, env vars, and smoke tests.
+**Production (Vercel, live now):** https://foresightmatchmaker.app — SQLite in `/tmp`, wipes on cold start. Smoke tests: [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md).
+
+**Persistent host (when someone has time):** clone `main` onto a Hetzner (or other) Linux VM with Docker — SQLite in `./data`. One-pager: [`DEPLOY.md`](DEPLOY.md). The Vercel app stays the public site until that box is up.
 
 > **All seed data is synthetic.** Every organisation, dataset, contact name, and email address under `seed/` is fabricated for demonstration purposes and does not describe any real institution. See `seed/README.md`.
 
@@ -54,18 +56,21 @@ pnpm test         # schema + matching + web integration suites (Vitest)
 pnpm typecheck
 ```
 
-## Deployment (Linux VM, Docker)
+## Deployment
 
-For the Foresight / YCluster box (hostname `foresight-matchmaker.dev.ycluster.net`), follow **[DEPLOY.md](DEPLOY.md)** — that is the sysops one-pager.
+**Vercel is production today.** Push or `vercel deploy --prod` from `main`. Env vars live on the Vercel project. Listings on Vercel are not durable.
+
+**Hetzner / any Linux VM** is the durable path (same codebase). Follow **[DEPLOY.md](DEPLOY.md)**.
 
 ```bash
 git clone https://github.com/bradleycr/foresight-matchmaker.git
 cd foresight-matchmaker
-cp .env.example .env    # set SESSION_SECRET, ADMIN_SECRET, APP_URL, LLM_*
+cp .env.example .env    # SESSION_SECRET, ADMIN_SECRET, APP_URL; RESEND_* or SMTP_*
+mkdir -p data
 docker compose up -d --build
 ```
 
-The SQLite database lives in `./data` on the host (bind-mounted to `/data`). An existing database is never touched. Production leaves `SEED_ON_EMPTY` unset so a fresh volume stays empty until real organisations register. For a local rehearsal only, set `SEED_ON_EMPTY=true` in `.env`. No US-hosted managed database is involved — the data stays on the VM.
+The SQLite database lives in `./data` on the host (bind-mounted to `/data`). An existing database is never touched. Leave `SEED_ON_EMPTY` unset so a fresh volume stays empty until real listings. For a local rehearsal only, set `SEED_ON_EMPTY=true` in `.env`.
 
 Every environment variable is documented in [`.env.example`](.env.example).
 
@@ -74,7 +79,7 @@ Every environment variable is documented in [`.env.example`](.env.example).
 ```
 packages/schema      Zod schemas, enums, derived fields, JSON Schema export
 packages/matching    Deterministic scoring: hard/soft blockers + weighted factors
-apps/web             Next.js 15 App Router app (UI + /api/v1 + SQLite via Drizzle)
+apps/web             Next.js 16 App Router app (UI + /api/v1 + SQLite via Drizzle)
 seed/                Synthetic demo profiles (fabricated data)
 ```
 

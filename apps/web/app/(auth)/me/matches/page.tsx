@@ -97,17 +97,10 @@ function ClassicMatchList({
 
   return (
     <CollapsedList
-      preview={matches.slice(0, 5).map((match) => (
+      items={matches.map((match) => (
         <MatchRow key={match.profile.id} match={match} polish={polish} t={t} />
       ))}
-      rest={
-        matches.length > 5
-          ? matches.slice(5).map((match) => (
-              <MatchRow key={match.profile.id} match={match} polish={polish} t={t} />
-            ))
-          : null
-      }
-      moreLabel={t("matches.show_more", { n: matches.length - 5 })}
+      moreLabel={(n) => t("matches.show_more", { n })}
     />
   )
 }

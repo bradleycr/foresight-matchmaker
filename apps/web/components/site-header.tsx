@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
+import { signInHref } from "@/lib/auth/next-path"
+import { browseDirectoryPath } from "@/lib/challenges/catalog"
 import { getT } from "@/lib/i18n/server"
 import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
@@ -14,6 +16,7 @@ export async function SiteHeader() {
   const { t } = await getT()
   const live = await peekLiveSession()
   const session = live ? live.session : await getSession()
+  const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")
 
   return (
     <header className="border-b-2 border-rule-strong">
@@ -46,7 +49,7 @@ export async function SiteHeader() {
         </Link>
         {live ? (
           <>
-            <Link href="/directory" className="hover:underline">
+            <Link href={directoryHref} className="hover:underline">
               {t("nav.directory")}
             </Link>
             <Link href="/me/matches" className="hover:underline">

@@ -48,6 +48,27 @@ export function challengeBySlug(slug: string): ChallengeDef | undefined {
   return CHALLENGES.find((c) => c.slug === slug)
 }
 
+/** Directory URL for one programme. */
+export function directoryHref(challengeId: ChallengeId): string {
+  return `/directory?challenge=${challengeId}`
+}
+
+/**
+ * Where Browse / Directory should land.
+ *
+ * Signed-in listers go to the programme on their listing. With a single
+ * open programme (today: Recoding Medicine) everyone else lands there too.
+ * Several programmes and no listing yet → `/directory` (the chooser).
+ */
+export function browseDirectoryPath(listingChallengeId?: string | null): string {
+  const listed = listingChallengeId
+    ? CHALLENGES.find((c) => c.id === listingChallengeId)
+    : undefined
+  if (listed) return directoryHref(listed.id)
+  if (CHALLENGES.length === 1) return directoryHref(CHALLENGES[0]!.id)
+  return "/directory"
+}
+
 /** In-person Recoding Medicine matchmaking — dates align with `enum.attending` chips. */
 export const RECODING_MATCHMAKING_EVENTS = [
   "event_sept_1",

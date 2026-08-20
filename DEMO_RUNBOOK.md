@@ -1,11 +1,8 @@
 # Demo runbook — Vercel
 
-This is the demo path. Docker/VM is the durable long-term target for SPRIND
-(see `README.md` → "Deployment (Linux VM, Docker)") but it is **not** what
-tomorrow's demo runs on, and it has not been exercised end to end. Do not
-deploy that path by accident: it needs a bind-mounted volume and a different
-`DATABASE_PATH`, and mixing the two up is how you end up presenting the wrong
-database.
+This is the **Vercel** path — live at https://foresightmatchmaker.app while there is no persistent VM. Docker/Hetzner is the durable long-term host (see `DEPLOY.md`) but it is optional: the same `main` branch runs fully on Vercel if nobody has time to rack a box.
+
+Do not mix the two databases. Vercel SQLite is `/tmp` and wipes on deploy. A Hetzner volume is `./data` and must never be deleted.
 
 **Production URL:** https://foresightmatchmaker.app
 **Vercel project:** `bradley-royes-projects/foresight-matchmaker` (`prj_kyy37fkdoAST7LzShqfkLFFJvNbm`)
