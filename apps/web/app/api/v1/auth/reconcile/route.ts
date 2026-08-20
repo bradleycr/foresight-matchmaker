@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { CLEAR_SESSION_PATH, findOwnedProfile } from "@/lib/auth/live-session"
 import { safeNextPath } from "@/lib/auth/next-path"
 import { createSession, getSession, hasListing } from "@/lib/auth/session"
+import { restoreOwnedProfile } from "@/lib/db/durable"
 
 export const dynamic = "force-dynamic"
 
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   const session = await getSession()
   if (!session) return NextResponse.redirect(new URL("/signin", req.url), 303)
 
+  await restoreOwnedProfile(session.profileId, session.email)
   const profile = findOwnedProfile(session)
   const requested = safeNextPath(req.nextUrl.searchParams.get("next"))
 

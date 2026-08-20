@@ -17,9 +17,9 @@ function resolveDatabasePath(): string {
   if (process.env.DATABASE_PATH) return process.env.DATABASE_PATH
 
   // Vercel’s filesystem is ephemeral — keep the SQLite file under /tmp so
-  // writes succeed. Data does not survive deploys or a recycled instance;
-  // fine as a fallback host, not the long-term production store
-  // (use the Docker/VM path for that).
+  // writes succeed. Listings are dual-written to Vercel Blob (`lib/db/durable.ts`)
+  // so the next instance can refill this cache. The Docker/VM path with a
+  // mounted `./data` volume does not need Blob.
   if (process.env.VERCEL) return "/tmp/rmm-app.db"
 
   let dir = process.cwd()

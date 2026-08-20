@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { listDirectoryProfiles } from "@/lib/db/profiles"
+import { hydrateListings } from "@/lib/db/durable"
 import { getSession } from "@/lib/auth/session"
 import { unauthorized } from "@/lib/api/respond"
 
@@ -12,6 +13,8 @@ export const dynamic = "force-dynamic"
 export async function GET(): Promise<NextResponse> {
   const session = await getSession()
   if (!session) return unauthorized("Sign in to browse the directory.")
+
+  await hydrateListings()
 
   return NextResponse.json(
     {

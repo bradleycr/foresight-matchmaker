@@ -31,6 +31,10 @@ export function gone(message: string): NextResponse {
   return NextResponse.json({ error: message }, { status: 410 })
 }
 
+export function unavailable(message: string): NextResponse {
+  return NextResponse.json({ error: message }, { status: 503 })
+}
+
 export function zodError(error: ZodError): NextResponse {
   return badRequest(
     "Validation failed. Fix the listed fields and resubmit.",

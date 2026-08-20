@@ -197,6 +197,43 @@ export function setJointApplicationOutcome(id: string, outcome: "yes" | "no" | "
 }
 
 /**
+ * Adopt a listing that already exists in durable storage. This is not a user
+ * write — no created/updated events, no new ids. SQLite is only the cache.
+ */
+export function cacheRemoteListing(
+  profile: Profile,
+  opts?: { jointApplication?: string | null; recompute?: boolean },
+): void {
+  const taken = getProfileBySlug(profile.slug)
+  const row = profileToRow(profile)
+  if (taken && taken.id !== profile.id) {
+    row.slug = `${profile.slug}-${profile.id.slice(0, 8)}`
+  }
+
+  const existing = getProfileById(profile.id)
+  const newer = !existing || existing.updated_at < profile.updated_at
+  if (newer) {
+    getDb()
+      .insert(profiles)
+      .values(row)
+      .onConflictDoUpdate({ target: profiles.id, set: row })
+      .run()
+  }
+
+  if (opts?.jointApplication) {
+    getDb()
+      .update(profiles)
+      .set({ jointApplication: opts.jointApplication })
+      .where(eq(profiles.id, profile.id))
+      .run()
+  }
+
+  if (opts?.recompute !== false && (newer || !existing)) {
+    recomputeMatchesFor(profile.id)
+  }
+}
+
+/**
  * GDPR erasure — hard-delete the profile and every record that names it.
  *
  * Removes: the profile row, match-cache rows in both directions, all

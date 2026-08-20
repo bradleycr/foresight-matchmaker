@@ -3,6 +3,7 @@ import { z } from "zod"
 import { ok, unauthorized, notFound, zodError, badRequest } from "@/lib/api/respond"
 import { getSession } from "@/lib/auth/session"
 import { getProfileById } from "@/lib/db/profiles"
+import { restoreOwnedProfile } from "@/lib/db/durable"
 import { getShortlist } from "@/lib/db/matches"
 import { llmEnabled } from "@/lib/llm/client"
 import { explainMatch, templateRationale } from "@/lib/llm/rationale"
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const session = await getSession()
   if (!session?.profileId) return unauthorized()
 
+  await restoreOwnedProfile(session.profileId, session.email)
   const subject = getProfileById(session.profileId)
   if (!subject) return notFound("Your profile no longer exists.")
 
@@ -33,6 +35,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const entry = getShortlist(subject.id).find((m) => m.otherId === parsed.data.other_id)
   if (!entry) return badRequest("That profile is not on your shortlist.")
 
+  await restoreOwnedProfile(entry.otherId, session.email)
   const other = getProfileById(entry.otherId)
   if (!other) return notFound()
 

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { ZodError } from "zod"
 import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema, outcomeSchema } from "@/lib/api/input"
-import { ok, zodError, badRequest, notFound, unauthorized, forbidden } from "@/lib/api/respond"
+import { ok, zodError, badRequest, notFound, unauthorized, forbidden, unavailable } from "@/lib/api/respond"
 import {
   getProfileById,
   saveProfile,
@@ -10,6 +10,7 @@ import {
   getJointApplicationOutcome,
   deleteProfile,
 } from "@/lib/db/profiles"
+import { forgetListing, persistListing, restoreOwnedProfile } from "@/lib/db/durable"
 import { destroySession, getSession, createSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
@@ -29,9 +30,10 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
   if (!session) return unauthorized("Sign in to view this profile.")
 
   const { id } = await params
+  await restoreOwnedProfile(id, session.email)
   const profile = getProfileById(id)
   if (!profile) {
-    // Cookie valid, row gone (typical on Vercel /tmp after a cold start).
+    // Cookie valid, row gone, and Blob does not have it either — truly missing.
     if (session.profileId === id) {
       await destroySession()
       return unauthorized("Your profile is no longer on this instance. Add it again.")
@@ -39,7 +41,7 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
     return notFound("No profile with that id.")
   }
 
-  const owner = session.profileId === profile.id
+  const owner = session.profileId === profile.id || session.email.toLowerCase() === profile.contact_email.toLowerCase()
 
   if (owner || (await isAdmin())) {
     return ok({
@@ -62,11 +64,11 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
  */
 export async function PATCH(req: NextRequest, { params }: Params): Promise<Response> {
   const { id } = await params
-  const profile = getProfileById(id)
-  if (!profile) return notFound("No profile with that id.")
-
   const session = await getSession()
   if (!session) return unauthorized()
+  await restoreOwnedProfile(id, session.email)
+  const profile = getProfileById(id)
+  if (!profile) return notFound("No profile with that id.")
   if (session.profileId !== profile.id) return forbidden("Only the profile owner can edit it.")
 
   let body: unknown
@@ -80,6 +82,12 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
   const outcome = outcomeSchema.safeParse(body)
   if (outcome.success) {
     setJointApplicationOutcome(profile.id, outcome.data.joint_application)
+    const reported = getProfileById(profile.id) ?? profile
+    try {
+      await persistListing(reported)
+    } catch (error) {
+      console.error("[durable] persist after outcome failed", { id: profile.id }, error)
+    }
     return ok({ joint_application: outcome.data.joint_application })
   }
 
@@ -114,6 +122,12 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
   }
 
   await backupProfileByEmail(updated, "updated")
+  try {
+    await persistListing(updated)
+  } catch (error) {
+    console.error("[durable] persist after update failed", { id: updated.id }, error)
+    return unavailable("Your edits were saved on this server but not yet stored for the next one. Open Your profile again in a moment.")
+  }
   return ok({ profile: updated })
 }
 
@@ -128,11 +142,11 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
  */
 export async function DELETE(req: NextRequest, { params }: Params): Promise<Response> {
   const { id } = await params
-  const profile = getProfileById(id)
-  if (!profile) return notFound("No profile with that id.")
-
   const session = await getSession()
   if (!session) return unauthorized()
+  await restoreOwnedProfile(id, session.email)
+  const profile = getProfileById(id)
+  if (!profile) return notFound("No profile with that id.")
   if (session.profileId !== profile.id) return forbidden("Only the profile owner can delete it.")
 
   let body: unknown
@@ -152,6 +166,11 @@ export async function DELETE(req: NextRequest, { params }: Params): Promise<Resp
   }
 
   deleteProfile(profile.id)
+  try {
+    await forgetListing(profile.id, profile.contact_email)
+  } catch (error) {
+    console.error("[durable] forget after delete failed", { id: profile.id }, error)
+  }
   await createSession(null, session.email)
   return ok({ deleted: true })
 }

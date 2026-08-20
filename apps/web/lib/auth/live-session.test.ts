@@ -13,6 +13,11 @@ vi.mock("@/lib/db/profiles", () => ({
   getProfilesByEmail: (...args: unknown[]) => getProfilesByEmail(...args),
 }))
 
+const restoreOwnedProfile = vi.fn()
+vi.mock("@/lib/db/durable", () => ({
+  restoreOwnedProfile: (...args: unknown[]) => restoreOwnedProfile(...args),
+}))
+
 const createSession = vi.fn()
 const destroySession = vi.fn()
 const getSession = vi.fn()
@@ -30,6 +35,8 @@ beforeEach(() => {
   getProfileById.mockReset()
   getProfilesByEmail.mockReset()
   getSession.mockReset()
+  restoreOwnedProfile.mockReset()
+  restoreOwnedProfile.mockResolvedValue(undefined)
 })
 
 async function expectRedirect(run: () => Promise<unknown> | unknown, url: string): Promise<void> {
@@ -84,6 +91,25 @@ describe("peekLiveSession", () => {
     getProfilesByEmail.mockReturnValue([])
 
     await expect(peekLiveSession()).resolves.toBeNull()
+  })
+
+  it("refills sqlite from durable storage when the cookie names a missing row", async () => {
+    const profile = { id: "profile-1", contact_email: "owner@example.org" }
+    getSession.mockResolvedValue({
+      profileId: "profile-1",
+      email: "owner@example.org",
+      exp: Date.now() + 60_000,
+    })
+    getProfileById.mockReturnValue(null)
+    getProfilesByEmail.mockReturnValue([])
+    restoreOwnedProfile.mockImplementation(async () => {
+      getProfileById.mockReturnValue(profile)
+    })
+
+    const live = await peekLiveSession()
+
+    expect(restoreOwnedProfile).toHaveBeenCalledWith("profile-1", "owner@example.org")
+    expect(live).toMatchObject({ profile, needsReconcile: false })
   })
 })
 

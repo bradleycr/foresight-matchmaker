@@ -4,6 +4,7 @@ import { introRequestSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, unauthorized, notFound, tooMany } from "@/lib/api/respond"
 import { getSession } from "@/lib/auth/session"
 import { getProfileById } from "@/lib/db/profiles"
+import { hydrateListings, restoreOwnedProfile } from "@/lib/db/durable"
 import { listIntrosFor, requestIntro, rateLimitPer24h, type Intro } from "@/lib/db/intros"
 import { sendIntroductionEmail } from "@/lib/auth/mail"
 
@@ -53,6 +54,7 @@ function serialiseIntro(intro: Intro, viewerId: string) {
 export async function GET(): Promise<Response> {
   const session = await getSession()
   if (!session?.profileId) return unauthorized()
+  await hydrateListings()
   const viewerId = session.profileId
 
   const intros = listIntrosFor(viewerId).map((i) => serialiseIntro(i, viewerId))
@@ -67,6 +69,8 @@ export async function POST(req: NextRequest): Promise<Response> {
   const session = await getSession()
   if (!session?.profileId) return unauthorized()
   const viewerId = session.profileId
+  await restoreOwnedProfile(viewerId, session.email)
+  await restoreOwnedProfile(null, session.email)
 
   let body: unknown
   try {
@@ -82,6 +86,8 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (e instanceof ZodError) return zodError(e)
     throw e
   }
+
+  await restoreOwnedProfile(input.to_id, session.email)
 
   const sender = getProfileById(viewerId)
   const target = getProfileById(input.to_id)

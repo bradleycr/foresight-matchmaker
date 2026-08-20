@@ -4,6 +4,7 @@ import { ok, zodError, badRequest } from "@/lib/api/respond"
 import { consumeToken } from "@/lib/auth/tokens"
 import { createSession } from "@/lib/auth/session"
 import { getProfilesByEmail, markClaimed } from "@/lib/db/profiles"
+import { persistListing, restoreOwnedProfile } from "@/lib/db/durable"
 
 export const dynamic = "force-dynamic"
 
@@ -40,10 +41,21 @@ export async function POST(req: NextRequest): Promise<Response> {
     return badRequest("This link is no longer valid. Request a new one.")
   }
 
+  await restoreOwnedProfile(result.profileId, result.email)
   const profileId = result.profileId ?? getProfilesByEmail(result.email)[0]?.id ?? null
 
   await createSession(profileId, result.email)
-  if (profileId) markClaimed(profileId)
+  if (profileId) {
+    markClaimed(profileId)
+    const claimed = getProfilesByEmail(result.email)[0]
+    if (claimed) {
+      try {
+        await persistListing(claimed)
+      } catch (error) {
+        console.error("[durable] persist after claim failed", { id: claimed.id }, error)
+      }
+    }
+  }
 
   return ok({ signed_in: true, profile_id: profileId })
 }

@@ -1,6 +1,7 @@
 import { toPublicProfile } from "@rmm/schema"
 import { ok, unauthorized } from "@/lib/api/respond"
 import { getProfileById, listProfiles } from "@/lib/db/profiles"
+import { hydrateListings } from "@/lib/db/durable"
 import { getShortlist } from "@/lib/db/matches"
 import { resolveLiveSession } from "@/lib/auth/live-session"
 import { logEvent } from "@/lib/db/events"
@@ -20,6 +21,7 @@ export const dynamic = "force-dynamic"
  * LLM polish lives at POST /api/v1/matches/rationale.
  */
 export async function GET(): Promise<Response> {
+  await hydrateListings()
   const live = await resolveLiveSession()
   if (!live) return unauthorized()
   const { profile: subject } = live

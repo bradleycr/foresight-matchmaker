@@ -6,7 +6,6 @@ import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS } from "@/lib/challenges/catalog"
-import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { ListingCounts } from "@/components/listing-counts"
 
 export const dynamic = "force-dynamic"
@@ -69,8 +68,6 @@ export default async function ChallengePage({
       <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl">
         {t(`challenge.${id}.name`)}
       </h1>
-
-      <DirectoryDisclaimer className="mt-6" />
 
       <p className="mt-5 max-w-xl text-ink-soft">{t(`challenge.${id}.intro`)}</p>
 

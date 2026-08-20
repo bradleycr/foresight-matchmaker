@@ -4,10 +4,10 @@ Two hosts, one repo (`main`).
 
 | Host | URL | Database | Status |
 | --- | --- | --- | --- |
-| **Vercel** | https://foresightmatchmaker.app | SQLite in `/tmp` — **wiped on deploy and cold start** | **Live now.** Use this until a VM exists. |
+| **Vercel** | https://foresightmatchmaker.app | SQLite in `/tmp` (per-instance cache) + **Vercel Blob** (durable listings) | **Live now.** |
 | **Linux VM (Hetzner or YCluster)** | set `APP_URL` | SQLite in `./data` on disk — **survives rebuilds** | Clone `main` when someone has time. |
 
-The app is the same on both. Magic links are HMAC-signed in the URL (no sticky sessions). Mail is Resend (`RESEND_API_KEY`) or SMTP (`SMTP_URL`). Do not copy the Vercel `/tmp` database onto a VM — it is empty after a cold start and is not a source of truth.
+The app is the same on both. Magic links are HMAC-signed in the URL (no sticky sessions). Mail is Resend (`RESEND_API_KEY`) or SMTP (`SMTP_URL`). On Vercel, listings are also written to a private Blob store so a cold start can refill `/tmp`. Do not copy the Vercel `/tmp` database onto a VM — it is only a cache.
 
 ---
 
@@ -22,7 +22,7 @@ vercel deploy --prod --scope bradley-royes-projects --yes
 
 Smoke tests and the env table: [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md).
 
-Leave `SEED_ON_EMPTY` unset. Real listings on Vercel disappear on cold start — that is the reason to move to a VM later, not a reason to seed production.
+Leave `SEED_ON_EMPTY` unset. Blob is the listing store on Vercel; SQLite is the per-instance cache. A VM with `./data` does not need Blob.
 
 ---
 

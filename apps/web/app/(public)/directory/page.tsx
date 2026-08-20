@@ -12,7 +12,6 @@ import {
   directoryHref,
 } from "@/lib/challenges/catalog"
 import { challengeTheme } from "@/lib/challenges/themes"
-import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { DirectoryBrowser } from "@/components/directory/browser"
 import { kindCountTotal } from "@/components/listing-counts"
 
@@ -92,7 +91,6 @@ export default async function DirectoryPage({
       <h1 className="mb-4 font-listing text-3xl font-bold uppercase tracking-tight">
         {t("directory.programme_title", { programme: name })}
       </h1>
-      <DirectoryDisclaimer className="mb-6" />
       <DirectoryBrowser profiles={directory.profiles} />
     </div>
   )

@@ -1,8 +1,8 @@
 # Demo runbook — Vercel
 
-This is the **Vercel** path — live at https://foresightmatchmaker.app while there is no persistent VM. Docker/Hetzner is the durable long-term host (see `DEPLOY.md`) but it is optional: the same `main` branch runs fully on Vercel if nobody has time to rack a box.
+This is the **Vercel** path — live at https://foresightmatchmaker.app. Docker/Hetzner is the simpler durable host (see `DEPLOY.md`) because SQLite lives on a disk volume; on Vercel the same `main` branch keeps listings in a private Blob store and uses `/tmp` SQLite as a cache.
 
-Do not mix the two databases. Vercel SQLite is `/tmp` and wipes on deploy. A Hetzner volume is `./data` and must never be deleted.
+Do not mix the two databases. Vercel SQLite is `/tmp` and wipes on deploy. A Hetzner volume is `./data` and must never be deleted. Blob is Vercel-only.
 
 **Production URL:** https://foresightmatchmaker.app
 **Vercel project:** `bradley-royes-projects/foresight-matchmaker` (`prj_kyy37fkdoAST7LzShqfkLFFJvNbm`)
@@ -16,12 +16,13 @@ deployment, or an instance recycled after inactivity) starts from an empty
 `/tmp`. Production must **not** set `SEED_ON_EMPTY=true` — otherwise every
 cold start refills ~118 fabricated profiles and looks like an applicant pool.
 
-- Real registrations on Vercel also disappear on cold start. That is why
-  durable production is the Docker/VM path with a bind-mounted volume.
+- Real registrations are dual-written to Vercel Blob (`BLOB_READ_WRITE_TOKEN`).
+  The next instance refills SQLite from that store, so `/me` after create
+  should not bounce to “we could not load your profile”.
 - To empty a live Vercel instance that was seeded earlier: set
   `SEED_ON_EMPTY` to empty/false for Production, redeploy, and (if the
   instance is still warm) use `/admin` → Remove seed listings, or wait for
-  the next cold start.
+  the next cold start. Blob is not used for seed rows.
 
 ## Required environment variables (already set on Vercel)
 
@@ -36,7 +37,8 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | `SMTP_FROM` | `Foresight Matchmaking <hello@foresightmatchmaker.app>` | From address for Resend (and SMTP fallback). |
 | `AUTH_REVEAL_LINKS` | `true` | **Fallback** when Resend/SMTP fails — link also returned in the JSON response and logged server-side. Keep on until you have confirmed inbox delivery in production. |
 | `SEED_ON_EMPTY` | unset / `false` on Production | Must stay off on any host real applicants see. `true` only for a rehearsal deploy that should show fabricated listings. |
-| `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
+| `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. Cache only — listings live in Blob. |
+| `BLOB_READ_WRITE_TOKEN` | set (all envs) | Private Blob store `matchmaker-profiles`. Dual-write + hydrate so listings survive instance hops. |
 | `APP_URL` | `https://foresightmatchmaker.app` | Canonical origin for Open Graph, robots, and magic links — so a hit on the `*.vercel.app` hostname still mints links on the owned domain. |
 | `RATE_LIMIT_PER_24H` | `20` (recommended for the demo) | Outbound intro requests allowed per profile per rolling 24h. Defaults to 5, which a few rehearsal run-throughs from the same account will exhaust — set it higher for the demo so a live retry never trips `rate_limited` on stage. |
 

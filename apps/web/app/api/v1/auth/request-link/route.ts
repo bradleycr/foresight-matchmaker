@@ -3,6 +3,7 @@ import { ZodError } from "zod"
 import { requestLinkSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest } from "@/lib/api/respond"
 import { getProfilesByEmail } from "@/lib/db/profiles"
+import { restoreOwnedProfile } from "@/lib/db/durable"
 import { issueToken } from "@/lib/auth/tokens"
 import { magicLinkMode, sendMagicLink, revealLinksAllowed } from "@/lib/auth/mail"
 import { rateLimit } from "@/lib/auth/rate-limit"
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     )
   }
 
+  await restoreOwnedProfile(null, email)
   const profiles = getProfilesByEmail(email)
   const origin = process.env.APP_URL ?? req.nextUrl.origin
   const mode = magicLinkMode()

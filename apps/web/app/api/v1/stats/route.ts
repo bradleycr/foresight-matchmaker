@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
+import { hydrateListings } from "@/lib/db/durable"
 
 /**
  * GET /api/v1/stats — public aggregates only. No organisation names.
@@ -7,7 +8,8 @@ import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
  */
 export const dynamic = "force-dynamic"
 
-export function GET(): NextResponse {
+export async function GET(): Promise<NextResponse> {
+  await hydrateListings()
   return NextResponse.json(
     {
       version: "v1",

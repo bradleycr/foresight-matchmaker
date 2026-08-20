@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
+import { restoreOwnedProfile } from "@/lib/db/durable"
 import { getProfileById, getProfilesByEmail } from "@/lib/db/profiles"
 import { createSession, destroySession, getSession, type Session } from "@/lib/auth/session"
 import { safeNextPath } from "@/lib/auth/next-path"
@@ -9,8 +10,8 @@ import { safeNextPath } from "@/lib/auth/next-path"
  *
  * On Vercel the SQLite file lives in /tmp, so a warm instance that accepted
  * a registration is not the instance that later serves /me. The cookie is
- * still valid HMAC; the row is gone. Treat that as signed-out rather than
- * throwing through error.tsx.
+ * still valid HMAC; the row is gone from this isolate. We refill SQLite from
+ * Blob before treating that as signed-out.
  *
  * Next.js forbids cookie writes in Server Components ("Cookies can only be
  * modified in a Server Action or Route Handler"). Clearing a stale session
@@ -45,7 +46,11 @@ export function findOwnedProfile(session: Session): Profile | null {
 export async function peekLiveSession(): Promise<LiveSession | null> {
   const session = await getSession()
   if (!session) return null
-  const profile = findOwnedProfile(session)
+  let profile = findOwnedProfile(session)
+  if (!profile) {
+    await restoreOwnedProfile(session.profileId, session.email)
+    profile = findOwnedProfile(session)
+  }
   if (!profile) return null
   return {
     session: { ...session, profileId: profile.id },
