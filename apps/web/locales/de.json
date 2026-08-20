@@ -202,6 +202,8 @@
   "matches.tabs_label": "Match-Ansichten",
   "matches.tab_list": "Matches",
   "matches.tab_remmy": "Remmy fragen",
+  "matches.remmy_soon_title": "Remmy ist fast soweit",
+  "matches.remmy_soon_body": "Der KI-Matchmaking-Assistent ist in Kürze online. Schauen Sie bald wieder vorbei. Die Rangfolge auf dieser Seite funktioniert bereits — öffnen Sie eine Eintragung, um per E-Mail zu schreiben.",
   "matches.breakdown": "Score-Aufschlüsselung",
   "matches.score_label": "Match-Score {score} von 100",
   "matches.empty_title": "Noch keine Treffer oberhalb der Schwelle (35).",

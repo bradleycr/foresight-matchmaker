@@ -2,23 +2,14 @@
 
 import { useState, type ReactNode } from "react"
 import { useT } from "@/lib/i18n/client"
-import { RemmyGuideChat } from "./guide-chat"
 
 /**
- * Matches hub tabs: ranked list first, Remmy chat as the optional surface.
- * Remmy stays mounted (hidden) so a draft conversation survives a tab flip.
+ * Ranked list first. Remmy chat is paused — the tab explains it will
+ * return shortly, instead of mounting a client that can take the page down.
  */
-export function MatchesTabs({
-  list,
-  remmyEnabled,
-}: {
-  list: ReactNode
-  remmyEnabled: boolean
-}) {
+export function MatchesTabs({ list }: { list: ReactNode }) {
   const t = useT()
   const [tab, setTab] = useState<"list" | "remmy">("list")
-
-  if (!remmyEnabled) return <>{list}</>
 
   return (
     <div>
@@ -40,8 +31,10 @@ export function MatchesTabs({
       </div>
 
       <div role="tabpanel" hidden={tab !== "remmy"} className={tab === "remmy" ? "mt-6" : "hidden"}>
-        <p className="mb-4 max-w-2xl text-sm text-ink-soft">{t("guide.page_explainer")}</p>
-        <RemmyGuideChat embedded />
+        <div className="max-w-xl border border-ink p-4">
+          <p className="font-listing text-lg font-bold uppercase">{t("matches.remmy_soon_title")}</p>
+          <p className="mt-2 leading-relaxed text-ink-soft">{t("matches.remmy_soon_body")}</p>
+        </div>
       </div>
     </div>
   )

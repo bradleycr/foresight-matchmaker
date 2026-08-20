@@ -201,6 +201,8 @@
   "matches.tabs_label": "Vues des correspondances",
   "matches.tab_list": "Correspondances",
   "matches.tab_remmy": "Demander à Remmy",
+  "matches.remmy_soon_title": "Remmy arrive bientôt",
+  "matches.remmy_soon_body": "L’assistant d’appariement par IA sera en ligne très bientôt. Revenez un peu plus tard. Le classement sur cette page fonctionne déjà — ouvrez une fiche pour leur écrire.",
   "matches.breakdown": "Détail du score",
   "matches.score_label": "Score de correspondance {score} sur 100",
   "matches.empty_title": "Aucune correspondance au-dessus du seuil (35) pour l'instant.",

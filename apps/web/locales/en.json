@@ -205,6 +205,8 @@
   "matches.tabs_label": "Matches views",
   "matches.tab_list": "Matches",
   "matches.tab_remmy": "Ask Remmy",
+  "matches.remmy_soon_title": "Remmy is almost ready",
+  "matches.remmy_soon_body": "The AI matchmaking assistant will be online very soon. Check back shortly. Your ranked matches on this page already work — open a listing to email them.",
   "matches.breakdown": "Score breakdown",
   "matches.score_label": "Match score {score} out of 100",
   "matches.empty_title": "No matches above the threshold (35) yet.",

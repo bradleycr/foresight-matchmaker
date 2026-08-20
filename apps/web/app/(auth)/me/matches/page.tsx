@@ -104,7 +104,6 @@ function ClassicMatchList({
       items={matches.map((match) => (
         <MatchRow key={match.profile.id} match={match} polish={polish} t={t} />
       ))}
-      moreLabel={(n) => t("matches.show_more", { n })}
     />
   )
 }
@@ -198,7 +197,6 @@ export default async function MatchesPage() {
 
       <div className="mt-6">
         <MatchesTabs
-          remmyEnabled={polish}
           list={
             <ClassicMatchList
               matches={matches}
