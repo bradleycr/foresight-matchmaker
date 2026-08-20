@@ -152,6 +152,11 @@ describe("verify email before listing", () => {
     expect(createdBody.profile.contact_email).toBeUndefined()
     expect(createdBody.email_sent).toBe(false)
     expect((await getSession())?.profileId).toBeTruthy()
+
+    const again = await profilesPOST(jsonRequest("/api/v1/profiles", "POST", listing))
+    expect(again.status).toBe(200)
+    const againBody = (await again.json()) as { already?: boolean }
+    expect(againBody.already).toBe(true)
   })
 
   it("keeps email verified after delete so a new listing can be added without another magic link", async () => {

@@ -48,11 +48,16 @@ const putOpts = {
 }
 
 async function readJson(pathname: string): Promise<unknown | null> {
-  const result = await get(pathname, { access: "private", useCache: false })
-  if (!result || result.statusCode !== 200 || !result.stream) return null
-  const text = await new Response(result.stream).text()
-  if (!text) return null
-  return JSON.parse(text) as unknown
+  try {
+    const result = await get(pathname, { access: "private", useCache: false })
+    if (!result || result.statusCode !== 200 || !result.stream) return null
+    const text = await new Response(result.stream).text()
+    if (!text) return null
+    return JSON.parse(text) as unknown
+  } catch (error) {
+    console.error("[durable] read failed", { pathname }, error)
+    return null
+  }
 }
 
 function parseListing(raw: unknown): DurableListing | null {
@@ -68,25 +73,15 @@ function parseListing(raw: unknown): DurableListing | null {
 }
 
 async function fetchListingById(id: string): Promise<DurableListing | null> {
-  try {
-    return parseListing(await readJson(profilePath(id)))
-  } catch (error) {
-    console.error("[durable] read by id failed", { id }, error)
-    throw error
-  }
+  return parseListing(await readJson(profilePath(id)))
 }
 
 async function fetchListingByEmail(email: string): Promise<DurableListing | null> {
-  try {
-    const pointer = await readJson(emailPath(email))
-    if (!pointer || typeof pointer !== "object" || !("id" in pointer)) return null
-    const id = (pointer as { id: unknown }).id
-    if (typeof id !== "string" || !id) return null
-    return fetchListingById(id)
-  } catch (error) {
-    console.error("[durable] read by email failed", { email }, error)
-    throw error
-  }
+  const pointer = await readJson(emailPath(email))
+  if (!pointer || typeof pointer !== "object" || !("id" in pointer)) return null
+  const id = (pointer as { id: unknown }).id
+  if (typeof id !== "string" || !id) return null
+  return fetchListingById(id)
 }
 
 function adoptListing(listing: DurableListing, recompute: boolean): void {
@@ -101,20 +96,27 @@ function adoptListing(listing: DurableListing, recompute: boolean): void {
  * create/update path — returning 201 before this lands is how the stale
  * sign-in screen used to happen.
  */
-export async function persistListing(profile: Profile): Promise<void> {
-  if (!durableEnabled()) return
-
+async function writeListing(profile: Profile): Promise<void> {
   const listing: DurableListing = {
     profile,
     joint_application: getJointApplicationOutcome(profile.id),
   }
   const body = JSON.stringify(listing)
   const pointer = JSON.stringify({ id: profile.id })
-
   await Promise.all([
     put(profilePath(profile.id), body, putOpts),
     put(emailPath(profile.contact_email), pointer, putOpts),
   ])
+}
+
+export async function persistListing(profile: Profile): Promise<void> {
+  if (!durableEnabled()) return
+  try {
+    await writeListing(profile)
+  } catch (error) {
+    console.error("[durable] persist retrying", { id: profile.id }, error)
+    await writeListing(profile)
+  }
 }
 
 /** GDPR erasure — drop both the document and the email pointer. */
@@ -129,17 +131,21 @@ export async function forgetListing(id: string, email: string): Promise<void> {
  */
 export async function restoreOwnedProfile(id: string | null, email: string): Promise<void> {
   if (!durableEnabled()) return
-
-  if (id) {
-    const byId = await fetchListingById(id)
-    if (byId) {
-      adoptListing(byId, true)
-      return
+  try {
+    if (id) {
+      const byId = await fetchListingById(id)
+      if (byId) {
+        adoptListing(byId, true)
+        return
+      }
     }
+    const byEmail = await fetchListingByEmail(email)
+    if (byEmail) adoptListing(byEmail, true)
+  } catch (error) {
+    // A Blob blip must not 500 /register or POST /profiles — SQLite can still
+    // accept the new listing, and the next request will try Blob again.
+    console.error("[durable] restore failed", { id, email }, error)
   }
-
-  const byEmail = await fetchListingByEmail(email)
-  if (byEmail) adoptListing(byEmail, true)
 }
 
 let lastHydrateAt = 0
@@ -157,28 +163,30 @@ export async function hydrateListings(): Promise<void> {
   if (now - lastHydrateAt < HYDRATE_DEBOUNCE_MS) return
 
   hydrateInflight = (async () => {
-    let cursor: string | undefined
-
-    do {
-      const page = await list({ prefix: PROFILE_PREFIX, limit: 1000, cursor })
-      for (const blob of page.blobs) {
-        if (!blob.pathname.endsWith(".json")) continue
-        try {
-          const listing = parseListing(await readJson(blob.pathname))
-          if (!listing) continue
-          adoptListing(listing, false)
-        } catch (error) {
-          console.error("[durable] skip unreadable listing", { pathname: blob.pathname }, error)
+    try {
+      let cursor: string | undefined
+      do {
+        const page = await list({ prefix: PROFILE_PREFIX, limit: 1000, cursor })
+        for (const blob of page.blobs) {
+          if (!blob.pathname.endsWith(".json")) continue
+          try {
+            const listing = parseListing(await readJson(blob.pathname))
+            if (!listing) continue
+            adoptListing(listing, false)
+          } catch (error) {
+            console.error("[durable] skip unreadable listing", { pathname: blob.pathname }, error)
+          }
         }
+        cursor = page.hasMore ? page.cursor : undefined
+      } while (cursor)
+
+      for (const profile of listProfiles()) {
+        recomputeMatchesFor(profile.id)
       }
-      cursor = page.hasMore ? page.cursor : undefined
-    } while (cursor)
-
-    for (const profile of listProfiles()) {
-      recomputeMatchesFor(profile.id)
+      lastHydrateAt = Date.now()
+    } catch (error) {
+      console.error("[durable] hydrate failed", error)
     }
-
-    lastHydrateAt = Date.now()
   })().finally(() => {
     hydrateInflight = null
   })

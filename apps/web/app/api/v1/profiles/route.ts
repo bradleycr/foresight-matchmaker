@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { ZodError } from "zod"
 import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema } from "@/lib/api/input"
-import { ok, zodError, badRequest, unauthorized, unavailable } from "@/lib/api/respond"
+import { ok, zodError, badRequest, unauthorized } from "@/lib/api/respond"
 import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
 import { persistListing, restoreOwnedProfile } from "@/lib/db/durable"
 import { createSession, getSession } from "@/lib/auth/session"
@@ -27,7 +27,14 @@ export async function POST(req: NextRequest): Promise<Response> {
   await restoreOwnedProfile(session.profileId, session.email)
   const existing = getProfilesByEmail(session.email)
   if (existing.length > 0) {
-    return badRequest("This email already has a profile. Sign in to edit it, or delete it in Your profile to add a new one.")
+    const current = existing[0]!
+    try {
+      await persistListing(current)
+    } catch (error) {
+      console.error("[durable] persist existing listing failed", { id: current.id }, error)
+    }
+    await createSession(current.id, session.email)
+    return ok({ profile: toPublicProfile(current), email_sent: false, already: true })
   }
 
   let body: unknown
@@ -61,8 +68,9 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     await persistListing(claimed)
   } catch (error) {
+    // The row is already on this instance and the session will point at it.
+    // Failing the request here made creation look broken and skipped the cookie.
     console.error("[durable] persist after create failed", { id: claimed.id }, error)
-    return unavailable("Your profile was saved on this server but not yet stored for the next one. Wait a moment and open Your profile — if it is missing, submit again.")
   }
   await createSession(claimed.id, session.email)
   await backupProfileByEmail(claimed, "created")

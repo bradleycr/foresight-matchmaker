@@ -491,6 +491,7 @@ export function ProfileForm({
     try {
       res = await fetch(isCreate ? "/api/v1/profiles" : `/api/v1/profiles/${profileId}`, {
         method: isCreate ? "POST" : "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           lockedEmail ? { ...toPayload(state), contact_email: lockedEmail } : toPayload(state),
