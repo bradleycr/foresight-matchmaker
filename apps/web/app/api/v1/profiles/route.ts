@@ -5,6 +5,7 @@ import { profileInputSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, unauthorized } from "@/lib/api/respond"
 import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
 import { createSession, getSession } from "@/lib/auth/session"
+import { backupProfileByEmail } from "@/lib/ops/profile-backup"
 
 export const dynamic = "force-dynamic"
 
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   await createSession(profile.id, session.email)
   markClaimed(profile.id)
+  await backupProfileByEmail(profile, "created")
 
   return ok(
     {

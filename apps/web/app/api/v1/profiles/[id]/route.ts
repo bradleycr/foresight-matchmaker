@@ -12,6 +12,7 @@ import {
 } from "@/lib/db/profiles"
 import { destroySession, getSession, createSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
+import { backupProfileByEmail } from "@/lib/ops/profile-backup"
 
 export const dynamic = "force-dynamic"
 
@@ -112,6 +113,7 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
     throw e
   }
 
+  await backupProfileByEmail(updated, "updated")
   return ok({ profile: updated })
 }
 

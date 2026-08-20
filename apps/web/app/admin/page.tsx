@@ -3,6 +3,8 @@ import { isAdmin } from "@/lib/auth/admin"
 import { getT } from "@/lib/i18n/server"
 import type { Metrics } from "@/lib/metrics"
 import type { T } from "@/lib/i18n"
+import type { SignupRow } from "@/app/api/admin/signups/route"
+import { SignupList } from "@/components/admin/signup-list"
 
 export const dynamic = "force-dynamic"
 
@@ -106,7 +108,12 @@ export default async function AdminPage({
     )
   }
 
-  const metrics = (await apiFetch("/api/v1/metrics").then((r) => r.json())) as Metrics
+  const [metrics, signups] = await Promise.all([
+    apiFetch("/api/v1/metrics").then((r) => r.json() as Promise<Metrics>),
+    apiFetch("/api/admin/signups")
+      .then((r) => (r.ok ? (r.json() as Promise<{ signups: SignupRow[] }>) : { signups: [] }))
+      .catch(() => ({ signups: [] as SignupRow[] })),
+  ])
   const funnel = metrics.funnel
 
   return (
@@ -123,6 +130,8 @@ export default async function AdminPage({
           {t("admin.purge_synthetic_done", { removed: purged, kept: kept ?? "0" })}
         </p>
       ) : null}
+
+      <SignupList signups={signups.signups} t={t} />
 
       <section className="mt-6 border border-rule-strong p-4">
         <h2 className="font-listing text-base font-bold uppercase">{t("admin.purge_synthetic_title")}</h2>
