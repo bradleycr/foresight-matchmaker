@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { findOwnedProfile } from "@/lib/auth/live-session"
+import { CLEAR_SESSION_PATH, findOwnedProfile } from "@/lib/auth/live-session"
 import { safeNextPath } from "@/lib/auth/next-path"
-import { createSession, getSession } from "@/lib/auth/session"
+import { createSession, getSession, hasListing } from "@/lib/auth/session"
 
 export const dynamic = "force-dynamic"
 
@@ -20,6 +20,13 @@ export async function GET(req: NextRequest): Promise<Response> {
   const requested = safeNextPath(req.nextUrl.searchParams.get("next"))
 
   if (!profile) {
+    // A session that names a profile has registered before, so a silent trip
+    // to the empty form would read as losing their work without explanation.
+    if (hasListing(session)) {
+      const stale = new URL(CLEAR_SESSION_PATH, req.url)
+      stale.searchParams.set("stale", "1")
+      return NextResponse.redirect(stale, 303)
+    }
     return NextResponse.redirect(new URL("/register", req.url), 303)
   }
 

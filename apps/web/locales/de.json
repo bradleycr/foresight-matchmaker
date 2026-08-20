@@ -720,7 +720,7 @@
   "privacy.contact_box_title": "Kontakt",
   "privacy.contact_box_body": "Datenschutzanfragen zu diesem Matchmaker-Verzeichnis:",
   "privacy.contact_challenge": "Bewerbungen und Förderfähigkeit Recoding Medicine (externe Programmseite, nicht dieses Verzeichnis):",
-  "signin.stale": "Ihr vorheriges Profil ist auf dieser Demo-Instanz nicht mehr da (die Datenbank leert sich, wenn der Server schläft). Legen Sie das Profil erneut an — das dauert eine Minute.",
+  "signin.stale": "Ihr Profil konnte gerade nicht geladen werden. Melden Sie sich erneut an, um dort weiterzumachen — falls es weiterhin fehlt, können Sie es neu anlegen.",
   "form.prefill_url_only": "Bitte den Seitentext einfügen, nicht den Link. Kopieren Sie die About-Absätze von der Website und versuchen Sie es erneut.",
   "form.attending_hint": "Eine Absicht, kein zugesagter Platz. Plätze sind begrenzt und werden von Foresight bestätigt.",
   "form.attending_events_link": "Foresight-Eventkalender (Luma) →",

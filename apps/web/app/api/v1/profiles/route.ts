@@ -4,7 +4,7 @@ import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, unauthorized } from "@/lib/api/respond"
 import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
-import { createSession, getSession, hasListing } from "@/lib/auth/session"
+import { createSession, getSession } from "@/lib/auth/session"
 
 export const dynamic = "force-dynamic"
 
@@ -17,10 +17,10 @@ export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest): Promise<Response> {
   const session = await getSession()
   if (!session) return unauthorized("Confirm your email before adding a profile.")
-  if (hasListing(session)) {
-    return badRequest("This email already has a profile. Sign in to edit it, or delete it in Your profile to add a new one.")
-  }
 
+  // One profile per email, decided by the database alone. A cookie can still
+  // name a profile that no longer exists, and refusing on that basis would
+  // block the only recovery someone in that state has left.
   const existing = getProfilesByEmail(session.email)
   if (existing.length > 0) {
     return badRequest("This email already has a profile. Sign in to edit it, or delete it in Your profile to add a new one.")

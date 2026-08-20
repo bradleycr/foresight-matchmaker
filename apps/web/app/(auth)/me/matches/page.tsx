@@ -2,8 +2,13 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { apiFetch } from "@/lib/api/server-fetch"
-import { getSession } from "@/lib/auth/session"
-import { peekLiveSession, RECONCILE_SESSION_PATH, redirectIfOwnListingGone } from "@/lib/auth/live-session"
+import { getSession, hasListing } from "@/lib/auth/session"
+import {
+  peekLiveSession,
+  RECONCILE_SESSION_PATH,
+  redirectIfOwnListingGone,
+  redirectToClearSession,
+} from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { enumLabel } from "@/lib/i18n/labels"
 import { llmEnabled } from "@/lib/llm/client"
@@ -162,7 +167,9 @@ export default async function MatchesPage() {
   const live = await peekLiveSession()
   if (!live) {
     const session = await getSession()
-    redirect(session ? "/register" : "/signin")
+    if (!session) redirect("/signin")
+    if (hasListing(session)) redirectToClearSession({ stale: true })
+    redirect("/register")
   }
   if (live.needsReconcile) redirect(`${RECONCILE_SESSION_PATH}?next=%2Fme%2Fmatches`)
 

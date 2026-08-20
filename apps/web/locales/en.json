@@ -603,7 +603,7 @@
   "enum.language.ro": "Romanian",
   "field.partner_only": "Collaboration partner only",
   "form.partner_only_hint": "HQ outside EU/EFTA/UK/Israel — collaborate, cannot lead.",
-  "signin.stale": "Your previous profile is no longer on this demo instance (the database resets when the server sleeps). Add the profile again — it takes a minute.",
+  "signin.stale": "We could not load your profile just now. Sign in again to pick up where you left off — if it is still missing, you can add it again.",
   "signin.explainer_email": "Enter the email on your profile. We send a sign-in link.",
   "signin.explainer_on_screen": "Enter the email on your profile. This host signs you in here.",
   "signin.explainer_server_log": "Enter the email on your profile.",
