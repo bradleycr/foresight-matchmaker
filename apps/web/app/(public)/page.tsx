@@ -1,6 +1,4 @@
 import Link from "next/link"
-import { apiFetch } from "@/lib/api/server-fetch"
-import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { getT } from "@/lib/i18n/server"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
@@ -9,6 +7,8 @@ import { CHALLENGES, browseDirectoryPath } from "@/lib/challenges/catalog"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { kindCountTotal } from "@/components/listing-counts"
+import { hydrateListings } from "@/lib/db/durable"
+import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
 
 export const dynamic = "force-dynamic"
 
@@ -25,7 +25,8 @@ export default async function LandingPage({
   const { deleted } = await searchParams
   const live = await peekLiveSession()
   const session = live ? live.session : await getSession()
-  const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
+  await hydrateListings({ force: true })
+  const byChallenge = countVisibleProfilesByChallenge()
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")
   const profileHref = live ? "/me" : "/register"
@@ -75,7 +76,7 @@ export default async function LandingPage({
 
         <ul className="mt-6 grid gap-4">
           {CHALLENGES.map((challenge) => {
-            const counts = stats.by_challenge?.[challenge.id] ?? empty
+            const counts = byChallenge[challenge.id] ?? empty
             return (
               <li key={challenge.id}>
                 <Link

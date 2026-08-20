@@ -14,8 +14,10 @@ vi.mock("@/lib/db/profiles", () => ({
 }))
 
 const restoreOwnedProfile = vi.fn()
+const hydrateListings = vi.fn()
 vi.mock("@/lib/db/durable", () => ({
   restoreOwnedProfile: (...args: unknown[]) => restoreOwnedProfile(...args),
+  hydrateListings: (...args: unknown[]) => hydrateListings(...args),
 }))
 
 const createSession = vi.fn()
@@ -37,6 +39,8 @@ beforeEach(() => {
   getSession.mockReset()
   restoreOwnedProfile.mockReset()
   restoreOwnedProfile.mockResolvedValue(undefined)
+  hydrateListings.mockReset()
+  hydrateListings.mockResolvedValue(undefined)
 })
 
 async function expectRedirect(run: () => Promise<unknown> | unknown, url: string): Promise<void> {
@@ -117,15 +121,15 @@ describe("redirectIfOwnListingGone", () => {
   it("does not write cookies when the own listing is gone (401)", async () => {
     await expectRedirect(
       () => redirectIfOwnListingGone(new Response(null, { status: 401 })),
-      CLEAR_SESSION_PATH,
+      "/register",
     )
     expect(destroySession).not.toHaveBeenCalled()
   })
 
-  it("bounces 404 through the logout route with stale=1", async () => {
+  it("keeps the verified session on 404 instead of signing them out", async () => {
     await expectRedirect(
       () => redirectIfOwnListingGone(new Response(null, { status: 404 })),
-      `${CLEAR_SESSION_PATH}?stale=1`,
+      "/register",
     )
     expect(destroySession).not.toHaveBeenCalled()
   })

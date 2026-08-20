@@ -9,13 +9,13 @@ import { hydrateListings } from "@/lib/db/durable"
 export const dynamic = "force-dynamic"
 
 export async function GET(): Promise<NextResponse> {
-  await hydrateListings()
+  await hydrateListings({ force: true })
   return NextResponse.json(
     {
       version: "v1",
       generated_at: new Date().toISOString(),
       by_challenge: countVisibleProfilesByChallenge(),
     },
-    { headers: { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" } },
+    { headers: { "Cache-Control": "private, no-store" } },
   )
 }

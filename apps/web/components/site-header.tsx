@@ -70,6 +70,9 @@ export async function SiteHeader() {
           </>
         ) : session ? (
           <>
+            <Link href={directoryHref} className="hover:underline">
+              {t("nav.directory")}
+            </Link>
             <Link href="/register" className="hover:underline">
               {t("nav.register")}
             </Link>

@@ -155,28 +155,39 @@ let hydrateInflight: Promise<void> | null = null
  * Fill the local cache from Blob. Debounced per isolate so a directory page
  * of 50 people does not list the store on every card render.
  */
-export async function hydrateListings(): Promise<void> {
+/**
+ * Fill the local cache from Blob.
+ *
+ * Pass `{ force: true }` on the directory so a listing published a second
+ * ago is not skipped because this isolate hydrated an empty corpus earlier.
+ */
+export async function hydrateListings(opts?: { force?: boolean }): Promise<void> {
   if (!durableEnabled()) return
 
-  const now = Date.now()
-  if (hydrateInflight) return hydrateInflight
-  if (now - lastHydrateAt < HYDRATE_DEBOUNCE_MS) return
+  const force = opts?.force === true
+  if (!force) {
+    if (hydrateInflight) return hydrateInflight
+    if (Date.now() - lastHydrateAt < HYDRATE_DEBOUNCE_MS) return
+  } else if (hydrateInflight) {
+    await hydrateInflight
+  }
 
-  hydrateInflight = (async () => {
+  const run = (async () => {
     try {
       let cursor: string | undefined
       do {
         const page = await list({ prefix: PROFILE_PREFIX, limit: 1000, cursor })
-        for (const blob of page.blobs) {
-          if (!blob.pathname.endsWith(".json")) continue
-          try {
-            const listing = parseListing(await readJson(blob.pathname))
-            if (!listing) continue
-            adoptListing(listing, false)
-          } catch (error) {
-            console.error("[durable] skip unreadable listing", { pathname: blob.pathname }, error)
-          }
-        }
+        await Promise.all(
+          page.blobs.map(async (blob) => {
+            if (!blob.pathname.endsWith(".json")) return
+            try {
+              const listing = parseListing(await readJson(blob.pathname))
+              if (listing) adoptListing(listing, false)
+            } catch (error) {
+              console.error("[durable] skip unreadable listing", { pathname: blob.pathname }, error)
+            }
+          }),
+        )
         cursor = page.hasMore ? page.cursor : undefined
       } while (cursor)
 
@@ -187,9 +198,10 @@ export async function hydrateListings(): Promise<void> {
     } catch (error) {
       console.error("[durable] hydrate failed", error)
     }
-  })().finally(() => {
+  })()
+
+  hydrateInflight = run.finally(() => {
     hydrateInflight = null
   })
-
   return hydrateInflight
 }

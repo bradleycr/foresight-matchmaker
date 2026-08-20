@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation"
 import { apiFetch } from "@/lib/api/server-fetch"
-import { getSession, hasListing } from "@/lib/auth/session"
+import { getSession } from "@/lib/auth/session"
 import {
   peekLiveSession,
   RECONCILE_SESSION_PATH,
   redirectIfOwnListingGone,
-  redirectToClearSession,
 } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import type { IntroPayload } from "@/lib/api/types"
@@ -22,7 +21,6 @@ export default async function InboxPage() {
   if (!live) {
     const session = await getSession()
     if (!session) redirect("/signin")
-    if (hasListing(session)) redirectToClearSession({ stale: true })
     redirect("/register")
   }
   if (live.needsReconcile) redirect(`${RECONCILE_SESSION_PATH}?next=%2Fme%2Finbox`)

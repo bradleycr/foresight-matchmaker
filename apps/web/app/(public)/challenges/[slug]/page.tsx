@@ -1,12 +1,12 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { apiFetch } from "@/lib/api/server-fetch"
-import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS } from "@/lib/challenges/catalog"
 import { ListingCounts } from "@/components/listing-counts"
+import { hydrateListings } from "@/lib/db/durable"
+import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
 
 export const dynamic = "force-dynamic"
 
@@ -42,13 +42,10 @@ export default async function ChallengePage({
   const challenge = challengeBySlug(slug)
   if (!challenge) notFound()
 
-  const [{ t }, live, statsResponse] = await Promise.all([
-    getT(),
-    peekLiveSession(),
-    apiFetch("/api/v1/stats"),
-  ])
-  const stats = (await statsResponse.json()) as DirectoryStatsPayload
-  const counts = stats.by_challenge?.[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
+  const [{ t }, live] = await Promise.all([getT(), peekLiveSession()])
+  await hydrateListings({ force: true })
+  const byChallenge = countVisibleProfilesByChallenge()
+  const counts = byChallenge[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const id = challenge.id
 
   const facts = [

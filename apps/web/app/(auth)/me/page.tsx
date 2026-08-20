@@ -1,12 +1,8 @@
 import { redirect } from "next/navigation"
-import type { Profile } from "@rmm/schema"
-import { apiFetch } from "@/lib/api/server-fetch"
-import { getSession, hasListing } from "@/lib/auth/session"
+import { getSession } from "@/lib/auth/session"
 import {
   peekLiveSession,
   RECONCILE_SESSION_PATH,
-  redirectIfOwnListingGone,
-  redirectToClearSession,
 } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { llmEnabled } from "@/lib/llm/client"
@@ -15,6 +11,7 @@ import { OutcomeReport } from "@/components/outcome-report"
 import { SignOutButton } from "@/components/sign-out-button"
 import { DeleteAccountPanel } from "@/components/delete-account-panel"
 import { ProfileCompleteChoices } from "@/components/profile-complete-choices"
+import { getJointApplicationOutcome } from "@/lib/db/profiles"
 
 export const dynamic = "force-dynamic"
 
@@ -26,24 +23,14 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
   if (!live) {
     const session = await getSession()
     if (!session) redirect("/signin")
-    // The cookie names a profile the database cannot produce. Say so, rather
-    // than dropping someone on the empty form as if they had never registered.
-    if (hasListing(session)) redirectToClearSession({ stale: true })
     redirect("/register")
   }
   if (live.needsReconcile) redirect(`${RECONCILE_SESSION_PATH}?next=%2Fme`)
 
   const { t } = await getT()
   const { saved, created } = await searchParams
-
-  const res = await apiFetch(`/api/v1/profiles/${live.profile.id}`)
-  await redirectIfOwnListingGone(res)
-  if (!res.ok) throw new Error(`Could not load your profile (status ${res.status}).`)
-  const body = (await res.json()) as {
-    profile: Profile
-    joint_application?: "yes" | "no" | "not_yet" | null
-  }
-  const { profile } = body
+  const profile = live.profile
+  const joint = getJointApplicationOutcome(profile.id) as "yes" | "no" | "not_yet" | null
 
   if (created) return <ProfileCompleteChoices profile={profile} t={t} />
 
@@ -66,7 +53,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
       )}
 
       {/* The real KPI: did this directory lead to a joint application? */}
-      <OutcomeReport profileId={profile.id} initial={body.joint_application ?? null} />
+      <OutcomeReport profileId={profile.id} initial={joint} />
 
       <div className="mt-8">
         <MeEditor profile={profile} remmyEnabled={llmEnabled()} />

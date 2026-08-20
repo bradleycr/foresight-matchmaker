@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic"
  * LLM polish lives at POST /api/v1/matches/rationale.
  */
 export async function GET(): Promise<Response> {
-  await hydrateListings()
+  await hydrateListings({ force: true })
   const live = await resolveLiveSession()
   if (!live) return unauthorized()
   const { profile: subject } = live

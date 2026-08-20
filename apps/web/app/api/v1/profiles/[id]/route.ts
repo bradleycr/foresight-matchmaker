@@ -11,7 +11,7 @@ import {
   deleteProfile,
 } from "@/lib/db/profiles"
 import { forgetListing, persistListing, restoreOwnedProfile } from "@/lib/db/durable"
-import { destroySession, getSession, createSession } from "@/lib/auth/session"
+import { getSession, createSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
 
@@ -32,14 +32,7 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
   const { id } = await params
   await restoreOwnedProfile(id, session.email)
   const profile = getProfileById(id)
-  if (!profile) {
-    // Cookie valid, row gone, and Blob does not have it either — truly missing.
-    if (session.profileId === id) {
-      await destroySession()
-      return unauthorized("Your profile is no longer on this instance. Add it again.")
-    }
-    return notFound("No profile with that id.")
-  }
+  if (!profile) return notFound("No profile with that id.")
 
   const owner = session.profileId === profile.id || session.email.toLowerCase() === profile.contact_email.toLowerCase()
 

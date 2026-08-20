@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
-import { restoreOwnedProfile } from "@/lib/db/durable"
+import { restoreOwnedProfile, hydrateListings } from "@/lib/db/durable"
 import { getProfileById, getProfilesByEmail } from "@/lib/db/profiles"
-import { createSession, destroySession, getSession, type Session } from "@/lib/auth/session"
+import { createSession, getSession, type Session } from "@/lib/auth/session"
 import { safeNextPath } from "@/lib/auth/next-path"
 
 /**
@@ -51,6 +51,10 @@ export async function peekLiveSession(): Promise<LiveSession | null> {
     await restoreOwnedProfile(session.profileId, session.email)
     profile = findOwnedProfile(session)
   }
+  if (!profile && session.profileId) {
+    await hydrateListings({ force: true })
+    profile = findOwnedProfile(session)
+  }
   if (!profile) return null
   return {
     session: { ...session, profileId: profile.id },
@@ -69,8 +73,6 @@ export async function resolveLiveSession(): Promise<LiveSession | null> {
     if (live.needsReconcile) await createSession(live.profile.id, live.session.email)
     return live
   }
-  const session = await getSession()
-  if (session?.profileId) await destroySession()
   return null
 }
 
@@ -89,15 +91,13 @@ export function redirectToClearSession(opts?: { stale?: boolean; next?: string }
 }
 
 /**
- * For RSC pages that self-fetch the API: a 401/404 on your own listing
- * must clear the cookie on a Route Handler response. Set-Cookie from the
- * inner apiFetch is not forwarded to the browser.
+ * Keep a verified session. A missing listing on this isolate is not a sign-out.
  */
 export async function redirectIfOwnListingGone(res: Response): Promise<void> {
   if (res.status === 401 || res.status === 403) {
-    redirectToClearSession()
+    redirect("/register")
   }
   if (res.status === 404) {
-    redirectToClearSession({ stale: true })
+    redirect("/register")
   }
 }

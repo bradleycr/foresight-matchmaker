@@ -1,7 +1,5 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { apiFetch, redirectOnAuthFailure } from "@/lib/api/server-fetch"
-import type { DirectoryPayload, DirectoryStatsPayload } from "@/lib/api/types"
 import { getT } from "@/lib/i18n/server"
 import { getSession } from "@/lib/auth/session"
 import { peekLiveSession } from "@/lib/auth/live-session"
@@ -14,12 +12,16 @@ import {
 import { challengeTheme } from "@/lib/challenges/themes"
 import { DirectoryBrowser } from "@/components/directory/browser"
 import { kindCountTotal } from "@/components/listing-counts"
+import { hydrateListings } from "@/lib/db/durable"
+import { countVisibleProfilesByChallenge, listDirectoryProfiles } from "@/lib/db/profiles"
+import type { DirectoryProfile } from "@/lib/api/types"
 
 export const dynamic = "force-dynamic"
 
 /**
- * Programme directory. Unsigned visitors sign in first. With one open
- * programme we skip the chooser; with several, pick a directory first.
+ * Programme directory. Unsigned visitors sign in first. Listings are loaded
+ * on this request (not via a second API hop) so a profile published a moment
+ * ago is in the same corpus the browser renders.
  */
 export default async function DirectoryPage({
   searchParams,
@@ -28,6 +30,8 @@ export default async function DirectoryPage({
 }) {
   const session = await getSession()
   if (!session) redirect(signInHref("/directory"))
+
+  await hydrateListings({ force: true })
 
   const { challenge: raw } = await searchParams
   const selected = raw ? CHALLENGES.find((c) => c.id === raw) : undefined
@@ -38,7 +42,7 @@ export default async function DirectoryPage({
     if (dest !== "/directory") redirect(dest)
 
     const { t } = await getT()
-    const stats = (await apiFetch("/api/v1/stats").then((r) => r.json())) as DirectoryStatsPayload
+    const byChallenge = countVisibleProfilesByChallenge()
     const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
 
     return (
@@ -47,7 +51,7 @@ export default async function DirectoryPage({
         <p className="mt-2 max-w-xl text-ink-soft">{t("directory.choose_intro")}</p>
         <ul className="mt-8 grid gap-4">
           {CHALLENGES.map((challenge) => {
-            const counts = stats.by_challenge?.[challenge.id] ?? empty
+            const counts = byChallenge[challenge.id] ?? empty
             return (
               <li key={challenge.id}>
                 <Link
@@ -77,10 +81,7 @@ export default async function DirectoryPage({
   }
 
   const { t } = await getT()
-  const res = await apiFetch("/api/v1/directory")
-  redirectOnAuthFailure(res)
-  if (!res.ok) throw new Error(`Could not load the directory (status ${res.status}).`)
-  const directory = (await res.json()) as DirectoryPayload
+  const profiles = listDirectoryProfiles({ includeAuthenticatedOnly: true }) as unknown as DirectoryProfile[]
   const name = t(`challenge.${selected.id}.name`)
 
   return (
@@ -91,7 +92,7 @@ export default async function DirectoryPage({
       <h1 className="mb-4 font-listing text-3xl font-bold uppercase tracking-tight">
         {t("directory.programme_title", { programme: name })}
       </h1>
-      <DirectoryBrowser profiles={directory.profiles} />
+      <DirectoryBrowser profiles={profiles} />
     </div>
   )
 }
