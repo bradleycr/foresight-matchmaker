@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { forbidden } from "@/lib/api/respond"
 import { isAdmin } from "@/lib/auth/admin"
+import { hydrateListings } from "@/lib/db/durable"
 import { computeMetrics, metricsToCsv } from "@/lib/metrics"
 
 export const dynamic = "force-dynamic"
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic"
 export async function GET(req: NextRequest): Promise<Response> {
   if (!(await isAdmin())) return forbidden("Admin access required.")
 
+  await hydrateListings({ force: true })
   const metrics = computeMetrics()
 
   if (req.nextUrl.searchParams.get("format") === "csv") {

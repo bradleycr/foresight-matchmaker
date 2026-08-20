@@ -1,13 +1,11 @@
-import type { SignupRow } from "@/app/api/admin/signups/route"
+import type { SignupRow } from "@/lib/db/signups"
 import type { T } from "@/lib/i18n"
 
 /**
- * The contactable register of everyone who has published a profile.
+ * Contactable register of every email that requested a magic link.
  *
- * Aggregates elsewhere on this page answer "how is the programme doing"; this
- * answers the only question that matters in a bad hour — who do we write to.
- * Hence a download beside the table: the addresses must be usable away from
- * the running app.
+ * Aggregates elsewhere answer how the programme is doing; this answers who
+ * to write to after a cold start wipes `/tmp`.
  */
 export function SignupList({ signups, t }: { signups: SignupRow[]; t: T }) {
   return (
@@ -33,11 +31,14 @@ export function SignupList({ signups, t }: { signups: SignupRow[]; t: T }) {
         <p className="px-3 py-3 text-sm text-ink-soft">{t("admin.no_data")}</p>
       ) : (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[36rem] text-sm">
+          <table className="w-full min-w-[40rem] text-sm">
             <thead>
               <tr className="border-y border-rule bg-paper-shade text-left">
                 <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
                   {t("admin.accounts_email")}
+                </th>
+                <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
+                  {t("admin.accounts_status")}
                 </th>
                 <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
                   {t("admin.accounts_org")}
@@ -52,14 +53,15 @@ export function SignupList({ signups, t }: { signups: SignupRow[]; t: T }) {
             </thead>
             <tbody>
               {signups.map((signup) => (
-                <tr key={`${signup.contact_email}-${signup.created_at}`} className="border-b border-rule last:border-0">
+                <tr key={signup.contact_email} className="border-b border-rule last:border-0">
                   <td className="px-3 py-1.5">
                     <a href={`mailto:${signup.contact_email}`} className="underline underline-offset-2">
                       {signup.contact_email}
                     </a>
                   </td>
-                  <td className="px-3 py-1.5">{signup.org_name}</td>
-                  <td className="px-3 py-1.5">{signup.kind}</td>
+                  <td className="px-3 py-1.5">{t(`admin.status_${signup.status}`)}</td>
+                  <td className="px-3 py-1.5">{signup.org_name || "—"}</td>
+                  <td className="px-3 py-1.5">{signup.kind || "—"}</td>
                   <td className="tnum px-3 py-1.5 text-ink-soft">{signup.created_at.slice(0, 10)}</td>
                 </tr>
               ))}

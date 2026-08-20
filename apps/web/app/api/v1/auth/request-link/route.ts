@@ -3,7 +3,7 @@ import { ZodError } from "zod"
 import { requestLinkSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest } from "@/lib/api/respond"
 import { getProfilesByEmail } from "@/lib/db/profiles"
-import { restoreOwnedProfile } from "@/lib/db/durable"
+import { persistSignup, restoreOwnedProfile } from "@/lib/db/durable"
 import { issueToken } from "@/lib/auth/tokens"
 import { magicLinkMode, sendMagicLink, revealLinksAllowed } from "@/lib/auth/mail"
 import { rateLimit } from "@/lib/auth/rate-limit"
@@ -60,6 +60,12 @@ export async function POST(req: NextRequest): Promise<Response> {
   const link = `${origin}/claim/${token}${nextQuery}`
   const kind = profile ? "signin" : "welcome"
   const mail = await sendMagicLink(email, link, kind)
+
+  try {
+    await persistSignup({ email })
+  } catch (error) {
+    console.error("[durable] persist signup after request-link failed", { email }, error)
+  }
 
   // Only reveal on-screen when the inbox did not get the link — otherwise
   // auto-claim burns the token and the emailed button fails.

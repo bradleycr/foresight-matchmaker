@@ -4,7 +4,7 @@ import { ok, zodError, badRequest } from "@/lib/api/respond"
 import { consumeToken } from "@/lib/auth/tokens"
 import { createSession } from "@/lib/auth/session"
 import { getProfilesByEmail, markClaimed } from "@/lib/db/profiles"
-import { persistListing, restoreOwnedProfile } from "@/lib/db/durable"
+import { persistListing, persistSignup, restoreOwnedProfile } from "@/lib/db/durable"
 
 export const dynamic = "force-dynamic"
 
@@ -45,6 +45,15 @@ export async function POST(req: NextRequest): Promise<Response> {
   const profileId = result.profileId ?? getProfilesByEmail(result.email)[0]?.id ?? null
 
   await createSession(profileId, result.email)
+  try {
+    await persistSignup({
+      email: result.email,
+      confirmed_at: new Date().toISOString(),
+      ...(profileId ? { profile_id: profileId } : {}),
+    })
+  } catch (error) {
+    console.error("[durable] persist signup after claim failed", { email: result.email }, error)
+  }
   if (profileId) {
     markClaimed(profileId)
     const claimed = getProfilesByEmail(result.email)[0]
