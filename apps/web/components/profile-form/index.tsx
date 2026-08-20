@@ -36,6 +36,7 @@ import {
   type Dataset,
   type Profile,
 } from "@rmm/schema"
+import { PLATFORM } from "@/lib/challenges/catalog"
 import { useT, useLocale } from "@/lib/i18n/client"
 import { Button, Field, Input, Select, Textarea } from "@/components/ui/primitives"
 import { EnumChips, EnumSelect } from "./enum-controls"
@@ -806,7 +807,7 @@ export function ProfileForm({
         />
         <p className="text-sm">
           <a
-            href="https://www.sprind.org/taten/challenges/recoding-medicine"
+            href={PLATFORM.lumaCalendarUrl}
             target="_blank"
             rel="noreferrer"
             className="font-semibold underline"

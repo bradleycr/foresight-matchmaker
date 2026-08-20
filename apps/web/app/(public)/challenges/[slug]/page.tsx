@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { apiFetch } from "@/lib/api/server-fetch"
 import type { DirectoryStatsPayload } from "@/lib/api/types"
 import { getT } from "@/lib/i18n/server"
-import { CHALLENGES, challengeBySlug } from "@/lib/challenges/catalog"
+import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS } from "@/lib/challenges/catalog"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { ListingCounts } from "@/components/listing-counts"
 
@@ -101,6 +101,33 @@ export default async function ChallengePage({
           ))}
         </dl>
       </section>
+
+      {id === "recoding_medicine" ? (
+        <section aria-labelledby="matchmaking-events" className="mt-12 max-w-3xl">
+          <h2
+            id="matchmaking-events"
+            className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase"
+          >
+            {t("challenge.matchmaking_events_title")}
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-ink-soft">{t("challenge.matchmaking_events_intro")}</p>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-base">
+            {RECODING_MATCHMAKING_EVENTS.map((key) => (
+              <li key={key}>{t(`enum.attending.${key}`)}</li>
+            ))}
+          </ul>
+          <p className="mt-5">
+            <a
+              href={PLATFORM.lumaCalendarUrl}
+              className="font-semibold underline underline-offset-2"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {t("challenge.matchmaking_events_luma")}
+            </a>
+          </p>
+        </section>
+      ) : null}
 
       <p className="mt-8">
         <a href={challenge.hostUrl} className="font-semibold underline" rel="noopener noreferrer" target="_blank">

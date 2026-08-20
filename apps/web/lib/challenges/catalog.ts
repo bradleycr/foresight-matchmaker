@@ -10,6 +10,8 @@ export const PLATFORM = {
   id: "foresight",
   operator: "Foresight Institute",
   operatorUrl: "https://foresight.org",
+  /** Matchmaking sessions, webinars, and Foresight community events. */
+  lumaCalendarUrl: "https://luma.com/foresightinstitute",
 } as const
 
 export interface ChallengeDef {
@@ -44,6 +46,13 @@ export function challengeById(id: string | undefined | null): ChallengeDef {
 export function challengeBySlug(slug: string): ChallengeDef | undefined {
   return CHALLENGES.find((c) => c.slug === slug)
 }
+
+/** In-person Recoding Medicine matchmaking — dates align with `enum.attending` chips. */
+export const RECODING_MATCHMAKING_EVENTS = [
+  "event_sept_1",
+  "event_sept_2",
+  "event_sept_3",
+] as const
 
 export { CHALLENGE_ID, DEFAULT_CHALLENGE_ID }
 export type { ChallengeId }
