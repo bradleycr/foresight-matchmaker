@@ -3,15 +3,17 @@ import { listProfiles, getJointApplicationOutcome } from "./db/profiles"
 import { getAllCachedMatches } from "./db/matches"
 import { listAllIntros } from "./db/intros"
 import { listEvents } from "./db/events"
+import type { SignupSummary } from "./db/signups"
 
 /**
- * The reporting engine behind /admin and /api/v1/metrics. SPRIND asked for
- * this explicitly: the friction data — especially which single field kills
- * otherwise-strong matches — is the research output of the prototype.
+ * The reporting engine behind programme admin pages and /api/v1/metrics.
+ * SPRIND asked for this explicitly: the friction data — especially which
+ * single field kills otherwise-strong matches — is the research output.
  */
 
 export interface Metrics {
   generated_at: string
+  challenge_id: string | null
   profiles: {
     total: number
     by_kind: Record<string, number>
@@ -22,9 +24,15 @@ export interface Metrics {
     empty_field_counts: Record<string, number>
   }
   funnel: {
+    signups: number
+    signed_in: number
+    unfinished: number
+    unfinished_confirmed: number
     profiles: number
     profiles_with_shortlist_view: number
     intros_requested: number
+    contact_email: number
+    contact_linkedin: number
     intros_accepted: number
     intros_declined: number
     intros_expired: number
@@ -89,11 +97,24 @@ function emptyFields(profile: Profile): string[] {
   })
 }
 
-export function computeMetrics(): Metrics {
-  const profiles = listProfiles()
-  const intros = listAllIntros()
-  const events = listEvents()
-  const cached = getAllCachedMatches()
+function programmeOf(profile: Profile): string {
+  return profile.challenge_id ?? "recoding_medicine"
+}
+
+export function computeMetrics(opts?: { challengeId?: string; signups?: SignupSummary }): Metrics {
+  const challengeId = opts?.challengeId
+  const allProfiles = listProfiles()
+  const profiles = challengeId ? allProfiles.filter((p) => programmeOf(p) === challengeId) : allProfiles
+  const ids = new Set(profiles.map((p) => p.id))
+  const inProgramme = (id: string | null | undefined) => Boolean(id && ids.has(id))
+
+  const intros = listAllIntros().filter((i) => !challengeId || inProgramme(i.fromId) || inProgramme(i.toId))
+  const events = listEvents().filter((e) => {
+    if (!challengeId) return true
+    if (e.type === "intro_requested") return typeof e.payload.to === "string" && ids.has(e.payload.to)
+    return inProgramme(e.actorId)
+  })
+  const cached = getAllCachedMatches().filter((m) => !challengeId || (ids.has(m.subjectId) && ids.has(m.otherId)))
 
   // Which single blocker kills the most matches. Only hard blockers on
   // blocked pairs are counted; each pair is stored in both directions, so
@@ -123,8 +144,19 @@ export function computeMetrics(): Metrics {
 
   const shortlistViewers = new Set(events.filter((e) => e.type === "shortlist_viewed").map((e) => e.actorId))
 
+  const introEvents = events.filter((e) => e.type === "intro_requested")
+  const pairKey = (actorId: string | null, to: unknown) => `${actorId ?? "anon"}::${typeof to === "string" ? to : ""}`
+  const introPairs = new Set(introEvents.map((e) => pairKey(e.actorId, e.payload.to)))
+  const emailPairs = new Set(
+    introEvents.filter((e) => e.payload.channel === "email").map((e) => pairKey(e.actorId, e.payload.to)),
+  )
+  const linkedinPairs = new Set(
+    introEvents.filter((e) => e.payload.channel === "linkedin").map((e) => pairKey(e.actorId, e.payload.to)),
+  )
+
   return {
     generated_at: new Date().toISOString(),
+    challenge_id: challengeId ?? null,
     profiles: {
       total: profiles.length,
       by_kind: tally(profiles, (p) => p.kind),
@@ -135,9 +167,15 @@ export function computeMetrics(): Metrics {
       empty_field_counts: emptyCounts,
     },
     funnel: {
+      signups: opts?.signups?.total ?? 0,
+      signed_in: opts?.signups?.signed_in ?? 0,
+      unfinished: opts?.signups?.unfinished ?? 0,
+      unfinished_confirmed: opts?.signups?.confirmed ?? 0,
       profiles: profiles.length,
       profiles_with_shortlist_view: shortlistViewers.size,
-      intros_requested: intros.length,
+      intros_requested: introPairs.size,
+      contact_email: emailPairs.size,
+      contact_linkedin: linkedinPairs.size,
       intros_accepted: intros.filter((i) => i.state === "accepted" || i.state === "emailed").length,
       intros_declined: intros.filter((i) => i.state === "declined").length,
       intros_expired: intros.filter((i) => i.state === "expired").length,
@@ -160,6 +198,7 @@ export function metricsToCsv(m: Metrics): string {
   }
 
   rows.push(["meta", "generated_at", m.generated_at])
+  rows.push(["meta", "challenge_id", m.challenge_id ?? ""])
   push("profiles_by_kind", m.profiles.by_kind)
   push("profiles_by_country", m.profiles.by_country)
   push("profiles_by_org_type", m.profiles.by_org_type)

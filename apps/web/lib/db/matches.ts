@@ -21,6 +21,7 @@ import { matches, profiles } from "./schema"
 export const MIN_SCORE = 35
 
 export interface CachedMatch extends MatchEntry {
+  subjectId: string
   computedAt: string
 }
 
@@ -55,8 +56,9 @@ export function recomputeMatchesFor(profileId: string): void {
     })
   }
 
-  // Incoming: everyone → subject. Scoring is symmetric in outcome but each
-  // side owns its own shortlist rows.
+  // Incoming: everyone → subject. Each side owns its own shortlist rows.
+  // Hidden subjects still receive outgoing matches against visible peers;
+  // others do not receive the hidden subject (`score` hard-blocks `b`).
   for (const other of all) {
     if (other.id === subject.id) continue
     for (const entry of topMatches(other, [subject], { limit: 1, includeBlocked: true })) {
@@ -106,14 +108,24 @@ export function recomputeAllMatches(): void {
 
 /** Ranked shortlist for one profile: score ≥ 35, unblocked, best first. */
 export function getShortlist(subjectId: string): CachedMatch[] {
+  const hiddenIds = new Set(
+    getDb()
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.visibility, "hidden"))
+      .all()
+      .map((r) => r.id),
+  )
+
   return getDb()
     .select()
     .from(matches)
     .where(eq(matches.subjectId, subjectId))
     .all()
-    .filter((r) => r.score >= MIN_SCORE)
+    .filter((r) => r.score >= MIN_SCORE && !hiddenIds.has(r.otherId))
     .sort((a, b) => (b.score !== a.score ? b.score - a.score : a.otherId < b.otherId ? -1 : 1))
     .map((r) => ({
+      subjectId,
       otherId: r.otherId,
       score: r.score,
       factors: JSON.parse(r.factors),
@@ -129,6 +141,7 @@ export function getAllCachedMatches(): CachedMatch[] {
     .from(matches)
     .all()
     .map((r) => ({
+      subjectId: r.subjectId,
       otherId: r.otherId,
       score: r.score,
       factors: JSON.parse(r.factors),

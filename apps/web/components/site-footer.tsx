@@ -31,19 +31,14 @@ export async function SiteFooter() {
 
         <div>
           <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.challenge")}</h2>
-          <p>{t("footer.deadline")}</p>
           {programme ? (
-            <p className="mt-3">
-              <a
-                href={programme.hostUrl}
-                className="font-semibold text-ink underline underline-offset-2"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {t("footer.challenge_page")}
-              </a>
+            <p>
+              <Link href={`/challenges/${programme.slug}`} className="font-semibold text-ink underline underline-offset-2">
+                {t(`challenge.${programme.id}.name`)}
+              </Link>
             </p>
           ) : null}
+          <p className={programme ? "mt-2" : undefined}>{t("footer.deadline")}</p>
         </div>
 
         <div>

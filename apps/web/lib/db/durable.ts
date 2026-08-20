@@ -2,6 +2,7 @@ import { del, get, list, put } from "@vercel/blob"
 import { profileSchema, type Profile } from "@rmm/schema"
 import { cacheRemoteListing, getJointApplicationOutcome, listProfiles } from "./profiles"
 import { recomputeMatchesFor } from "./matches"
+import { cacheRemoteEvent, type DurableEvent } from "./events"
 
 /**
  * Shared profile store for hosts whose SQLite file is not the source of truth.
@@ -10,6 +11,8 @@ import { recomputeMatchesFor } from "./matches"
  * written on instance A is invisible on instance B, which is why `/me` after
  * create used to bounce people to “we could not load your profile”. Blob is
  * the durable copy: SQLite is a per-instance cache that we refill on miss.
+ * Funnel events (shortlist views, contact clicks) use the same pattern
+ * under `matchmaker/events/`.
  *
  * Local Docker/VM hosts keep using on-disk SQLite and never touch Blob
  * unless `DURABLE_PROFILES=1` is set (so a laptop with a pulled token cannot
@@ -19,6 +22,7 @@ import { recomputeMatchesFor } from "./matches"
 const PROFILE_PREFIX = "matchmaker/profiles/"
 const EMAIL_PREFIX = "matchmaker/emails/"
 const SIGNUP_PREFIX = "matchmaker/signups/"
+const EVENT_PREFIX = "matchmaker/events/"
 const HYDRATE_DEBOUNCE_MS = 4_000
 
 export interface DurableListing {
@@ -42,6 +46,10 @@ function emailPath(email: string): string {
 
 function signupPath(email: string): string {
   return `${SIGNUP_PREFIX}${encodeURIComponent(email.toLowerCase())}.json`
+}
+
+function eventPath(uid: string): string {
+  return `${EVENT_PREFIX}${uid}.json`
 }
 
 const putOpts = {
@@ -364,3 +372,80 @@ export async function hydrateListings(opts?: { force?: boolean }): Promise<void>
   })
   return hydrateInflight
 }
+
+function parseEvent(raw: unknown): DurableEvent | null {
+  if (!raw || typeof raw !== "object") return null
+  const record = raw as Record<string, unknown>
+  if (typeof record.uid !== "string" || !record.uid) return null
+  if (typeof record.type !== "string" || !record.type) return null
+  if (typeof record.createdAt !== "string" || !record.createdAt) return null
+  const actorId = typeof record.actorId === "string" ? record.actorId : null
+  const payload =
+    record.payload && typeof record.payload === "object" && !Array.isArray(record.payload)
+      ? (record.payload as Record<string, unknown>)
+      : {}
+  return { uid: record.uid, type: record.type, actorId, payload, createdAt: record.createdAt }
+}
+
+/**
+ * Dual-write one funnel event. Overwrite by uid so GDPR anonymise can
+ * replace the Blob copy without leaving the identified payload behind.
+ */
+export async function persistEvent(event: DurableEvent): Promise<void> {
+  if (!durableEnabled()) return
+  if (process.env.VITEST) return
+  if (!event.uid) return
+  const body = JSON.stringify(event)
+  try {
+    await put(eventPath(event.uid), body, putOpts)
+  } catch (error) {
+    console.error("[durable] event persist retrying", { uid: event.uid }, error)
+    await put(eventPath(event.uid), body, putOpts)
+  }
+}
+
+let lastEventHydrateAt = 0
+let eventHydrateInflight: Promise<void> | null = null
+
+/** Pull the durable event log into this instance's SQLite cache. */
+export async function hydrateEvents(opts?: { force?: boolean }): Promise<void> {
+  if (!durableEnabled()) return
+
+  const force = opts?.force === true
+  if (!force) {
+    if (eventHydrateInflight) return eventHydrateInflight
+    if (Date.now() - lastEventHydrateAt < HYDRATE_DEBOUNCE_MS) return
+  } else if (eventHydrateInflight) {
+    await eventHydrateInflight
+  }
+
+  const run = (async () => {
+    try {
+      let cursor: string | undefined
+      do {
+        const page = await list({ prefix: EVENT_PREFIX, limit: 1000, cursor })
+        await Promise.all(
+          page.blobs.map(async (blob) => {
+            if (!blob.pathname.endsWith(".json")) return
+            try {
+              const event = parseEvent(await readJson(blob.pathname))
+              if (event) cacheRemoteEvent(event)
+            } catch (error) {
+              console.error("[durable] skip unreadable event", { pathname: blob.pathname }, error)
+            }
+          }),
+        )
+        cursor = page.hasMore ? page.cursor : undefined
+      } while (cursor)
+      lastEventHydrateAt = Date.now()
+    } catch (error) {
+      console.error("[durable] hydrate events failed", error)
+    }
+  })()
+
+  eventHydrateInflight = run.finally(() => {
+    eventHydrateInflight = null
+  })
+  return eventHydrateInflight
+}
+

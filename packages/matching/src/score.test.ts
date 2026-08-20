@@ -170,8 +170,15 @@ describe("score — hard blockers force 0", () => {
     expect(score(buildDataHolder(), buildAiTeam({ open_to_intros: false })).score).toBe(0)
   })
 
-  it("hidden visibility hard-blocks", () => {
-    expect(score(buildDataHolder(), buildAiTeam({ visibility: "hidden" })).score).toBe(0)
+  it("hidden visibility hard-blocks the counterpart, not the viewer", () => {
+    const hiddenOther = buildAiTeam({ visibility: "hidden" })
+    expect(score(buildDataHolder(), hiddenOther).score).toBe(0)
+
+    const hiddenViewer = buildDataHolder({ visibility: "hidden" })
+    const visible = buildAiTeam()
+    expect(score(hiddenViewer, visible).score).toBeGreaterThan(0)
+    expect(topMatches(hiddenViewer, [visible]).length).toBeGreaterThan(0)
+    expect(topMatches(visible, [hiddenViewer])).toEqual([])
   })
 
   it("parallel public funding does not affect the score", () => {

@@ -5,7 +5,9 @@ import { computeFactors, computePeopleFactors, sumFactors } from "./factors"
 import { consortiumIsSeeking } from "./helpers"
 
 /**
- * Score an ordered pair of profiles.
+ * Score an ordered pair of profiles. `a` is the viewer, `b` the candidate.
+ * Hidden visibility hard-blocks the candidate, not the viewer — so a private
+ * listing can still rank visible peers.
  *
  * Pipeline:
  *   1. If either side is an individual, score a person↔team pairing

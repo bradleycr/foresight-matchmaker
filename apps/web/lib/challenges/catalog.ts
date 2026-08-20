@@ -76,5 +76,12 @@ export const RECODING_MATCHMAKING_EVENTS = [
   "event_sept_3",
 ] as const
 
+/** Per-city Luma pages. The calendar URL above stays the full Foresight listing. */
+export const RECODING_MATCHMAKING_EVENT_URLS: Record<(typeof RECODING_MATCHMAKING_EVENTS)[number], string> = {
+  event_sept_1: "https://luma.com/foresight-bmzq",
+  event_sept_2: "https://luma.com/foresight-hf6t",
+  event_sept_3: "https://luma.com/y9aqjbzq",
+}
+
 export { CHALLENGE_ID, DEFAULT_CHALLENGE_ID }
 export type { ChallengeId }

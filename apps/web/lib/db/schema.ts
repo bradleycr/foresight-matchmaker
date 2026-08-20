@@ -85,6 +85,8 @@ export const events = sqliteTable(
   "events",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
+    /** Stable id for Blob dual-write; unique when present. */
+    uid: text("uid").unique(),
     type: text("type").notNull(),
     actorId: text("actor_id"),
     payload: text("payload").notNull().default("{}"),

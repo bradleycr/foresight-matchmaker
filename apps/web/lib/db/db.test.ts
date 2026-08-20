@@ -269,6 +269,13 @@ describe("match cache", () => {
     expect(shortlist[0].otherId).toBe(team.id)
     expect(shortlist[0].score).toBeGreaterThanOrEqual(35)
   })
+
+  it("lets a hidden owner see matches without appearing on others' shortlists", () => {
+    const secret = makeDataHolder(40, { visibility: "hidden", slug: "holder-private-matches" })
+    const visibleTeam = makeAiTeam(40, { slug: "team-private-matches" })
+    expect(getShortlist(secret.id).some((m) => m.otherId === visibleTeam.id)).toBe(true)
+    expect(getShortlist(visibleTeam.id).some((m) => m.otherId === secret.id)).toBe(false)
+  })
 })
 
 describe("intro flow", () => {

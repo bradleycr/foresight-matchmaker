@@ -3,19 +3,25 @@ import { verifyAdminSecret, writeAdminCookie } from "@/lib/auth/admin"
 
 export const dynamic = "force-dynamic"
 
+/** Only `/admin` and `/admin/{slug}` — never an open redirect. */
+function safeAdminNext(value: string | null): string {
+  if (!value) return "/admin"
+  if (value === "/admin") return value
+  if (/^\/admin\/[a-z0-9-]+$/.test(value)) return value
+  return "/admin"
+}
+
 /**
  * POST /api/admin/login — exchange the shared secret for a signed cookie.
  *
  * A Route Handler (not a Server Action) so Set-Cookie survives the 303.
- * Next.js has dropped cookies set in a Server Action that then `redirect()`s,
- * which is exactly how /admin used to fail in production: the password was
- * accepted, the cookie never landed, and the page rendered the login form
- * again.
+ * Optional `next` returns to the admin page that asked for the secret.
  */
 export async function POST(req: NextRequest): Promise<Response> {
   const form = await req.formData()
   const secret = String(form.get("secret") ?? "")
-  const dest = new URL("/admin", req.nextUrl.origin)
+  const next = safeAdminNext(String(form.get("next") ?? "/admin"))
+  const dest = new URL(next, req.nextUrl.origin)
 
   if (!verifyAdminSecret(secret)) {
     dest.searchParams.set("error", "1")

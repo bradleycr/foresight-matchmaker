@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
-import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS } from "@/lib/challenges/catalog"
+import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS, RECODING_MATCHMAKING_EVENT_URLS } from "@/lib/challenges/catalog"
 import { ListingCounts } from "@/components/listing-counts"
 import { hydrateListings } from "@/lib/db/durable"
 import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
@@ -113,7 +113,16 @@ export default async function ChallengePage({
           <p className="mt-3 text-base leading-relaxed">{t("challenge.matchmaking_events_limit")}</p>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-base">
             {RECODING_MATCHMAKING_EVENTS.map((key) => (
-              <li key={key}>{t(`enum.attending.${key}`)}</li>
+              <li key={key}>
+                <a
+                  href={RECODING_MATCHMAKING_EVENT_URLS[key]}
+                  className="font-semibold underline underline-offset-2"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {t(`enum.attending.${key}`)}
+                </a>
+              </li>
             ))}
           </ul>
           <p className="mt-5">

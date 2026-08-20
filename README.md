@@ -41,7 +41,7 @@ Vercel production, **Resend** sends real mail from `hello@foresightmatchmaker.ap
 Sign in with any seed contact email (e.g. `a.voss@example.invalid`), or walk through
 **`/register`** to test verify-first signup.
 
-To unlock `/admin`, open the page and enter `password123`
+To unlock `/admin`, open the page and enter `FSRM2026!`
 (also accepted when `ADMIN_SECRET` is set to something else):
 
 ```bash

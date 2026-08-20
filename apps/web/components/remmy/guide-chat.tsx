@@ -19,6 +19,7 @@ type SheetState =
   | { kind: "match"; match: GuideMatchCard; focus: "detail" | "intro" }
   | {
       kind: "intro"
+      toId: string
       toName: string
       toSlug: string
       email?: string
@@ -69,6 +70,7 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
     if (intro?.type === "intro_compose") {
       setSheet({
         kind: "intro",
+        toId: intro.to_id,
         toName: intro.to_name,
         toSlug: intro.to_slug,
         email: intro.contact_email,
@@ -152,6 +154,7 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
                   onOpenIntro={(intro) =>
                     setSheet({
                       kind: "intro",
+                      toId: intro.to_id,
                       toName: intro.to_name,
                       toSlug: intro.to_slug,
                       email: intro.contact_email,
@@ -216,6 +219,7 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
           intro={
             sheet.focus === "intro"
               ? {
+                  toId: sheet.match.profile.id,
                   toName: sheet.match.profile.org_name,
                   toSlug: sheet.match.profile.slug,
                   email: sheet.match.profile.contact_email,
@@ -230,6 +234,7 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
       {sheet?.kind === "intro" ? (
         <MatchSheet
           intro={{
+            toId: sheet.toId,
             toName: sheet.toName,
             toSlug: sheet.toSlug,
             email: sheet.email,

@@ -60,9 +60,6 @@ export async function SiteHeader() {
             <Link href="/me/matches" className="hover:underline">
               {t("nav.matches")}
             </Link>
-            <Link href="/me/inbox" className="hover:underline">
-              {t("nav.inbox")}
-            </Link>
             <Link href="/me" className="hover:underline">
               {t("nav.me")}
             </Link>

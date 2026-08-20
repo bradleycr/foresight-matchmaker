@@ -1,4 +1,4 @@
-import type { Profile } from "@rmm/schema"
+import { DEFAULT_CHALLENGE_ID, type Profile } from "@rmm/schema"
 import { listDurableSignups, type SignupRecord } from "./durable"
 import { listProfiles } from "./profiles"
 
@@ -88,14 +88,14 @@ function fromProfile(profile: Profile, previous?: SignupRecord): SignupRow {
     kind: profile.kind,
     org_type: profile.org_type,
     country: profile.country,
-    challenge_id: profile.challenge_id ?? "recoding_medicine",
+    challenge_id: profile.challenge_id ?? DEFAULT_CHALLENGE_ID,
     completeness: profile.completeness,
     visibility: profile.visibility,
     website: profile.website ?? "",
   }
 }
 
-export async function collectSignupRows(): Promise<SignupRow[]> {
+export async function collectSignupRows(opts?: { challengeId?: string }): Promise<SignupRow[]> {
   const durable = await listDurableSignups()
   const byEmail = new Map<string, SignupRecord>()
   for (const rec of durable) byEmail.set(rec.email.toLowerCase(), rec)
@@ -108,9 +108,92 @@ export async function collectSignupRows(): Promise<SignupRow[]> {
     rows.set(email, fromProfile(profile, byEmail.get(email)))
   }
 
-  return [...rows.values()].sort(
+  const all = [...rows.values()].sort(
     (a, b) => b.last_seen_at.localeCompare(a.last_seen_at) || b.created_at.localeCompare(a.created_at),
   )
+  if (!opts?.challengeId) return all
+  return all.filter((row) => signupBelongsToChallenge(row, opts.challengeId!))
+}
+
+/**
+ * Unlisted magic-link rows have no programme yet. Count them on the live
+ * programme so “signed in, never published” sits next to its listings.
+ */
+export function signupBelongsToChallenge(row: SignupRow, challengeId: string): boolean {
+  if (row.challenge_id) return row.challenge_id === challengeId
+  return challengeId === DEFAULT_CHALLENGE_ID
+}
+
+export interface SignupSummary {
+  total: number
+  requested: number
+  confirmed: number
+  listed: number
+  signed_in: number
+  unfinished: number
+  unfinishedConfirmedEmails: string[]
+  unfinishedEmails: string[]
+}
+
+/** Signups vs listings — the drop-off between a magic link and a published profile. */
+export function summarizeSignups(rows: readonly SignupRow[]): SignupSummary {
+  let requested = 0
+  let confirmed = 0
+  let listed = 0
+  const unfinishedConfirmedEmails: string[] = []
+  const unfinishedEmails: string[] = []
+
+  for (const row of rows) {
+    if (row.status === "listed") {
+      listed += 1
+      continue
+    }
+    unfinishedEmails.push(row.contact_email)
+    if (row.status === "confirmed") {
+      confirmed += 1
+      unfinishedConfirmedEmails.push(row.contact_email)
+    } else {
+      requested += 1
+    }
+  }
+
+  return {
+    total: rows.length,
+    requested,
+    confirmed,
+    listed,
+    signed_in: confirmed + listed,
+    unfinished: requested + confirmed,
+    unfinishedConfirmedEmails,
+    unfinishedEmails,
+  }
+}
+
+const STATUS_RANK: Record<SignupStatus, number> = {
+  confirmed: 0,
+  requested: 1,
+  listed: 2,
+}
+
+/** Confirmed-but-unpublished first — the cohort most likely stuck on the form. */
+export function sortSignupsForOperator(rows: readonly SignupRow[]): SignupRow[] {
+  return [...rows].sort((a, b) => {
+    const rank = STATUS_RANK[a.status] - STATUS_RANK[b.status]
+    if (rank !== 0) return rank
+    return b.last_seen_at.localeCompare(a.last_seen_at) || a.contact_email.localeCompare(b.contact_email)
+  })
+}
+
+export function mailtoBcc(emails: readonly string[], subject: string, body: string): string | null {
+  if (emails.length === 0) return null
+  const params = new URLSearchParams({ subject, body, bcc: emails.join(",") })
+  return `mailto:?${params.toString()}`
+}
+
+export function withSignupQuery(href: string, extra: Record<string, string>): string {
+  const glue = href.includes("?") ? "&" : "?"
+  const params = new URLSearchParams(extra)
+  return `${href}${glue}${params.toString()}`
 }
 
 function csvCell(value: string | number): string {

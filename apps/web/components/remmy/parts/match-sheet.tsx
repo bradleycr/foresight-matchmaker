@@ -19,6 +19,7 @@ export function MatchSheet({
 }: {
   match?: GuideMatchCard
   intro?: {
+    toId: string
     toName: string
     toSlug: string
     email?: string
@@ -113,7 +114,13 @@ export function MatchSheet({
 
           <div id="match-sheet-contact" className={match ? "mt-6 border-t-2 border-rule-strong pt-4" : undefined}>
             <p className="font-listing text-sm font-bold uppercase tracking-wide">{t("contact.title")}</p>
-            <ProfileContact orgName={name} email={email} linkedin={linkedin} open={open} t={t} />
+            <ProfileContact
+              orgName={name}
+              email={email}
+              linkedin={linkedin}
+              open={open}
+              toProfileId={match?.profile.id ?? intro?.toId}
+            />
             {!match ? (
               <Link
                 href={`/profile/${slug}#contact`}

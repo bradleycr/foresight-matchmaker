@@ -4,7 +4,7 @@ import { getProfileById, listProfiles } from "@/lib/db/profiles"
 import { hydrateListings } from "@/lib/db/durable"
 import { getShortlist } from "@/lib/db/matches"
 import { resolveLiveSession } from "@/lib/auth/live-session"
-import { logEvent } from "@/lib/db/events"
+import { logEvent, flushEvent } from "@/lib/db/events"
 import { templateRationale } from "@/lib/llm/rationale"
 
 export const dynamic = "force-dynamic"
@@ -27,7 +27,8 @@ export async function GET(): Promise<Response> {
   const { profile: subject } = live
 
   const shortlist = getShortlist(subject.id)
-  logEvent("shortlist_viewed", subject.id, { count: shortlist.length })
+  const event = logEvent("shortlist_viewed", subject.id, { count: shortlist.length })
+  await flushEvent(event)
 
   const othersVisible = listProfiles().filter((p) => p.id !== subject.id && p.visibility !== "hidden").length
 

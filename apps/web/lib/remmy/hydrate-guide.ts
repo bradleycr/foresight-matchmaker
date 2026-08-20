@@ -86,7 +86,6 @@ function resolveOther(
 const NAV_LABELS: Record<string, string> = {
   "/me": "guide.nav_me",
   "/me/matches": "guide.nav_matches",
-  "/me/inbox": "guide.nav_inbox",
   "/directory": "guide.nav_directory",
   "/register": "guide.nav_register",
 }

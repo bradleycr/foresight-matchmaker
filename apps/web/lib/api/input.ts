@@ -32,6 +32,11 @@ export const introRequestSchema = z.object({
   message: z.string().min(1).max(500),
 })
 
+export const contactClickSchema = z.object({
+  to_id: z.string().uuid(),
+  channel: z.enum(["email", "linkedin"]),
+})
+
 export const introResponseSchema = z.object({
   action: z.enum(["accepted", "declined"]),
   decline_reason: z.enum(["wrong_domain", "governance_mismatch", "already_have_partner", "not_applying", "other"]).optional(),

@@ -31,7 +31,7 @@ const intentSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("show_gaps") }),
   z.object({
     type: z.literal("navigate"),
-    href: z.enum(["/me", "/me/matches", "/me/inbox", "/directory", "/register"]),
+    href: z.enum(["/me", "/me/matches", "/directory", "/register"]),
   }),
 ])
 
@@ -67,7 +67,7 @@ Hard rules:
 - When they ask why someone matches, or about a named org → explain_match (use org_hint with the name they said; use other_id only if it appears in context).
 - When they want to connect / introduce / reach out → compose_intro (never include emails in reply; the UI shows contact).
 - When matches are empty or they ask how to improve / get better matches → show_gaps (and optionally show_matches).
-- When they want their profile, inbox, or directory → navigate.
+- When they want their profile, matches, or directory → navigate.
 
 Return ONLY JSON:
 {
@@ -80,7 +80,7 @@ Intent shapes:
 { "type": "explain_match", "org_hint": "optional name", "other_id": "optional id from context" }
 { "type": "compose_intro", "org_hint": "optional", "other_id": "optional", "draft_message": "optional draft" }
 { "type": "show_gaps" }
-{ "type": "navigate", "href": "/me" | "/me/matches" | "/me/inbox" | "/directory" | "/register" }
+{ "type": "navigate", "href": "/me" | "/me/matches" | "/directory" | "/register" }
 
 Signed-in context (trusted; do not contradict scores or names here):
 ${contextJson}`

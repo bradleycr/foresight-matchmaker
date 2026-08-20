@@ -37,15 +37,19 @@ function aiCapabilitiesOf(p: Profile): readonly string[] {
 }
 
 /**
- * Per-profile blockers that apply regardless of orientation. Returned so both
- * a and b can be checked.
+ * Per-profile blockers that apply regardless of orientation.
+ *
+ * `score(a, b)` treats `a` as the viewer. Hidden is therefore
+ * counterparty-only: a hidden listing stays off the directory and off
+ * everyone else's shortlist (`b.visibility_hidden`), but the owner can
+ * still rank visible peers above the usual threshold.
  */
 function profileHardBlockers(p: Profile, label: "a" | "b"): Blocker[] {
   const out: Blocker[] = []
   if (p.open_to_intros === false) {
     out.push({ key: `${label}.open_to_intros`, severity: "hard", note: "This profile is not open to introductions." })
   }
-  if (p.visibility === "hidden") {
+  if (label === "b" && p.visibility === "hidden") {
     out.push({ key: `${label}.visibility_hidden`, severity: "hard", note: "This profile is hidden." })
   }
   if (p.eligible_hq === false && p.partner_only !== true) {

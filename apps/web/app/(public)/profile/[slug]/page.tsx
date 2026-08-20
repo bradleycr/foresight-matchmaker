@@ -229,7 +229,7 @@ export default async function ProfilePage({ params }: Params) {
             email={profile.contact_email}
             linkedin={profile.linkedin}
             open={profile.open_to_intros}
-            t={t}
+            toProfileId={profile.id}
           />
         </section>
       )}

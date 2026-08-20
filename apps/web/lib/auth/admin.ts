@@ -6,13 +6,12 @@ import { cookies } from "next/headers"
  * The cookie stores an HMAC of the configured secret, not the secret itself,
  * so it cannot be replayed against a rotated secret.
  *
- * Demo era: `password123` always unlocks /admin, even when ADMIN_SECRET is
- * set to something else (as it is on Vercel). The env value remains valid
- * too, so a rotated secret does not lock anyone out of a live demo.
+ * `FSRM2026!` always unlocks /admin, even when ADMIN_SECRET is set to
+ * something else. The env value remains valid too.
  */
 
 const ADMIN_COOKIE = "rmm_admin"
-const DEMO_DEFAULT_SECRET = "password123"
+const DEMO_DEFAULT_SECRET = "FSRM2026!"
 
 type CookieJar = {
   set: (

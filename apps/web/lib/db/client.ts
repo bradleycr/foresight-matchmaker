@@ -17,9 +17,9 @@ function resolveDatabasePath(): string {
   if (process.env.DATABASE_PATH) return process.env.DATABASE_PATH
 
   // Vercel’s filesystem is ephemeral — keep the SQLite file under /tmp so
-  // writes succeed. Listings are dual-written to Vercel Blob (`lib/db/durable.ts`)
-  // so the next instance can refill this cache. The Docker/VM path with a
-  // mounted `./data` volume does not need Blob.
+  // writes succeed. Listings and funnel events are dual-written to Vercel Blob
+  // (`lib/db/durable.ts`) so the next instance can refill this cache. The
+  // Docker/VM path with a mounted `./data` volume does not need Blob.
   if (process.env.VERCEL) return "/tmp/rmm-app.db"
 
   let dir = process.cwd()
@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS auth_tokens (
 
 CREATE TABLE IF NOT EXISTS events (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  uid        TEXT UNIQUE,
   type       TEXT NOT NULL,
   actor_id   TEXT,
   payload    TEXT NOT NULL DEFAULT '{}',
@@ -137,6 +138,18 @@ function openOrExplain(file: string): Database.Database {
   }
 }
 
+/**
+ * Databases created before events carried a Blob uid still open — add the
+ * column in place. New files get `uid` from CREATE TABLE above.
+ */
+function ensureEventUid(sqlite: Database.Database): void {
+  const cols = sqlite.pragma("table_info(events)") as { name: string }[]
+  if (!cols.some((c) => c.name === "uid")) {
+    sqlite.exec("ALTER TABLE events ADD COLUMN uid TEXT")
+  }
+  sqlite.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_uid ON events(uid)")
+}
+
 function open(): { db: Db; sqlite: Database.Database } {
   const file = resolveDatabasePath()
   const sqlite = openOrExplain(file)
@@ -151,6 +164,7 @@ function open(): { db: Db; sqlite: Database.Database } {
   sqlite.pragma("synchronous = FULL")
   sqlite.pragma("foreign_keys = ON")
   sqlite.exec(MIGRATIONS)
+  ensureEventUid(sqlite)
 
   registerCheckpointOnShutdown(sqlite)
 
