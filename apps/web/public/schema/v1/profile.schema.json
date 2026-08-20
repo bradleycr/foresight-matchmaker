@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://foresight-matchmaker.vercel.app/schema/v1/profile.schema.json",
+  "$id": "https://foresightmatchmaker.app/schema/v1/profile.schema.json",
   "title": "Foresight Matchmaking — Profile (v1)",
   "$ref": "#/definitions/Profile",
   "definitions": {
@@ -159,11 +159,11 @@
             "visibility": {
               "type": "string",
               "enum": [
-                "public",
                 "authenticated_only",
+                "public",
                 "hidden"
               ],
-              "default": "public"
+              "default": "authenticated_only"
             },
             "org_type_other": {
               "type": "string",
@@ -613,11 +613,11 @@
             "visibility": {
               "type": "string",
               "enum": [
-                "public",
                 "authenticated_only",
+                "public",
                 "hidden"
               ],
-              "default": "public"
+              "default": "authenticated_only"
             },
             "org_type_other": {
               "type": "string",
@@ -684,10 +684,15 @@
                   "synthetic_data",
                   "federated_learning",
                   "privacy_tech",
-                  "classical_ml_biostat"
+                  "classical_ml_biostat",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "methods_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_target": {
               "type": "array",
@@ -1098,11 +1103,11 @@
             "visibility": {
               "type": "string",
               "enum": [
-                "public",
                 "authenticated_only",
+                "public",
                 "hidden"
               ],
-              "default": "public"
+              "default": "authenticated_only"
             },
             "org_type_other": {
               "type": "string",
@@ -1393,10 +1398,15 @@
                   "synthetic_data",
                   "federated_learning",
                   "privacy_tech",
-                  "classical_ml_biostat"
+                  "classical_ml_biostat",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "methods_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_target": {
               "type": "array",
@@ -1826,11 +1836,11 @@
             "visibility": {
               "type": "string",
               "enum": [
-                "public",
                 "authenticated_only",
+                "public",
                 "hidden"
               ],
-              "default": "public"
+              "default": "authenticated_only"
             },
             "org_type_other": {
               "type": "string",
@@ -1897,10 +1907,15 @@
                   "synthetic_data",
                   "federated_learning",
                   "privacy_tech",
-                  "classical_ml_biostat"
+                  "classical_ml_biostat",
+                  "other"
                 ]
               },
               "default": []
+            },
+            "methods_other": {
+              "type": "string",
+              "maxLength": 200
             },
             "application_target": {
               "type": "array",

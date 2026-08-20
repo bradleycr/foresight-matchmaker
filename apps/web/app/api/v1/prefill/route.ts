@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ok, badRequest, zodError } from "@/lib/api/respond"
+import { ok, badRequest, unauthorized, zodError } from "@/lib/api/respond"
+import { getSession } from "@/lib/auth/session"
 import { rateLimit } from "@/lib/auth/rate-limit"
 import { llmEnabled } from "@/lib/llm/client"
 import { proposeProfile } from "@/lib/llm/prefill"
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 503 },
     )
   }
+
+  const session = await getSession()
+  if (!session) return unauthorized("Confirm your email before pre-filling a listing.")
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
   const limited = rateLimit(`prefill:${ip}`, { limit: 20, windowMs: 15 * 60 * 1000 })

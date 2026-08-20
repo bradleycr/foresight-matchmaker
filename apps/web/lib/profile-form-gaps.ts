@@ -26,6 +26,10 @@ export type GapField =
   | "datasets"
   | "website"
   | "compute_scale"
+  | "still_seeking"
+  | "looking_for_other"
+  | "org_type_other"
+  | "methods_other"
 
 /** Minimal shape — anything the profile form can hand to gap detection. */
 export interface GapInspectable {
@@ -48,6 +52,11 @@ export interface GapInspectable {
   needs_min_n_subjects: string
   needs_annotation: string
   compute_scale: string
+  still_seeking?: unknown[]
+  looking_for_other?: string
+  org_type?: string
+  org_type_other?: string
+  methods_other?: string
   datasets: Array<{
     name: string
     modality: unknown[]
@@ -71,17 +80,28 @@ export function findManualGaps(state: GapInspectable): GapField[] {
   if (empty(state.contact_email)) gaps.push("contact_email")
   if (empty(state.website)) gaps.push("website")
 
+  const lookingHasOther =
+    state.looking_for.includes("other") || (state.still_seeking ?? []).includes("other")
+  if (lookingHasOther && empty(state.looking_for_other ?? "")) {
+    gaps.push("looking_for_other")
+  }
+  if (state.org_type === "other" && empty(state.org_type_other ?? "")) {
+    gaps.push("org_type_other")
+  }
+
   const showAi = state.kind === "ai_team" || state.kind === "consortium" || state.kind === "individual"
   const showData = state.kind === "data_holder" || state.kind === "consortium"
 
   if (showAi) {
     if (state.methods.length === 0) gaps.push("methods")
+    else if (state.methods.includes("other") && empty(state.methods_other ?? "")) {
+      gaps.push("methods_other")
+    }
     if (state.application_target.length === 0) gaps.push("application_target")
-    if (state.domain_expertise.length === 0) gaps.push("domain_expertise")
     if (state.privacy_capability.length === 0) gaps.push("privacy_capability")
-    // data_needs (modality, disease, cohort size, annotation) stay off this
-    // list: an AI expert often does not know which datasets they want yet.
-    // Matching can nudge those later; they must not block creating a profile.
+    // domain_expertise and data_needs stay off this list: many AI people are
+    // methods / privacy / infra, not a clinical specialty, and often do not
+    // yet know which datasets they want. Matching can nudge later.
   }
 
   if (showData) {
@@ -94,6 +114,10 @@ export function findManualGaps(state: GapInspectable): GapField[] {
         !d.access_model,
     )
     if (thin) gaps.push("datasets")
+  }
+
+  if (state.kind === "consortium" && (state.still_seeking?.length ?? 0) === 0) {
+    gaps.push("still_seeking")
   }
 
   return gaps
@@ -111,7 +135,7 @@ export const GAP_REMMY_HINT: Record<GapField, string> = {
   contact_email: "contact email (they type this — never invent it)",
   methods: "AI/ML methods",
   application_target: "application target",
-  domain_expertise: "domain / disease expertise",
+  domain_expertise: "clinical domain only if they have one — skip for methods/privacy/infra people",
   privacy_capability: "privacy-preserving methods they can use",
   needs_modality: "data modalities they already know they need (optional — skip if unknown)",
   needs_disease_area: "disease areas they already know they need data in (optional)",
@@ -120,6 +144,10 @@ export const GAP_REMMY_HINT: Record<GapField, string> = {
   datasets: "dataset details — name, modality, disease area, scale, and access model",
   website: "website URL",
   compute_scale: "compute they have access to",
+  still_seeking: "what the consortium is still looking for in a partner",
+  looking_for_other: "what 'Other' means for what they are looking for — their own words",
+  org_type_other: "what 'Other' means for organisation type — their own words",
+  methods_other: "what 'Other' means for methods — their own words",
 }
 
 export function formatGapsForRemmy(gaps: readonly string[]): string {

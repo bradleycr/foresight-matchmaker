@@ -168,6 +168,7 @@ function MatchRow({ match, polish, t }: { match: MatchPayload; polish: boolean; 
 export default async function MatchesPage() {
   const session = await getSession()
   if (!session) redirect("/signin")
+  if (!session.profileId) redirect("/register")
 
   const { t } = await getT()
   const polish = llmEnabled()

@@ -10,13 +10,19 @@ function blankTarget(): ProposalMergeTarget {
     kind: "data_holder",
     org_name: "",
     org_type: "hospital",
+    org_type_other: "",
     country: "DE",
     one_liner: "",
     summary: "",
     website: "",
     languages: [],
     looking_for: [],
+    looking_for_other: "",
+    attending: [],
+    application_status: "undecided",
+    affiliation: "",
     methods: [],
+    methods_other: "",
     application_target: [],
     domain_expertise: [],
     clinical_partner: "need",
@@ -33,6 +39,10 @@ function blankTarget(): ProposalMergeTarget {
     needs_standards: [],
     datasets: [emptyDataset()],
     still_seeking: [],
+    compute_scale: "",
+    intended_public_contribution: "",
+    funding_mainly_needed_for: "",
+    best_public_dataset: "",
   }
 }
 
@@ -40,6 +50,8 @@ function proposal(partial: Partial<PrefillProposal>): PrefillProposal {
   return {
     languages: [],
     looking_for: [],
+    still_seeking: [],
+    attending: [],
     methods: [],
     application_target: [],
     domain_expertise: [],
@@ -135,5 +147,116 @@ describe("mergeProposalIntoForm", () => {
     expect(next.datasets).toHaveLength(1)
     expect(next.datasets[0]?.modality).toEqual(["imaging_mri"])
     expect(next.datasets[0]?.disease_area).toEqual(["oncology"])
+  })
+
+  it("applies event chips onto attending", () => {
+    const next = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({ attending: ["event_sept_1", "remote_only"] }),
+      COUNTRIES,
+    )
+    expect(next.attending).toEqual(["event_sept_1", "remote_only"])
+  })
+
+  it("keeps an individual as a person even if the extractor guessed a hospital org type", () => {
+    const next = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({
+        kind: "individual",
+        org_name: "Bradley Royes",
+        org_type: "hospital",
+        affiliation: "Charité",
+        application_status: "intend_to_apply",
+      }),
+      COUNTRIES,
+    )
+    expect(next.kind).toBe("individual")
+    expect(next.org_type).toBe("individual")
+    expect(next.team_size).toBe("1")
+    expect(next.affiliation).toBe("Charité")
+    expect(next.application_status).toBe("intend_to_apply")
+  })
+
+  it("applies what a consortium is still seeking", () => {
+    const next = mergeProposalIntoForm(
+      { ...blankTarget(), kind: "consortium" },
+      proposal({ still_seeking: ["ai_partner", "compute"] }),
+      COUNTRIES,
+    )
+    expect(next.still_seeking).toEqual(["ai_partner", "compute"])
+  })
+
+  it("does not keep org_type individual on a data holder", () => {
+    const next = mergeProposalIntoForm(
+      { ...blankTarget(), kind: "individual", org_type: "individual", team_size: "1" },
+      proposal({ kind: "data_holder", org_name: "Charité" }),
+      COUNTRIES,
+    )
+    expect(next.kind).toBe("data_holder")
+    expect(next.org_type).toBe("hospital")
+  })
+
+  it("lets a later named dataset paste fill scale without wiping modality already on the form", () => {
+    const started = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({
+        kind: "data_holder",
+        datasets: [{ name: "Berlin MRI", modality: ["imaging_mri"], disease_area: ["oncology"], linkage: [], standards: [] }],
+      }),
+      COUNTRIES,
+    )
+    const next = mergeProposalIntoForm(
+      started,
+      proposal({
+        datasets: [
+          {
+            name: "Berlin MRI",
+            modality: [],
+            disease_area: [],
+            n_subjects: "10k_100k",
+            volume: "1_10tb",
+            access_model: "dua_required",
+            linkage: ["outcomes"],
+            standards: ["dicom"],
+          },
+        ],
+      }),
+      COUNTRIES,
+    )
+    expect(next.datasets).toHaveLength(1)
+    expect(next.datasets[0]?.modality).toEqual(["imaging_mri"])
+    expect(next.datasets[0]?.disease_area).toEqual(["oncology"])
+    expect(next.datasets[0]?.n_subjects).toBe("10k_100k")
+    expect(next.datasets[0]?.access_model).toBe("dua_required")
+  })
+
+  it("applies a free-text Other method", () => {
+    const next = mergeProposalIntoForm(
+      { ...blankTarget(), kind: "ai_team" },
+      proposal({ methods: ["other"], methods_other: "Mechanistic ODE models" }),
+      COUNTRIES,
+    )
+    expect(next.methods).toEqual(["other"])
+    expect(next.methods_other).toBe("Mechanistic ODE models")
+  })
+
+  it("adds methods Other when the extractor only returned a definition", () => {
+    const next = mergeProposalIntoForm(
+      { ...blankTarget(), kind: "ai_team", methods: ["clinical_nlp"] },
+      proposal({ methods_other: "Mechanistic ODE models" }),
+      COUNTRIES,
+    )
+    expect(next.methods).toEqual(["clinical_nlp", "other"])
+    expect(next.methods_other).toBe("Mechanistic ODE models")
+  })
+
+  it("adds looking-for Other when the extractor only returned a definition", () => {
+    const next = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({ looking_for_other: "A federated compute partner" }),
+      COUNTRIES,
+    )
+    expect(next.looking_for).toEqual(["other"])
+    expect(next.looking_for_other).toBe("A federated compute partner")
   })
 })

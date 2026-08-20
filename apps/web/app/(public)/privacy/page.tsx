@@ -2,7 +2,7 @@ import { getT } from "@/lib/i18n/server"
 import { CHALLENGES } from "@/lib/challenges/catalog"
 
 const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@foresight.org"
-const UPDATED = "13 August 2026"
+const UPDATED = "19 August 2026"
 
 /**
  * Privacy notice for Foresight Matchmaking.
@@ -15,13 +15,13 @@ export default async function PrivacyPage() {
 
   const sections: Array<{ title: string; body: string }> = [
     { title: t("privacy.who_title"), body: t("privacy.who_body") },
+    { title: t("privacy.ai_title"), body: t("privacy.ai_body") },
     { title: t("privacy.independent_title"), body: t("privacy.independent_body") },
     { title: t("privacy.collected_title"), body: t("privacy.collected_body") },
     { title: t("privacy.purpose_title"), body: t("privacy.purpose_body") },
     { title: t("privacy.legal_basis_title"), body: t("privacy.legal_basis_body") },
     { title: t("privacy.visibility_title"), body: t("privacy.visibility_body") },
     { title: t("privacy.recipients_title"), body: t("privacy.recipients_body") },
-    { title: t("privacy.ai_title"), body: t("privacy.ai_body") },
     { title: t("privacy.cookies_title"), body: t("privacy.cookies_body") },
     { title: t("privacy.retention_title"), body: t("privacy.retention_body") },
     { title: t("privacy.rights_title"), body: t("privacy.rights_body") },

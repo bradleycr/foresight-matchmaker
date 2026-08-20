@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer"
 import en from "@/locales/en.json"
 import de from "@/locales/de.json"
 import fr from "@/locales/fr.json"
+import { publicOrigin } from "@/lib/public-origin"
 import "./globals.css"
 
 /**
@@ -43,7 +44,7 @@ const arizona = localFont({
 
 const dictionaries = { en, de, fr } as const
 
-const ORIGIN = process.env.APP_URL ?? "https://foresight-matchmaker.vercel.app"
+const ORIGIN = publicOrigin()
 
 export const metadata: Metadata = {
   metadataBase: new URL(ORIGIN),

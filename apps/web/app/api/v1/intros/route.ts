@@ -52,9 +52,10 @@ function serialiseIntro(intro: Intro, viewerId: string) {
 /** GET /api/v1/intros — sent and received contacts for the signed-in profile. */
 export async function GET(): Promise<Response> {
   const session = await getSession()
-  if (!session) return unauthorized()
+  if (!session?.profileId) return unauthorized()
+  const viewerId = session.profileId
 
-  const intros = listIntrosFor(session.profileId).map((i) => serialiseIntro(i, session.profileId))
+  const intros = listIntrosFor(viewerId).map((i) => serialiseIntro(i, viewerId))
   return ok({ intros })
 }
 
@@ -64,7 +65,8 @@ export async function GET(): Promise<Response> {
  */
 export async function POST(req: NextRequest): Promise<Response> {
   const session = await getSession()
-  if (!session) return unauthorized()
+  if (!session?.profileId) return unauthorized()
+  const viewerId = session.profileId
 
   let body: unknown
   try {
@@ -81,7 +83,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     throw e
   }
 
-  const sender = getProfileById(session.profileId)
+  const sender = getProfileById(viewerId)
   const target = getProfileById(input.to_id)
   if (!sender) return unauthorized()
   if (!target || target.visibility === "hidden") return notFound("That profile does not exist.")
@@ -89,7 +91,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     return badRequest("This organisation is not accepting introductions.")
   }
 
-  const result = requestIntro(session.profileId, input.to_id, input.message)
+  const result = requestIntro(viewerId, input.to_id, input.message)
   if (!result.ok) {
     switch (result.error) {
       case "rate_limited":
@@ -113,7 +115,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   return ok(
     {
-      intro: serialiseIntro(result.intro, session.profileId),
+      intro: serialiseIntro(result.intro, viewerId),
       email_sent: mail.sent,
     },
     { status: 201 },

@@ -1,6 +1,7 @@
 # AI assistant — living plan
 
-Status: **Remmy onboarding shipped** (create + update chat; chips for vocabularies; draft applies to the form immediately).
+Status: **Verify-first signup shipped** (confirm email → fill listing; one listing per email; delete keeps session).
+**Remmy onboarding shipped** (create + update chat; chips for vocabularies; draft applies to the form immediately).
 **Remmy Guide shipped** for signed-in match exploration (generative shortlist,
 intro compose, gaps) on `/me/matches` when `LLM_*` is configured.
 
@@ -8,6 +9,16 @@ Related: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md), [`DEMO_RUNBOOK.md`](DEMO_RUNB
 YCluster inference gateway ([docs](https://gitlab.com/devrandom01/ycluster/-/blob/main/docs/operations/inference.md)).
 
 ---
+
+## Shipped: Verify-first auth + listings
+
+- **`/register`** — email gate first; `POST /api/v1/auth/request-link` with `next=/register` sends a welcome email for unknown addresses.
+- **`POST /api/v1/auth/claim`** — establishes a session with `profileId: null` until the listing is submitted.
+- **`POST /api/v1/profiles`** — requires a verified session; contact email comes from the session.
+- **One listing per email** — enforced server-side; delete via `/me` then re-register a different type without re-verifying email (`createSession(null, email)` after delete).
+- Magic links are **HMAC-signed** (stateless across Vercel instances). Resend delivers from `hello@foresightmatchmaker.app` in production.
+
+Do not create a listing before email verification. Do not use "profile" in pre-submit copy — say **listing**.
 
 ## Shipped: Remmy (profile create / update)
 

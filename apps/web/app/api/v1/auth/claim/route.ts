@@ -15,6 +15,9 @@ const claimSchema = z.object({ token: z.string().min(1) })
  * Deliberately a POST triggered by a button on /claim/[token], never a GET
  * side effect: link prefetchers and mail scanners must not be able to burn
  * a single-use token.
+ *
+ * A token with no listing still creates a session (email confirmed). The
+ * client then sends them to /register to fill the profile.
  */
 export async function POST(req: NextRequest): Promise<Response> {
   let body: unknown
@@ -34,18 +37,13 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   const result = consumeToken(input.token)
   if (!result.ok) {
-    // One generic message — don't distinguish invalid / expired / used
-    // (helps against token-oracle probing).
-    return badRequest("This sign-in link is not valid. Request a new one from the sign-in page.")
+    return badRequest("This link is no longer valid. Request a new one.")
   }
 
-  const profileId = result.profileId ?? getProfilesByEmail(result.email)[0]?.id
-  if (!profileId) {
-    return badRequest("This sign-in link is not valid. Request a new one from the sign-in page.")
-  }
+  const profileId = result.profileId ?? getProfilesByEmail(result.email)[0]?.id ?? null
 
   await createSession(profileId, result.email)
-  markClaimed(profileId)
+  if (profileId) markClaimed(profileId)
 
   return ok({ signed_in: true, profile_id: profileId })
 }

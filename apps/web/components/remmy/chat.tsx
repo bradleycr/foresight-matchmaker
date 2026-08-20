@@ -9,11 +9,10 @@ import type { PrefillProposal } from "@/lib/llm/prefill"
 import { fetchPrefill } from "@/lib/llm/fetch-prefill"
 import { transcriptForExtraction } from "@/lib/llm/proposal-utils"
 import { pasteLooksLikeUrlOnly } from "@/lib/paste-is-url"
-import { ASK_CATALOG, proposalFromAsk, type AskId } from "@/lib/remmy/ask"
+import { ASK_CATALOG, activeChipTurn, answeredAsksFromMessages, gapsWithoutAnswered, isAskId, overlayAskOnProfile, proposalFromAsk, type AskId } from "@/lib/remmy/ask"
 import { AskChipsPart } from "./parts/ask-chips"
-import { cn } from "@/lib/utils"
 
-interface ChatMessage {
+export interface RemmyChatMessage {
   role: "user" | "assistant"
   content: string
   ask?: AskId
@@ -32,12 +31,19 @@ export interface RemmyApplyOpts {
 
 const LONG_PASTE_CHARS = 400
 
+function hydrateAsk(value: string | undefined): AskId | undefined {
+  return isAskId(value) ? value : undefined
+}
+
 /**
  * Remmy chat — hybrid conversational intake:
  * 1. Remmy interviews (one question at a time).
  * 2. Vocabulary questions hydrate as tappable chips (generative UI).
  * 3. Schema extractor maps the transcript → form fields.
  * 4. Fill form (or a ready signal) applies the draft; chat stays available.
+ *
+ * When the form is on screen, only the current question stays open. The
+ * rest of the transcript is a scrollable drawer — not a second page.
  */
 export function RemmyChat({
   mode,
@@ -45,6 +51,8 @@ export function RemmyChat({
   getFormContext,
   formAlreadyOpen = false,
   compact = false,
+  initialMessages,
+  onMessagesChange,
   onDraftApplied,
   onUseFormInstead,
 }: {
@@ -53,17 +61,39 @@ export function RemmyChat({
   getFormContext?: () => RemmyFormContext | null
   formAlreadyOpen?: boolean
   compact?: boolean
+  initialMessages?: RemmyChatMessage[]
+  onMessagesChange?: (messages: RemmyChatMessage[]) => void
   onDraftApplied: (proposal: PrefillProposal, opts?: RemmyApplyOpts) => void
   onUseFormInstead: () => void
 }) {
   const t = useT()
   const scroller = useRef<HTMLDivElement>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const answeredAsks = useRef<AskId[]>([])
+  const profileOverlay = useRef<Record<string, unknown>>({})
+  const restored = useRef(Boolean(initialMessages && initialMessages.length > 0))
+  const onMessagesChangeRef = useRef(onMessagesChange)
+  onMessagesChangeRef.current = onMessagesChange
+  const [messages, setMessages] = useState<RemmyChatMessage[]>(() => {
+    if (initialMessages && initialMessages.length > 0) {
+      return initialMessages.map((m) => ({
+        ...m,
+        ask: hydrateAsk(m.ask),
+      }))
+    }
+    return []
+  })
   const [input, setInput] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   useEffect(() => {
+    if (restored.current) {
+      answeredAsks.current = answeredAsksFromMessages(messages)
+      return
+    }
+    answeredAsks.current = []
+    profileOverlay.current = {}
     setMessages([
       {
         role: "assistant",
@@ -75,12 +105,16 @@ export function RemmyChat({
   }, [mode])
 
   useEffect(() => {
+    onMessagesChangeRef.current?.(messages)
+  }, [messages])
+
+  useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" })
   }, [messages, busy])
 
   const userTurns = messages.filter((m) => m.role === "user").length
 
-  async function extractDraft(fromMessages: ChatMessage[]) {
+  async function extractDraft(fromMessages: RemmyChatMessage[]) {
     const transcript = transcriptForExtraction(fromMessages)
     if (transcript.length < 40) {
       return { ok: false as const, message: t("remmy.fill_failed") }
@@ -95,6 +129,8 @@ export function RemmyChat({
   }
 
   function liveKind(): Kind | undefined {
+    const fromOverlay = profileOverlay.current.kind
+    if (typeof fromOverlay === "string") return fromOverlay as Kind
     const fromForm = getFormContext?.()?.current_profile.kind
     if (typeof fromForm === "string") return fromForm as Kind
     const fromProp = currentProfile?.kind
@@ -102,28 +138,51 @@ export function RemmyChat({
     return undefined
   }
 
+  /** Form snapshot Remmy reads — includes chips that React has not painted yet. */
+  function contextForTurn(transcript: RemmyChatMessage[] = messages) {
+    const ctx = getFormContext?.() ?? null
+    const answered = [...new Set([...answeredAsks.current, ...answeredAsksFromMessages(transcript)])]
+    return {
+      current_profile: {
+        ...(ctx?.current_profile ?? (mode === "update" ? currentProfile ?? null : null) ?? {}),
+        ...profileOverlay.current,
+      },
+      open_gaps: gapsWithoutAnswered(ctx?.open_gaps ?? [], answered),
+      answered_asks: answered,
+    }
+  }
+
+  function noteAnswered(ask: AskId, values?: string[]) {
+    if (!answeredAsks.current.includes(ask)) answeredAsks.current = [...answeredAsks.current, ask]
+    if (values) profileOverlay.current = overlayAskOnProfile(profileOverlay.current, ask, values)
+  }
+
   function commitAsk(index: number, ask: AskId, values: string[]) {
     const catalog = ASK_CATALOG[ask]
     const labels = values.map((v) => enumLabel(t, catalog.group, v))
     const sentence = `${t(catalog.labelKey)}: ${labels.join(", ")}`
     const kind = ask === "kind" ? (values[0] as Kind) : liveKind()
+    noteAnswered(ask, values)
     onDraftApplied(proposalFromAsk(ask, values, kind), { spotlight: false })
     const next = messages.map((msg, i) => (i === index ? { ...msg, askDone: true } : msg))
     setMessages(next)
     void send(sentence, next)
   }
 
-  function skipAsk(index: number) {
+  function skipAsk(index: number, ask: AskId) {
+    const catalog = ASK_CATALOG[ask]
+    const sentence = t(catalog.skipKey ?? "remmy.ask_skip_said")
+    noteAnswered(ask)
     const next = messages.map((msg, i) => (i === index ? { ...msg, askDone: true } : msg))
     setMessages(next)
-    void send(t("remmy.ask_skip_said"), next)
+    void send(sentence, next)
   }
 
-  async function send(text: string, fromMessages?: ChatMessage[]) {
+  async function send(text: string, fromMessages?: RemmyChatMessage[]) {
     const trimmed = text.trim()
     if (!trimmed || busy) return
 
-    const nextMessages: ChatMessage[] = [...(fromMessages ?? messages), { role: "user", content: trimmed }]
+    const nextMessages: RemmyChatMessage[] = [...(fromMessages ?? messages), { role: "user", content: trimmed }]
     setMessages(nextMessages)
     setInput("")
     setBusy(true)
@@ -147,15 +206,16 @@ export function RemmyChat({
         return
       }
 
-      const ctx = getFormContext?.() ?? null
+      const ctx = contextForTurn(nextMessages)
       const res = await fetch("/api/v1/remmy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode,
           messages: nextMessages.map(({ role, content }) => ({ role, content })),
-          current_profile: ctx?.current_profile ?? (mode === "update" ? currentProfile ?? null : null),
-          open_gaps: ctx?.open_gaps ?? [],
+          current_profile: ctx.current_profile,
+          open_gaps: ctx.open_gaps,
+          answered_asks: ctx.answered_asks,
         }),
       })
 
@@ -171,9 +231,12 @@ export function RemmyChat({
         ask?: AskId | null
       }
 
-      const withReply: ChatMessage[] = [
+      const ask =
+        isAskId(turn.ask) && !ctx.answered_asks.includes(turn.ask) ? turn.ask : undefined
+
+      const withReply: RemmyChatMessage[] = [
         ...nextMessages,
-        { role: "assistant", content: turn.reply, ask: turn.ask ?? undefined },
+        { role: "assistant", content: turn.reply, ask },
       ]
       setMessages(withReply)
 
@@ -216,24 +279,56 @@ export function RemmyChat({
     void send(input)
   }
 
-  const lastAskIndex = [...messages]
-    .map((m, i) => ({ m, i }))
-    .reverse()
-    .find(({ m }) => m.role === "assistant" && m.ask && !m.askDone)?.i
+  const chipTurn = activeChipTurn(messages)
+  const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant")
+  const prior = lastAssistantIndex > 0 ? messages.slice(0, lastAssistantIndex) : []
+  const live = lastAssistantIndex >= 0 ? messages.slice(lastAssistantIndex) : messages
+
+  function bubble(m: RemmyChatMessage, i: number, showChips: boolean) {
+    return (
+      <div
+        key={`${m.role}-${i}-${m.content.slice(0, 24)}`}
+        className={
+          m.role === "user"
+            ? "ml-6 border border-ink bg-mark/40 px-3 py-2 text-sm leading-relaxed sm:ml-8"
+            : "mr-2 border border-rule bg-paper-shade px-3 py-2 text-sm leading-relaxed sm:mr-4"
+        }
+      >
+        <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-widest text-ink-faint">
+          {m.role === "user" ? t("remmy.you") : t("remmy.name")}
+        </p>
+        <p className="whitespace-pre-wrap">{m.content}</p>
+        {showChips && m.ask && (
+          <AskChipsPart
+            key={`${i}-${m.ask}`}
+            ask={m.ask}
+            disabled={busy}
+            onCommit={(values) => commitAsk(i, m.ask!, values)}
+            onSkip={() => skipAsk(i, m.ask!)}
+          />
+        )}
+      </div>
+    )
+  }
 
   return (
-    <div
-      className={cn(
-        "flex flex-col border-2 border-ink bg-paper",
-        compact ? "min-h-[18rem]" : "min-h-[32rem]",
-      )}
-    >
+    <div className="flex flex-col border-2 border-ink bg-paper">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-paper-shade px-4 py-3">
         <div>
           <p className="font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">{t("remmy.kicker")}</p>
-          <h2 className="font-listing text-2xl font-bold uppercase tracking-tight">{t("remmy.name")}</h2>
+          <h2 className="font-listing text-xl font-bold uppercase tracking-tight sm:text-2xl">{t("remmy.name")}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
+          {prior.length > 0 && (
+            <Button
+              type="button"
+              className="text-sm"
+              aria-expanded={historyOpen}
+              onClick={() => setHistoryOpen((v) => !v)}
+            >
+              {historyOpen ? t("remmy.hide_history") : t("remmy.show_history")}
+            </Button>
+          )}
           <Button
             type="button"
             variant="primary"
@@ -251,31 +346,21 @@ export function RemmyChat({
         </div>
       </header>
 
-      <div ref={scroller} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-        {messages.map((m, i) => (
-          <div
-            key={`${m.role}-${i}`}
-            className={
-              m.role === "user"
-                ? "ml-8 border border-ink bg-mark/40 px-3 py-2 text-sm leading-relaxed"
-                : "mr-4 border border-rule bg-paper-shade px-3 py-2 text-sm leading-relaxed"
-            }
-          >
-            <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-widest text-ink-faint">
-              {m.role === "user" ? t("remmy.you") : t("remmy.name")}
-            </p>
-            <p className="whitespace-pre-wrap">{m.content}</p>
-            {m.role === "assistant" && m.ask && i === lastAskIndex && !m.askDone && (
-              <AskChipsPart
-                ask={m.ask}
-                disabled={busy}
-                onCommit={(values) => commitAsk(i, m.ask!, values)}
-                onSkip={() => skipAsk(i)}
-              />
-            )}
-          </div>
-        ))}
+      {historyOpen && prior.length > 0 && (
+        <div
+          ref={scroller}
+          className="max-h-[min(20rem,45vh)] space-y-3 overflow-y-auto overscroll-contain border-b border-rule px-4 py-3"
+        >
+          {prior.map((m, i) => bubble(m, i, false))}
+        </div>
+      )}
 
+      <div className="space-y-3 px-4 py-3">
+        {live.map((m, offset) => {
+          const i = lastAssistantIndex >= 0 ? lastAssistantIndex + offset : offset
+          const showChips = chipTurn !== null && i === chipTurn.index && m.ask === chipTurn.ask && !m.askDone
+          return bubble(m, i, showChips)
+        })}
         {busy && (
           <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft" aria-live="polite">
             {t("remmy.thinking")}
@@ -294,7 +379,7 @@ export function RemmyChat({
         </label>
         <Textarea
           id="remmy-input"
-          rows={compact ? 2 : 3}
+          rows={compact || formAlreadyOpen ? 2 : 3}
           maxLength={4000}
           value={input}
           disabled={busy}
@@ -309,7 +394,7 @@ export function RemmyChat({
           }}
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs text-ink-faint">{t("remmy.hint_verify")}</p>
+          <p className="text-xs text-ink-faint">{formAlreadyOpen ? t("remmy.draft_kept") : t("remmy.hint_verify")}</p>
           <Button type="submit" variant="primary" disabled={busy || input.trim().length === 0}>
             {busy ? t("remmy.thinking") : t("remmy.send")}
           </Button>

@@ -75,7 +75,7 @@ const sharedProfileFields = {
   parallel_public_funding: yesNoUnsureEnum.default("no"),
   attending: z.array(attendingEnum).default([]),
   open_to_intros: z.boolean().default(true),
-  visibility: visibilityEnum.default("public"),
+  visibility: visibilityEnum.default("authenticated_only"),
   org_type_other: z.string().max(200).optional(),
   intended_public_contribution: z.string().max(600).optional(),
   funding_mainly_needed_for: z.string().max(200).optional(),
@@ -97,6 +97,7 @@ const sharedProfileFields = {
 
 const aiTeamFields = {
   methods: z.array(methodsEnum).default([]),
+  methods_other: z.string().max(200).optional(),
   application_target: z.array(applicationTargetEnum).default([]),
   domain_expertise: z.array(diseaseAreaEnum).default([]),
   clinical_partner: clinicalPartnerEnum,
@@ -171,6 +172,13 @@ export const profileSchema = z
         code: z.ZodIssueCode.custom,
         path: ["looking_for_other"],
         message: "Please define what you are looking for.",
+      })
+    }
+    if ("methods" in data && data.methods?.includes("other") && !data.methods_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["methods_other"],
+        message: "Please define the method.",
       })
     }
   })

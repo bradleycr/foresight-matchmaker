@@ -19,7 +19,7 @@ Four listing types. Please mark any field that is wrong, missing, or should not 
 | Working languages | no | en, de, fr, nl, es, it, pl, sv, da, he, fi, pt, el, cs, hu, ro, other |
 | Looking for | no | dataset access, AI partner, clinical partner, data-governance support, compute, join an existing team, individual expert, not looking, other (please define) |
 | Application status | yes | undecided, looking for a partner to apply with, applying with a partner, team complete, not applying |
-| Challenge events attending | no | webinar 20 Aug 2026 (hidden after 20 Aug), Berlin 3 Sep, Paris 9 Sep, Stockholm 17 Sep, remote only |
+| Challenge events attending | no | Berlin 2 Sep, Paris 9 Sep, Stockholm 17 Sep, remote only |
 | Intended public contribution | no | optional free text |
 | Funding mainly needed for | no | optional free text (compute, personnel, …) |
 | Best publicly available dataset | no | optional free text |

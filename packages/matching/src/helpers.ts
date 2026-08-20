@@ -6,7 +6,7 @@ export function hasDatasets(p: Profile): p is Extract<Profile, { datasets: Datas
   return hasDatasetKind(p.kind)
 }
 
-/** Does this profile carry AI capability fields (ai_team, consortium, or individual)? */
+/** Does this profile carry AI capability fields used in data↔AI pairing (ai_team or consortium)? */
 export function hasAiFields(p: Profile): p is Extract<Profile, { data_needs: DataNeeds }> {
   return hasAiCapabilityKind(p.kind)
 }

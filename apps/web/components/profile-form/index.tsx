@@ -94,6 +94,7 @@ interface FormState {
   contact_role: string
   datasets: Dataset[]
   methods: (typeof METHODS)[number][]
+  methods_other: string
   application_target: (typeof APPLICATION_TARGET)[number][]
   domain_expertise: (typeof DISEASE_AREA)[number][]
   clinical_partner: (typeof CLINICAL_PARTNER)[number]
@@ -133,13 +134,14 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     application_status: "undecided",
     attending: [],
     open_to_intros: true,
-    visibility: "public",
+    visibility: "authenticated_only",
     partner_only: false,
     contact_name: "",
     contact_email: "",
     contact_role: "",
     datasets: [emptyDataset()],
     methods: [],
+    methods_other: "",
     application_target: [],
     domain_expertise: [],
     clinical_partner: "need",
@@ -190,6 +192,7 @@ function stateFromProfile(p: Profile): FormState {
     partner_only: p.partner_only ?? false,
     datasets: "datasets" in p ? p.datasets : [emptyDataset()],
     methods: ai?.methods ?? [],
+    methods_other: ai?.methods_other ?? "",
     application_target: ai?.application_target ?? [],
     domain_expertise: ai?.domain_expertise ?? [],
     clinical_partner: ai?.clinical_partner ?? "need",
@@ -252,6 +255,7 @@ function toPayload(s: FormState): Record<string, unknown> {
 
   const aiFields = {
     methods: s.methods,
+    methods_other: s.methods.includes("other") ? s.methods_other.trim() || undefined : undefined,
     application_target: s.application_target,
     domain_expertise: s.domain_expertise,
     clinical_partner: s.clinical_partner,
@@ -301,11 +305,19 @@ function remmySnapshot(s: FormState): Record<string, unknown> {
     website: s.website,
     languages: s.languages,
     looking_for: s.looking_for,
+    looking_for_other: s.looking_for_other,
     attending: s.attending,
+    application_status: s.application_status,
+    affiliation: s.affiliation,
+    still_seeking: s.still_seeking,
+    org_type_other: s.org_type_other,
     methods: s.methods,
+    methods_other: s.methods_other,
     application_target: s.application_target,
     domain_expertise: s.domain_expertise,
     privacy_capability: s.privacy_capability,
+    clinical_partner: s.clinical_partner,
+    compute: s.compute,
     team_size: s.team_size,
     datasets: s.datasets
       .filter((d) => d.name.trim() || d.modality.length || d.disease_area.length)
@@ -325,9 +337,28 @@ function remmySnapshot(s: FormState): Record<string, unknown> {
   }
 }
 
+function applySnapshot(base: FormState, snap?: Record<string, unknown> | null): FormState {
+  if (!snap) return base
+  const next = { ...base } as FormState
+  const writable = next as unknown as Record<string, unknown>
+  for (const key of Object.keys(base) as (keyof FormState)[]) {
+    if (!(key in snap)) continue
+    const incoming = snap[key as string]
+    const current = base[key]
+    if (Array.isArray(current)) {
+      if (Array.isArray(incoming)) writable[key] = incoming
+    } else if (incoming !== null && incoming !== undefined && typeof incoming === typeof current) {
+      writable[key] = incoming
+    }
+  }
+  if (!Array.isArray(next.datasets) || next.datasets.length === 0) next.datasets = base.datasets
+  return next
+}
+
 export type ProfileFormHandle = {
   applyDraft: (proposal: PrefillProposal, opts?: { spotlight?: boolean }) => void
   getContext: () => { open_gaps: GapField[]; current_profile: Record<string, unknown> }
+  getSnapshot: () => Record<string, unknown>
 }
 
 export function ProfileForm({
@@ -336,8 +367,12 @@ export function ProfileForm({
   profileId,
   prefillEnabled = false,
   initialProposal,
+  initialSnapshot,
   highlightGapsOnMount = false,
   defaultChallengeId = DEFAULT_CHALLENGE_ID,
+  lockedEmail,
+  onSnapshotChange,
+  onPublished,
 }: {
   ref?: Ref<ProfileFormHandle>
   initial?: Profile
@@ -345,17 +380,25 @@ export function ProfileForm({
   prefillEnabled?: boolean
   /** Remmy (or paste-prefill) draft to apply on first mount. */
   initialProposal?: PrefillProposal
+  /** Browser-restored in-progress listing (create only). */
+  initialSnapshot?: Record<string, unknown> | null
   /** After a Remmy draft is applied, spotlight fields still empty. */
   highlightGapsOnMount?: boolean
   /** Programme selected on /register?challenge=… */
   defaultChallengeId?: ChallengeId
+  /** Confirmed address — the listing is bound to this, not typed again. */
+  lockedEmail?: string
+  onSnapshotChange?: (snapshot: Record<string, unknown>) => void
+  onPublished?: () => void
 }) {
   const t = useT()
   const locale = useLocale()
   const router = useRouter()
   const [state, setState] = useState<FormState>(() => {
     const base = initial ? stateFromProfile(initial) : blankState(defaultChallengeId)
-    return initialProposal ? mergeProposalIntoForm(base, initialProposal, COUNTRY_CODES) : base
+    const restored = !initial ? applySnapshot(base, initialSnapshot) : base
+    const merged = initialProposal ? mergeProposalIntoForm(restored, initialProposal, COUNTRY_CODES) : restored
+    return lockedEmail ? { ...merged, contact_email: lockedEmail } : merged
   })
   const [status, setStatus] = useState<"idle" | "saving" | "created">("idle")
   const [apiError, setApiError] = useState<ApiError | null>(null)
@@ -378,7 +421,10 @@ export function ProfileForm({
   const needs = (key: GapField) => gapSet.has(key)
 
   function applyDraft(proposal: PrefillProposal, opts?: { spotlight?: boolean }) {
-    setState((s) => mergeProposalIntoForm(s, proposal, COUNTRY_CODES))
+    setState((s) => {
+      const next = mergeProposalIntoForm(s, proposal, COUNTRY_CODES)
+      return lockedEmail ? { ...next, contact_email: lockedEmail } : next
+    })
     const spotlight = opts?.spotlight !== false
     if (spotlight) setSpotlightGaps(true)
     setClientIssues([])
@@ -395,7 +441,12 @@ export function ProfileForm({
       open_gaps: findManualGaps(state),
       current_profile: remmySnapshot(state),
     }),
+    getSnapshot: () => ({ ...state }) as Record<string, unknown>,
   }))
+
+  useEffect(() => {
+    onSnapshotChange?.(state as unknown as Record<string, unknown>)
+  }, [state, onSnapshotChange])
 
   useEffect(() => {
     if (highlightGapsOnMount && gaps.length > 0) {
@@ -419,6 +470,8 @@ export function ProfileForm({
       looking_for: state.looking_for,
       still_seeking: state.still_seeking,
       looking_for_other: state.looking_for_other,
+      methods: state.methods,
+      methods_other: state.methods_other,
     })
 
     if (issues.length > 0) {
@@ -432,11 +485,24 @@ export function ProfileForm({
     setClientIssues([])
     setStatus("saving")
 
-    const res = await fetch(isCreate ? "/api/v1/profiles" : `/api/v1/profiles/${profileId}`, {
-      method: isCreate ? "POST" : "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(toPayload(state)),
-    })
+    // A dropped connection must not strand the form in "saving" — that reads as
+    // a hang, and the person walks away believing they submitted. Anything
+    // thrown here returns them to an editable form with their answers intact.
+    let res: Response
+    try {
+      res = await fetch(isCreate ? "/api/v1/profiles" : `/api/v1/profiles/${profileId}`, {
+        method: isCreate ? "POST" : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          lockedEmail ? { ...toPayload(state), contact_email: lockedEmail } : toPayload(state),
+        ),
+      })
+    } catch {
+      setApiError({ error: t("form.error_network") })
+      setStatus("idle")
+      window.scrollTo({ top: 0 })
+      return
+    }
 
     if (!res.ok) {
       setApiError((await res.json().catch(() => ({ error: t("form.error_generic") }))) as ApiError)
@@ -446,6 +512,7 @@ export function ProfileForm({
     }
 
     if (isCreate) {
+      onPublished?.()
       setStatus("created")
       window.scrollTo({ top: 0 })
       router.refresh()
@@ -551,23 +618,45 @@ export function ProfileForm({
               const next = v.filter((k) => k !== state.kind)[0]
               if (!next) return
               setClientIssues([])
-              setState((s) => ({
-                ...s,
-                kind: next,
-                ...(next === "individual"
-                  ? { org_type: "individual" as const, team_size: "1" as const, looking_for: s.looking_for.includes("join_team") ? s.looking_for : [...s.looking_for, "join_team" as const] }
-                  : {}),
-              }))
+              setState((s) => {
+                if (next === "individual") {
+                  return {
+                    ...s,
+                    kind: next,
+                    org_type: "individual" as const,
+                    team_size: "1" as const,
+                    looking_for: s.looking_for.includes("join_team")
+                      ? s.looking_for
+                      : [...s.looking_for, "join_team" as const],
+                  }
+                }
+                return {
+                  ...s,
+                  kind: next,
+                  org_type:
+                    s.org_type === "individual"
+                      ? next === "ai_team"
+                        ? "startup"
+                        : next === "consortium"
+                          ? "university"
+                          : "hospital"
+                      : s.org_type,
+                  team_size: s.kind === "individual" ? "2_5" : s.team_size,
+                }
+              })
             }}
             hint={t("form.kind_hint")}
           />
         </>
       ) : (
-        <p className="text-sm text-ink-soft">
-          {t("field.challenge")}: <strong className="uppercase">{t(`enum.challenge.${state.challenge_id}`)}</strong>
-          {" · "}
-          {t("field.kind")}: <strong className="uppercase">{t(`enum.kind.${state.kind}`)}</strong>
-        </p>
+        <div>
+          <p className="text-sm text-ink-soft">
+            {t("field.challenge")}: <strong className="uppercase">{t(`enum.challenge.${state.challenge_id}`)}</strong>
+            {" · "}
+            {t("field.kind")}: <strong className="uppercase">{t(`enum.kind.${state.kind}`)}</strong>
+          </p>
+          <p className="mt-1 max-w-xl text-sm text-ink-soft">{t("form.kind_locked_hint")}</p>
+        </div>
       )}
 
       {/* Organisation. */}
@@ -598,7 +687,7 @@ export function ProfileForm({
             <EnumSelect
               label={t("field.org_type")}
               group="org_type"
-              options={ORG_TYPE}
+              options={ORG_TYPE.filter((value) => value !== "individual")}
               value={state.org_type}
               onChange={(v) => v && set("org_type", v)}
               id="org_type"
@@ -637,10 +726,43 @@ export function ProfileForm({
           <Textarea id="summary" required rows={4} maxLength={600} value={state.summary} onChange={(e) => set("summary", e.target.value)} />
         </Field>
         <Field label={t("field.website")} htmlFor="website" attention={needs("website")} id="gap-website">
-          <Input id="website" type="url" placeholder="https://" value={state.website} onChange={(e) => set("website", e.target.value)} />
+          <Input id="website" inputMode="url" autoComplete="url" placeholder="https://" value={state.website} onChange={(e) => set("website", e.target.value)} />
         </Field>
         <EnumChips label={t("field.languages")} group="language" options={LANGUAGE} value={state.languages} onChange={(v) => set("languages", v)} attention={needs("languages")} fieldId="gap-languages" />
       </section>
+
+      {isCreate ? (
+        <section className="flex flex-col gap-4 border-2 border-ink p-4">
+          <h2 className="font-listing text-xl font-bold uppercase">{t("form.section_contact")}</h2>
+          <p className="text-sm leading-relaxed text-ink-soft">{t("form.draft_hint")}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("field.contact_name")} htmlFor="contact_name" required attention={needs("contact_name")} id="gap-contact_name">
+              <Input id="contact_name" required maxLength={160} value={state.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
+            </Field>
+            <Field
+              label={t("field.contact_email")}
+              htmlFor="contact_email"
+              required
+              hint={lockedEmail ? t("form.email_locked_hint") : undefined}
+              id="gap-contact_email"
+            >
+              <Input
+                id="contact_email"
+                type="email"
+                required
+                readOnly={Boolean(lockedEmail)}
+                autoComplete={lockedEmail ? "off" : "email"}
+                value={lockedEmail ?? state.contact_email}
+                onChange={lockedEmail ? undefined : (e) => set("contact_email", e.target.value)}
+                className={lockedEmail ? "bg-paper-shade" : undefined}
+              />
+            </Field>
+            <Field label={t("field.contact_role")} htmlFor="contact_role">
+              <Input id="contact_role" maxLength={160} value={state.contact_role} onChange={(e) => set("contact_role", e.target.value)} />
+            </Field>
+          </div>
+        </section>
+      ) : null}
 
       {/* Application intent. */}
       <section className="flex flex-col gap-4">
@@ -689,7 +811,7 @@ export function ProfileForm({
             rel="noreferrer"
             className="font-semibold underline"
           >
-            {isWebinarOpen() ? t("form.attending_events_link") : t("form.webinar_recording_link")}
+            {t("form.attending_events_link")}
           </a>
         </p>
       </section>
@@ -738,8 +860,34 @@ export function ProfileForm({
             {t("form.section_ai")}
           </h2>
           <EnumChips label={t("field.methods")} group="methods" options={METHODS} value={state.methods} onChange={(v) => set("methods", v)} attention={needs("methods")} fieldId="gap-methods" />
+          {state.methods.includes("other") ? (
+            <Field
+              label={t("field.methods_other")}
+              htmlFor="methods_other"
+              required
+              hint={t("form.methods_other_hint")}
+              attention={needs("methods_other")}
+              id="gap-methods_other"
+            >
+              <Input
+                id="methods_other"
+                required
+                maxLength={200}
+                value={state.methods_other}
+                onChange={(e) => set("methods_other", e.target.value)}
+              />
+            </Field>
+          ) : null}
           <EnumChips label={t("field.application_target")} group="application_target" options={APPLICATION_TARGET} value={state.application_target} onChange={(v) => set("application_target", v)} attention={needs("application_target")} fieldId="gap-application_target" />
-          <EnumChips label={t("field.domain_expertise")} group="disease_area" options={DISEASE_AREA} value={state.domain_expertise} onChange={(v) => set("domain_expertise", v)} attention={needs("domain_expertise")} fieldId="gap-domain_expertise" />
+          <EnumChips
+            label={t("field.domain_expertise")}
+            group="disease_area"
+            options={DISEASE_AREA}
+            value={state.domain_expertise}
+            onChange={(v) => set("domain_expertise", v)}
+            hint={t("form.domain_expertise_hint")}
+            fieldId="gap-domain_expertise"
+          />
           <EnumChips
             label={t("field.privacy_capability")}
             group="privacy_capability"
@@ -797,7 +945,7 @@ export function ProfileForm({
 
       {state.kind === "consortium" && (
         <>
-          <EnumChips label={t("field.still_seeking")} group="looking_for" options={LOOKING_FOR} value={state.still_seeking} onChange={(v) => set("still_seeking", v)} hint={t("form.still_seeking_hint")} />
+          <EnumChips label={t("field.still_seeking")} group="looking_for" options={LOOKING_FOR} value={state.still_seeking} onChange={(v) => set("still_seeking", v)} hint={t("form.still_seeking_hint")} attention={needs("still_seeking")} fieldId="gap-still_seeking" />
           {state.still_seeking.includes("other") && !state.looking_for.includes("other") ? (
             <Field
               label={t("field.looking_for_other")}
@@ -817,21 +965,23 @@ export function ProfileForm({
         </>
       )}
 
-      {/* Contact — private, always. */}
-      <section className="flex flex-col gap-4 border-2 border-ink p-4">
-        <h2 className="font-listing text-xl font-bold uppercase">{t("form.section_contact")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("field.contact_name")} htmlFor="contact_name" required attention={needs("contact_name")} id="gap-contact_name">
-            <Input id="contact_name" required maxLength={160} value={state.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
-          </Field>
-          <Field label={t("field.contact_email")} htmlFor="contact_email" required attention={needs("contact_email")} id="gap-contact_email">
-            <Input id="contact_email" type="email" required value={state.contact_email} onChange={(e) => set("contact_email", e.target.value)} />
-          </Field>
-          <Field label={t("field.contact_role")} htmlFor="contact_role">
-            <Input id="contact_role" maxLength={160} value={state.contact_role} onChange={(e) => set("contact_role", e.target.value)} />
-          </Field>
-        </div>
-      </section>
+      {/* Contact — private. On create it sits with identity so a refresh can keep the draft. */}
+      {!isCreate && (
+        <section className="flex flex-col gap-4 border-2 border-ink p-4">
+          <h2 className="font-listing text-xl font-bold uppercase">{t("form.section_contact")}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("field.contact_name")} htmlFor="contact_name" required attention={needs("contact_name")} id="gap-contact_name">
+              <Input id="contact_name" required maxLength={160} value={state.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
+            </Field>
+            <Field label={t("field.contact_email")} htmlFor="contact_email" required attention={needs("contact_email")} id="gap-contact_email">
+              <Input id="contact_email" type="email" required value={state.contact_email} onChange={(e) => set("contact_email", e.target.value)} />
+            </Field>
+            <Field label={t("field.contact_role")} htmlFor="contact_role">
+              <Input id="contact_role" maxLength={160} value={state.contact_role} onChange={(e) => set("contact_role", e.target.value)} />
+            </Field>
+          </div>
+        </section>
+      )}
 
       {/* Visibility. */}
       <section className="flex flex-col gap-4">

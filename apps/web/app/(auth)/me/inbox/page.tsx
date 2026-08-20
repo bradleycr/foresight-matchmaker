@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic"
 export default async function InboxPage() {
   const session = await getSession()
   if (!session) redirect("/signin")
+  if (!session.profileId) redirect("/register")
 
   const { t } = await getT()
   const res = await apiFetch("/api/v1/intros")

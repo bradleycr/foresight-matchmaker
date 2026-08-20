@@ -12,7 +12,7 @@
   },
   "servers": [
     {
-      "url": "https://foresight-matchmaker.vercel.app",
+      "url": "https://foresightmatchmaker.app",
       "description": "Production"
     }
   ],

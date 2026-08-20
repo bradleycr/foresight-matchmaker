@@ -18,6 +18,7 @@ const PRIVACY_EMAIL = process.env.PRIVACY_CONTACT_EMAIL?.trim() || "bradley@fore
 export default async function MePage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const session = await getSession()
   if (!session) redirect("/signin")
+  if (!session.profileId) redirect("/register")
 
   const { t } = await getT()
   const { saved } = await searchParams

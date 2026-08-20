@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { peekLiveSession } from "@/lib/auth/live-session"
+import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
@@ -12,6 +13,7 @@ import { SignOutButton } from "./sign-out-button"
 export async function SiteHeader() {
   const { t } = await getT()
   const live = await peekLiveSession()
+  const session = live ? live.session : await getSession()
 
   return (
     <header className="border-b-2 border-rule-strong">
@@ -55,6 +57,13 @@ export async function SiteHeader() {
             </Link>
             <Link href="/me" className="hover:underline">
               {t("nav.me")}
+            </Link>
+            <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
+          </>
+        ) : session ? (
+          <>
+            <Link href="/register" className="hover:underline">
+              {t("nav.register")}
             </Link>
             <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
           </>

@@ -14,11 +14,18 @@ const SESSION_COOKIE = "rmm_session"
 const SESSION_TTL_DAYS = 30
 
 export interface Session {
-  /** The profile this session controls. */
-  profileId: string
+  /**
+   * The listing this session controls. Null after email is confirmed and
+   * before the first listing is published — they may fill /register, not /me.
+   */
+  profileId: string | null
   email: string
   /** Unix ms expiry, embedded and signed. */
   exp: number
+}
+
+export function hasListing(session: Session): session is Session & { profileId: string } {
+  return typeof session.profileId === "string" && session.profileId.length > 0
 }
 
 function secret(): string {
@@ -52,7 +59,9 @@ export function decodeSession(value: string | undefined): Session | null {
 
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString()) as Session
-    if (typeof session.profileId !== "string" || session.exp < Date.now()) return null
+    if (typeof session.email !== "string" || session.exp < Date.now()) return null
+    if (session.profileId !== null && typeof session.profileId !== "string") return null
+    if (session.profileId === "") session.profileId = null
     return session
   } catch {
     return null
@@ -63,7 +72,7 @@ export function decodeSession(value: string | undefined): Session | null {
 // Cookie plumbing (server components / route handlers)
 // ---------------------------------------------------------------------------
 
-export async function createSession(profileId: string, email: string): Promise<void> {
+export async function createSession(profileId: string | null, email: string): Promise<void> {
   const session: Session = {
     profileId,
     email: email.toLowerCase(),

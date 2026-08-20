@@ -4,8 +4,17 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
+import { afterClaimHref } from "@/lib/auth/next-path"
 
-export function ClaimForm({ token, next }: { token: string; next?: string }) {
+export function ClaimForm({
+  token,
+  next,
+  intent = "signin",
+}: {
+  token: string
+  next?: string
+  intent?: "signin" | "signup"
+}) {
   const t = useT()
   const router = useRouter()
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle")
@@ -13,14 +22,26 @@ export function ClaimForm({ token, next }: { token: string; next?: string }) {
 
   async function claim() {
     setStatus("working")
-    const res = await fetch("/api/v1/auth/claim", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    })
+    setError("")
+
+    let res: Response
+    try {
+      res = await fetch("/api/v1/auth/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      })
+    } catch {
+      // The token is single-use but unspent until the server sees it, so
+      // retrying this same link is safe.
+      setError(t("claim.error_network"))
+      setStatus("error")
+      return
+    }
 
     if (res.ok) {
-      router.push(next ?? "/me")
+      const claimed = (await res.json().catch(() => null)) as { profile_id?: string | null } | null
+      router.push(afterClaimHref(claimed?.profile_id ?? null, next))
       router.refresh()
     } else {
       const body = (await res.json().catch(() => ({}))) as { error?: string }
@@ -37,7 +58,7 @@ export function ClaimForm({ token, next }: { token: string; next?: string }) {
         </p>
       )}
       <Button variant="primary" onClick={claim} disabled={status === "working"}>
-        {t("claim.button")}
+        {t(intent === "signup" ? "claim.button_signup" : "claim.button")}
       </Button>
     </div>
   )

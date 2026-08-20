@@ -20,7 +20,7 @@ export const profiles = sqliteTable(
     orgName: text("org_name").notNull(),
     orgType: text("org_type").notNull(),
     country: text("country").notNull(),
-    visibility: text("visibility").notNull().default("public"),
+    visibility: text("visibility").notNull().default("authenticated_only"),
     applicationStatus: text("application_status").notNull(),
     completeness: integer("completeness").notNull().default(0),
     contactEmail: text("contact_email").notNull(),

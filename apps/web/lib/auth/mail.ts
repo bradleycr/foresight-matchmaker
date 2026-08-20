@@ -1,28 +1,40 @@
 /**
  * Outbound mail. Magic links and introduction forwards share one transport.
  *
- * Three modes, never mixed in one response for auth:
+ * Prefer Resend’s HTTP API on Vercel (`RESEND_API_KEY`). SMTP_URL remains
+ * for a VM that already has a mail relay. From address is SMTP_FROM.
  *
- * 1. SMTP configured     → email the link; API never returns it.
- * 2. Reveal allowed      → on-screen link for demos (dev, or AUTH_REVEAL_LINKS=true).
- * 3. Neither             → log the link server-side only; API returns the same
- *                          opaque success as for unknown emails.
+ * Auth delivery:
+ *
+ * 1. Mail configured → email the link. Do not also auto-claim it on-screen
+ *    (that burns the one-time token before they open the inbox).
+ * 2. Mail send failed, AUTH_REVEAL_LINKS=true → on-screen fallback.
+ * 3. Neither → log the link server-side only.
  */
 import nodemailer from "nodemailer"
 import type { Profile } from "@rmm/schema"
+import { renderAuthEmail, type AuthEmailKind } from "./mail-templates"
 
+const RESEND_API = "https://api.resend.com/emails"
+const DEFAULT_FROM = "Foresight Matchmaking <hello@foresightmatchmaker.app>"
+
+export function mailConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY?.trim() || process.env.SMTP_URL?.trim())
+}
+
+/** @deprecated use mailConfigured — kept so existing call sites keep compiling. */
 export function smtpConfigured(): boolean {
-  return Boolean(process.env.SMTP_URL)
+  return mailConfigured()
 }
 
 /**
  * On-screen reveal is opt-in in production (`AUTH_REVEAL_LINKS=true`).
- * In development it is the default when SMTP is unset, so `pnpm dev` stays
- * usable with zero infrastructure.
+ * An explicit true still wins even when mail is configured, so a first
+ * Resend deploy cannot lock people out before DNS is live.
  */
 export function revealLinksAllowed(): boolean {
-  if (smtpConfigured()) return false
   if (process.env.AUTH_REVEAL_LINKS === "true") return true
+  if (mailConfigured()) return false
   if (process.env.AUTH_REVEAL_LINKS === "false") return false
   return process.env.NODE_ENV !== "production"
 }
@@ -30,7 +42,7 @@ export function revealLinksAllowed(): boolean {
 export type DeliveryMode = "email" | "on_screen" | "server_log"
 
 export function magicLinkMode(): DeliveryMode {
-  if (smtpConfigured()) return "email"
+  if (mailConfigured()) return "email"
   if (revealLinksAllowed()) return "on_screen"
   return "server_log"
 }
@@ -38,7 +50,53 @@ export function magicLinkMode(): DeliveryMode {
 export type MailResult = { sent: true } | { sent: false; reason: "no_smtp" | "smtp_error" }
 
 function fromAddress(): string {
-  return process.env.SMTP_FROM ?? "matchmaker@localhost"
+  return process.env.SMTP_FROM?.trim() || DEFAULT_FROM
+}
+
+function asList(value: string | string[] | undefined): string[] | undefined {
+  if (!value) return undefined
+  return Array.isArray(value) ? value : [value]
+}
+
+async function sendViaResend(opts: {
+  to: string | string[]
+  cc?: string | string[]
+  replyTo?: string
+  subject: string
+  text: string
+  html?: string
+}): Promise<MailResult> {
+  const key = process.env.RESEND_API_KEY
+  if (!key) return { sent: false, reason: "no_smtp" }
+
+  try {
+    const res = await fetch(RESEND_API, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        "User-Agent": "foresight-matchmaker/mail",
+      },
+      body: JSON.stringify({
+        from: fromAddress(),
+        to: asList(opts.to),
+        cc: asList(opts.cc),
+        reply_to: opts.replyTo,
+        subject: opts.subject,
+        text: opts.text,
+        html: opts.html,
+      }),
+    })
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "")
+      console.error("[mail] Resend rejected:", res.status, detail.slice(0, 500))
+      return { sent: false, reason: "smtp_error" }
+    }
+    return { sent: true }
+  } catch (error) {
+    console.error("[mail] Resend send failed:", error)
+    return { sent: false, reason: "smtp_error" }
+  }
 }
 
 export async function sendMail(opts: {
@@ -47,17 +105,19 @@ export async function sendMail(opts: {
   replyTo?: string
   subject: string
   text: string
+  html?: string
 }): Promise<MailResult> {
-  if (!smtpConfigured()) {
-    console.info("[mail] SMTP unset; would send:", {
+  if (!mailConfigured()) {
+    console.info("[mail] unset; would send:", {
       to: opts.to,
       cc: opts.cc,
       replyTo: opts.replyTo,
       subject: opts.subject,
-      text: opts.text,
     })
     return { sent: false, reason: "no_smtp" }
   }
+
+  if (process.env.RESEND_API_KEY) return sendViaResend(opts)
 
   try {
     const transport = nodemailer.createTransport(process.env.SMTP_URL)
@@ -68,6 +128,7 @@ export async function sendMail(opts: {
       replyTo: opts.replyTo,
       subject: opts.subject,
       text: opts.text,
+      html: opts.html,
     })
     return { sent: true }
   } catch (error) {
@@ -76,27 +137,20 @@ export async function sendMail(opts: {
   }
 }
 
-export async function sendMagicLink(email: string, link: string): Promise<MailResult> {
-  if (!smtpConfigured()) {
+export async function sendMagicLink(
+  email: string,
+  link: string,
+  kind: AuthEmailKind = "signin",
+): Promise<MailResult> {
+  if (!mailConfigured()) {
     console.info(`[auth] magic link for ${email}: ${link}`)
     return { sent: false, reason: "no_smtp" }
   }
 
-  const result = await sendMail({
-    to: email,
-    subject: "Your sign-in link — Foresight Matchmaking",
-    text: [
-      "Use this link to access your profile:",
-      "",
-      link,
-      "",
-      "The link works once and expires in 24 hours.",
-      "If you did not request it, ignore this email.",
-    ].join("\n"),
-  })
-
+  const { subject, text, html } = renderAuthEmail(kind, link)
+  const result = await sendMail({ to: email, subject, text, html })
   if (!result.sent) {
-    console.info(`[auth] magic link for ${email} (smtp failed): ${link}`)
+    console.info(`[auth] magic link for ${email} (send failed): ${link}`)
   }
   return result
 }
@@ -113,33 +167,34 @@ export async function sendIntroductionEmail(input: {
 }): Promise<MailResult> {
   const { from, to, message, fromProfileUrl } = input
   const subject = `${from.org_name} would like to connect — Foresight Matchmaking`
+  const text = [
+    `${from.org_name} sent you an introduction through Foresight Matchmaking.`,
+    "",
+    "Reply to this email to continue the conversation directly. Foresight Matchmaking will not host further messages.",
+    "",
+    "— Message —",
+    message,
+    "",
+    "— From —",
+    from.org_name,
+    [from.contact_name, from.contact_role].filter(Boolean).join(" · "),
+    from.contact_email,
+    from.website ? from.website : "",
+    `Profile: ${fromProfileUrl}`,
+    "",
+    "— To —",
+    to.org_name,
+    [to.contact_name, to.contact_role].filter(Boolean).join(" · "),
+    to.contact_email,
+  ]
+    .filter((line) => line !== "")
+    .join("\n")
 
   return sendMail({
     to: to.contact_email,
     cc: from.contact_email,
     replyTo: from.contact_email,
     subject,
-    text: [
-      `${from.org_name} sent you an introduction through Foresight Matchmaking.`,
-      "",
-      "Reply to this email to continue the conversation directly. Foresight Matchmaking will not host further messages.",
-      "",
-      "— Message —",
-      message,
-      "",
-      "— From —",
-      from.org_name,
-      [from.contact_name, from.contact_role].filter(Boolean).join(" · "),
-      from.contact_email,
-      from.website ? from.website : "",
-      `Profile: ${fromProfileUrl}`,
-      "",
-      "— To —",
-      to.org_name,
-      [to.contact_name, to.contact_role].filter(Boolean).join(" · "),
-      to.contact_email,
-    ]
-      .filter((line) => line !== "")
-      .join("\n"),
+    text,
   })
 }

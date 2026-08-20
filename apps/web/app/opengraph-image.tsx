@@ -1,12 +1,13 @@
 import { ImageResponse } from "next/og"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
+import { publicOrigin } from "@/lib/public-origin"
 
 export const alt = "Foresight Matchmaking — Recoding Medicine programme"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-const ORIGIN = process.env.APP_URL ?? "https://foresight-matchmaker.vercel.app"
+const ORIGIN = publicOrigin()
 
 /** Ink-on-paper card for Slack, email, and social link previews. */
 export default async function OpenGraphImage() {

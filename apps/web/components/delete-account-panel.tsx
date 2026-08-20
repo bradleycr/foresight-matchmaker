@@ -44,7 +44,7 @@ export function DeleteAccountPanel({
         setStatus("error")
         return
       }
-      router.push("/?deleted=1")
+      router.push("/register?deleted=1")
       router.refresh()
     } catch {
       setError(t("me.delete_error"))

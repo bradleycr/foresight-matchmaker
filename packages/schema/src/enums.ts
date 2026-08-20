@@ -114,21 +114,23 @@ export const ATTENDING = [
 export const attendingEnum = z.enum(ATTENDING)
 export type Attending = (typeof ATTENDING)[number]
 
-/** Hide the webinar chip after Thursday 20 August 2026. */
+/**
+ * Kept on stored profiles so existing rows still parse. The webinar has
+ * already happened — listings are created after it, so the form never
+ * offers this chip.
+ */
 export const WEBINAR_ATTENDING: Attending = "webinar_2026_08_20"
-const WEBINAR_HIDE_AFTER_MS = Date.UTC(2026, 7, 21, 0, 0, 0)
 
-export function isWebinarOpen(now = new Date()): boolean {
-  return now.getTime() < WEBINAR_HIDE_AFTER_MS
+export function isWebinarOpen(_now = new Date()): boolean {
+  return false
 }
 
-/** Attending chips for the form — webinar drops off after the session. */
-export function attendingChoices(now = new Date()): Attending[] {
-  if (isWebinarOpen(now)) return [...ATTENDING]
+/** In-person / remote chips for the form — webinar is not offered. */
+export function attendingChoices(_now = new Date()): Attending[] {
   return ATTENDING.filter((v) => v !== WEBINAR_ATTENDING)
 }
 
-export const VISIBILITY = ["public", "authenticated_only", "hidden"] as const
+export const VISIBILITY = ["authenticated_only", "public", "hidden"] as const
 export const visibilityEnum = z.enum(VISIBILITY)
 export type Visibility = (typeof VISIBILITY)[number]
 
@@ -278,6 +280,7 @@ export const METHODS = [
   "federated_learning",
   "privacy_tech",
   "classical_ml_biostat",
+  "other",
 ] as const
 export const methodsEnum = z.enum(METHODS)
 export type Methods = (typeof METHODS)[number]

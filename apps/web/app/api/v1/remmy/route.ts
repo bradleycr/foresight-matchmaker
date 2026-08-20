@@ -19,6 +19,7 @@ const bodySchema = z.object({
   messages: z.array(messageSchema).min(1).max(24),
   current_profile: z.record(z.unknown()).optional().nullable(),
   open_gaps: z.array(z.string().max(64)).max(24).optional(),
+  answered_asks: z.array(z.string().max(64)).max(24).optional(),
 })
 
 /**
@@ -38,10 +39,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return zodError(parsed.error)
 
-  if (parsed.data.mode === "update") {
-    const session = await getSession()
-    if (!session) return unauthorized()
-  }
+  const session = await getSession()
+  if (!session) return unauthorized("Confirm your email before talking to Remmy.")
+  if (parsed.data.mode === "update" && !session.profileId) return unauthorized()
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
   const limited = rateLimit(`remmy:${ip}`, { limit: 30, windowMs: 15 * 60 * 1000 })
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     messages: parsed.data.messages,
     currentProfile: parsed.data.current_profile ?? null,
     openGaps: parsed.data.open_gaps ?? [],
+    answeredAsks: parsed.data.answered_asks ?? [],
   })
 
   if (!turn) {

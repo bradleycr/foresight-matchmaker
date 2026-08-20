@@ -87,7 +87,8 @@ export default async function ProfilePage({ params }: Params) {
             </a>
           </Tag>
           <span className="text-sm text-ink-soft">
-            {profile.country} · {enumLabel(t, "org_type", profile.org_type)}
+            {profile.country} ·{" "}
+            {[enumLabel(t, "org_type", profile.org_type), profile.org_type_other].filter(Boolean).join(" — ")}
           </span>
         </div>
         <h1 className="mt-2 font-listing text-3xl font-bold uppercase leading-tight tracking-tight sm:text-4xl">
@@ -107,7 +108,9 @@ export default async function ProfilePage({ params }: Params) {
           </Row>
         )}
         <Row label={t("field.languages")}>{joinEnum(t, "language", profile.languages)}</Row>
-        <Row label={t("field.looking_for")}>{joinEnum(t, "looking_for", profile.looking_for)}</Row>
+        <Row label={t("field.looking_for")}>
+          {[joinEnum(t, "looking_for", profile.looking_for), profile.looking_for_other].filter(Boolean).join(" — ")}
+        </Row>
         <Row label={t("field.application_status")}>
           {enumLabel(t, "application_status", profile.application_status)}
         </Row>
@@ -121,7 +124,9 @@ export default async function ProfilePage({ params }: Params) {
             {t("profile.ai_section")}
           </h2>
           <dl>
-            <Row label={t("field.methods")}>{joinEnum(t, "methods", profile.methods)}</Row>
+            <Row label={t("field.methods")}>
+              {[joinEnum(t, "methods", profile.methods), profile.methods_other].filter(Boolean).join(" — ")}
+            </Row>
             <Row label={t("field.application_target")}>
               {joinEnum(t, "application_target", profile.application_target)}
             </Row>

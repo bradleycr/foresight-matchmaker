@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { safeNextPath, signInHref } from "./next-path"
+import { afterClaimHref, isRegisterPath, safeNextPath, signInHref } from "./next-path"
 
 describe("safeNextPath", () => {
   it("accepts same-origin relative pages", () => {
@@ -24,5 +24,27 @@ describe("signInHref", () => {
   it("omits an unsafe next", () => {
     expect(signInHref("/api/v1/auth/logout")).toBe("/signin")
     expect(signInHref("/register")).toBe("/signin?next=%2Fregister")
+  })
+})
+
+describe("isRegisterPath", () => {
+  it("accepts the listing form with an optional programme", () => {
+    expect(isRegisterPath("/register")).toBe(true)
+    expect(isRegisterPath("/register?challenge=recoding")).toBe(true)
+    expect(isRegisterPath("/me")).toBe(false)
+  })
+})
+
+describe("afterClaimHref", () => {
+  it("sends a confirmed address with no listing to the form", () => {
+    expect(afterClaimHref(null, "/register")).toBe("/register")
+    expect(afterClaimHref(null, "/register?challenge=x")).toBe("/register?challenge=x")
+    expect(afterClaimHref(null)).toBe("/register")
+  })
+
+  it("sends an existing listing to /me, not back through register", () => {
+    expect(afterClaimHref("prof-1", "/register")).toBe("/me")
+    expect(afterClaimHref("prof-1", "/directory")).toBe("/directory")
+    expect(afterClaimHref("prof-1")).toBe("/me")
   })
 })

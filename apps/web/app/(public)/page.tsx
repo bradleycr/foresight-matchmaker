@@ -29,9 +29,15 @@ export default async function LandingPage({
   return (
     <div className="py-10">
       {deleted ? (
-        <p role="status" className="mb-6 border border-ink bg-paper-shade px-3 py-2">
-          {t("landing.deleted")}
-        </p>
+        <div role="status" className="mb-6 border border-ink bg-paper-shade px-3 py-2">
+          <p>{t("landing.deleted")}</p>
+          <Link
+            href="/register?deleted=1"
+            className="mt-2 inline-flex min-h-10 items-center font-semibold uppercase tracking-wide text-ink underline underline-offset-2 hover:no-underline"
+          >
+            {t("landing.deleted_cta")} →
+          </Link>
+        </div>
       ) : null}
 
       <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">{t("landing.kicker")}</p>

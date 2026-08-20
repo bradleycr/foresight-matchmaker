@@ -17,8 +17,9 @@ function resolveDatabasePath(): string {
   if (process.env.DATABASE_PATH) return process.env.DATABASE_PATH
 
   // Vercel’s filesystem is ephemeral — keep the SQLite file under /tmp so
-  // writes succeed. Data does not survive cold starts; fine for a smoke demo,
-  // not for durable production (use the Docker/VM path for that).
+  // writes succeed. Data does not survive deploys or a recycled instance;
+  // fine as a fallback host, not the long-term production store
+  // (use the Docker/VM path for that).
   if (process.env.VERCEL) return "/tmp/rmm-app.db"
 
   let dir = process.cwd()
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   org_name      TEXT NOT NULL,
   org_type      TEXT NOT NULL,
   country       TEXT NOT NULL,
-  visibility    TEXT NOT NULL DEFAULT 'public',
+  visibility    TEXT NOT NULL DEFAULT 'authenticated_only',
   application_status TEXT NOT NULL,
   completeness  INTEGER NOT NULL DEFAULT 0,
   contact_email TEXT NOT NULL,
@@ -108,16 +109,74 @@ declare global {
   var __rmmDb: { db: Db; sqlite: Database.Database } | undefined
 }
 
+/**
+ * A database we cannot write to is the one failure that looks like a bug in
+ * every other part of the app: the form 500s, the directory empties, and the
+ * cause is three layers down in a native module. The usual culprit on a VM is
+ * a bind-mounted `./data` owned by root while the container runs as `node`,
+ * so name that explicitly rather than re-raising `SQLITE_CANTOPEN`.
+ */
+function openOrExplain(file: string): Database.Database {
+  try {
+    fs.mkdirSync(path.dirname(file), { recursive: true })
+    return new Database(file)
+  } catch (cause) {
+    throw new Error(
+      [
+        `[db] Cannot open the SQLite database at ${file}.`,
+        "",
+        "The directory must be writable by the user running the app.",
+        "In Docker the volume is owned by the host, not the image, so:",
+        "",
+        `  chown -R 1000:1000 ${path.dirname(file)}`,
+        "",
+        "Nothing has been written — fix the permission and restart.",
+      ].join("\n"),
+      { cause },
+    )
+  }
+}
+
 function open(): { db: Db; sqlite: Database.Database } {
   const file = resolveDatabasePath()
-  fs.mkdirSync(path.dirname(file), { recursive: true })
+  const sqlite = openOrExplain(file)
 
-  const sqlite = new Database(file)
   sqlite.pragma("journal_mode = WAL")
+  // WAL defaults to synchronous=NORMAL, which does not fsync on commit: a host
+  // power-cut or hard reset can drop the last few transactions. Every write
+  // here is someone's profile typed in by hand, and the write rate is a few
+  // per minute, so trade the unmeasurable throughput for a durable commit.
+  sqlite.pragma("synchronous = FULL")
   sqlite.pragma("foreign_keys = ON")
   sqlite.exec(MIGRATIONS)
 
+  registerCheckpointOnShutdown(sqlite)
+
   return { db: drizzle(sqlite, { schema: tables }), sqlite }
+}
+
+/**
+ * Fold the WAL back into the main file when the process stops.
+ *
+ * In WAL mode the recent history lives in `app.db-wal`, so a stopped container
+ * can leave `app.db` almost empty. That is safe for SQLite — it recovers on
+ * open — but it quietly breaks the most natural backup anyone will reach for
+ * (`cp data/app.db`). Checkpointing on the way out means the single file is
+ * always the whole database.
+ */
+function registerCheckpointOnShutdown(sqlite: Database.Database): void {
+  const checkpoint = () => {
+    try {
+      sqlite.pragma("wal_checkpoint(TRUNCATE)")
+    } catch {
+      // Best effort. A busy checkpoint loses nothing: the WAL is still on disk
+      // and SQLite replays it on the next open.
+    }
+  }
+
+  process.once("SIGTERM", checkpoint)
+  process.once("SIGINT", checkpoint)
+  process.once("beforeExit", checkpoint)
 }
 
 export function getDb(): Db {

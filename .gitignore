@@ -21,6 +21,11 @@ data/
 *.db-journal
 *.db-wal
 *.db-shm
+[SENSITIVE]
+
+# Local Cursor / agent artifacts (not part of the app)
+.agents/
+skills-lock.json
 
 # TypeScript incremental build cache
 *.tsbuildinfo

@@ -48,10 +48,14 @@ COPY --from=build --chown=node:node /app/apps/web/public ./apps/web/public
 # SEED_ON_EMPTY=true. Production must leave that unset.
 COPY --chown=node:node seed ./seed
 
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 RUN mkdir -p /data && chown node:node /data
 VOLUME /data
 
-USER node
+# Deliberately still root here: the entrypoint claims the bind-mounted volume
+# and then drops to uid 1000 (node) via setpriv. The app never runs as root.
 EXPOSE 3000
 
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["node", "apps/web/server.js"]

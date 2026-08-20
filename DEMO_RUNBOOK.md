@@ -7,9 +7,9 @@ deploy that path by accident: it needs a bind-mounted volume and a different
 `DATABASE_PATH`, and mixing the two up is how you end up presenting the wrong
 database.
 
-**Production URL:** https://foresight-matchmaker.vercel.app
+**Production URL:** https://foresightmatchmaker.app
 **Vercel project:** `bradley-royes-projects/foresight-matchmaker` (`prj_kyy37fkdoAST7LzShqfkLFFJvNbm`)
-The previous hostname `matchmaker-sprind.vercel.app` forwards here.
+The Vercel hostname `foresight-matchmaker.vercel.app` still serves the same deployment.
 
 ## Why Vercel's SQLite is safe to demo on, with one caveat
 
@@ -35,16 +35,17 @@ project (`vercel env ls --scope bradley-royes-projects`):
 | --- | --- | --- |
 | `SESSION_SECRET` | random, generated | Required in production — the app now refuses to boot without it (see `instrumentation.ts`). |
 | `ADMIN_SECRET` | `password123` | Unlocks `/admin`. The page also accepts `password123` even if this env value is rotated. |
-| `AUTH_REVEAL_LINKS` | `true` | **Load-bearing.** With no SMTP configured, this is the only way anyone — including you, on stage — can sign in. Without it, magic links go to the server log only and `/signin` becomes unusable live. |
+| `RESEND_API_KEY` | set (Production) | **Primary** magic-link delivery from `hello@foresightmatchmaker.app`. `/signin` and `/register` show mode `email` when this is configured. |
+| `SMTP_FROM` | `Foresight Matchmaking <hello@foresightmatchmaker.app>` | From address for Resend (and SMTP fallback). |
+| `AUTH_REVEAL_LINKS` | `true` | **Fallback** when Resend/SMTP fails — link also returned in the JSON response and logged server-side. Keep on until you have confirmed inbox delivery in production. |
 | `SEED_ON_EMPTY` | unset / `false` on Production | Must stay off on any host real applicants see. `true` only for a rehearsal deploy that should show fabricated listings. |
 | `DATABASE_PATH` | `/tmp/rmm-app.db` | Vercel's only writable path for a function instance. |
-| `APP_URL` | `https://foresight-matchmaker.vercel.app` | Canonical origin for Open Graph, robots, and magic links — so a hit on the old forwarding hostname still mints links on the new one. |
+| `APP_URL` | `https://foresightmatchmaker.app` | Canonical origin for Open Graph, robots, and magic links — so a hit on the `*.vercel.app` hostname still mints links on the owned domain. |
 | `RATE_LIMIT_PER_24H` | `20` (recommended for the demo) | Outbound intro requests allowed per profile per rolling 24h. Defaults to 5, which a few rehearsal run-throughs from the same account will exhaust — set it higher for the demo so a live retry never trips `rate_limited` on stage. |
 
-`/signin` already states which delivery mode is live (`lib/auth/mail.ts` →
-`magicLinkMode()`), so if `AUTH_REVEAL_LINKS` were ever unset in production
-the page would say "we've logged a link server-side" instead of silently
-failing — but check the table above before you go on anyway.
+`/signin` and `/register` state which delivery mode is live (`magicLinkMode()` in
+`lib/auth/mail.ts`): `email` when Resend/SMTP is configured, `reveal` when
+`AUTH_REVEAL_LINKS` is the only path, or `log` otherwise.
 
 ## Cold-machine bring-up
 
@@ -68,14 +69,45 @@ doubled path).
 ## Smoke-test after every deploy
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/
-curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/signin
-curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/directory
-curl -s https://foresight-matchmaker.vercel.app/api/v1/stats | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['by_challenge'])"
-curl -s -o /dev/null -w '%{http_code}\n' https://foresight-matchmaker.vercel.app/api/v1/directory.json
+# Pages
+curl -s -o /dev/null -w '%{http_code}\n' https://foresightmatchmaker.app/
+curl -s -o /dev/null -w '%{http_code}\n' https://foresightmatchmaker.app/signin
+curl -s -o /dev/null -w '%{http_code}\n' https://foresightmatchmaker.app/register
+curl -s -o /dev/null -w '%{http_code}\n' https://foresightmatchmaker.app/directory
+
+# API
+curl -s https://foresightmatchmaker.app/api/v1/stats | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['by_challenge'])"
+curl -s -o /dev/null -w '%{http_code}\n' https://foresightmatchmaker.app/api/v1/directory.json
+
+# Signup gate: unknown email → welcome link (mode should be "email" when Resend is set)
+curl -s -X POST https://foresightmatchmaker.app/api/v1/auth/request-link \
+  -H 'content-type: application/json' \
+  -d '{"email":"smoke-test@example.invalid","next":"/register"}' \
+  | python3 -c "import json,sys;d=json.load(sys.stdin);print(d.get('ok'), d.get('mode'))"
+
+# Unauthenticated listing create is rejected
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://foresightmatchmaker.app/api/v1/profiles \
+  -H 'content-type: application/json' -d '{}'
 ```
 
-Expect `200`, `200`, `307`/`302` (directory redirects unsigned visitors to sign-in), programme counts, and `401` on the members-only directory API.
+Expect `200` on `/`, `/signin`, `/register`; `307`/`302` on `/directory` for unsigned visitors; programme counts from `/stats`; `401` on bare `POST /profiles`; request-link returns `True email` (or `True reveal` if mail is down).
+
+**Full path (email → claim → create → delete → recreate):** with `RESEND_API_KEY` in your shell:
+
+```bash
+./scripts/e2e-prod.sh
+```
+
+Uses a throwaway `@foresight.org` address, reads the sent message from Resend, and cleans up after itself.
+
+## Adding a listing live (verify-first)
+
+1. Open **`/register`** — enter email, submit. Inbox receives a branded welcome email (Resend) with a one-time link to `/register`.
+2. Click the link — session is verified with `profileId: null`; the listing form appears with contact email locked.
+3. Submit the form — `POST /api/v1/profiles` publishes the listing and binds the session.
+4. **Delete + re-add:** `/me` → delete listing → lands on `/register?deleted=1` still signed in; pick a new listing type without a second confirmation email.
+
+Returning users with an existing listing use **`/signin`** (not `/register`).
 
 ## Resetting between rehearsals
 
@@ -112,8 +144,9 @@ Do not do that in the middle of a live session with real visitors. Local
 
 ## Signing in during the demo
 
-With `AUTH_REVEAL_LINKS=true`, `/signin` shows the magic link on screen
-immediately after you submit a seed contact email — no email account needed.
+**New listing:** walk through **`/register`** (verify-first). With Resend configured, the link arrives by email; if delivery fails, `AUTH_REVEAL_LINKS=true` also surfaces the link in the API response for controlled testing.
+
+**Existing seed listing (local `pnpm db:demo` only):** `/signin` with a seed contact email. With `AUTH_REVEAL_LINKS=true` and no mail configured locally, the magic link appears on screen immediately — no inbox needed.
 
 **Demo account** (after `pnpm db:demo`): `j.bakhuizen@example.invalid` —
 Stichting Regionaal Pathologie Archief Zuid (`rpaz-zuid`). Signing in as this
@@ -136,4 +169,5 @@ demonstrate *sending* a fresh request live:
 
 - **Blank page / 500** → check `vercel inspect <deployment-url> --logs`. As of P0.1, a missing `SESSION_SECRET` now fails at boot with a named error in the deploy log instead of a stack trace on first request — read the log, not the browser.
 - **"You've been signed out" when you didn't sign out** → this is the exact bug P0.3 fixes (a 500 was rendering as a redirect to `/signin`). If you see it before that lands, it's a real server error — check the Vercel function logs, not your session.
-- **Sign-in page doesn't show a link** → check `AUTH_REVEAL_LINKS=true` is still set for Production specifically (`vercel env ls`), not just Preview/Development.
+- **Sign-in page doesn't show a link** → on production with Resend, links go to email (check spam). If mail failed, confirm `AUTH_REVEAL_LINKS=true` for Production (`vercel env ls`). Locally, reveal mode is on by default in development.
+- **Magic link 404 / invalid** → links expire after 24h and are single-use. Request a fresh link. HMAC tokens must match `SESSION_SECRET` across instances (no sticky sessions required).

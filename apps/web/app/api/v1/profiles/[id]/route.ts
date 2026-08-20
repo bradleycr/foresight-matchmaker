@@ -10,7 +10,7 @@ import {
   getJointApplicationOutcome,
   deleteProfile,
 } from "@/lib/db/profiles"
-import { destroySession, getSession } from "@/lib/auth/session"
+import { destroySession, getSession, createSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
 
 export const dynamic = "force-dynamic"
@@ -91,11 +91,11 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
     throw e
   }
   if (input.kind !== profile.kind) {
-    return badRequest("A profile cannot change kind. Create a new profile instead.")
+    return badRequest("Profile type cannot be changed. Delete this listing in Your profile, then add a new one.")
   }
   const existingChallenge = profile.challenge_id ?? "recoding_medicine"
   if (input.challenge_id !== existingChallenge) {
-    return badRequest("A profile cannot change programme. Create a new profile instead.")
+    return badRequest("Programme cannot be changed. Delete this listing in Your profile, then add a new one.")
   }
 
   let updated
@@ -120,8 +120,9 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
  *
  * Body must confirm with the exact organisation name:
  *   `{ "confirm_org_name": "…" }`
- * On success the profile and all linked personal data are removed and the
- * session cookie is cleared.
+ * On success the profile and all linked personal data are removed. The
+ * session stays verified (no listing) so the owner can add a new one
+ * without confirming email again.
  */
 export async function DELETE(req: NextRequest, { params }: Params): Promise<Response> {
   const { id } = await params
@@ -149,6 +150,6 @@ export async function DELETE(req: NextRequest, { params }: Params): Promise<Resp
   }
 
   deleteProfile(profile.id)
-  await destroySession()
+  await createSession(null, session.email)
   return ok({ deleted: true })
 }

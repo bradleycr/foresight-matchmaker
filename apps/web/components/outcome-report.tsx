@@ -23,11 +23,17 @@ export function OutcomeReport({
   async function report(outcome: "yes" | "no" | "not_yet") {
     setSelected(outcome)
     setError(null)
-    const res = await fetch(`/api/v1/profiles/${profileId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ joint_application: outcome }),
-    })
+    let res: Response
+    try {
+      res = await fetch(`/api/v1/profiles/${profileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ joint_application: outcome }),
+      })
+    } catch {
+      setError(t("outcome.error"))
+      return
+    }
     if (res.ok) setSaved(true)
     else setError(t("outcome.error"))
   }

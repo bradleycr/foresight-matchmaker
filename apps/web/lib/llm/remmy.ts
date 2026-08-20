@@ -2,7 +2,7 @@ import { z } from "zod"
 import { complete } from "./client"
 import { extractJsonObject } from "./json"
 import { formatGapsForRemmy } from "@/lib/profile-form-gaps"
-import { isAskId, resolveAsk, type AskId } from "@/lib/remmy/ask"
+import { gapsWithoutAnswered, resolveAsk, type AskId } from "@/lib/remmy/ask"
 
 /**
  * Remmy — conversational interviewer only.
@@ -73,13 +73,17 @@ ${
     ? `- The form is already on screen. Do not re-ask fields that are already filled unless they want to change them.
 - Ask about the most important OPEN field next.
 - Data holders / consortia: prefer dataset name, then modality, then disease area. Those ARE the listing.
-- AI teams and independent experts: prefer methods, application target, and domain expertise (the disease areas they work in). Do NOT grill them on data modalities, cohort size, or annotation unless they already said they know what data they need. "Not sure yet" is a complete answer for data needs.
+- AI teams and independent experts: prefer methods, application target, and privacy capability. Do NOT ask for a clinical disease area unless they already named one — many people here are methods, privacy, or infrastructure, not oncology/cardiology specialists. Do NOT grill them on data modalities, cohort size, or annotation unless they already said they know what data they need. "No specific disease area" and "Not sure yet" are complete answers.
+- Vocabularies include Other. If they pick Other, or describe something not on the list, the chips capture "other" — then ask them to define it in a few words (free text, ask=null). Never invent that definition. Open fields looking_for_other, methods_other, or org_type_other mean they already chose Other: ask what they mean, then stop.
 - Set ready_for_review=true when they have given NEW facts that should be merged into the form.`
     : ""
 }
 - When the question is a controlled vocabulary, set "ask" so the UI shows tappable chips. Do NOT list the options in the reply.
-  ask values: kind, looking_for, languages, methods, application_target, domain_expertise, privacy_capability, modality, disease_area.
-  Use domain_expertise (not disease_area) for an AI person's field of work. Use modality / disease_area for a data holder's dataset.
+  ask values: kind, looking_for, languages, attending, methods, application_target, domain_expertise, privacy_capability, modality, disease_area.
+  "ask" MUST name the same field as the question in "reply". If you ask which events they will attend, ask MUST be "attending". If you ask about languages, ask MUST be "languages". If you cannot set a matching ask, set ask to null. NEVER attach chips for a different field than the question.
+  Use attending for Recoding Medicine events / remote-only.
+  Use domain_expertise only if they already mentioned a clinical area they work in. Never lead with the 19 disease chips.
+  Use modality / disease_area for a data holder's dataset.
   Use kind only if they have not said whether they are a data holder, AI team, consortium, or individual.
   Omit "ask" for free-text questions (name, country, what they do).
 - draft_summary: bullets of what you understood AND what the human must still enter (especially contact email). Do NOT return structured profile fields — a separate extractor handles that.
@@ -89,7 +93,7 @@ Return ONLY JSON:
   "reply": "what Remmy says",
   "ready_for_review": true|false,
   "draft_summary": ["bullet", "..."],
-  "ask": "kind" | "looking_for" | "languages" | "methods" | "application_target" | "domain_expertise" | "privacy_capability" | "modality" | "disease_area" | null
+  "ask": "kind" | "looking_for" | "languages" | "attending" | "methods" | "application_target" | "domain_expertise" | "privacy_capability" | "modality" | "disease_area" | null
 }
 ${currentProfileJson ? `\nCurrent form (not yet published — do not claim it is saved):\n${currentProfileJson}` : ""}
 ${openGapsText ? `\nOpen fields still empty — ask about these, one at a time:\n${openGapsText}` : ""}`
@@ -100,7 +104,10 @@ export async function remmyTurn(input: {
   messages: RemmyMessage[]
   currentProfile?: Record<string, unknown> | null
   openGaps?: string[] | null
+  answeredAsks?: string[] | null
 }): Promise<RemmyTurnResult | null> {
+  const answered = input.answeredAsks ?? []
+  const openGaps = gapsWithoutAnswered(input.openGaps ?? [], answered)
   const history = input.messages
     .slice(-16)
     .map((m) => `${m.role === "user" ? "User" : "Remmy"}: ${m.content}`)
@@ -109,7 +116,7 @@ export async function remmyTurn(input: {
   const currentProfileJson = input.currentProfile
     ? JSON.stringify(stripForRemmyContext(input.currentProfile)).slice(0, 6000)
     : null
-  const openGapsText = formatGapsForRemmy(input.openGaps ?? [])
+  const openGapsText = formatGapsForRemmy(openGaps)
 
   const raw = await complete(
     [
@@ -124,12 +131,10 @@ export async function remmyTurn(input: {
     const parsed = turnSchema.parse(JSON.parse(extractJsonObject(raw)))
     const profile = input.currentProfile ?? null
     const kind = typeof profile?.kind === "string" ? profile.kind : null
-    const llmAsk = isAskId(parsed.ask) ? parsed.ask : undefined
-    // Don't re-ask kind once the form already has one.
-    const ask =
-      llmAsk === "kind" && kind
-        ? resolveAsk(undefined, input.openGaps ?? [], profile)
-        : resolveAsk(llmAsk, input.openGaps ?? [], profile)
+    const ask = resolveAsk(parsed.ask, {
+      alreadyHasKind: Boolean(kind),
+      answered,
+    })
     return {
       reply: parsed.reply,
       ready_for_review: parsed.ready_for_review,

@@ -2,22 +2,30 @@ import { NextRequest } from "next/server"
 import { ZodError } from "zod"
 import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema } from "@/lib/api/input"
-import { ok, zodError, badRequest } from "@/lib/api/respond"
-import { saveProfile, slugFor } from "@/lib/db/profiles"
-import { issueToken } from "@/lib/auth/tokens"
-import { sendMagicLink, smtpConfigured } from "@/lib/auth/mail"
-import { createSession } from "@/lib/auth/session"
+import { ok, zodError, badRequest, unauthorized } from "@/lib/api/respond"
+import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
+import { createSession, getSession, hasListing } from "@/lib/auth/session"
 
 export const dynamic = "force-dynamic"
 
 /**
- * POST /api/v1/profiles — create a profile.
+ * POST /api/v1/profiles — publish a listing.
  *
- * Open to the public (this is how the directory grows during the webinar).
- * The submitter is signed in immediately. When SMTP is configured, a
- * magic link is also emailed so they can return on another device.
+ * The contact address must already be confirmed (magic-link session).
+ * Email on the payload is ignored: the listing is bound to the session.
  */
 export async function POST(req: NextRequest): Promise<Response> {
+  const session = await getSession()
+  if (!session) return unauthorized("Confirm your email before adding a listing.")
+  if (hasListing(session)) {
+    return badRequest("This email already has a listing. Sign in to edit it, or delete it in Your profile to add a new one.")
+  }
+
+  const existing = getProfilesByEmail(session.email)
+  if (existing.length > 0) {
+    return badRequest("This email already has a listing. Sign in to edit it, or delete it in Your profile to add a new one.")
+  }
+
   let body: unknown
   try {
     body = await req.json()
@@ -35,26 +43,22 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   let profile
   try {
-    profile = saveProfile({ ...input, slug: slugFor(input.org_name) }, { isNew: true })
+    profile = saveProfile(
+      { ...input, slug: slugFor(input.org_name), contact_email: session.email },
+      { isNew: true },
+    )
   } catch (e) {
     if (e instanceof ZodError) return zodError(e)
     throw e
   }
 
-  let emailSent = false
-  if (smtpConfigured()) {
-    const token = issueToken(profile.contact_email, profile.id)
-    const origin = process.env.APP_URL ?? req.nextUrl.origin
-    const mail = await sendMagicLink(profile.contact_email, `${origin}/claim/${token}`)
-    emailSent = mail.sent
-  }
-
-  await createSession(profile.id, profile.contact_email)
+  await createSession(profile.id, session.email)
+  markClaimed(profile.id)
 
   return ok(
     {
       profile: toPublicProfile(profile),
-      email_sent: emailSent,
+      email_sent: false,
     },
     { status: 201 },
   )

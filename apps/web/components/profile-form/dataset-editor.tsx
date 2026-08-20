@@ -93,10 +93,10 @@ export function DatasetEditor({
           {t("form.dataset_section_required")}
         </h3>
 
-        <Field label={t("field.dataset_name")} htmlFor={`ds-name-${index}`} required>
+        <Field label={t("field.dataset_name")} htmlFor={`ds-name-${index}`} required={started}>
           <Input
             id={`ds-name-${index}`}
-            required
+            required={started}
             maxLength={160}
             placeholder={t("form.dataset_name_placeholder")}
             value={dataset.name}

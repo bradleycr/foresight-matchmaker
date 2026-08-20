@@ -46,4 +46,38 @@ describe("Other please-define fields", () => {
       expect(result.error.issues.some((i) => i.path.join(".") === "looking_for_other")).toBe(true)
     }
   })
+
+  it("rejects methods Other without a definition", () => {
+    const raw = JSON.parse(readFileSync(resolve(seedDir, "ai-teams.json"), "utf8")) as Record<string, unknown>[]
+    const first = raw[0]
+    if (!first) throw new Error("seed ai-teams.json is empty")
+    const result = profileSchema.safeParse({
+      ...first,
+      methods: ["other"],
+      methods_other: "",
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.join(".") === "methods_other")).toBe(true)
+    }
+  })
+
+  it("accepts methods Other with a definition", () => {
+    const raw = JSON.parse(readFileSync(resolve(seedDir, "ai-teams.json"), "utf8")) as Record<string, unknown>[]
+    const first = raw[0]
+    if (!first) throw new Error("seed ai-teams.json is empty")
+    const result = profileSchema.safeParse({
+      ...first,
+      methods: ["other"],
+      methods_other: "Mechanistic ODE models",
+    })
+    expect(result.success).toBe(true)
+  })
+})
+
+describe("visibility default", () => {
+  it("defaults omitted visibility to signed-in members, not the open web", () => {
+    const { visibility: _dropped, ...rest } = loadFirstHolder()
+    expect(profileSchema.parse(rest).visibility).toBe("authenticated_only")
+  })
 })

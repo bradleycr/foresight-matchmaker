@@ -39,11 +39,18 @@ export function IntroComposePart({
     e.preventDefault()
     setStatus("sending")
     setError("")
-    const res = await fetch("/api/v1/intros", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ to_id: toId, message }),
-    })
+    let res: Response
+    try {
+      res = await fetch("/api/v1/intros", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to_id: toId, message }),
+      })
+    } catch {
+      setError(t("intro.error_network"))
+      setStatus("error")
+      return
+    }
     if (res.ok) {
       setStatus("sent")
       return

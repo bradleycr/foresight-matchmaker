@@ -20,7 +20,7 @@ Four listing types. Please mark any field that is wrong, missing, or should not 
 | Looking for | no | dataset access, AI partner, clinical partner, data-governance support, compute, join an existing team, individual expert, not looking |
 | Application status | yes | undecided, intend to apply, applying with a partner, team complete, not applying |
 | Parallel public funding | yes | yes / no / unsure |
-| Challenge events attending | no | webinar 20 Aug 2026, Sept events 1–3, remote only |
+| Challenge events attending | no | Berlin 2 Sep, Paris 9 Sep, Stockholm 17 Sep, remote only |
 | Open to introductions | yes | |
 | Contact name | yes | private |
 | Contact email | yes | private |

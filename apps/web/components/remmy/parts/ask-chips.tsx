@@ -56,7 +56,7 @@ export function AskChipsPart({
             {t("remmy.ask_add")}
           </Button>
           <Button type="button" className="text-sm" disabled={disabled} onClick={onSkip}>
-            {t("remmy.ask_skip")}
+            {t(catalog.skipKey ?? "remmy.ask_skip")}
           </Button>
         </div>
       )}

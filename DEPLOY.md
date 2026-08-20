@@ -1,7 +1,7 @@
 # Deploy on YCluster (sysops)
 
 **This VM is not live until you finish the steps below.** Until then the public
-site is Vercel (https://foresight-matchmaker.vercel.app) — smoke only. Its
+site is Vercel (https://foresightmatchmaker.app) — smoke only. Its
 SQLite file lives in `/tmp` and **every deploy / cold start wipes listings**.
 Do not copy that database here.
 
@@ -31,6 +31,18 @@ Put HTTPS in front of `127.0.0.1:3000`. Point DNS `foresight-matchmaker.dev.yclu
 
 The database is `./data/app.db` on the host (bind-mounted to `/data` in the container). **Do not delete `./data`.** A container rebuild must keep it.
 
+You do **not** need to chown `./data`. The container starts as root, claims the
+directory for uid 1000, then drops to the unprivileged app user. On first start
+you will see this in the logs, which is normal:
+
+```
+[entrypoint] Claiming /data for uid 1000 (was uid 0)
+```
+
+If instead you see `[db] Cannot open the SQLite database`, the volume is not
+writable — run `chown -R 1000:1000 data` and restart. Nothing is lost; the app
+refuses to start rather than accepting profiles it cannot store.
+
 Leave `SEED_ON_EMPTY` unset. A fresh volume stays empty until real people register. That is correct — there are **no dummy profiles** on this host.
 
 If an older image already filled the file with fabricated `.invalid` emails, purge them **once** after the first good build — do not do this if real listings exist:
@@ -55,6 +67,40 @@ docker compose up -d --build
 Compose always sets `DATABASE_PATH=/data/app.db`. Rebuilds replace the container only. `./data` on the host is not touched.
 
 If `git pull` fails because the checkout is dirty, stop and tell Bradley — do not wipe `./data` to “fix” it.
+
+---
+
+## Back up the database
+
+Please set this up on day one. Every row is a profile somebody typed in by
+hand; there is no other copy of it anywhere.
+
+SQLite runs in WAL mode, so at any given moment the database is **three files**:
+
+```
+data/app.db        data/app.db-wal        data/app.db-shm
+```
+
+Recent writes live in `app.db-wal` until SQLite folds them back in. So
+**copying `app.db` on its own can silently lose the newest profiles** — it will
+look like a valid database and simply be missing people.
+
+Two safe ways to take a backup:
+
+```bash
+# A. Stop first (SIGTERM folds the WAL back into app.db), then copy one file.
+docker compose stop web
+cp data/app.db /var/backups/matchmaker-$(date +%F-%H%M).db
+docker compose start web
+```
+
+```bash
+# B. Hot backup, no downtime — copy all three files together.
+tar czf /var/backups/matchmaker-$(date +%F-%H%M).tar.gz data/
+```
+
+A daily `cron` entry using B is enough. To restore, stop the container, drop
+the files back into `./data`, and start it again.
 
 ---
 

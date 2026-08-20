@@ -7,7 +7,6 @@
     "dev": "pnpm --filter @rmm/web dev",
     "build": "pnpm -r build",
     "start": "pnpm --filter @rmm/web start",
-    "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "schema:export": "pnpm --filter @rmm/schema export-json-schema",

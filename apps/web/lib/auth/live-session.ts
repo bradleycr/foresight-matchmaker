@@ -20,21 +20,23 @@ import { safeNextPath } from "@/lib/auth/next-path"
 
 export const CLEAR_SESSION_PATH = "/api/v1/auth/logout"
 
-export async function peekLiveSession(): Promise<{ session: Session; profile: Profile } | null> {
+export async function peekLiveSession(): Promise<{ session: Session & { profileId: string }; profile: Profile } | null> {
   const session = await getSession()
-  if (!session) return null
+  if (!session?.profileId) return null
   const profile = getProfileById(session.profileId)
   if (!profile) return null
-  return { session, profile }
+  return { session: session as Session & { profileId: string }, profile }
 }
 
 /**
  * Route-handler variant: may delete the cookie. Do not call from RSC.
+ * A verified-email session with no listing is kept — they still need /register.
  */
-export async function resolveLiveSession(): Promise<{ session: Session; profile: Profile } | null> {
+export async function resolveLiveSession(): Promise<{ session: Session & { profileId: string }; profile: Profile } | null> {
   const live = await peekLiveSession()
   if (live) return live
-  if (await getSession()) await destroySession()
+  const session = await getSession()
+  if (session?.profileId) await destroySession()
   return null
 }
 

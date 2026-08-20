@@ -22,7 +22,7 @@ const bodySchema = z.object({
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const session = await getSession()
-  if (!session) return unauthorized()
+  if (!session?.profileId) return unauthorized()
 
   const subject = getProfileById(session.profileId)
   if (!subject) return notFound("Your profile no longer exists.")

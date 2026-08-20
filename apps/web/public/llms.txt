@@ -7,7 +7,7 @@ directory. SPRIND does not operate, control, or assume liability for
 matchmaking here.
 
 Operator: Foresight Institute — https://foresight.org
-Product: https://foresight-matchmaker.vercel.app
+Product: https://foresightmatchmaker.app
 
 ## What this is
 
@@ -21,12 +21,12 @@ Contact details and dataset governance notes never appear in public payloads.
 
 ## Machine-readable contract (start here)
 
-- JSON Schema (profiles): https://foresight-matchmaker.vercel.app/api/v1/schema
-- JSON Schema (files): https://foresight-matchmaker.vercel.app/schema/v1/profile.schema.json
-- OpenAPI 3.1: https://foresight-matchmaker.vercel.app/openapi.json
-- Public aggregates: https://foresight-matchmaker.vercel.app/api/v1/stats
-- Directory dump (session cookie required): https://foresight-matchmaker.vercel.app/api/v1/directory.json
-- Human schema pack for Recoding Medicine listings: https://foresight-matchmaker.vercel.app/sprind/recoding-medicine-schema.html
+- JSON Schema (profiles): https://foresightmatchmaker.app/api/v1/schema
+- JSON Schema (files): https://foresightmatchmaker.app/schema/v1/profile.schema.json
+- OpenAPI 3.1: https://foresightmatchmaker.app/openapi.json
+- Public aggregates: https://foresightmatchmaker.app/api/v1/stats
+- Directory dump (session cookie required): https://foresightmatchmaker.app/api/v1/directory.json
+- Human schema pack for Recoding Medicine listings: https://foresightmatchmaker.app/sprind/recoding-medicine-schema.html
 
 ## Auth today
 

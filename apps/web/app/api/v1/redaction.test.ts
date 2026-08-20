@@ -239,6 +239,7 @@ describe("GET /api/v1/profiles/:id", () => {
 
 describe("POST /api/v1/profiles — derived fields are server-owned", () => {
   it("ignores client-supplied eligible_hq and completeness", async () => {
+    await createSession(null, "tamper-test@example.invalid")
     const res = await profilesPOST(
       jsonRequest("/api/v1/profiles", "POST", {
         kind: "data_holder",

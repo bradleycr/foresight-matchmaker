@@ -4,9 +4,11 @@ import type {
   OrgType,
   Language,
   LookingFor,
+  Attending,
   Methods,
   ApplicationTarget,
   DiseaseArea,
+  ApplicationStatus,
   ClinicalPartner,
   RegulatoryExperience,
   Compute,
@@ -34,13 +36,19 @@ export interface ProposalMergeTarget {
   kind: Kind
   org_name: string
   org_type: OrgType
+  org_type_other: string
   country: string
   one_liner: string
   summary: string
   website: string
   languages: Language[]
   looking_for: LookingFor[]
+  looking_for_other: string
+  attending: Attending[]
+  application_status: ApplicationStatus
+  affiliation: string
   methods: Methods[]
+  methods_other: string
   application_target: ApplicationTarget[]
   domain_expertise: DiseaseArea[]
   clinical_partner: ClinicalPartner
@@ -57,6 +65,10 @@ export interface ProposalMergeTarget {
   needs_standards: Standards[]
   datasets: Dataset[]
   still_seeking: LookingFor[]
+  compute_scale: string
+  intended_public_contribution: string
+  funding_mainly_needed_for: string
+  best_public_dataset: string
 }
 
 function mergePartialDataset(partial: Partial<Dataset>): Dataset {
@@ -82,14 +94,28 @@ function mergePartialDataset(partial: Partial<Dataset>): Dataset {
   return d
 }
 
+function orgTypeForKind(kind: Kind, current: OrgType): OrgType {
+  if (kind === "individual") return "individual"
+  if (current !== "individual") return current
+  if (kind === "ai_team") return "startup"
+  if (kind === "consortium") return "university"
+  return "hospital"
+}
+
 function resetForKind<T extends ProposalMergeTarget>(state: T, kind: Kind): T {
   if (state.kind === kind) return state
+
+  const org_type = orgTypeForKind(kind, state.org_type)
+  const team_size = kind === "individual" ? ("1" as const) : state.kind === "individual" ? ("2_5" as const) : state.team_size
 
   if (kind === "data_holder") {
     return {
       ...state,
       kind,
+      org_type,
+      team_size,
       methods: [],
+      methods_other: "",
       application_target: [],
       domain_expertise: [],
       regulatory_experience: [],
@@ -102,6 +128,7 @@ function resetForKind<T extends ProposalMergeTarget>(state: T, kind: Kind): T {
       needs_linkage: [],
       needs_standards: [],
       still_seeking: [],
+      affiliation: "",
       datasets: state.datasets.length ? state.datasets : [emptyDataset()],
     }
   }
@@ -110,23 +137,26 @@ function resetForKind<T extends ProposalMergeTarget>(state: T, kind: Kind): T {
     return {
       ...state,
       kind,
+      org_type,
+      team_size,
       datasets: [emptyDataset()],
       still_seeking: [],
       ...(kind === "individual"
         ? {
-            org_type: "individual" as const,
-            team_size: "1" as const,
             looking_for: state.looking_for.includes("join_team")
               ? state.looking_for
               : [...state.looking_for, "join_team" as const],
           }
-        : {}),
+        : { affiliation: "" }),
     }
   }
 
   return {
     ...state,
     kind,
+    org_type,
+    team_size,
+    affiliation: "",
     datasets: state.datasets.length ? state.datasets : [emptyDataset()],
   }
 }
@@ -147,15 +177,41 @@ export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
   if (p.website) next = { ...next, website: p.website }
   if (p.languages.length) next = { ...next, languages: p.languages }
   if (p.looking_for.length) next = { ...next, looking_for: p.looking_for }
+  if (p.still_seeking?.length) next = { ...next, still_seeking: p.still_seeking }
+  if (p.attending?.length) next = { ...next, attending: p.attending }
+  if (p.application_status) next = { ...next, application_status: p.application_status }
+  if (p.affiliation) next = { ...next, affiliation: p.affiliation }
   if (p.methods.length) next = { ...next, methods: p.methods }
+  if (p.methods_other) {
+    next = {
+      ...next,
+      methods_other: p.methods_other,
+      methods: next.methods.includes("other") ? next.methods : [...next.methods, "other"],
+    }
+  }
+  if (p.looking_for_other) {
+    const hasOther = next.looking_for.includes("other") || next.still_seeking.includes("other")
+    next = {
+      ...next,
+      looking_for_other: p.looking_for_other,
+      looking_for: hasOther ? next.looking_for : [...next.looking_for, "other"],
+    }
+  }
+  if (p.org_type_other && next.kind !== "individual") {
+    next = { ...next, org_type_other: p.org_type_other, org_type: "other" }
+  }
   if (p.application_target.length) next = { ...next, application_target: p.application_target }
   if (p.domain_expertise.length) next = { ...next, domain_expertise: p.domain_expertise }
   if (p.clinical_partner) next = { ...next, clinical_partner: p.clinical_partner }
   if (p.regulatory_experience.length) next = { ...next, regulatory_experience: p.regulatory_experience }
   if (p.compute) next = { ...next, compute: p.compute }
+  if (p.compute_scale) next = { ...next, compute_scale: p.compute_scale }
   if (p.privacy_capability.length) next = { ...next, privacy_capability: p.privacy_capability }
   if (p.team_size) next = { ...next, team_size: p.team_size }
   if (p.track_record.length) next = { ...next, track_record: p.track_record.join("\n") }
+  if (p.intended_public_contribution) next = { ...next, intended_public_contribution: p.intended_public_contribution }
+  if (p.funding_mainly_needed_for) next = { ...next, funding_mainly_needed_for: p.funding_mainly_needed_for }
+  if (p.best_public_dataset) next = { ...next, best_public_dataset: p.best_public_dataset }
 
   if (p.data_needs) {
     if (p.data_needs.modality.length) next = { ...next, needs_modality: p.data_needs.modality }
@@ -171,6 +227,12 @@ export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
     // can highlight what is still open instead of looking empty.
     const rows = p.datasets.map(mergePartialDataset).filter(datasetRowHasSignal)
     next = { ...next, datasets: mergeDatasetLists(next.datasets, rows) }
+  }
+
+  if (next.kind === "individual") {
+    next = { ...next, org_type: "individual" as T["org_type"], team_size: "1" as T["team_size"] }
+  } else if (next.org_type === "individual") {
+    next = { ...next, org_type: orgTypeForKind(next.kind, "individual") as T["org_type"] }
   }
 
   return next
@@ -208,11 +270,30 @@ function mergeDatasetLists(current: Dataset[], incoming: Dataset[]): Dataset[] {
 }
 
 function overlayDataset(base: Dataset, incoming: Dataset): Dataset {
-  return {
-    ...incoming,
+  const named = incoming.name.trim().length > 0
+  const next: Dataset = {
     ...base,
     name: base.name.trim() || incoming.name,
     modality: base.modality.length > 0 ? base.modality : incoming.modality,
     disease_area: base.disease_area.length > 0 ? base.disease_area : incoming.disease_area,
+  }
+  if (!named) return next
+  return {
+    ...next,
+    n_subjects: incoming.n_subjects,
+    volume: incoming.volume,
+    time_span_years: incoming.time_span_years ?? next.time_span_years,
+    longitudinal: incoming.longitudinal,
+    annotation: incoming.annotation,
+    linkage: incoming.linkage.length > 0 ? incoming.linkage : next.linkage,
+    standards: incoming.standards.length > 0 ? incoming.standards : next.standards,
+    readiness: incoming.readiness,
+    consent_basis: incoming.consent_basis,
+    access_model: incoming.access_model,
+    data_can_leave_institution: incoming.data_can_leave_institution,
+    ethics_approval: incoming.ethics_approval,
+    available_from: incoming.available_from ?? next.available_from,
+    publicly_describable: incoming.publicly_describable,
+    governance_notes: incoming.governance_notes ?? next.governance_notes,
   }
 }

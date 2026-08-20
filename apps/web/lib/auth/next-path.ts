@@ -15,3 +15,23 @@ export function signInHref(next?: string): string {
   const path = safeNextPath(next)
   return path ? `/signin?next=${encodeURIComponent(path)}` : "/signin"
 }
+
+/** True when this return path is the listing form (with or without ?challenge=). */
+export function isRegisterPath(path: string | null): boolean {
+  if (!path) return false
+  return path === "/register" || path.startsWith("/register?")
+}
+
+/**
+ * Where to send someone after they confirm a magic link.
+ * Confirmed email, no listing yet → the form. Existing listing → /me
+ * (unless they asked for another in-app page).
+ */
+export function afterClaimHref(profileId: string | null, next?: string | null): string {
+  const dest = safeNextPath(next)
+  if (profileId) {
+    if (dest && !isRegisterPath(dest)) return dest
+    return "/me"
+  }
+  return dest ?? "/register"
+}

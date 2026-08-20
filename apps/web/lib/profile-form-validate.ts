@@ -7,7 +7,13 @@ export function isDatasetBlank(d: Dataset): boolean {
 }
 
 export function filterDatasetsForSubmit(datasets: Dataset[]): Dataset[] {
-  return datasets.filter((d) => !isDatasetBlank(d))
+  return datasets
+    .filter((d) => !isDatasetBlank(d))
+    .map((d) => ({
+      ...d,
+      linkage: d.linkage.length > 0 ? d.linkage : (["none"] as Dataset["linkage"]),
+      standards: d.standards.length > 0 ? d.standards : (["none"] as Dataset["standards"]),
+    }))
 }
 
 export type ValidationIssue = {
@@ -29,6 +35,8 @@ interface ValidateInput {
   looking_for?: string[]
   still_seeking?: string[]
   looking_for_other?: string
+  methods?: string[]
+  methods_other?: string
 }
 
 /** Client-side checks with human-readable issue keys — run before hitting the API. */
@@ -56,6 +64,10 @@ export function collectValidationIssues(input: ValidateInput): ValidationIssue[]
   const looking = [...(input.looking_for ?? []), ...(input.still_seeking ?? [])]
   if (looking.includes("other") && !input.looking_for_other?.trim()) {
     issues.push({ fieldId: "looking_for_other", messageKey: "form.validation.looking_for_other" })
+  }
+
+  if (input.methods?.includes("other") && !input.methods_other?.trim()) {
+    issues.push({ fieldId: "methods_other", messageKey: "form.validation.methods_other" })
   }
 
   const showData = input.kind === "data_holder" || input.kind === "consortium"
@@ -114,6 +126,7 @@ export function fieldIdFromApiPath(path: string): string | null {
   if (path === "contact_email") return "gap-contact_email"
   if (path === "org_type_other") return "org_type_other"
   if (path === "looking_for_other") return "looking_for_other"
+  if (path === "methods_other") return "methods_other"
   return null
 }
 

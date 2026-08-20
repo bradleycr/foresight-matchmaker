@@ -7,16 +7,17 @@ import { getProfilesByEmail } from "@/lib/db/profiles"
 import { issueToken } from "@/lib/auth/tokens"
 import { magicLinkMode, sendMagicLink, revealLinksAllowed } from "@/lib/auth/mail"
 import { rateLimit } from "@/lib/auth/rate-limit"
-import { safeNextPath } from "@/lib/auth/next-path"
+import { isRegisterPath, safeNextPath } from "@/lib/auth/next-path"
 
 export const dynamic = "force-dynamic"
 
 /**
  * POST /api/v1/auth/request-link
  *
- * Response shape is identical for known and unknown emails (anti-enumeration).
- * When on-screen reveal is enabled, unknown emails still get a claim_link —
- * a decoy that fails at /claim with the same generic error as a bad token.
+ * Response shape is identical for known and unknown emails on the sign-in
+ * path (anti-enumeration). The register path is different on purpose: a
+ * new address must receive a real confirmation link so they can verify
+ * before filling a listing.
  */
 export async function POST(req: NextRequest): Promise<Response> {
   let body: unknown
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   const mode = magicLinkMode()
   const reveal = revealLinksAllowed()
   const next = safeNextPath(input.next)
+  const signup = isRegisterPath(next)
   const nextQuery = next ? `?next=${encodeURIComponent(next)}` : ""
 
   let claimLink: string | undefined
@@ -59,22 +61,25 @@ export async function POST(req: NextRequest): Promise<Response> {
     const profile = profiles[0]!
     const token = issueToken(email, profile.id)
     const link = `${origin}/claim/${token}${nextQuery}`
-    await sendMagicLink(email, link)
-    if (reveal) claimLink = link
+    const mail = await sendMagicLink(email, link, "signin")
+    // Only reveal on-screen when the inbox did not get the link — otherwise
+    // auto-claim burns the token and the emailed button fails.
+    if (reveal && !mail.sent) claimLink = link
+  } else if (signup) {
+    // Confirm the address first; the listing does not exist yet.
+    const token = issueToken(email)
+    const link = `${origin}/claim/${token}${nextQuery}`
+    const mail = await sendMagicLink(email, link, "welcome")
+    if (reveal && !mail.sent) claimLink = link
   } else if (reveal) {
     // Decoy: same URL shape, never stored — claim fails with the generic error.
     // Equalises response shape so existence cannot be inferred from JSON keys.
     claimLink = `${origin}/claim/${randomBytes(32).toString("base64url")}${nextQuery}`
-    // Rough timing parity with issueToken + log path.
     await new Promise((r) => setTimeout(r, 5))
   } else {
-    // Opaque path: burn a little CPU so known/unknown aren't free to time.
     randomBytes(32)
   }
 
-  // Identical public contract in every mode. `claim_link` is only present
-  // when reveal is explicitly allowed — and then it is present for BOTH
-  // known and unknown emails (real vs decoy).
   return ok({
     ok: true,
     mode,

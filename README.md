@@ -2,9 +2,25 @@
 
 A Foresight Institute directory that pairs organisations around open programmes. **Recoding Medicine** (application deadline **16 October 2026**) is the first programme on this instance.
 
-Think of it as a phone book, not a social network: register a structured profile against a programme, browse the directory, get a deterministic ranked shortlist of counterparts, and **email an introduction**. Both contacts are on the thread so the conversation continues off this platform. Joint applications are filed with the programme host, not here.
+Think of it as a phone book, not a social network: add a structured **listing** against a programme, browse the directory, get a deterministic ranked shortlist of counterparts, and **email an introduction**. Both contacts are on the thread so the conversation continues off this platform. Joint applications are filed with the programme host, not here.
+
+**Production (Vercel):** https://foresightmatchmaker.app — see [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for deploy, env vars, and smoke tests.
 
 > **All seed data is synthetic.** Every organisation, dataset, contact name, and email address under `seed/` is fabricated for demonstration purposes and does not describe any real institution. See `seed/README.md`.
+
+---
+
+## Adding a listing (verify-first)
+
+1. **`/register`** — confirm your email (magic link via Resend when configured).
+2. **Fill the form** (or chat with Remmy) — pick a **listing type**: data holder, AI team, consortium, or individual.
+3. **Submit** — `POST /api/v1/profiles` requires a verified session; contact email is taken from the session, not the form.
+
+One listing per email. To switch type, delete the listing under **Your listing** (`/me`) and submit a new one — you stay signed in; no second confirmation email.
+
+Returning users: **`/signin`** with the email on their listing.
+
+Magic links are **HMAC-signed in the URL** (no server-side token store required), so they work across Vercel serverless instances. Links are single-use and expire after 24 hours.
 
 ---
 
@@ -16,10 +32,12 @@ pnpm db:seed      # load the synthetic directory + build the match cache
 pnpm dev          # http://localhost:3000
 ```
 
-That is the whole setup. Without SMTP configured, magic sign-in links are
-shown on screen in development (and logged to the server console). In
-production, set `SMTP_URL` — or explicitly `AUTH_REVEAL_LINKS=true` for a
-controlled demo. Sign in with any seed contact email (e.g. `a.voss@example.invalid`).
+That is the whole setup. Without `RESEND_API_KEY` or `SMTP_URL`, magic links are
+shown on screen in development (`AUTH_REVEAL_LINKS` defaults on locally). On
+Vercel production, **Resend** sends real mail from `hello@foresightmatchmaker.app`;
+`AUTH_REVEAL_LINKS=true` remains a fallback if delivery fails (link also logged).
+Sign in with any seed contact email (e.g. `a.voss@example.invalid`), or walk through
+**`/register`** to test verify-first signup.
 
 To unlock `/admin`, open the page and enter `password123`
 (also accepted when `ADMIN_SECRET` is set to something else):
@@ -64,7 +82,7 @@ The UI is a pure client of the versioned API — everything the pages render com
 
 ## The schema, in one paragraph
 
-A **profile** is a data holder, an AI team, or a consortium (both at once). Data holders describe one or more **datasets**: modality, disease area, subject/record scale, access model (export, secure processing environment, federated), ethics status, linkage, and annotation. AI teams describe **capabilities**: methods, domain expertise, compute, and — most importantly — `privacy_capability` (can they work inside a TRE, federate, or do they require data export?). The matcher scores pairs on disease and modality overlap, access-model compatibility, scale sufficiency, annotation/linkage fit, readiness, language, and colocation, and reports **hard blockers** (score zeroed, e.g. dataset cannot leave the institution and the team can only work on exported data) and **soft blockers** (score kept, friction surfaced) with every match.
+A **listing** is one of four types: **data holder**, **AI team**, **consortium**, or **individual**. Data holders describe one or more **datasets**: modality, disease area, subject/record scale, access model (export, secure processing environment, federated), ethics status, linkage, and annotation. AI teams and individuals describe **capabilities**: methods, domain expertise, compute, and — most importantly — `privacy_capability` (can they work inside a TRE, federate, or do they require data export?). Consortia combine both and declare what they are **still seeking**. The matcher scores pairs on disease and modality overlap, access-model compatibility, scale sufficiency, annotation/linkage fit, readiness, language, and colocation, and reports **hard blockers** (score zeroed, e.g. dataset cannot leave the institution and the team can only work on exported data) and **soft blockers** (score kept, friction surfaced) with every match.
 
 The machine-readable contract:
 
@@ -78,8 +96,8 @@ The machine-readable contract:
 | `GET /api/v1/directory.json` | Stable public machine contract: redacted `public` profiles only (no contact details, ever). What the footer links and third parties should call. |
 | `GET /api/v1/directory` | UI corpus: same shape, but signed-in callers also receive `authenticated_only` profiles. Anonymous callers see `public` only. Pages self-fetch this; do not treat it as the public dump. |
 | `GET /api/v1/schema/v1/profile.schema.json` | JSON Schema of the profile |
-| `POST /api/v1/profiles` | Register a profile (signs the submitter in; optional email magic link if SMTP is set) |
-| `GET /api/v1/profiles/:id` · `PATCH` · `DELETE` | Read public profile / edit own / GDPR erase own (session) |
+| `POST /api/v1/profiles` | Publish a listing (**session required** — email verified first on `/register`) |
+| `GET /api/v1/profiles/:id` · `PATCH` · `DELETE` | Read / edit own listing / GDPR erase (delete keeps email verified for a fresh listing) |
 | `GET /api/v1/matches` | Ranked shortlist for the signed-in profile |
 | `GET /api/v1/intros` · `POST` · `PATCH /:id` | Double opt-in introduction flow |
 | `POST /api/v1/auth/request-link` · `/claim` · `/logout` | Magic-link auth |
@@ -101,4 +119,4 @@ The whole test suite passes with no LLM configured.
 
 ## Privacy
 
-See [`PRIVACY.md`](PRIVACY.md). Highlights: Foresight Institute as operator of this directory, minimal collection (one contact per organisation), no advertising trackers, optional AI drafting only with human confirmation, and deletion on request — self-service from Your profile (`/me`) or via the privacy contact email.
+See [`PRIVACY.md`](PRIVACY.md). Highlights: Foresight Institute as operator of this directory, minimal collection (one contact per listing), no advertising trackers, optional AI drafting only with human confirmation, and deletion on request — self-service from **Your listing** (`/me`) or via the privacy contact email.

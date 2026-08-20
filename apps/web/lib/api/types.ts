@@ -91,6 +91,7 @@ export interface DirectoryProfile {
   datasets?: PublicDataset[]
   // ai_team / consortium / individual
   methods?: Methods[]
+  methods_other?: string
   application_target?: ApplicationTarget[]
   domain_expertise?: DiseaseArea[]
   clinical_partner?: ClinicalPartner

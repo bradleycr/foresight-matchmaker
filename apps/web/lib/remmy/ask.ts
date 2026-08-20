@@ -7,20 +7,23 @@ import {
   DISEASE_AREA,
   MODALITY,
   PRIVACY_CAPABILITY,
+  attendingChoices,
   type Kind,
 } from "@rmm/schema"
 import type { PrefillProposal } from "@/lib/llm/prefill"
 
 /**
  * Generative UI for Remmy intake: the model names a vocabulary, never the
- * option list. We hydrate tappable chips from the schema so a person can
- * fill modality / disease / methods without typing 24 enum labels.
+ * option list. Chips are shown only when `ask` is an explicit catalog id —
+ * we never substitute a different field from leftover form gaps (that is
+ * how "which events?" rendered language chips).
  */
 
 export const ASK_IDS = [
   "kind",
   "looking_for",
   "languages",
+  "attending",
   "methods",
   "application_target",
   "domain_expertise",
@@ -38,6 +41,7 @@ export interface AskCatalogEntry {
   options: readonly string[]
   multi: boolean
   labelKey: string
+  skipKey?: string
 }
 
 export const ASK_CATALOG: Record<AskId, AskCatalogEntry> = {
@@ -56,6 +60,13 @@ export const ASK_CATALOG: Record<AskId, AskCatalogEntry> = {
     multi: true,
     labelKey: "field.languages",
   },
+  attending: {
+    id: "attending",
+    group: "attending",
+    options: attendingChoices(),
+    multi: true,
+    labelKey: "field.attending",
+  },
   methods: { id: "methods", group: "methods", options: METHODS, multi: true, labelKey: "field.methods" },
   application_target: {
     id: "application_target",
@@ -70,6 +81,7 @@ export const ASK_CATALOG: Record<AskId, AskCatalogEntry> = {
     options: DISEASE_AREA,
     multi: true,
     labelKey: "field.domain_expertise",
+    skipKey: "remmy.ask_skip_no_domain",
   },
   privacy_capability: {
     id: "privacy_capability",
@@ -94,63 +106,90 @@ export function isAskId(value: unknown): value is AskId {
   return typeof value === "string" && ASK_SET.has(value)
 }
 
-const GAP_TO_ASK: Record<string, AskId> = {
-  looking_for: "looking_for",
-  languages: "languages",
-  methods: "methods",
-  application_target: "application_target",
-  domain_expertise: "domain_expertise",
-  privacy_capability: "privacy_capability",
-  datasets: "modality",
-}
-
-/** Gaps to walk past when inferring chips (typed on the form, or not vocab). */
-const SKIP_PAST = new Set(["contact_name", "contact_email", "website", "attending", "compute_scale"])
-
-/** Free-text identity — chips would interrupt the name/summary question. */
-const TEXT_STOP = new Set(["org_name", "one_liner", "summary"])
-
-function firstDataset(profile: Record<string, unknown> | null): {
-  modality: unknown[]
-  disease_area: unknown[]
-} | null {
-  const rows = profile?.datasets
-  if (!Array.isArray(rows) || rows.length === 0) return null
-  const row = rows[0] as { modality?: unknown; disease_area?: unknown }
-  return {
-    modality: Array.isArray(row.modality) ? row.modality : [],
-    disease_area: Array.isArray(row.disease_area) ? row.disease_area : [],
+/** Vocabularies already committed in this transcript (survives a remount). */
+export function answeredAsksFromMessages(
+  messages: ReadonlyArray<{ role: string; ask?: string; askDone?: boolean; content?: string }>,
+): AskId[] {
+  const out: AskId[] = []
+  for (const m of messages) {
+    if (m.role !== "assistant" || !m.askDone || !isAskId(m.ask)) continue
+    if (!out.includes(m.ask)) out.push(m.ask)
   }
-}
-
-function datasetAsk(profile: Record<string, unknown> | null): AskId {
-  const ds = firstDataset(profile)
-  if (!ds || ds.modality.length === 0) return "modality"
-  if (ds.disease_area.length === 0) return "disease_area"
-  return "modality"
+  return out
 }
 
 /**
- * Prefer the model's `ask`. If it forgot, show chips only when the next
- * real gap is a vocabulary — never while they still owe a name or summary.
+ * Chips belong only to the latest Remmy turn. Walking back to an earlier
+ * unanswered ask is how "which events?" could still show language chips.
+ */
+export function activeChipTurn(
+  messages: ReadonlyArray<{ role: string; ask?: string; askDone?: boolean; content?: string }>,
+): { index: number; ask: AskId } | null {
+  if (messages.at(-1)?.role === "user") return null
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i]!
+    if (m.role !== "assistant") continue
+    if (m.ask && !m.askDone && isAskId(m.ask)) return { index: i, ask: m.ask }
+    return null
+  }
+  return null
+}
+
+/**
+ * Chips follow the model's `ask` only. A missing or unknown ask means no
+ * chips — never the next open gap (that swapped events for languages).
  */
 export function resolveAsk(
   llmAsk: unknown,
-  openGaps: readonly string[],
-  profile: Record<string, unknown> | null,
+  opts: { alreadyHasKind?: boolean; answered?: readonly string[] } = {},
 ): AskId | null {
-  if (isAskId(llmAsk)) return llmAsk
+  if (!isAskId(llmAsk)) return null
+  if (llmAsk === "kind" && opts.alreadyHasKind) return null
+  if (opts.answered?.includes(llmAsk)) return null
+  return llmAsk
+}
 
-  const next = openGaps.find((g) => !SKIP_PAST.has(g))
-  if (!next || TEXT_STOP.has(next)) return null
-  if (next === "datasets") return datasetAsk(profile)
-  return GAP_TO_ASK[next] ?? null
+/** Drop vocabularies the human already tapped this session from Remmy's gap list. */
+export function gapsWithoutAnswered(openGaps: readonly string[], answered: readonly string[]): string[] {
+  const skip = new Set(answered)
+  return openGaps.filter((g) => {
+    if (g === "datasets") return !(skip.has("modality") && skip.has("disease_area"))
+    return !skip.has(g)
+  })
+}
+
+/**
+ * Chip commits land in React state on the next paint. Overlay them onto the
+ * snapshot we send Remmy so the following turn cannot resurrect a filled field.
+ */
+export function overlayAskOnProfile(
+  profile: Record<string, unknown>,
+  ask: AskId,
+  values: string[],
+): Record<string, unknown> {
+  switch (ask) {
+    case "kind":
+      return { ...profile, kind: values[0] }
+    case "looking_for":
+    case "languages":
+    case "attending":
+    case "methods":
+    case "application_target":
+    case "domain_expertise":
+    case "privacy_capability":
+      return { ...profile, [ask]: values }
+    case "modality":
+    case "disease_area":
+      return profile
+  }
 }
 
 function emptyProposal(): PrefillProposal {
   return {
     languages: [],
     looking_for: [],
+    still_seeking: [],
+    attending: [],
     methods: [],
     application_target: [],
     domain_expertise: [],
@@ -188,6 +227,8 @@ export function proposalFromAsk(
       return { ...p, looking_for: values as PrefillProposal["looking_for"] }
     case "languages":
       return { ...p, languages: values as PrefillProposal["languages"] }
+    case "attending":
+      return { ...p, attending: values as PrefillProposal["attending"] }
     case "methods":
       return { ...p, methods: values as PrefillProposal["methods"] }
     case "application_target":

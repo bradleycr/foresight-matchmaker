@@ -4,9 +4,11 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button, Field, Input } from "@/components/ui/primitives"
+import { afterClaimHref } from "@/lib/auth/next-path"
 import type { DeliveryMode } from "@/lib/auth/mail"
 
 type Result = { ok: true; mode: DeliveryMode; claim_link?: string }
+type ClaimResult = { signed_in?: boolean; profile_id?: string | null }
 
 function tokenFromClaimLink(link: string): string | null {
   try {
@@ -20,7 +22,15 @@ function tokenFromClaimLink(link: string): string | null {
   }
 }
 
-export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }) {
+export function SigninForm({
+  mode,
+  next,
+  intent = "signin",
+}: {
+  mode: DeliveryMode
+  next?: string
+  intent?: "signin" | "signup"
+}) {
   const t = useT()
   const router = useRouter()
   const [email, setEmail] = useState("")
@@ -31,13 +41,19 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
   async function claimAndEnter(link: string): Promise<boolean> {
     const token = tokenFromClaimLink(link)
     if (!token) return false
-    const res = await fetch("/api/v1/auth/claim", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    })
+    let res: Response
+    try {
+      res = await fetch("/api/v1/auth/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      })
+    } catch {
+      return false
+    }
     if (!res.ok) return false
-    router.push(next ?? "/me")
+    const claimed = (await res.json().catch(() => null)) as ClaimResult | null
+    router.push(afterClaimHref(claimed?.profile_id ?? null, next))
     router.refresh()
     return true
   }
@@ -47,11 +63,20 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
     setStatus("working")
     setError(null)
 
-    const res = await fetch("/api/v1/auth/request-link", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, ...(next ? { next } : {}) }),
-    })
+    // Without this guard a dropped connection leaves the button stuck on
+    // "Signing in…" with nothing to click — indistinguishable from a hang.
+    let res: Response
+    try {
+      res = await fetch("/api/v1/auth/request-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, ...(next ? { next } : {}) }),
+      })
+    } catch {
+      setError(t("signin.error_network"))
+      setStatus("error")
+      return
+    }
 
     if (res.status === 429) {
       setError(t("signin.rate_limited"))
@@ -65,7 +90,12 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
       return
     }
 
-    const body = (await res.json()) as Result
+    const body = (await res.json().catch(() => null)) as Result | null
+    if (!body) {
+      setError(t("signin.error_generic"))
+      setStatus("error")
+      return
+    }
 
     // On-screen demo hosts: consume the token here so the person never
     // sees a raw URL or a second "confirm sign-in" page.
@@ -82,8 +112,13 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
   }
 
   if (status === "done" && result) {
+    const titleKey = intent === "signup" ? "register.verify_sent_title" : "signin.email_sent_title"
+    const bodyKey = intent === "signup" ? "register.verify_sent" : "signin.email_sent"
     return (
-      <p className="mt-6 border border-ink px-3 py-2">{t("signin.email_sent")}</p>
+      <div className="mt-8 border-2 border-ink bg-paper-shade px-5 py-6">
+        <p className="font-listing text-2xl font-bold uppercase tracking-tight">{t(titleKey)}</p>
+        <p className="mt-3 leading-relaxed">{t(bodyKey)}</p>
+      </div>
     )
   }
 
@@ -94,7 +129,11 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
           {error}
         </p>
       )}
-      <Field label={t("signin.email_label")} htmlFor="signin-email" required>
+      <Field
+        label={t(intent === "signup" ? "register.verify_email_label" : "signin.email_label")}
+        htmlFor="signin-email"
+        required
+      >
         <Input
           id="signin-email"
           type="email"
@@ -102,15 +141,19 @@ export function SigninForm({ mode, next }: { mode: DeliveryMode; next?: string }
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@organisation.eu"
+          placeholder="you@organisation.eu"
         />
       </Field>
       <Button type="submit" variant="primary" disabled={status === "working"} className="self-start">
         {status === "working"
-          ? t("signin.signing_in")
-          : mode === "on_screen"
-            ? t("signin.button_reveal")
-            : t("signin.button")}
+          ? t(intent === "signup" ? "register.verify_working" : "signin.signing_in")
+          : intent === "signup"
+            ? mode === "on_screen"
+              ? t("register.verify_button_reveal")
+              : t("register.verify_button")
+            : mode === "on_screen"
+              ? t("signin.button_reveal")
+              : t("signin.button")}
       </Button>
     </form>
   )
