@@ -33,8 +33,8 @@ import type { Factor, Blocker } from "@rmm/matching"
 
 /**
  * Client-facing shapes of the /api/v1 payloads. These mirror the schema
- * package minus every private field — the contact block and governance
- * notes never appear here because the server never sends them publicly.
+ * package minus private fields — contact name, role, and governance notes
+ * never appear here. Contact email is shown so members can write directly.
  */
 
 export interface PublicDataset {
@@ -71,6 +71,7 @@ export interface DirectoryProfile {
   one_liner: string
   summary: string
   website?: string
+  linkedin?: string
   languages: Language[]
   looking_for: LookingFor[]
   looking_for_other?: string
@@ -79,6 +80,8 @@ export interface DirectoryProfile {
   attending: Attending[]
   open_to_intros: boolean
   visibility: Visibility
+  /** Shown to signed-in members when the listing is open to contact. */
+  contact_email?: string
   org_type_other?: string
   intended_public_contribution?: string
   funding_mainly_needed_for?: string

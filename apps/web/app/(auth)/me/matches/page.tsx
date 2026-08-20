@@ -147,10 +147,10 @@ function MatchRow({ match, polish, t }: { match: MatchPayload; polish: boolean; 
               <FactorBreakdown match={match} t={t} />
 
               <Link
-                href={`/profile/${match.profile.slug}#intro`}
+                href={`/profile/${match.profile.slug}#contact`}
                 className="mt-3 inline-block border border-ink px-3 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
               >
-                {t("intro.request_button")}
+                {t("contact.email_button")}
               </Link>
             </div>
           </div>

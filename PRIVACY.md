@@ -25,8 +25,7 @@ SPRIND.
 | Data | Purpose | Visibility |
 | --- | --- | --- |
 | Organisation profile (name, type, country, capabilities, dataset *descriptions*) | Directory listing and deterministic matching | Visible after sign-in, except fields marked private |
-| One contact person (name, email, role) | Sign-in (magic link) and introductions | **Never public.** Revealed only after mutual acceptance of an introduction |
-| Introduction messages and accept/decline | Double opt-in intro flow | Only the two organisations involved |
+| One contact person (name, email, role); optional LinkedIn URL | Sign-in (magic link) and member-to-member contact | Email and LinkedIn are visible to **signed-in members** on the listing. Name and role are not. You can hide the email on your listing. |
 | Self-reported joint-application outcomes | Aggregate reporting on whether the matchmaker worked | Aggregated only |
 | Technical event log (profile edits, intro state changes) | Security, abuse prevention, funnel metrics | Aggregated / internal |
 
@@ -46,12 +45,7 @@ or by emailing the privacy contact below.
 
 ## What is visible to members
 
-Directory listings are visible only to organisations that have created a profile
-and signed in. Listings show organisation and capability information needed for
-partner discovery. Contact details and private governance notes are never shown
-on listings. When you send an introduction, we email both listed contacts so the
-conversation continues off this platform. You can set visibility to hidden or
-close introductions at any time.
+Directory listings are visible only to people who have signed in. Listings show organisation and capability information needed for partner discovery, plus the contact email and LinkedIn URL when provided. Contact name, role, and private governance notes are never shown on listings. You can hide your email, hide your profile, or delete it at any time.
 
 ## Recipients and processors
 

@@ -12,7 +12,7 @@ function loadSeed(file: string): unknown[] {
   return JSON.parse(raw)
 }
 
-const PRIVATE_KEYS = ["contact_name", "contact_email", "contact_role", "governance_notes"]
+const PRIVATE_KEYS = ["contact_name", "contact_role", "governance_notes"]
 
 function deepFindKey(obj: unknown, key: string): boolean {
   if (Array.isArray(obj)) return obj.some((v) => deepFindKey(v, key))

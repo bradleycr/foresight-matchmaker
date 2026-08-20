@@ -127,7 +127,9 @@ describe("Remmy guide hydration", () => {
         type: "intro_compose",
         to_id: team.id,
         to_name: team.org_name,
-        draft_message: "Shall we apply jointly?",
+        to_slug: team.slug,
+        contact_email: team.contact_email,
+        open_to_intros: true,
       }),
     ])
   })

@@ -26,7 +26,9 @@ export type GuidePart =
       to_id: string
       to_name: string
       to_slug: string
-      draft_message: string
+      contact_email?: string
+      linkedin?: string
+      open_to_intros: boolean
     }
   | {
       type: "gaps"
@@ -81,10 +83,6 @@ function resolveOther(
   return cards[0] ?? null
 }
 
-function defaultIntroDraft(subject: Profile, other: DirectoryProfile): string {
-  return `Hello — we are ${subject.org_name}. Your directory profile looks like a strong fit. We would like to explore a collaboration — reply to this email to continue.`
-}
-
 const NAV_LABELS: Record<string, string> = {
   "/me": "guide.nav_me",
   "/me/matches": "guide.nav_matches",
@@ -133,14 +131,14 @@ export function hydrateGuideIntents(subject: Profile, intents: GuideIntent[]): G
       if (!match || seen.has(`intro:${match.profile.id}`)) continue
       if (!match.profile.open_to_intros) continue
       seen.add(`intro:${match.profile.id}`)
-      const draft =
-        intent.draft_message?.trim().slice(0, 500) || defaultIntroDraft(subject, match.profile)
       parts.push({
         type: "intro_compose",
         to_id: match.profile.id,
         to_name: match.profile.org_name,
         to_slug: match.profile.slug,
-        draft_message: draft,
+        contact_email: match.profile.contact_email,
+        linkedin: match.profile.linkedin,
+        open_to_intros: match.profile.open_to_intros,
       })
       continue
     }

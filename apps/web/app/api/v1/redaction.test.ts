@@ -45,7 +45,7 @@ const { POST: introsPOST } = await import("@/app/api/v1/intros/route")
 const { PATCH: introPATCH } = await import("@/app/api/v1/intros/[id]/route")
 const { GET: metricsGET } = await import("@/app/api/v1/metrics/route")
 
-const PRIVATE_KEYS = ["contact_name", "contact_email", "contact_role", "governance_notes"]
+const PRIVATE_KEYS = ["contact_name", "contact_role", "governance_notes"]
 
 function jsonRequest(url: string, method: string, body?: unknown): InstanceType<typeof NextRequest> {
   return new NextRequest(`http://localhost:3000${url}`, {
@@ -182,7 +182,7 @@ describe("GET /api/v1/directory.json — members-only", () => {
 
     for (const key of PRIVATE_KEYS) expect(text).not.toContain(`"${key}"`)
     expect(text).not.toContain("Küng")
-    expect(text).not.toContain("b.kueng@example.invalid")
+    expect(text).toContain("b.kueng@example.invalid")
     expect(text).not.toContain("430 trios")
 
     expect(body.profiles.some((p) => p.slug === "test-hidden-profile")).toBe(false)

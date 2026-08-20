@@ -66,7 +66,7 @@ export function MatchShortlistPart({
                   onClick={() => onOpen(match, "intro")}
                   className="min-h-11 shrink-0 self-stretch border-l border-ink bg-mark px-3 text-xs font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper sm:px-4"
                 >
-                  {t("guide.connect_short")}
+                  {t("contact.email_button")}
                 </button>
               ) : null}
             </div>
@@ -116,8 +116,8 @@ export function IntroDraftChip({
       onClick={onOpen}
       className="w-full border border-ink bg-paper-shade px-3 py-3 text-left hover:bg-mark"
     >
-      <span className="block font-listing text-sm font-bold uppercase">{t("guide.intro_title", { name })}</span>
-      <span className="mt-0.5 block text-sm text-ink-soft">{t("guide.open_intro")}</span>
+      <span className="block font-listing text-sm font-bold uppercase">{t("contact.title")}</span>
+      <span className="mt-0.5 block text-sm text-ink-soft">{t("contact.open_sheet", { name })}</span>
     </button>
   )
 }

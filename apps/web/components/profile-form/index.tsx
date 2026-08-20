@@ -81,6 +81,7 @@ interface FormState {
   one_liner: string
   summary: string
   website: string
+  linkedin: string
   languages: (typeof LANGUAGE)[number][]
   looking_for: (typeof LOOKING_FOR)[number][]
   looking_for_other: string
@@ -128,6 +129,7 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     one_liner: "",
     summary: "",
     website: "",
+    linkedin: "",
     languages: [],
     looking_for: [],
     looking_for_other: "",
@@ -179,6 +181,7 @@ function stateFromProfile(p: Profile): FormState {
     one_liner: p.one_liner,
     summary: p.summary,
     website: p.website ?? "",
+    linkedin: p.linkedin ?? "",
     languages: p.languages,
     looking_for: p.looking_for,
     looking_for_other: p.looking_for_other ?? "",
@@ -221,6 +224,8 @@ function stateFromProfile(p: Profile): FormState {
 function toPayload(s: FormState): Record<string, unknown> {
   const websiteRaw = s.website.trim()
   const website = websiteRaw ? tryNormalizeUrl(websiteRaw) ?? websiteRaw : undefined
+  const linkedinRaw = s.linkedin.trim()
+  const linkedin = linkedinRaw ? tryNormalizeUrl(linkedinRaw) ?? linkedinRaw : undefined
   const { urls: trackUrls } = parseUrlLines(s.track_record)
 
   const shared = {
@@ -232,6 +237,7 @@ function toPayload(s: FormState): Record<string, unknown> {
     one_liner: s.one_liner,
     summary: s.summary,
     website,
+    linkedin,
     languages: s.languages,
     looking_for: s.looking_for,
     looking_for_other:
@@ -713,6 +719,16 @@ export function ProfileForm({
         <Field label={t("field.website")} htmlFor="website" attention={needs("website")} id="gap-website">
           <Input id="website" inputMode="url" autoComplete="url" placeholder="https://" value={state.website} onChange={(e) => set("website", e.target.value)} />
         </Field>
+        <Field label={t("field.linkedin")} htmlFor="linkedin" hint={t("form.linkedin_hint")} id="gap-linkedin">
+          <Input
+            id="linkedin"
+            inputMode="url"
+            autoComplete="url"
+            placeholder="https://www.linkedin.com/in/…"
+            value={state.linkedin}
+            onChange={(e) => set("linkedin", e.target.value)}
+          />
+        </Field>
         <EnumChips label={t("field.languages")} group="language" options={LANGUAGE} value={state.languages} onChange={(v) => set("languages", v)} attention={needs("languages")} fieldId="gap-languages" />
       </section>
 
@@ -950,7 +966,7 @@ export function ProfileForm({
         </>
       )}
 
-      {/* Contact — private. On create it sits with identity so a refresh can keep the draft. */}
+      {/* Contact — email is shown to signed-in members. */}
       {!isCreate && (
         <section className="flex flex-col gap-4 border-2 border-ink p-4">
           <h2 className="font-listing text-xl font-bold uppercase">{t("form.section_contact")}</h2>

@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Tag } from "@/components/ui/primitives"
-import { IntroRequestForm } from "@/components/intro-request-form"
+import { ProfileContact } from "@/components/profile-contact"
 import type { T } from "@/lib/i18n"
 import { challengeById, challengeIdOf } from "@/lib/challenges/catalog"
 import { signInHref } from "@/lib/auth/next-path"
@@ -104,6 +104,13 @@ export default async function ProfilePage({ params }: Params) {
           <Row label={t("field.website")}>
             <a href={profile.website} className="underline" rel="noopener noreferrer">
               {profile.website}
+            </a>
+          </Row>
+        )}
+        {profile.linkedin && (
+          <Row label={t("field.linkedin")}>
+            <a href={profile.linkedin} className="underline" rel="noopener noreferrer">
+              {profile.linkedin}
             </a>
           </Row>
         )}
@@ -211,17 +218,19 @@ export default async function ProfilePage({ params }: Params) {
         </p>
       )}
 
-      {/* Contact is emailed off-platform; this site keeps a record. */}
       {!isOwn && (
-        <section aria-labelledby="intro" className="mt-10 border-t-2 border-rule-strong pt-4">
-          <h2 id="intro" className="font-listing text-xl font-bold uppercase">
-            {t("intro.request_title")}
+        <section aria-labelledby="contact" id="contact" className="mt-10 border-t-2 border-rule-strong pt-4">
+          <h2 id="contact-heading" className="font-listing text-xl font-bold uppercase">
+            {t("contact.title")}
           </h2>
-          {profile.open_to_intros ? (
-            <IntroRequestForm targetId={profile.id} targetName={profile.org_name} signedIn />
-          ) : (
-            <p className="mt-2 text-ink-soft">{t("intro.not_open")}</p>
-          )}
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">{t("contact.body")}</p>
+          <ProfileContact
+            orgName={profile.org_name}
+            email={profile.contact_email}
+            linkedin={profile.linkedin}
+            open={profile.open_to_intros}
+            t={t}
+          />
         </section>
       )}
     </article>

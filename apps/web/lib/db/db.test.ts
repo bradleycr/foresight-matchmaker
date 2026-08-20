@@ -13,7 +13,7 @@ import { getDb } from "./client"
 import { authTokens, matches as matchesTable, intros as introsTable } from "./schema"
 import { eq, or } from "drizzle-orm"
 
-const PRIVATE_KEYS = ["contact_name", "contact_email", "contact_role", "governance_notes"]
+const PRIVATE_KEYS = ["contact_name", "contact_role", "governance_notes"]
 
 function makeDataHolder(n: number, overrides: Record<string, unknown> = {}) {
   return saveProfile(

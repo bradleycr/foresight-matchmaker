@@ -149,7 +149,7 @@ describe("verify email before listing", () => {
     const created = await profilesPOST(jsonRequest("/api/v1/profiles", "POST", listing))
     expect(created.status).toBe(201)
     const createdBody = (await created.json()) as { profile: { contact_email?: string }; email_sent: boolean }
-    expect(createdBody.profile.contact_email).toBeUndefined()
+    expect(createdBody.profile.contact_email).toBe("new-lister@example.invalid")
     expect(createdBody.email_sent).toBe(false)
     expect((await getSession())?.profileId).toBeTruthy()
 

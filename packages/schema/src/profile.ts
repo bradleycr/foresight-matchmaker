@@ -24,8 +24,8 @@ import { datasetSchema, dataNeedsSchema } from "./dataset"
 // ---------------------------------------------------------------------------
 
 /**
- * PRIVATE contact block. Held on every profile, but stripped by server-side
- * redaction before any public payload. Verified by test.
+ * Contact person. Name and role stay private. Email is shown to signed-in
+ * members so they can write directly — the directory is not a public listing.
  */
 export const contactSchema = z.object({
   contact_name: z.string().min(1).max(160),
@@ -63,6 +63,8 @@ const sharedProfileFields = {
   one_liner: z.string().min(1).max(140),
   summary: z.string().max(600),
   website: z.string().url().optional(),
+  /** Public LinkedIn profile URL for people who prefer to connect there. */
+  linkedin: z.string().url().optional(),
   languages: z.array(languageEnum).default([]),
   looking_for: z.array(lookingForEnum).default([]),
   looking_for_other: z.string().max(200).optional(),
@@ -80,7 +82,7 @@ const sharedProfileFields = {
   intended_public_contribution: z.string().max(600).optional(),
   funding_mainly_needed_for: z.string().max(200).optional(),
   best_public_dataset: z.string().max(400).optional(),
-  // PRIVATE — redacted from public payloads.
+  // Name and role stay private. Email is on the member directory.
   contact_name: contactSchema.shape.contact_name,
   contact_email: contactSchema.shape.contact_email,
   contact_role: contactSchema.shape.contact_role,
@@ -188,20 +190,20 @@ export type Profile = z.infer<typeof profileSchema>
 // Public (redacted) profile — the ONLY shape that leaves the server publicly
 // ---------------------------------------------------------------------------
 
-const PRIVATE_KEYS = ["contact_name", "contact_email", "contact_role", "governance_notes"] as const
+const PRIVATE_KEYS = ["contact_name", "contact_role", "governance_notes"] as const
 
 /**
- * Strip every private field from a profile, producing a payload safe for any
- * public surface. Also removes datasets flagged `publicly_describable: false`
- * (they are still matched on server-side, just never publicly described) and
- * strips `governance_notes` from any dataset that does survive.
+ * Strip private fields from a profile for signed-in directory surfaces.
+ * Contact email stays: members email each other directly. Name, role, and
+ * dataset governance notes do not. Datasets flagged `publicly_describable:
+ * false` are matched server-side but never described.
  *
- * This is the single choke point for redaction — server code must route all
- * public output through here, and a test asserts no private key survives.
+ * If they closed contact, drop the email so it cannot leak via the API.
  */
 export function toPublicProfile(profile: Profile): Record<string, unknown> {
   const clone: Record<string, unknown> = { ...profile }
   for (const key of PRIVATE_KEYS) delete clone[key]
+  if (!profile.open_to_intros) delete clone.contact_email
 
   if (Array.isArray((clone as { datasets?: unknown }).datasets)) {
     const datasets = (clone as { datasets: Array<Record<string, unknown>> }).datasets

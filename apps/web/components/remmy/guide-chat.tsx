@@ -17,7 +17,14 @@ interface GuideTurn {
 
 type SheetState =
   | { kind: "match"; match: GuideMatchCard; focus: "detail" | "intro" }
-  | { kind: "intro"; toId: string; toName: string; toSlug: string; draftMessage: string }
+  | {
+      kind: "intro"
+      toName: string
+      toSlug: string
+      email?: string
+      linkedin?: string
+      open: boolean
+    }
 
 const SUGGESTIONS = [
   "guide.suggest_matches",
@@ -62,10 +69,11 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
     if (intro?.type === "intro_compose") {
       setSheet({
         kind: "intro",
-        toId: intro.to_id,
         toName: intro.to_name,
         toSlug: intro.to_slug,
-        draftMessage: intro.draft_message,
+        email: intro.contact_email,
+        linkedin: intro.linkedin,
+        open: intro.open_to_intros,
       })
     }
   }
@@ -144,10 +152,11 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
                   onOpenIntro={(intro) =>
                     setSheet({
                       kind: "intro",
-                      toId: intro.to_id,
                       toName: intro.to_name,
                       toSlug: intro.to_slug,
-                      draftMessage: intro.draft_message,
+                      email: intro.contact_email,
+                      linkedin: intro.linkedin,
+                      open: intro.open_to_intros,
                     })
                   }
                 />
@@ -207,10 +216,11 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
           intro={
             sheet.focus === "intro"
               ? {
-                  toId: sheet.match.profile.id,
                   toName: sheet.match.profile.org_name,
                   toSlug: sheet.match.profile.slug,
-                  draftMessage: t("guide.default_intro", { name: sheet.match.profile.org_name }),
+                  email: sheet.match.profile.contact_email,
+                  linkedin: sheet.match.profile.linkedin,
+                  open: sheet.match.profile.open_to_intros,
                 }
               : undefined
           }
@@ -220,10 +230,11 @@ export function RemmyGuideChat({ embedded = false }: { embedded?: boolean }) {
       {sheet?.kind === "intro" ? (
         <MatchSheet
           intro={{
-            toId: sheet.toId,
             toName: sheet.toName,
             toSlug: sheet.toSlug,
-            draftMessage: sheet.draftMessage,
+            email: sheet.email,
+            linkedin: sheet.linkedin,
+            open: sheet.open,
           }}
           onClose={() => setSheet(null)}
         />
