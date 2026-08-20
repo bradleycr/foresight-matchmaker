@@ -95,6 +95,29 @@ describe("peekLiveSession", () => {
     getProfilesByEmail.mockReturnValue([])
 
     await expect(peekLiveSession()).resolves.toBeNull()
+    expect(hydrateListings).toHaveBeenCalled()
+  })
+
+  it("hydrates Blob when a verified email owns a listing but the cookie has no id", async () => {
+    const profile = { id: "profile-1", contact_email: "owner@example.org" }
+    getSession.mockResolvedValue({
+      profileId: null,
+      email: "owner@example.org",
+      exp: Date.now() + 60_000,
+    })
+    getProfilesByEmail.mockReturnValue([])
+    hydrateListings.mockImplementation(async () => {
+      getProfilesByEmail.mockReturnValue([profile])
+    })
+
+    const live = await peekLiveSession()
+
+    expect(hydrateListings).toHaveBeenCalled()
+    expect(live).toMatchObject({
+      profile,
+      session: { profileId: "profile-1" },
+      needsReconcile: true,
+    })
   })
 
   it("refills sqlite from durable storage when the cookie names a missing row", async () => {

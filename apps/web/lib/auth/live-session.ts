@@ -51,8 +51,8 @@ export async function peekLiveSession(): Promise<LiveSession | null> {
     await restoreOwnedProfile(session.profileId, session.email)
     profile = findOwnedProfile(session)
   }
-  if (!profile && session.profileId) {
-    await hydrateListings({ force: true })
+  if (!profile) {
+    await hydrateListings()
     profile = findOwnedProfile(session)
   }
   if (!profile) return null

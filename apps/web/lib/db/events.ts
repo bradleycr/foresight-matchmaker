@@ -41,16 +41,20 @@ export interface DurableEvent {
 export function logEvent(type: EventType, actorId: string | null, payload: Record<string, unknown>): DurableEvent {
   const uid = randomUUID()
   const createdAt = new Date().toISOString()
-  getDb()
-    .insert(events)
-    .values({
-      uid,
-      type,
-      actorId,
-      payload: JSON.stringify(payload),
-      createdAt,
-    })
-    .run()
+  try {
+    getDb()
+      .insert(events)
+      .values({
+        uid,
+        type,
+        actorId,
+        payload: JSON.stringify(payload),
+        createdAt,
+      })
+      .run()
+  } catch (error) {
+    console.error("[events] sqlite insert failed", { uid, type }, error)
+  }
 
   const row: DurableEvent = { uid, type, actorId, payload, createdAt }
   void flushEvent(row)

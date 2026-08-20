@@ -143,11 +143,21 @@ function openOrExplain(file: string): Database.Database {
  * column in place. New files get `uid` from CREATE TABLE above.
  */
 function ensureEventUid(sqlite: Database.Database): void {
-  const cols = sqlite.pragma("table_info(events)") as { name: string }[]
-  if (!cols.some((c) => c.name === "uid")) {
-    sqlite.exec("ALTER TABLE events ADD COLUMN uid TEXT")
+  try {
+    const cols = sqlite.pragma("table_info(events)") as { name?: string }[]
+    const names = cols.map((c) => c.name)
+    if (!names.includes("uid")) {
+      sqlite.exec("ALTER TABLE events ADD COLUMN uid TEXT")
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!/duplicate column name/i.test(message)) throw error
   }
-  sqlite.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_uid ON events(uid)")
+  try {
+    sqlite.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_uid ON events(uid)")
+  } catch (error) {
+    console.error("[db] events uid index skipped", error)
+  }
 }
 
 function open(): { db: Db; sqlite: Database.Database } {

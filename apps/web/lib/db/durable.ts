@@ -296,9 +296,21 @@ export async function listDurableSignups(): Promise<SignupRecord[]> {
   return out
 }
 
+async function fetchSignup(email: string): Promise<SignupRecord | null> {
+  return parseSignup(await readJson(signupPath(email)))
+}
+
+async function rewriteEmailPointer(email: string, profileId: string): Promise<void> {
+  await put(emailPath(email), JSON.stringify({ id: profileId }), putOpts)
+}
+
 /**
  * Pull one listing into this instance's SQLite. Used when a signed cookie
  * names a profile the local file has never seen.
+ *
+ * Lookup order: cookie id → email pointer → signup register's profile_id.
+ * The register is the durable copy of “this mailbox already listed”, so a
+ * missing `matchmaker/emails/…` pointer must not look like a new user.
  */
 export async function restoreOwnedProfile(id: string | null, email: string): Promise<void> {
   if (!durableEnabled()) return
@@ -311,7 +323,20 @@ export async function restoreOwnedProfile(id: string | null, email: string): Pro
       }
     }
     const byEmail = await fetchListingByEmail(email)
-    if (byEmail) adoptListing(byEmail, true)
+    if (byEmail) {
+      adoptListing(byEmail, true)
+      return
+    }
+    const signup = await fetchSignup(email)
+    if (!signup?.profile_id) return
+    const bySignup = await fetchListingById(signup.profile_id)
+    if (!bySignup) return
+    adoptListing(bySignup, true)
+    try {
+      await rewriteEmailPointer(email, bySignup.profile.id)
+    } catch (error) {
+      console.error("[durable] rewrite email pointer failed", { email }, error)
+    }
   } catch (error) {
     // A Blob blip must not 500 /register or POST /profiles — SQLite can still
     // accept the new listing, and the next request will try Blob again.
