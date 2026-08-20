@@ -111,6 +111,7 @@ export default async function ChallengePage({
             {t("challenge.matchmaking_events_title")}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-ink-soft">{t("challenge.matchmaking_events_intro")}</p>
+          <p className="mt-3 text-base leading-relaxed">{t("challenge.matchmaking_events_limit")}</p>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-base">
             {RECODING_MATCHMAKING_EVENTS.map((key) => (
               <li key={key}>{t(`enum.attending.${key}`)}</li>
