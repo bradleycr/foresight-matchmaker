@@ -17,9 +17,9 @@ function resolveDatabasePath(): string {
   if (process.env.DATABASE_PATH) return process.env.DATABASE_PATH
 
   // Vercel’s filesystem is ephemeral — keep the SQLite file under /tmp so
-  // writes succeed. Listings and funnel events are dual-written to Vercel Blob
+  // writes succeed. Listings and funnel events are dual-written to Supabase
   // (`lib/db/durable.ts`) so the next instance can refill this cache. The
-  // Docker/VM path with a mounted `./data` volume does not need Blob.
+  // Docker/VM path with a mounted `./data` volume does not need a remote store.
   if (process.env.VERCEL) return "/tmp/rmm-app.db"
 
   let dir = process.cwd()

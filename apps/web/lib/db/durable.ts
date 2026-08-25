@@ -1,23 +1,29 @@
-import { del, get, list, put } from "@vercel/blob"
 import { profileSchema, type Profile } from "@rmm/schema"
 import { cacheRemoteListing, getJointApplicationOutcome, listProfiles } from "./profiles"
 import { recomputeMatchesFor } from "./matches"
 import { cacheRemoteEvent, type DurableEvent } from "./events"
+import {
+  durableEnabled,
+  getDurableStore,
+  importBlobIntoSupabase,
+} from "./durable-store"
 
 /**
  * Shared profile store for hosts whose SQLite file is not the source of truth.
  *
  * On Vercel every function instance has its own `/tmp` database. A listing
  * written on instance A is invisible on instance B, which is why `/me` after
- * create used to bounce people to “we could not load your profile”. Blob is
- * the durable copy: SQLite is a per-instance cache that we refill on miss.
- * Funnel events (shortlist views, contact clicks) use the same pattern
- * under `matchmaker/events/`.
+ * create used to bounce people to “we could not load your profile”. The
+ * durable copy (Supabase, or Blob if Supabase is not configured) is the source of
+ * truth: SQLite is a per-instance cache that we refill on miss. Funnel
+ * events use the same pattern under `matchmaker/events/`.
  *
- * Local Docker/VM hosts keep using on-disk SQLite and never touch Blob
- * unless `DURABLE_PROFILES=1` is set (so a laptop with a pulled token cannot
- * write rehearsal listings into production storage).
+ * Local Docker/VM hosts keep using on-disk SQLite and never touch the remote
+ * store unless `DURABLE_PROFILES=1` is set (so a pulled token cannot write
+ * rehearsal listings into production storage).
  */
+
+export { durableEnabled } from "./durable-store"
 
 const PROFILE_PREFIX = "matchmaker/profiles/"
 const EMAIL_PREFIX = "matchmaker/emails/"
@@ -28,12 +34,6 @@ const HYDRATE_DEBOUNCE_MS = 4_000
 export interface DurableListing {
   profile: Profile
   joint_application: string | null
-}
-
-export function durableEnabled(): boolean {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return false
-  if (process.env.VERCEL) return true
-  return process.env.DURABLE_PROFILES === "1" || process.env.DURABLE_PROFILES === "true"
 }
 
 function profilePath(id: string): string {
@@ -52,27 +52,6 @@ function eventPath(uid: string): string {
   return `${EVENT_PREFIX}${uid}.json`
 }
 
-const putOpts = {
-  access: "private" as const,
-  addRandomSuffix: false,
-  allowOverwrite: true,
-  contentType: "application/json",
-  cacheControlMaxAge: 60,
-}
-
-async function readJson(pathname: string): Promise<unknown | null> {
-  try {
-    const result = await get(pathname, { access: "private", useCache: false })
-    if (!result || result.statusCode !== 200 || !result.stream) return null
-    const text = await new Response(result.stream).text()
-    if (!text) return null
-    return JSON.parse(text) as unknown
-  } catch (error) {
-    console.error("[durable] read failed", { pathname }, error)
-    return null
-  }
-}
-
 function parseListing(raw: unknown): DurableListing | null {
   if (!raw || typeof raw !== "object") return null
   const record = raw as Record<string, unknown>
@@ -86,11 +65,11 @@ function parseListing(raw: unknown): DurableListing | null {
 }
 
 async function fetchListingById(id: string): Promise<DurableListing | null> {
-  return parseListing(await readJson(profilePath(id)))
+  return parseListing(await getDurableStore().getJson(profilePath(id)))
 }
 
 async function fetchListingByEmail(email: string): Promise<DurableListing | null> {
-  const pointer = await readJson(emailPath(email))
+  const pointer = await getDurableStore().getJson(emailPath(email))
   if (!pointer || typeof pointer !== "object" || !("id" in pointer)) return null
   const id = (pointer as { id: unknown }).id
   if (typeof id !== "string" || !id) return null
@@ -114,11 +93,12 @@ async function writeListing(profile: Profile): Promise<void> {
     profile,
     joint_application: getJointApplicationOutcome(profile.id),
   }
+  const store = getDurableStore()
   const body = JSON.stringify(listing)
   const pointer = JSON.stringify({ id: profile.id })
   await Promise.all([
-    put(profilePath(profile.id), body, putOpts),
-    put(emailPath(profile.contact_email), pointer, putOpts),
+    store.putJson(profilePath(profile.id), body),
+    store.putJson(emailPath(profile.contact_email), pointer),
   ])
 }
 
@@ -161,7 +141,7 @@ export async function persistListing(profile: Profile): Promise<void> {
  */
 export async function forgetListing(id: string, email: string): Promise<void> {
   if (!durableEnabled()) return
-  await del([profilePath(id), emailPath(email)])
+  await getDurableStore().remove([profilePath(id), emailPath(email)])
   try {
     await persistSignup({
       email,
@@ -252,7 +232,8 @@ export async function persistSignup(patch: SignupPatch): Promise<void> {
   const email = patch.email.toLowerCase()
   if (!email.includes("@")) return
   const now = new Date().toISOString()
-  const existing = parseSignup(await readJson(signupPath(email)))
+  const store = getDurableStore()
+  const existing = parseSignup(await store.getJson(signupPath(email)))
   const next: SignupRecord = {
     email,
     first_seen_at: existing?.first_seen_at ?? now,
@@ -271,25 +252,18 @@ export async function persistSignup(patch: SignupPatch): Promise<void> {
     visibility: keep(patch.visibility, existing?.visibility ?? null),
     website: keep(patch.website, existing?.website ?? null),
   }
-  await put(signupPath(email), JSON.stringify(next), putOpts)
+  await store.putJson(signupPath(email), JSON.stringify(next))
 }
 
 export async function listDurableSignups(): Promise<SignupRecord[]> {
   if (!durableEnabled()) return []
   const out: SignupRecord[] = []
   try {
-    let cursor: string | undefined
-    do {
-      const page = await list({ prefix: SIGNUP_PREFIX, limit: 1000, cursor })
-      await Promise.all(
-        page.blobs.map(async (blob) => {
-          if (!blob.pathname.endsWith(".json")) return
-          const rec = parseSignup(await readJson(blob.pathname))
-          if (rec) out.push(rec)
-        }),
-      )
-      cursor = page.hasMore ? page.cursor : undefined
-    } while (cursor)
+    const records = await getDurableStore().listRecords(SIGNUP_PREFIX)
+    for (const record of records) {
+      const rec = parseSignup(record.value)
+      if (rec) out.push(rec)
+    }
   } catch (error) {
     console.error("[durable] list signups failed", error)
   }
@@ -297,11 +271,11 @@ export async function listDurableSignups(): Promise<SignupRecord[]> {
 }
 
 async function fetchSignup(email: string): Promise<SignupRecord | null> {
-  return parseSignup(await readJson(signupPath(email)))
+  return parseSignup(await getDurableStore().getJson(signupPath(email)))
 }
 
 async function rewriteEmailPointer(email: string, profileId: string): Promise<void> {
-  await put(emailPath(email), JSON.stringify({ id: profileId }), putOpts)
+  await getDurableStore().putJson(emailPath(email), JSON.stringify({ id: profileId }))
 }
 
 /**
@@ -315,6 +289,7 @@ async function rewriteEmailPointer(email: string, profileId: string): Promise<vo
 export async function restoreOwnedProfile(id: string | null, email: string): Promise<void> {
   if (!durableEnabled()) return
   try {
+    await importBlobIntoSupabase()
     if (id) {
       const byId = await fetchListingById(id)
       if (byId) {
@@ -338,8 +313,8 @@ export async function restoreOwnedProfile(id: string | null, email: string): Pro
       console.error("[durable] rewrite email pointer failed", { email }, error)
     }
   } catch (error) {
-    // A Blob blip must not 500 /register or POST /profiles — SQLite can still
-    // accept the new listing, and the next request will try Blob again.
+    // A remote blip must not 500 /register or POST /profiles — SQLite can still
+    // accept the new listing, and the next request will try the store again.
     console.error("[durable] restore failed", { id, email }, error)
   }
 }
@@ -348,15 +323,16 @@ let lastHydrateAt = 0
 let hydrateInflight: Promise<void> | null = null
 
 /**
- * Fill the local cache from Blob.
+ * Fill the local cache from the durable store.
  *
- * Pass `{ force: true }` on the directory so a listing published a second
- * ago is not skipped because this isolate hydrated an empty corpus earlier.
+ * Cold isolates (empty SQLite) always hydrate. Warm isolates debounce so a
+ * burst of public pageviews cannot burn through the remote quota — that is
+ * how the Hobby Blob store got suspended.
  */
 export async function hydrateListings(opts?: { force?: boolean }): Promise<void> {
   if (!durableEnabled()) return
 
-  const force = opts?.force === true
+  const force = opts?.force === true || listProfiles().length === 0
   if (!force) {
     if (hydrateInflight) return hydrateInflight
     if (Date.now() - lastHydrateAt < HYDRATE_DEBOUNCE_MS) return
@@ -366,22 +342,16 @@ export async function hydrateListings(opts?: { force?: boolean }): Promise<void>
 
   const run = (async () => {
     try {
-      let cursor: string | undefined
-      do {
-        const page = await list({ prefix: PROFILE_PREFIX, limit: 1000, cursor })
-        await Promise.all(
-          page.blobs.map(async (blob) => {
-            if (!blob.pathname.endsWith(".json")) return
-            try {
-              const listing = parseListing(await readJson(blob.pathname))
-              if (listing) adoptListing(listing, false)
-            } catch (error) {
-              console.error("[durable] skip unreadable listing", { pathname: blob.pathname }, error)
-            }
-          }),
-        )
-        cursor = page.hasMore ? page.cursor : undefined
-      } while (cursor)
+      await importBlobIntoSupabase()
+      const records = await getDurableStore().listRecords(PROFILE_PREFIX)
+      for (const record of records) {
+        try {
+          const listing = parseListing(record.value)
+          if (listing) adoptListing(listing, false)
+        } catch (error) {
+          console.error("[durable] skip unreadable listing", { key: record.key }, error)
+        }
+      }
 
       for (const profile of listProfiles()) {
         recomputeMatchesFor(profile.id)
@@ -414,7 +384,7 @@ function parseEvent(raw: unknown): DurableEvent | null {
 
 /**
  * Dual-write one funnel event. Overwrite by uid so GDPR anonymise can
- * replace the Blob copy without leaving the identified payload behind.
+ * replace the durable copy without leaving the identified payload behind.
  */
 export async function persistEvent(event: DurableEvent): Promise<void> {
   if (!durableEnabled()) return
@@ -422,10 +392,10 @@ export async function persistEvent(event: DurableEvent): Promise<void> {
   if (!event.uid) return
   const body = JSON.stringify(event)
   try {
-    await put(eventPath(event.uid), body, putOpts)
+    await getDurableStore().putJson(eventPath(event.uid), body)
   } catch (error) {
     console.error("[durable] event persist retrying", { uid: event.uid }, error)
-    await put(eventPath(event.uid), body, putOpts)
+    await getDurableStore().putJson(eventPath(event.uid), body)
   }
 }
 
@@ -446,22 +416,16 @@ export async function hydrateEvents(opts?: { force?: boolean }): Promise<void> {
 
   const run = (async () => {
     try {
-      let cursor: string | undefined
-      do {
-        const page = await list({ prefix: EVENT_PREFIX, limit: 1000, cursor })
-        await Promise.all(
-          page.blobs.map(async (blob) => {
-            if (!blob.pathname.endsWith(".json")) return
-            try {
-              const event = parseEvent(await readJson(blob.pathname))
-              if (event) cacheRemoteEvent(event)
-            } catch (error) {
-              console.error("[durable] skip unreadable event", { pathname: blob.pathname }, error)
-            }
-          }),
-        )
-        cursor = page.hasMore ? page.cursor : undefined
-      } while (cursor)
+      await importBlobIntoSupabase()
+      const records = await getDurableStore().listRecords(EVENT_PREFIX)
+      for (const record of records) {
+        try {
+          const event = parseEvent(record.value)
+          if (event) cacheRemoteEvent(event)
+        } catch (error) {
+          console.error("[durable] skip unreadable event", { key: record.key }, error)
+        }
+      }
       lastEventHydrateAt = Date.now()
     } catch (error) {
       console.error("[durable] hydrate events failed", error)
@@ -473,4 +437,3 @@ export async function hydrateEvents(opts?: { force?: boolean }): Promise<void> {
   })
   return eventHydrateInflight
 }
-

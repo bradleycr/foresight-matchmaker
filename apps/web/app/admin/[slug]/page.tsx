@@ -35,8 +35,8 @@ export default async function ProgrammeAdminPage({
     return <AdminLoginForm next={next} error={error} t={t} />
   }
 
-  await hydrateListings({ force: true })
-  await hydrateEvents({ force: true })
+  await hydrateListings()
+  await hydrateEvents()
   const qs = new URLSearchParams({ challenge: challenge.id })
   const [metrics, signups] = await Promise.all([
     apiFetch(`/api/v1/metrics?${qs}`).then((r) => r.json() as Promise<Metrics>),

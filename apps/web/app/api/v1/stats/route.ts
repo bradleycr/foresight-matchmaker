@@ -9,7 +9,7 @@ import { hydrateListings } from "@/lib/db/durable"
 export const dynamic = "force-dynamic"
 
 export async function GET(): Promise<NextResponse> {
-  await hydrateListings({ force: true })
+  await hydrateListings()
   return NextResponse.json(
     {
       version: "v1",

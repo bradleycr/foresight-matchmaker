@@ -10,7 +10,7 @@ import { events } from "./schema"
  * one exception: see `anonymiseEventsFor`.
  *
  * On Vercel the SQLite file is ephemeral, so each row is also written to
- * Blob (`persistEvent`) and refilled with `hydrateEvents`.
+ * the durable store (`persistEvent`) and refilled with `hydrateEvents`.
  */
 
 export type EventType =

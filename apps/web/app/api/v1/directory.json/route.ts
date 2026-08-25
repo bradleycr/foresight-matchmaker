@@ -14,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
   const session = await getSession()
   if (!session) return unauthorized("Sign in to browse the directory.")
 
-  await hydrateListings({ force: true })
+  await hydrateListings()
 
   return NextResponse.json(
     {

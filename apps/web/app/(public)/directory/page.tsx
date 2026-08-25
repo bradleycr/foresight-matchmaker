@@ -31,7 +31,7 @@ export default async function DirectoryPage({
   const session = await getSession()
   if (!session) redirect(signInHref("/directory"))
 
-  await hydrateListings({ force: true })
+  await hydrateListings()
 
   const { challenge: raw } = await searchParams
   const selected = raw ? CHALLENGES.find((c) => c.id === raw) : undefined

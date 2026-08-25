@@ -22,7 +22,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     : undefined
   if (raw && !challenge) return notFound("Unknown programme.")
 
-  await hydrateListings({ force: true })
+  await hydrateListings()
   const rows = await collectSignupRows(challenge ? { challengeId: challenge.id } : undefined)
   const status = req.nextUrl.searchParams.get("status")
   const filtered = status === "unfinished" ? rows.filter((row) => row.status !== "listed") : rows

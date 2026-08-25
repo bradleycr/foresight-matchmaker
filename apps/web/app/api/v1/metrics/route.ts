@@ -21,8 +21,8 @@ export async function GET(req: NextRequest): Promise<Response> {
     : undefined
   if (raw && !challenge) return notFound("Unknown programme.")
 
-  await hydrateListings({ force: true })
-  await hydrateEvents({ force: true })
+  await hydrateListings()
+  await hydrateEvents()
   const challengeId = challenge?.id
   const signups = await collectSignupRows(challengeId ? { challengeId } : undefined)
   const metrics = computeMetrics({

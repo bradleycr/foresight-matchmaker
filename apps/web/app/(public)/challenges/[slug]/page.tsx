@@ -43,7 +43,7 @@ export default async function ChallengePage({
   if (!challenge) notFound()
 
   const [{ t }, live] = await Promise.all([getT(), peekLiveSession()])
-  await hydrateListings({ force: true })
+  await hydrateListings()
   const byChallenge = countVisibleProfilesByChallenge()
   const counts = byChallenge[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const id = challenge.id

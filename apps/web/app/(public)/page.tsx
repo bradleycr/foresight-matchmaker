@@ -25,7 +25,7 @@ export default async function LandingPage({
   const { deleted } = await searchParams
   const live = await peekLiveSession()
   const session = live ? live.session : await getSession()
-  await hydrateListings({ force: true })
+  await hydrateListings()
   const byChallenge = countVisibleProfilesByChallenge()
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")

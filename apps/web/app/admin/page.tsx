@@ -25,7 +25,7 @@ export default async function AdminHubPage({
     return <AdminLoginForm next="/admin" error={error} t={t} />
   }
 
-  await hydrateListings({ force: true })
+  await hydrateListings()
   const signups = await collectSignupRows()
 
   return (

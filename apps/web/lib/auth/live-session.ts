@@ -11,7 +11,7 @@ import { safeNextPath } from "@/lib/auth/next-path"
  * On Vercel the SQLite file lives in /tmp, so a warm instance that accepted
  * a registration is not the instance that later serves /me. The cookie is
  * still valid HMAC; the row is gone from this isolate. We refill SQLite from
- * Blob before treating that as signed-out.
+ * durable store before treating that as signed-out.
  *
  * Next.js forbids cookie writes in Server Components ("Cookies can only be
  * modified in a Server Action or Route Handler"). Clearing a stale session

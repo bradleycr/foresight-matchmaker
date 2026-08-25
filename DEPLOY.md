@@ -4,10 +4,10 @@ Two hosts, one repo (`main`).
 
 | Host | URL | Database | Status |
 | --- | --- | --- | --- |
-| **Vercel** | https://foresightmatchmaker.app | SQLite in `/tmp` (per-instance cache) + **Vercel Blob** (durable listings) | **Live now.** |
+| **Vercel** | https://foresightmatchmaker.app | SQLite in `/tmp` (per-instance cache) + **Supabase** (durable listings) | **Live now.** |
 | **Linux VM (Hetzner or YCluster)** | set `APP_URL` | SQLite in `./data` on disk — **survives rebuilds** | Clone `main` when someone has time. |
 
-The app is the same on both. Magic links are HMAC-signed in the URL (no sticky sessions). Mail is Resend (`RESEND_API_KEY`) or SMTP (`SMTP_URL`). On Vercel, listings are also written to a private Blob store so a cold start can refill `/tmp`. Do not copy the Vercel `/tmp` database onto a VM — it is only a cache.
+The app is the same on both. Magic links are HMAC-signed in the URL (no sticky sessions). Mail is Resend (`RESEND_API_KEY`) or SMTP (`SMTP_URL`). On Vercel, listings are also written to **Supabase** (or Blob if Supabase is not configured) so a cold start can refill `/tmp`. Do not copy the Vercel `/tmp` database onto a VM — it is only a cache.
 
 ---
 
@@ -22,7 +22,20 @@ vercel deploy --prod --scope bradley-royes-projects --yes
 
 Smoke tests and the env table: [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md).
 
-Leave `SEED_ON_EMPTY` unset. Blob is the listing store on Vercel; SQLite is the per-instance cache. A VM with `./data` does not need Blob.
+Leave `SEED_ON_EMPTY` unset. Supabase is the listing store on Vercel; SQLite is the per-instance cache. A VM with `./data` does not need Supabase or Blob.
+
+Do **not** pay for Vercel Pro just to unsuspend Blob. Create a free Supabase project and set two env vars on the Vercel project:
+
+1. New project at https://supabase.com (Free).
+2. SQL editor → paste [`scripts/supabase-durable.sql`](scripts/supabase-durable.sql) → Run.
+3. Settings → API → copy **Project URL** and **service_role** (secret). Not the anon key.
+
+```bash
+vercel env add SUPABASE_URL production
+vercel env add SUPABASE_SERVICE_ROLE_KEY production
+```
+
+If Blob still has the 116 listings, leave `BLOB_READ_WRITE_TOKEN` in place for one deploy: the app copies Blob → Supabase on first hydrate, then Supabase is the source of truth. After that Blob can be deleted.
 
 ---
 
