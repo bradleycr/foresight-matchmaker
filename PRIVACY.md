@@ -4,9 +4,8 @@ _Last updated: 13 August 2026_
 
 This notice applies to the **Foresight Matchmaking** directory and
 matchmaking service, operated solely by **Foresight Institute**. It does
-**not** cover Recoding Medicine applications. SPRIND does not operate this
-directory, is not a joint controller of data processed here, and assumes no
-liability for listings, matches, or introductions.
+**not** cover Recoding Medicine applications. SPRIND is not a joint
+controller of data processed on this directory.
 
 ## Who operates this service
 
@@ -17,8 +16,7 @@ shown on `/privacy`).
 
 Recoding Medicine eligibility, funding, and applications are handled on the
 official programme site. Using this directory does not constitute an
-application to Recoding Medicine and does not create any relationship with
-SPRIND.
+application to Recoding Medicine.
 
 ## What we collect
 

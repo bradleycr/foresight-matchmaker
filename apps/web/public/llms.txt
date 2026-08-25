@@ -2,9 +2,7 @@
 
 A Foresight Institute directory that pairs listings around open programmes.
 Recoding Medicine is the first programme listed. Matching is deterministic:
-no LLM on the score. Foresight Institute independently operates this
-directory. SPRIND does not operate, control, or assume liability for
-matchmaking here.
+no LLM on the score.
 
 Operator: Foresight Institute — https://foresight.org
 Product: https://foresightmatchmaker.app

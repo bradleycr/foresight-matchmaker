@@ -1,6 +1,6 @@
 # Recoding Medicine — applicant schemas
 
-Field list for Foresight Matchmaking listings around Recoding Medicine. Foresight Institute independently operates this directory. SPRIND does not operate matchmaking here and assumes no liability for it.
+Field list for Foresight Matchmaking listings around Recoding Medicine.
 
 Four listing types. Please mark any field that is wrong, missing, or should not be collected.
 
