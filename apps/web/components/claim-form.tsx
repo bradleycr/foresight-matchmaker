@@ -60,7 +60,7 @@ export function ClaimForm({
           <FailureReportActions email={DEFAULT_CONTACT_EMAIL} message={error} />
         </div>
       )}
-      <Button variant="primary" onClick={claim} disabled={status === "working"}>
+      <Button type="button" variant="primary" onClick={claim} disabled={status === "working"}>
         {t(intent === "signup" ? "claim.button_signup" : "claim.button")}
       </Button>
     </div>
