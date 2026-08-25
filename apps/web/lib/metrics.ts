@@ -111,7 +111,9 @@ export function computeMetrics(opts?: { challengeId?: string; signups?: SignupSu
   const intros = listAllIntros().filter((i) => !challengeId || inProgramme(i.fromId) || inProgramme(i.toId))
   const events = listEvents().filter((e) => {
     if (!challengeId) return true
-    if (e.type === "intro_requested") return typeof e.payload.to === "string" && ids.has(e.payload.to)
+    if (e.type === "intro_requested" || e.type === "intro_emailed") {
+      return typeof e.payload.to === "string" && ids.has(e.payload.to)
+    }
     return inProgramme(e.actorId)
   })
   const cached = getAllCachedMatches().filter((m) => !challengeId || (ids.has(m.subjectId) && ids.has(m.otherId)))
@@ -144,14 +146,25 @@ export function computeMetrics(opts?: { challengeId?: string; signups?: SignupSu
 
   const shortlistViewers = new Set(events.filter((e) => e.type === "shortlist_viewed").map((e) => e.actorId))
 
-  const introEvents = events.filter((e) => e.type === "intro_requested")
+  // SPRIND report still reads “opened email or LinkedIn / requested intro”:
+  // unique actor→target pairs from clicks (`intro_requested`), platform
+  // emails (`intro_emailed`), and leftover intros-table rows. Same pair from
+  // more than one source still counts once. Channel tallies stay click-only.
   const pairKey = (actorId: string | null, to: unknown) => `${actorId ?? "anon"}::${typeof to === "string" ? to : ""}`
-  const introPairs = new Set(introEvents.map((e) => pairKey(e.actorId, e.payload.to)))
+  const introPairs = new Set<string>()
+  for (const e of events) {
+    if (e.type !== "intro_requested" && e.type !== "intro_emailed") continue
+    introPairs.add(pairKey(e.actorId, e.payload.to))
+  }
+  for (const intro of intros) {
+    introPairs.add(pairKey(intro.fromId, intro.toId))
+  }
+  const clickEvents = events.filter((e) => e.type === "intro_requested")
   const emailPairs = new Set(
-    introEvents.filter((e) => e.payload.channel === "email").map((e) => pairKey(e.actorId, e.payload.to)),
+    clickEvents.filter((e) => e.payload.channel === "email").map((e) => pairKey(e.actorId, e.payload.to)),
   )
   const linkedinPairs = new Set(
-    introEvents.filter((e) => e.payload.channel === "linkedin").map((e) => pairKey(e.actorId, e.payload.to)),
+    clickEvents.filter((e) => e.payload.channel === "linkedin").map((e) => pairKey(e.actorId, e.payload.to)),
   )
 
   return {

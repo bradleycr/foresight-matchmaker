@@ -27,6 +27,17 @@ describe("computeMetrics intro funnel", () => {
     expect(m.funnel.profiles_with_shortlist_view).toBe(1)
   })
 
+  it("counts an emailed intro as requested without double-counting the pair", () => {
+    logEvent("intro_emailed", "alice", { to: "bob" })
+    expect(computeMetrics().funnel.intros_requested).toBe(2)
+
+    logEvent("intro_emailed", "dave", { to: "erin" })
+    const m = computeMetrics()
+    expect(m.funnel.intros_requested).toBe(3)
+    expect(m.funnel.contact_email).toBe(2)
+    expect(m.funnel.contact_linkedin).toBe(1)
+  })
+
   it("folds a signup summary into the top of the funnel", () => {
     const m = computeMetrics({
       signups: {

@@ -1,7 +1,7 @@
 import { profileSchema, type Profile } from "@rmm/schema"
 import { cacheRemoteListing, getJointApplicationOutcome, getProfileById, getProfilesByEmail, listProfiles } from "./profiles"
 import { recomputeMatchesFor } from "./matches"
-import { cacheRemoteEvent, type DurableEvent } from "./events"
+import { cacheRemoteEvent, listEvents, type DurableEvent } from "./events"
 import {
   durableEnabled,
   getDurableStore,
@@ -420,11 +420,17 @@ export async function persistEvent(event: DurableEvent): Promise<void> {
 let lastEventHydrateAt = 0
 let eventHydrateInflight: Promise<void> | null = null
 
-/** Pull the durable event log into this instance's SQLite cache. */
+/**
+ * Pull the durable event log into this instance's SQLite cache.
+ *
+ * Cold isolates (empty SQLite) always hydrate — otherwise admin “intros
+ * requested” reads zero after a Vercel cold start even though Blob still
+ * holds every click. Warm isolates debounce like listings.
+ */
 export async function hydrateEvents(opts?: { force?: boolean }): Promise<void> {
   if (!durableEnabled()) return
 
-  const force = opts?.force === true
+  const force = opts?.force === true || listEvents().length === 0
   if (!force) {
     if (eventHydrateInflight) return eventHydrateInflight
     if (Date.now() - lastEventHydrateAt < HYDRATE_DEBOUNCE_MS) return
