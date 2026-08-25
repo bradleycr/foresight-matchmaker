@@ -184,18 +184,6 @@ export function sortSignupsForOperator(rows: readonly SignupRow[]): SignupRow[] 
   })
 }
 
-export function mailtoBcc(emails: readonly string[], subject: string, body: string): string | null {
-  if (emails.length === 0) return null
-  const params = new URLSearchParams({ subject, body, bcc: emails.join(",") })
-  return `mailto:?${params.toString()}`
-}
-
-export function withSignupQuery(href: string, extra: Record<string, string>): string {
-  const glue = href.includes("?") ? "&" : "?"
-  const params = new URLSearchParams(extra)
-  return `${href}${glue}${params.toString()}`
-}
-
 function csvCell(value: string | number): string {
   const text = String(value)
   return /["\n,]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text

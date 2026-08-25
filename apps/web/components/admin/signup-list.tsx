@@ -1,10 +1,4 @@
-import {
-  mailtoBcc,
-  sortSignupsForOperator,
-  summarizeSignups,
-  withSignupQuery,
-  type SignupRow,
-} from "@/lib/db/signups"
+import { sortSignupsForOperator, summarizeSignups, type SignupRow } from "@/lib/db/signups"
 import type { T } from "@/lib/i18n"
 
 /**
@@ -24,12 +18,6 @@ export function SignupList({
 }) {
   const summary = summarizeSignups(signups)
   const ordered = sortSignupsForOperator(signups)
-  const mailtoCohort =
-    summary.unfinishedConfirmedEmails.length > 0
-      ? summary.unfinishedConfirmedEmails
-      : summary.unfinishedEmails
-  const mailto = mailtoBcc(mailtoCohort, t("admin.unfinished_subject"), t("admin.unfinished_body"))
-  const unfinishedCsv = withSignupQuery(exportHref, { status: "unfinished" })
   const conversion =
     summary.total === 0 ? null : Math.round((summary.listed / summary.total) * 100)
 
@@ -70,26 +58,6 @@ export function SignupList({
           ? t("admin.accounts_count", { n: summary.total })
           : t("admin.accounts_conversion", { listed: summary.listed, total: summary.total, pct: conversion })}
       </p>
-      <p className="px-3 pt-1 text-sm leading-relaxed text-ink-soft">{t("admin.unfinished_hint")}</p>
-
-      {summary.unfinished > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-3 px-3">
-          {mailto ? (
-            <a
-              href={mailto}
-              className="border border-ink bg-mark px-3 py-1.5 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
-            >
-              {t("admin.unfinished_email", { n: mailtoCohort.length })}
-            </a>
-          ) : null}
-          <a
-            href={unfinishedCsv}
-            className="border border-ink px-3 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
-          >
-            {t("admin.unfinished_export")}
-          </a>
-        </div>
-      ) : null}
 
       {signups.length === 0 ? (
         <p className="px-3 py-3 text-sm text-ink-soft">{t("admin.no_data")}</p>

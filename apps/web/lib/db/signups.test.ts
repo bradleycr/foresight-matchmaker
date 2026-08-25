@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest"
 import {
   collectSignupRows,
-  mailtoBcc,
   signupBelongsToChallenge,
   signupsToCsv,
   sortSignupsForOperator,
   summarizeSignups,
-  withSignupQuery,
   type SignupRow,
 } from "./signups"
 
@@ -80,18 +78,5 @@ describe("signup drop-off", () => {
     expect(signupBelongsToChallenge(requested, "recoding_medicine")).toBe(true)
     expect(signupBelongsToChallenge(requested, "other")).toBe(false)
     expect(signupBelongsToChallenge(listed, "recoding_medicine")).toBe(true)
-  })
-
-  it("builds a BCC mailto for the unpublished cohort", () => {
-    const href = mailtoBcc(["b@x.org", "a@x.org"], "Finish your profile", "Reply if something broke.")
-    expect(href).toMatch(/^mailto:\?/)
-    expect(href).toContain("bcc=b%40x.org")
-    expect(href).toContain("a%40x.org")
-  })
-
-  it("appends the unfinished CSV filter onto an existing export href", () => {
-    expect(withSignupQuery("/api/admin/signups?format=csv", { status: "unfinished" })).toBe(
-      "/api/admin/signups?format=csv&status=unfinished",
-    )
   })
 })
