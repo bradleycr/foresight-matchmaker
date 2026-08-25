@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Chip } from "@/components/ui/primitives"
+import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
+import { FailureReportActions } from "@/components/bug-report"
 
 /**
  * The one-click self-report on whether a pairing led to
@@ -54,9 +56,10 @@ export function OutcomeReport({
         </p>
       )}
       {error && (
-        <p role="alert" className="mt-2 text-sm text-alert">
-          {error}
-        </p>
+        <div role="alert" className="mt-2 text-sm text-alert">
+          <p>{error}</p>
+          <FailureReportActions email={DEFAULT_CONTACT_EMAIL} message={error} />
+        </div>
       )}
     </div>
   )

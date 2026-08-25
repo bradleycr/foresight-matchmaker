@@ -6,6 +6,8 @@ import { useT } from "@/lib/i18n/client"
 import { Button, Field, Input } from "@/components/ui/primitives"
 import { afterClaimHref } from "@/lib/auth/next-path"
 import type { DeliveryMode } from "@/lib/auth/mail"
+import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
+import { FailureReportActions } from "@/components/bug-report"
 
 type Result = { ok: true; mode: DeliveryMode; claim_link?: string }
 type ClaimResult = { signed_in?: boolean; profile_id?: string | null }
@@ -136,9 +138,10 @@ export function SigninForm({
     <div>
       <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
         {error && (
-          <p role="alert" className="border border-alert px-3 py-2 text-alert">
-            {error}
-          </p>
+          <div role="alert" className="border border-alert px-3 py-2 text-alert">
+            <p>{error}</p>
+            <FailureReportActions email={DEFAULT_CONTACT_EMAIL} message={error} />
+          </div>
         )}
         <Field
           label={t(intent === "signup" ? "register.verify_email_label" : "signin.email_label")}

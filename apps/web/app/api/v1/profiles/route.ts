@@ -2,9 +2,9 @@ import { NextRequest } from "next/server"
 import { ZodError } from "zod"
 import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema } from "@/lib/api/input"
-import { ok, zodError, badRequest, unauthorized } from "@/lib/api/respond"
+import { ok, zodError, badRequest, unauthorized, unavailable } from "@/lib/api/respond"
 import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
-import { persistListing, restoreOwnedProfile } from "@/lib/db/durable"
+import { persistListing, restoreOwnedProfile, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
 import { createSession, getSession } from "@/lib/auth/session"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
 
@@ -32,6 +32,8 @@ export async function POST(req: NextRequest): Promise<Response> {
       await persistListing(current)
     } catch (error) {
       console.error("[durable] persist existing listing failed", { id: current.id }, error)
+      await createSession(current.id, session.email)
+      return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
     }
     await createSession(current.id, session.email)
     return ok({ profile: toPublicProfile(current), email_sent: false, already: true })
@@ -68,9 +70,13 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     await persistListing(claimed)
   } catch (error) {
-    // The row is already on this instance and the session will point at it.
-    // Failing the request here made creation look broken and skipped the cookie.
+    // The row is already on this instance. Keep the cookie and the email
+    // backup so a retry can bind the existing row — but do not pretend the
+    // lasting copy landed.
     console.error("[durable] persist after create failed", { id: claimed.id }, error)
+    await createSession(claimed.id, session.email)
+    await backupProfileByEmail(claimed, "created")
+    return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
   }
   await createSession(claimed.id, session.email)
   await backupProfileByEmail(claimed, "created")

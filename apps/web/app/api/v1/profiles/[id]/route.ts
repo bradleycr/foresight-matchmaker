@@ -10,7 +10,7 @@ import {
   getJointApplicationOutcome,
   deleteProfile,
 } from "@/lib/db/profiles"
-import { forgetListing, persistListing, restoreOwnedProfile } from "@/lib/db/durable"
+import { forgetListing, persistListing, ensureOwnedListing, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
 import { getSession, createSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
   if (!session) return unauthorized("Sign in to view this profile.")
 
   const { id } = await params
-  await restoreOwnedProfile(id, session.email)
+  await ensureOwnedListing(id, session.email)
   const profile = getProfileById(id)
   if (!profile) return notFound("No profile with that id.")
 
@@ -59,7 +59,7 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
   const { id } = await params
   const session = await getSession()
   if (!session) return unauthorized()
-  await restoreOwnedProfile(id, session.email)
+  await ensureOwnedListing(id, session.email)
   const profile = getProfileById(id)
   if (!profile) return notFound("No profile with that id.")
   if (session.profileId !== profile.id) return forbidden("Only the profile owner can edit it.")
@@ -80,6 +80,7 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
       await persistListing(reported)
     } catch (error) {
       console.error("[durable] persist after outcome failed", { id: profile.id }, error)
+      return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
     }
     return ok({ joint_application: outcome.data.joint_application })
   }
@@ -119,7 +120,7 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
     await persistListing(updated)
   } catch (error) {
     console.error("[durable] persist after update failed", { id: updated.id }, error)
-    return unavailable("Your edits were saved on this server but not yet stored for the next one. Open Your profile again in a moment.")
+    return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
   }
   return ok({ profile: updated })
 }
@@ -137,7 +138,7 @@ export async function DELETE(req: NextRequest, { params }: Params): Promise<Resp
   const { id } = await params
   const session = await getSession()
   if (!session) return unauthorized()
-  await restoreOwnedProfile(id, session.email)
+  await ensureOwnedListing(id, session.email)
   const profile = getProfileById(id)
   if (!profile) return notFound("No profile with that id.")
   if (session.profileId !== profile.id) return forbidden("Only the profile owner can delete it.")

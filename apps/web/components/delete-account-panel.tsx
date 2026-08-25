@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button, Input } from "@/components/ui/primitives"
+import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
+import { FailureReportActions } from "@/components/bug-report"
 
 /**
  * GDPR self-service erasure. Lives at the foot of /me so it is reachable
@@ -83,9 +85,10 @@ export function DeleteAccountPanel({
             />
           </label>
           {error ? (
-            <p role="alert" className="mt-2 text-sm text-alert">
-              {error}
-            </p>
+            <div role="alert" className="mt-2 text-sm text-alert">
+              <p>{error}</p>
+              <FailureReportActions email={DEFAULT_CONTACT_EMAIL} message={error} />
+            </div>
           ) : null}
           <div className="mt-4 flex flex-wrap gap-3">
             <Button type="button" variant="danger" disabled={!matches || status === "working"} onClick={erase}>

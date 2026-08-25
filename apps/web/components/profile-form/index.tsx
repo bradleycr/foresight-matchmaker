@@ -53,6 +53,8 @@ import {
   type ValidationIssue,
 } from "@/lib/profile-form-validate"
 import { mergeProposalIntoForm } from "@/lib/profile-form-apply"
+import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
+import { FailureReportActions } from "@/components/bug-report"
 
 /**
  * The profile form — create and edit in one component. Sections appear and
@@ -299,6 +301,14 @@ interface ApiError {
   details?: Array<{ path: string; message: string }>
 }
 
+/** Network and 5xx stay on the form with a bug-report path. Validation, auth, and rate limits do not. */
+function shouldOfferFailureReport(status: number | null, error: ApiError): boolean {
+  if (status === 0 || (status !== null && status >= 500)) return true
+  if (status === 401 || status === 403 || status === 429) return false
+  if (error.details?.length) return false
+  return true
+}
+
 /** Live form snapshot Remmy reads so it can ask about remaining gaps. */
 function remmySnapshot(s: FormState): Record<string, unknown> {
   return {
@@ -407,6 +417,7 @@ export function ProfileForm({
   })
   const [status, setStatus] = useState<"idle" | "saving">("idle")
   const [apiError, setApiError] = useState<ApiError | null>(null)
+  const [lastStatus, setLastStatus] = useState<number | null>(null)
   const [clientIssues, setClientIssues] = useState<ValidationIssue[]>([])
   const [spotlightGaps, setSpotlightGaps] = useState(highlightGapsOnMount)
 
@@ -464,6 +475,7 @@ export function ProfileForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setApiError(null)
+    setLastStatus(null)
 
     const issues = collectValidationIssues({
       kind: state.kind,
@@ -504,6 +516,7 @@ export function ProfileForm({
         ),
       })
     } catch {
+      setLastStatus(0)
       setApiError({ error: t("form.error_network") })
       setStatus("idle")
       window.scrollTo({ top: 0 })
@@ -511,7 +524,13 @@ export function ProfileForm({
     }
 
     if (!res.ok) {
-      setApiError((await res.json().catch(() => ({ error: t("form.error_generic") }))) as ApiError)
+      setLastStatus(res.status)
+      const body = (await res.json().catch(() => ({ error: t("form.error_generic") }))) as ApiError
+      setApiError(
+        res.status === 503
+          ? { ...body, error: t("form.error_persist") }
+          : body,
+      )
       setStatus("idle")
       window.scrollTo({ top: 0 })
       return
@@ -564,6 +583,12 @@ export function ProfileForm({
               })}
             </ul>
           )}
+          {shouldOfferFailureReport(lastStatus, apiError) ? (
+            <FailureReportActions
+              email={DEFAULT_CONTACT_EMAIL}
+              message={apiError.error ?? t("form.error_generic")}
+            />
+          ) : null}
         </div>
       )}
 

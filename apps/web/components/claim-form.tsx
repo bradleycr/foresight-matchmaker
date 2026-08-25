@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
 import { afterClaimHref } from "@/lib/auth/next-path"
+import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
+import { FailureReportActions } from "@/components/bug-report"
 
 export function ClaimForm({
   token,
@@ -53,9 +55,10 @@ export function ClaimForm({
   return (
     <div className="mt-6">
       {error && (
-        <p role="alert" className="mb-3 border border-alert px-3 py-2 text-alert">
-          {error}
-        </p>
+        <div role="alert" className="mb-3 border border-alert px-3 py-2 text-alert">
+          <p>{error}</p>
+          <FailureReportActions email={DEFAULT_CONTACT_EMAIL} message={error} />
+        </div>
       )}
       <Button variant="primary" onClick={claim} disabled={status === "working"}>
         {t(intent === "signup" ? "claim.button_signup" : "claim.button")}

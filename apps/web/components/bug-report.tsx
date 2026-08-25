@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
 import { formatErrorDetails, mailtoHref } from "@/lib/contact"
@@ -139,5 +139,35 @@ export function ErrorReportPanel({
         </BugReportMailto>
       </div>
     </section>
+  )
+}
+
+/**
+ * Compact copy + mailto under an in-form alert. Same actions as the error
+ * boundary, without a second heading or a large panel.
+ */
+export function FailureReportActions({
+  email,
+  message,
+}: {
+  email: string
+  message: string
+}) {
+  const t = useT()
+  const error = useMemo(() => ({ message }), [message])
+  return (
+    <div className="mt-3">
+      <p className="text-sm leading-relaxed text-ink-soft">{t("error.inline_hint")}</p>
+      <div className="mt-2 flex flex-wrap gap-3">
+        <CopyErrorDetails error={error} />
+        <BugReportMailto
+          email={email}
+          error={error}
+          className="inline-flex min-h-11 items-center border border-ink bg-mark px-4 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
+        >
+          {t("error.email_report")}
+        </BugReportMailto>
+      </div>
+    </div>
   )
 }

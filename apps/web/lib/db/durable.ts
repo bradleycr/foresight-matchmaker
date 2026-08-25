@@ -102,6 +102,10 @@ async function writeListing(profile: Profile): Promise<void> {
   ])
 }
 
+/** Honest 503 when SQLite accepted the write but the lasting copy did not. */
+export const PERSIST_UNAVAILABLE_MESSAGE =
+  "Your answers were saved on this server, but the lasting copy did not land. Stay on this page and submit again in a moment."
+
 export async function persistListing(profile: Profile): Promise<void> {
   if (!durableEnabled()) return
   try {
