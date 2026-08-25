@@ -4,9 +4,9 @@ A Foresight Institute directory that pairs organisations around open programmes.
 
 Think of it as a phone book, not a social network: add a structured **listing** against a programme, browse the directory, get a deterministic ranked shortlist of counterparts, and **email an introduction**. Both contacts are on the thread so the conversation continues off this platform. Joint applications are filed with the programme host, not here.
 
-**Production (Vercel, live now):** https://foresightmatchmaker.app — SQLite in `/tmp` (cache) + Supabase (durable). Smoke tests: [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md).
+**Production:** https://foresightmatchmaker.app. Smoke tests: [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md). Operators: hosting and durable storage are in [`DEPLOY.md`](DEPLOY.md).
 
-**Persistent host (when someone has time):** clone `main` onto a Hetzner (or other) Linux VM with Docker — SQLite in `./data`. One-pager: [`DEPLOY.md`](DEPLOY.md). The Vercel app stays the public site until that box is up.
+**Persistent host (when someone has time):** clone `main` onto a Linux VM with Docker. One-pager: [`DEPLOY.md`](DEPLOY.md).
 
 > **All seed data is synthetic.** Every organisation, dataset, contact name, and email address under `seed/` is fabricated for demonstration purposes and does not describe any real institution. See `seed/README.md`.
 
@@ -58,9 +58,9 @@ pnpm typecheck
 
 ## Deployment
 
-**Vercel is production today.** Push or `vercel deploy --prod` from `main`. Env vars live on the Vercel project. `/tmp` SQLite is a cache; Supabase holds the listings.
+Production is live at https://foresightmatchmaker.app. Push from `main` to deploy. Durable storage is documented in **[DEPLOY.md](DEPLOY.md)**.
 
-**Hetzner / any Linux VM** is the durable path (same codebase). Follow **[DEPLOY.md](DEPLOY.md)**.
+**Linux VM** is the durable-disk path (same codebase). Follow **[DEPLOY.md](DEPLOY.md)**.
 
 ```bash
 git clone https://github.com/bradleycr/foresight-matchmaker.git

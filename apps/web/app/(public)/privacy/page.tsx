@@ -3,7 +3,7 @@ import { CHALLENGES } from "@/lib/challenges/catalog"
 import { contactEmail } from "@/lib/contact"
 import { BugReportMailto } from "@/components/bug-report"
 
-const UPDATED = "19 August 2026"
+const UPDATED = "25 August 2026"
 
 /**
  * Privacy notice for Foresight Matchmaking.
@@ -24,6 +24,7 @@ export default async function PrivacyPage() {
     { title: t("privacy.legal_basis_title"), body: t("privacy.legal_basis_body") },
     { title: t("privacy.visibility_title"), body: t("privacy.visibility_body") },
     { title: t("privacy.recipients_title"), body: t("privacy.recipients_body") },
+    { title: t("privacy.storage_title"), body: t("privacy.storage_body") },
     { title: t("privacy.cookies_title"), body: t("privacy.cookies_body") },
     { title: t("privacy.retention_title"), body: t("privacy.retention_body") },
     { title: t("privacy.rights_title"), body: t("privacy.rights_body") },
