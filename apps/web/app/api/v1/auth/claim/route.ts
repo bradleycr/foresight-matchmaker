@@ -4,7 +4,7 @@ import { ok, zodError, badRequest } from "@/lib/api/respond"
 import { consumeToken } from "@/lib/auth/tokens"
 import { createSession } from "@/lib/auth/session"
 import { getProfilesByEmail, markClaimed } from "@/lib/db/profiles"
-import { persistListing, persistSignup, restoreOwnedProfile } from "@/lib/db/durable"
+import { persistListing, persistSignup, ensureOwnedListing } from "@/lib/db/durable"
 
 export const dynamic = "force-dynamic"
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     return badRequest("This link is no longer valid. Request a new one.")
   }
 
-  await restoreOwnedProfile(result.profileId, result.email)
+  await ensureOwnedListing(result.profileId, result.email)
   const profileId = result.profileId ?? getProfilesByEmail(result.email)[0]?.id ?? null
 
   await createSession(profileId, result.email)

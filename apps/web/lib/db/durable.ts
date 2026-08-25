@@ -1,5 +1,5 @@
 import { profileSchema, type Profile } from "@rmm/schema"
-import { cacheRemoteListing, getJointApplicationOutcome, listProfiles } from "./profiles"
+import { cacheRemoteListing, getJointApplicationOutcome, getProfileById, getProfilesByEmail, listProfiles } from "./profiles"
 import { recomputeMatchesFor } from "./matches"
 import { cacheRemoteEvent, type DurableEvent } from "./events"
 import {
@@ -317,6 +317,20 @@ export async function restoreOwnedProfile(id: string | null, email: string): Pro
     // accept the new listing, and the next request will try the store again.
     console.error("[durable] restore failed", { id, email }, error)
   }
+}
+
+/**
+ * Make sure this isolate has the listing for a verified mailbox.
+ *
+ * Restore is the cheap path (one email pointer). If that misses — pointer
+ * lost, cold SQLite — hydrate the durable corpus so sign-in still binds
+ * the profile they already published.
+ */
+export async function ensureOwnedListing(id: string | null, email: string): Promise<void> {
+  await restoreOwnedProfile(id, email)
+  if (id && getProfileById(id)) return
+  if (getProfilesByEmail(email).length > 0) return
+  await hydrateListings()
 }
 
 let lastHydrateAt = 0
