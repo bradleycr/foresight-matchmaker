@@ -15,7 +15,7 @@ export function ClaimForm({
 }: {
   token: string
   next?: string
-  intent?: "signin" | "signup"
+  intent?: "signin" | "signup" | "here"
 }) {
   const t = useT()
   const router = useRouter()
@@ -61,7 +61,9 @@ export function ClaimForm({
         </div>
       )}
       <Button type="button" variant="primary" onClick={claim} disabled={status === "working"}>
-        {t(intent === "signup" ? "claim.button_signup" : "claim.button")}
+        {t(
+          intent === "signup" ? "claim.button_signup" : intent === "here" ? "claim.button_here" : "claim.button",
+        )}
       </Button>
     </div>
   )

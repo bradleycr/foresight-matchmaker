@@ -40,6 +40,23 @@ export function isHerePath(path: string | null): boolean {
   return /^\/here\/[a-z]+\/?$/.test(path)
 }
 
+/** Room slug from `/here/berlin`, or null when the path is not a check-in URL. */
+export function hereCityFromPath(path: string | null): string | null {
+  if (!isHerePath(path)) return null
+  const match = path!.match(/^\/here\/([a-z]+)\/?$/)
+  return match?.[1] ?? null
+}
+
+/**
+ * Where an existing listing should land when they hit /register.
+ * Room check-in beats the default account page.
+ */
+export function ownedListingRedirect(next?: string | null): string {
+  const dest = safeNextPath(next)
+  if (dest && isHerePath(dest)) return dest
+  return "/me"
+}
+
 /**
  * Where to send someone after they confirm a magic link.
  * Confirmed email, no listing yet → the form. Existing listing → /me

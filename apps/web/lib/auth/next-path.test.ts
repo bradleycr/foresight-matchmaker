@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { afterClaimHref, isBrowsePath, isHerePath, isRegisterPath, needsEmailVerify, safeNextPath, signInHref } from "./next-path"
+import { afterClaimHref, hereCityFromPath, isBrowsePath, isHerePath, isRegisterPath, needsEmailVerify, ownedListingRedirect, safeNextPath, signInHref } from "./next-path"
 
 describe("safeNextPath", () => {
   it("accepts same-origin relative pages", () => {
@@ -41,6 +41,22 @@ describe("isHerePath", () => {
     expect(isHerePath("/here/paris")).toBe(true)
     expect(isHerePath("/here/berlin/board")).toBe(false)
     expect(isHerePath("/live-feed/berlin")).toBe(false)
+  })
+})
+
+describe("hereCityFromPath", () => {
+  it("reads the city slug from a check-in URL", () => {
+    expect(hereCityFromPath("/here/berlin")).toBe("berlin")
+    expect(hereCityFromPath("/here/stockholm/")).toBe("stockholm")
+    expect(hereCityFromPath("/me")).toBeNull()
+  })
+})
+
+describe("ownedListingRedirect", () => {
+  it("returns the room when that is where they started", () => {
+    expect(ownedListingRedirect("/here/berlin")).toBe("/here/berlin")
+    expect(ownedListingRedirect("/me/matches")).toBe("/me")
+    expect(ownedListingRedirect()).toBe("/me")
   })
 })
 

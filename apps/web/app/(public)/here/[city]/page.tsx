@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { magicLinkMode } from "@/lib/auth/mail"
 import { SigninForm } from "@/components/signin-form"
-import { HereCheckIn } from "@/components/onsite/here-check-in"
+import { HereRoomPanel } from "@/components/onsite/here-room-panel"
 import { hydrateEvents } from "@/lib/db/durable"
 import { listEvents } from "@/lib/db/events"
 import { isOnsiteCitySlug } from "@/lib/onsite/cities"
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 }
 
 /**
- * Phone page behind the projector QR. Confirm email, add a listing if
- * needed, then tap I'm here. That is consent to appear on the room board.
+ * Phone page behind the projector QR. Every path ends here: confirm email,
+ * add a listing if needed, then join the room board automatically.
  */
 export default async function HereCityPage({ params }: { params: Promise<{ city: string }> }) {
   const { city: raw } = await params
@@ -40,6 +40,8 @@ export default async function HereCityPage({ params }: { params: Promise<{ city:
     already = isCheckedIn(listEvents(), raw, live.profile.id)
   }
 
+  const registerHref = `/register?challenge=recoding_medicine&next=${encodeURIComponent(next)}`
+
   return (
     <div className="mx-auto max-w-md py-14">
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">{t("onsite.feed.kicker")}</p>
@@ -50,23 +52,30 @@ export default async function HereCityPage({ params }: { params: Promise<{ city:
 
       {!session ? (
         <>
-          <p className="mt-8 text-lg leading-relaxed">{t("onsite.here.signin")}</p>
+          <p className="mt-8 text-lg leading-relaxed">{t("onsite.here.signin_lead")}</p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">{t("onsite.here.signin_hint")}</p>
           <div className="mt-6">
-            <SigninForm mode={magicLinkMode()} next={next} intent="signup" />
+            <SigninForm mode={magicLinkMode()} next={next} intent="here" />
           </div>
         </>
       ) : !live ? (
         <>
-          <p className="mt-8 text-lg leading-relaxed">{t("onsite.here.create_body")}</p>
+          <p className="mt-8 text-lg leading-relaxed">{t("onsite.here.create_lead")}</p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">{t("onsite.here.create_body")}</p>
           <Link
-            href={`/register?challenge=recoding_medicine&next=${encodeURIComponent(next)}`}
+            href={registerHref}
             className="mt-8 inline-flex min-h-14 w-full items-center justify-center border border-ink bg-mark px-6 text-base font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
           >
             {t("onsite.here.cta_create")}
           </Link>
         </>
       ) : (
-        <HereCheckIn city={raw} orgName={live.profile.org_name} hidden={live.profile.visibility === "hidden"} already={already} />
+        <HereRoomPanel
+          city={raw}
+          orgName={live.profile.org_name}
+          hidden={live.profile.visibility === "hidden"}
+          already={already}
+        />
       )}
     </div>
   )

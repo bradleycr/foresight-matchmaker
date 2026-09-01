@@ -9,7 +9,7 @@ import { SigninForm } from "@/components/signin-form"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { OneListingNote } from "@/components/one-listing-note"
 import { challengeIdOf } from "@/lib/challenges/catalog"
-import { isHerePath, safeNextPath } from "@/lib/auth/next-path"
+import { isHerePath, ownedListingRedirect, safeNextPath } from "@/lib/auth/next-path"
 
 /**
  * Add a listing. Email must be confirmed first; then Remmy or the form.
@@ -21,12 +21,17 @@ export default async function RegisterPage({
   searchParams: Promise<{ challenge?: string; deleted?: string; next?: string }>
 }) {
   const live = await peekLiveSession()
-  if (live) redirect(live.needsReconcile ? `${RECONCILE_SESSION_PATH}?next=%2Fme` : "/me")
+  const { challenge, deleted, next: rawNext } = await searchParams
+  const returnTo = ownedListingRedirect(rawNext)
+  if (live) {
+    redirect(
+      live.needsReconcile ? `${RECONCILE_SESSION_PATH}?next=${encodeURIComponent(returnTo)}` : returnTo,
+    )
+  }
 
   const session = await getSession()
   const { t } = await getT()
   const remmy = llmEnabled()
-  const { challenge, deleted, next: rawNext } = await searchParams
   const defaultChallengeId = challengeIdOf(challenge)
   const afterCreateHref = isHerePath(safeNextPath(rawNext)) ? safeNextPath(rawNext)! : undefined
   const nextParams = new URLSearchParams()

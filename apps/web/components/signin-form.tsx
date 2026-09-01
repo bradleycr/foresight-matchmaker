@@ -31,7 +31,7 @@ export function SigninForm({
 }: {
   mode: DeliveryMode
   next?: string
-  intent?: "signin" | "signup" | "browse"
+  intent?: "signin" | "signup" | "browse" | "here"
 }) {
   const t = useT()
   const router = useRouter()
@@ -115,17 +115,21 @@ export function SigninForm({
 
   if (status === "done" && result) {
     const titleKey =
-      intent === "signup"
-        ? "register.verify_sent_title"
-        : intent === "browse"
-          ? "signin.browse_sent_title"
-          : "signin.email_sent_title"
+      intent === "here"
+        ? "onsite.here.verify_sent_title"
+        : intent === "signup"
+          ? "register.verify_sent_title"
+          : intent === "browse"
+            ? "signin.browse_sent_title"
+            : "signin.email_sent_title"
     const bodyKey =
-      intent === "signup"
-        ? "register.verify_sent"
-        : intent === "browse"
-          ? "signin.browse_sent"
-          : "signin.email_sent"
+      intent === "here"
+        ? "onsite.here.verify_sent"
+        : intent === "signup"
+          ? "register.verify_sent"
+          : intent === "browse"
+            ? "signin.browse_sent"
+            : "signin.email_sent"
     return (
       <div className="mt-8 border-2 border-ink bg-paper-shade px-5 py-6">
         <p className="font-listing text-2xl font-bold uppercase tracking-tight">{t(titleKey)}</p>
@@ -160,8 +164,18 @@ export function SigninForm({
         </Field>
         <Button type="submit" variant="primary" disabled={status === "working"} className="self-start">
           {status === "working"
-            ? t(intent === "signup" ? "register.verify_working" : "signin.signing_in")
-            : intent === "signup"
+            ? t(
+                intent === "here"
+                  ? "onsite.here.verify_working"
+                  : intent === "signup"
+                    ? "register.verify_working"
+                    : "signin.signing_in",
+              )
+            : intent === "here"
+              ? mode === "on_screen"
+                ? t("onsite.here.verify_button_reveal")
+                : t("onsite.here.verify_button")
+              : intent === "signup"
               ? mode === "on_screen"
                 ? t("register.verify_button_reveal")
                 : t("register.verify_button")
