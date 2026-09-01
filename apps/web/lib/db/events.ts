@@ -28,6 +28,7 @@ export type EventType =
   | "magic_link_issued"
   | "prefill_used"
   | "remmy_turn"
+  | "onsite_checkin"
 
 /** Shape dual-written to Blob so a cold start can refill SQLite. */
 export interface DurableEvent {

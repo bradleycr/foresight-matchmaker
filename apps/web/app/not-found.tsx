@@ -1,23 +1,14 @@
-import Link from "next/link"
-import { getT } from "@/lib/i18n/server"
+import { SiteChrome } from "@/components/site-chrome"
+import { NotFoundCopy } from "@/components/not-found-copy"
 
 /**
- * Renders for both `notFound()` calls (e.g. an unknown profile slug) and any
- * unmatched URL. Server Component — no client-side i18n plumbing needed.
+ * Unmatched URLs (no route group). Directory 404s live in (public)/not-found
+ * so they do not double-wrap the chrome.
  */
 export default async function NotFound() {
-  const { t } = await getT()
-
   return (
-    <div className="mx-auto max-w-md py-16">
-      <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("notfound.title")}</h1>
-      <p className="mt-3 leading-relaxed text-ink-soft">{t("notfound.body")}</p>
-      <Link
-        href="/"
-        className="mt-6 inline-flex min-h-11 items-center border border-ink px-4 text-sm font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
-      >
-        {t("notfound.back")}
-      </Link>
-    </div>
+    <SiteChrome>
+      <NotFoundCopy />
+    </SiteChrome>
   )
 }

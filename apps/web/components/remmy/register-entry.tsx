@@ -30,10 +30,12 @@ export function RegisterEntry({
   remmyEnabled,
   defaultChallengeId,
   verifiedEmail,
+  afterCreateHref,
 }: {
   remmyEnabled: boolean
   defaultChallengeId?: ChallengeId
   verifiedEmail: string
+  afterCreateHref?: string
 }) {
   const t = useT()
   const formRef = useRef<ProfileFormHandle>(null)
@@ -246,6 +248,7 @@ export function RegisterEntry({
           lockedEmail={verifiedEmail}
           onSnapshotChange={setFormSnapshot}
           onPublished={clearRegisterDraft}
+          afterCreateHref={afterCreateHref}
         />
       )}
     </div>

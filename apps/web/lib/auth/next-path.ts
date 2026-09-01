@@ -35,6 +35,11 @@ export function isRegisterPath(path: string | null): boolean {
   return path === "/register" || path.startsWith("/register?")
 }
 
+export function isHerePath(path: string | null): boolean {
+  if (!path) return false
+  return /^\/here\/[a-z]+\/?$/.test(path)
+}
+
 /**
  * Where to send someone after they confirm a magic link.
  * Confirmed email, no listing yet → the form. Existing listing → /me

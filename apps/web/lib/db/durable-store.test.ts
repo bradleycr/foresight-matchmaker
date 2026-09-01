@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it } from "vitest"
-import { durableEnabled, preferredBackend } from "./durable-store"
+import { blobImportEnabled, durableEnabled, preferredBackend } from "./durable-store"
 
 const KEYS = [
   "SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
   "BLOB_READ_WRITE_TOKEN",
+  "BLOB_IMPORT",
   "VERCEL",
   "DURABLE_PROFILES",
 ] as const
@@ -54,6 +55,14 @@ describe("durable store selection", () => {
     process.env.VERCEL = "1"
     process.env.BLOB_READ_WRITE_TOKEN = "blob"
     expect(preferredBackend()).toBe("blob")
+  })
+
+  it("keeps Blob import off unless an operator opts in", () => {
+    clear()
+    process.env.BLOB_READ_WRITE_TOKEN = "blob"
+    expect(blobImportEnabled()).toBe(false)
+    process.env.BLOB_IMPORT = "1"
+    expect(blobImportEnabled()).toBe(true)
   })
 
   it("stays off locally unless DURABLE_PROFILES is set", () => {

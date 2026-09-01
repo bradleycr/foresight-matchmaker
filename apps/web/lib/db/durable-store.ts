@@ -234,6 +234,15 @@ const IMPORT_PREFIXES = [
 let blobImport: Promise<void> | null = null
 
 /**
+ * One-shot Blob → Supabase copy. Production already lives on Supabase;
+ * leave this off unless an operator sets BLOB_IMPORT=1 for a recovery
+ * window. A leftover Blob token must not 403-spam hydrate on every request.
+ */
+export function blobImportEnabled(): boolean {
+  return process.env.BLOB_IMPORT === "1"
+}
+
+/**
  * If Supabase is empty and Blob still has files, copy them once.
  *
  * Recovery after a Hobby Blob suspend: unsuspend long enough for this
@@ -241,6 +250,7 @@ let blobImport: Promise<void> | null = null
  * so the site still serves whatever Supabase already has.
  */
 export function importBlobIntoSupabase(): Promise<void> {
+  if (!blobImportEnabled()) return Promise.resolve()
   if (!durableEnabled() || !supabaseConfigured() || !blobConfigured()) {
     return Promise.resolve()
   }

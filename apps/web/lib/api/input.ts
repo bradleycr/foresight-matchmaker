@@ -37,6 +37,10 @@ export const contactClickSchema = z.object({
   channel: z.enum(["email", "linkedin"]),
 })
 
+export const onsiteCheckInSchema = z.object({
+  city: z.enum(["berlin", "paris", "stockholm"]),
+})
+
 export const introResponseSchema = z.object({
   action: z.enum(["accepted", "declined"]),
   decline_reason: z.enum(["wrong_domain", "governance_mismatch", "already_have_partner", "not_applying", "other"]).optional(),

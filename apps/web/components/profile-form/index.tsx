@@ -389,6 +389,7 @@ export function ProfileForm({
   lockedEmail,
   onSnapshotChange,
   onPublished,
+  afterCreateHref,
 }: {
   ref?: Ref<ProfileFormHandle>
   initial?: Profile
@@ -406,6 +407,8 @@ export function ProfileForm({
   lockedEmail?: string
   onSnapshotChange?: (snapshot: Record<string, unknown>) => void
   onPublished?: () => void
+  /** After first publish — room check-in instead of /me. */
+  afterCreateHref?: string
 }) {
   const t = useT()
   const locale = useLocale()
@@ -541,7 +544,7 @@ export function ProfileForm({
       // Publishing replaces the verified-only cookie with an owned-profile
       // session. A document navigation guarantees every cached layout,
       // especially the masthead, reads that new cookie immediately.
-      window.location.assign("/me?created=1")
+      window.location.assign(afterCreateHref ?? "/me?created=1")
       return
     }
     window.location.assign("/me?saved=1")

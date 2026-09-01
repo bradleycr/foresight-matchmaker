@@ -7,6 +7,7 @@ import {
   getDurableStore,
   importBlobIntoSupabase,
 } from "./durable-store"
+import { retryOnce } from "./retry-once"
 
 /**
  * Shared profile store for hosts whose SQLite file is not the source of truth.
@@ -409,12 +410,12 @@ export async function persistEvent(event: DurableEvent): Promise<void> {
   if (process.env.VITEST) return
   if (!event.uid) return
   const body = JSON.stringify(event)
-  try {
-    await getDurableStore().putJson(eventPath(event.uid), body)
-  } catch (error) {
-    console.error("[durable] event persist retrying", { uid: event.uid }, error)
-    await getDurableStore().putJson(eventPath(event.uid), body)
-  }
+  await retryOnce(
+    () => getDurableStore().putJson(eventPath(event.uid), body),
+    (error) => {
+      console.warn("[durable] event persist retrying", { uid: event.uid }, error)
+    },
+  )
 }
 
 let lastEventHydrateAt = 0

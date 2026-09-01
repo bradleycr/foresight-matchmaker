@@ -28,6 +28,12 @@
   --color-teal-deep: #1f7a74;
   --color-mint: #c8ead1;
 
+  /* Room-board washes. One step off paper: enough to group the three kinds
+   * from the back of the room, not enough to become a second palette. */
+  --color-tint-teal: #d9ecea;
+  --color-tint-mark: #f6efd9;
+  --color-tint-ink: #dde5e9;
+
   /* Semantic states stay ink-adjacent, not decorative. */
   --color-alert: #a4262c;
 
@@ -121,4 +127,9 @@
       transition: none;
     }
   }
+}
+
+/* Projector: the board is the viewport. */
+html:has([data-kiosk]) body {
+  overflow: hidden;
 }

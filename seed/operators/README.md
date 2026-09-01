@@ -7,4 +7,4 @@ Loaded by `pnpm db:seed` after golden fixtures, before bulk filler.
 
 | Email | Slug | Purpose |
 |---|---|---|
-| `bradley@foresight.org` | `foresight-bradley` | Full-stack operator login (sign-in → /me → matches → intros) |
+| `bradley@foresight.org` | `foresight-bradley` | Data-holder demo login (sign-in → /me → ranked AI-team shortlist) |

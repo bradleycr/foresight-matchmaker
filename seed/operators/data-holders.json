@@ -1,0 +1,45 @@
+[
+  {
+    "slug": "foresight-bradley",
+    "kind": "data_holder",
+    "org_name": "Foresight Institute — operator demo (data holder)",
+    "org_type": "research_institute",
+    "country": "DE",
+    "one_liner": "DEMO listing — oncology imaging cohort so operator can walk the live shortlist.",
+    "summary": "Operator demo listing for bradley@foresight.org. Fabricated Recoding Medicine data-holder answers so Matches can be shown on stage. Not a real hospital, not a real SPRIND application.",
+    "website": "https://foresight.org",
+    "linkedin": "https://www.linkedin.com/company/foresight-institute",
+    "languages": ["en", "de"],
+    "looking_for": ["ai_partner"],
+    "application_status": "intend_to_apply",
+    "parallel_public_funding": "no",
+    "attending": ["event_sept_1", "event_sept_2"],
+    "open_to_intros": true,
+    "visibility": "authenticated_only",
+    "contact_name": "Bradley Royes",
+    "contact_email": "bradley@foresight.org",
+    "contact_role": "Operator",
+    "datasets": [
+      {
+        "name": "DEMO — linked oncology imaging cohort",
+        "modality": ["imaging_histopath", "imaging_mri", "ehr_structured"],
+        "disease_area": ["oncology"],
+        "n_subjects": "10k_100k",
+        "volume": "10_100tb",
+        "time_span_years": 8,
+        "longitudinal": true,
+        "annotation": "outcome_linked",
+        "linkage": ["outcomes", "mortality", "medication"],
+        "standards": ["dicom", "fhir", "snomed"],
+        "readiness": "ai_ready",
+        "consent_basis": "broad_consent",
+        "access_model": "dua_required",
+        "data_can_leave_institution": "yes",
+        "ethics_approval": "approved",
+        "available_from": "2026-09-01",
+        "publicly_describable": true,
+        "governance_notes": "Demo listing only. Do not treat as a real data use pathway."
+      }
+    ]
+  }
+]

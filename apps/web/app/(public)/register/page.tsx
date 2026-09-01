@@ -9,6 +9,7 @@ import { SigninForm } from "@/components/signin-form"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { OneListingNote } from "@/components/one-listing-note"
 import { challengeIdOf } from "@/lib/challenges/catalog"
+import { isHerePath, safeNextPath } from "@/lib/auth/next-path"
 
 /**
  * Add a listing. Email must be confirmed first; then Remmy or the form.
@@ -17,7 +18,7 @@ import { challengeIdOf } from "@/lib/challenges/catalog"
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ challenge?: string; deleted?: string }>
+  searchParams: Promise<{ challenge?: string; deleted?: string; next?: string }>
 }) {
   const live = await peekLiveSession()
   if (live) redirect(live.needsReconcile ? `${RECONCILE_SESSION_PATH}?next=%2Fme` : "/me")
@@ -25,9 +26,14 @@ export default async function RegisterPage({
   const session = await getSession()
   const { t } = await getT()
   const remmy = llmEnabled()
-  const { challenge, deleted } = await searchParams
+  const { challenge, deleted, next: rawNext } = await searchParams
   const defaultChallengeId = challengeIdOf(challenge)
-  const next = defaultChallengeId ? `/register?challenge=${defaultChallengeId}` : "/register"
+  const afterCreateHref = isHerePath(safeNextPath(rawNext)) ? safeNextPath(rawNext)! : undefined
+  const nextParams = new URLSearchParams()
+  if (defaultChallengeId) nextParams.set("challenge", defaultChallengeId)
+  if (afterCreateHref) nextParams.set("next", afterCreateHref)
+  const nextQuery = nextParams.toString()
+  const next = nextQuery ? `/register?${nextQuery}` : "/register"
 
   if (!session) {
     const mode = magicLinkMode()
@@ -69,6 +75,7 @@ export default async function RegisterPage({
           remmyEnabled={remmy}
           defaultChallengeId={defaultChallengeId}
           verifiedEmail={session.email}
+          afterCreateHref={afterCreateHref}
         />
       </div>
     </div>
