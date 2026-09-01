@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { magicLinkMode } from "@/lib/auth/mail"
 import { SigninForm } from "@/components/signin-form"
+import { MagicLinkNote } from "@/components/magic-link-note"
 import { HereRoomPanel } from "@/components/onsite/here-room-panel"
 import { hydrateEvents } from "@/lib/db/durable"
 import { listEvents } from "@/lib/db/events"
@@ -53,7 +54,8 @@ export default async function HereCityPage({ params }: { params: Promise<{ city:
       {!session ? (
         <>
           <p className="mt-8 text-lg leading-relaxed">{t("onsite.here.signin_lead")}</p>
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft">{t("onsite.here.signin_hint")}</p>
+          <MagicLinkNote className="mt-4" />
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">{t("onsite.here.signin_hint")}</p>
           <div className="mt-6">
             <SigninForm mode={magicLinkMode()} next={next} intent="here" />
           </div>

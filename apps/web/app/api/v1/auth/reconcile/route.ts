@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CLEAR_SESSION_PATH, findOwnedProfile } from "@/lib/auth/live-session"
 import { safeNextPath } from "@/lib/auth/next-path"
-import { createSession, getSession, hasListing } from "@/lib/auth/session"
+import { createSession, getSession, hasListing, touchSession } from "@/lib/auth/session"
 import { restoreOwnedProfile } from "@/lib/db/durable"
 
 export const dynamic = "force-dynamic"
@@ -34,6 +34,8 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   if (session.profileId !== profile.id) {
     await createSession(profile.id, session.email)
+  } else {
+    await touchSession({ ...session, profileId: profile.id })
   }
 
   return NextResponse.redirect(new URL(requested ?? "/me", req.url), 303)

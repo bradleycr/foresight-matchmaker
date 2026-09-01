@@ -7,6 +7,7 @@ import { magicLinkMode } from "@/lib/auth/mail"
 import { RegisterEntry } from "@/components/remmy/register-entry"
 import { SigninForm } from "@/components/signin-form"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
+import { MagicLinkNote } from "@/components/magic-link-note"
 import { OneListingNote } from "@/components/one-listing-note"
 import { challengeIdOf } from "@/lib/challenges/catalog"
 import { isHerePath, ownedListingRedirect, safeNextPath } from "@/lib/auth/next-path"
@@ -58,6 +59,7 @@ export default async function RegisterPage({
           </p>
         ) : null}
         <p className="mt-3 leading-relaxed">{explainer}</p>
+        <MagicLinkNote className="mt-4" />
         <OneListingNote className="mt-4" />
         <SigninForm mode={mode} next={next} intent="signup" />
       </div>

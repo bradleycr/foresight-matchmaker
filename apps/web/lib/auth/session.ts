@@ -12,6 +12,9 @@ import { cookies } from "next/headers"
 
 const SESSION_COOKIE = "rmm_session"
 const SESSION_TTL_DAYS = 30
+const SESSION_TTL_MS = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000
+/** Refresh the cookie when less than half the TTL remains — keeps active users signed in. */
+const REFRESH_WHEN_REMAINING_LT_MS = SESSION_TTL_MS / 2
 
 export interface Session {
   /**
@@ -96,4 +99,19 @@ export async function getSession(): Promise<Session | null> {
 export async function destroySession(): Promise<void> {
   const jar = await cookies()
   jar.delete(SESSION_COOKIE)
+}
+
+/** True when the signed session is past the halfway mark — time to slide the expiry. */
+export function sessionNeedsRefresh(session: Session, nowMs = Date.now()): boolean {
+  return session.exp - nowMs < REFRESH_WHEN_REMAINING_LT_MS
+}
+
+/**
+ * Extend a valid session to a full 30 days from now. No-op when plenty of
+ * time remains, so we are not rewriting the cookie on every request.
+ */
+export async function touchSession(session: Session): Promise<boolean> {
+  if (!sessionNeedsRefresh(session)) return false
+  await createSession(session.profileId, session.email)
+  return true
 }

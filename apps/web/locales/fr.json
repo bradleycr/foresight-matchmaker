@@ -632,7 +632,7 @@
   "enum.language.ro": "Roumain",
   "field.partner_only": "Partenaire de collaboration uniquement",
   "form.partner_only_hint": "Siège hors UE/AELE/Royaume-Uni/Israël — collaborer, pas mener.",
-  "signin.explainer_email": "Saisissez votre e-mail. Nous envoyons un lien de connexion — même sans profil existant.",
+  "signin.explainer_email": "Pas de mot de passe — saisissez votre e-mail, nous envoyons un lien de connexion à usage unique.",
   "signin.explainer_on_screen": "Saisissez votre e-mail. Cet hôte vous connecte ici.",
   "signin.explainer_server_log": "Saisissez votre e-mail.",
   "signin.button_reveal": "Se connecter",
@@ -803,12 +803,12 @@
   "onsite.feed.spotlight": "Devraient se parler",
   "onsite.feed.rotate_in": "Prochain match dans {n} s",
   "onsite.here.signin_lead": "Rejoindre la salle.",
-  "onsite.here.signin_hint": "Confirmez votre e-mail — le lien vous ramène ici pour vous enregistrer.",
+  "onsite.here.signin_hint": "Déjà venu ? Même e-mail, un lien. Ensuite cet appareil vous reconnaît pendant 30 jours.",
   "onsite.here.verify_button": "Envoyer le lien",
   "onsite.here.verify_button_reveal": "M’enregistrer",
   "onsite.here.verify_working": "Envoi du lien…",
   "onsite.here.verify_sent_title": "Vérifiez votre e-mail",
-  "onsite.here.verify_sent": "Ouvrez le lien de Foresight Matchmaking. Il vous ramène ici pour apparaître à l’écran.",
+  "onsite.here.verify_sent": "Ouvrez le lien de Foresight Matchmaking. Il vous connecte et vous ramène ici — pas de mot de passe.",
   "onsite.here.create_lead": "Ajoutez d’abord votre fiche.",
   "onsite.here.create_body": "L’écran affiche les fiches. Créez la vôtre — vous reviendrez ici pour vous enregistrer.",
   "onsite.here.cta_create": "Ajouter un profil",
@@ -826,5 +826,7 @@
   "onsite.city.stockholm": "Stockholm",
   "onsite.date.berlin": "2 septembre",
   "onsite.date.paris": "9 septembre",
-  "onsite.date.stockholm": "17 septembre"
+  "onsite.date.stockholm": "17 septembre",
+  "auth.magic_link_note": "Pas de mot de passe. Saisissez votre e-mail — nous envoyons un lien à usage unique. Cet appareil reste connecté 30 jours.",
+  "auth.magic_link_after_send": "Ce lien vous garde connecté sur cet appareil pendant 30 jours. Pas besoin d’en demander un à chaque visite."
 }

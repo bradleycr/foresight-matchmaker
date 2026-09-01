@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { ZodError } from "zod"
 import { onsiteCheckInSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, unauthorized } from "@/lib/api/respond"
-import { peekLiveSession } from "@/lib/auth/live-session"
+import { resolveLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
 import { hydrateEvents, hydrateListings } from "@/lib/db/durable"
 import { flushEvent, listEvents, logEvent } from "@/lib/db/events"
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic"
  * can see they arrived; the projector omits them.
  */
 export async function POST(req: NextRequest): Promise<Response> {
-  const live = await peekLiveSession()
+  const live = await resolveLiveSession()
   if (!live) {
     const session = await getSession()
     if (!session) return unauthorized()

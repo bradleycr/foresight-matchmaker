@@ -651,7 +651,7 @@
   "field.partner_only": "Collaboration partner only",
   "form.partner_only_hint": "HQ outside EU/EFTA/UK/Israel — collaborate, cannot lead.",
   "signin.stale": "We could not load your profile just now. Sign in again to pick up where you left off — if it is still missing, you can add it again.",
-  "signin.explainer_email": "Enter your email. We send a sign-in link — even if you do not have a profile yet.",
+  "signin.explainer_email": "No password — enter your email and we send a one-time sign-in link.",
   "signin.explainer_on_screen": "Enter your email. This host signs you in here.",
   "signin.explainer_server_log": "Enter your email.",
   "signin.button_reveal": "Sign in",
@@ -802,12 +802,12 @@
   "onsite.feed.spotlight": "Should talk",
   "onsite.feed.rotate_in": "Next match in {n}s",
   "onsite.here.signin_lead": "Join the room.",
-  "onsite.here.signin_hint": "Confirm your email — the link brings you straight back here to check in.",
+  "onsite.here.signin_hint": "Returning? Same email, one link. After that this phone remembers you for 30 days.",
   "onsite.here.verify_button": "Send check-in link",
   "onsite.here.verify_button_reveal": "Check in",
   "onsite.here.verify_working": "Sending link…",
   "onsite.here.verify_sent_title": "Check your email",
-  "onsite.here.verify_sent": "Open the link from Foresight Matchmaking. It returns you here to join the room board.",
+  "onsite.here.verify_sent": "Open the link from Foresight Matchmaking. It signs you in and brings you back here — no password to remember.",
   "onsite.here.create_lead": "Add your listing first.",
   "onsite.here.create_body": "The board shows listings. Create yours, then you will land back here to check in.",
   "onsite.here.cta_create": "Add a profile",
@@ -825,5 +825,7 @@
   "onsite.city.stockholm": "Stockholm",
   "onsite.date.berlin": "2 September",
   "onsite.date.paris": "9 September",
-  "onsite.date.stockholm": "17 September"
+  "onsite.date.stockholm": "17 September",
+  "auth.magic_link_note": "No password. Enter your email — we send a one-time link. This device stays signed in for 30 days.",
+  "auth.magic_link_after_send": "That link also keeps you signed in on this device for 30 days. You will not need a new one every visit."
 }

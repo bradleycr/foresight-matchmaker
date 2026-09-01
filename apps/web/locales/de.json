@@ -633,7 +633,7 @@
   "enum.language.ro": "Rumänisch",
   "field.partner_only": "Nur Kooperationspartner",
   "form.partner_only_hint": "Sitz außerhalb EU/EFTA/UK/Israel — mitwirken, nicht führen.",
-  "signin.explainer_email": "Geben Sie Ihre E-Mail ein. Wir senden einen Anmeldelink — auch ohne bestehendes Profil.",
+  "signin.explainer_email": "Kein Passwort — E-Mail eingeben, wir senden einen einmaligen Anmeldelink.",
   "signin.explainer_on_screen": "Geben Sie Ihre E-Mail ein. Dieser Host meldet Sie hier an.",
   "signin.explainer_server_log": "Geben Sie Ihre E-Mail ein.",
   "signin.button_reveal": "Anmelden",
@@ -803,12 +803,12 @@
   "onsite.feed.spotlight": "Sollten reden",
   "onsite.feed.rotate_in": "Nächster Match in {n}s",
   "onsite.here.signin_lead": "Dem Raum beitreten.",
-  "onsite.here.signin_hint": "Bestätigen Sie Ihre E-Mail — der Link bringt Sie direkt hierher zum Einchecken zurück.",
+  "onsite.here.signin_hint": "Schon dagewesen? Gleiche E-Mail, ein Link. Danach merkt sich dieses Gerät Sie 30 Tage.",
   "onsite.here.verify_button": "Check-in-Link senden",
   "onsite.here.verify_button_reveal": "Einchecken",
   "onsite.here.verify_working": "Link wird gesendet…",
   "onsite.here.verify_sent_title": "E-Mail prüfen",
-  "onsite.here.verify_sent": "Öffnen Sie den Link von Foresight Matchmaking. Er bringt Sie hierher zurück, um auf der Tafel zu erscheinen.",
+  "onsite.here.verify_sent": "Öffnen Sie den Link von Foresight Matchmaking. Er meldet Sie an und bringt Sie hierher zurück — kein Passwort.",
   "onsite.here.create_lead": "Zuerst Ihr Profil anlegen.",
   "onsite.here.create_body": "Die Tafel zeigt Einträge. Legen Sie Ihres an — danach landen Sie hier zum Einchecken.",
   "onsite.here.cta_create": "Profil anlegen",
@@ -826,5 +826,7 @@
   "onsite.city.stockholm": "Stockholm",
   "onsite.date.berlin": "2. September",
   "onsite.date.paris": "9. September",
-  "onsite.date.stockholm": "17. September"
+  "onsite.date.stockholm": "17. September",
+  "auth.magic_link_note": "Kein Passwort. E-Mail eingeben — wir senden einen einmaligen Link. Dieses Gerät bleibt 30 Tage angemeldet.",
+  "auth.magic_link_after_send": "Der Link hält Sie auf diesem Gerät 30 Tage angemeldet. Bei jedem Besuch kein neuer nötig."
 }

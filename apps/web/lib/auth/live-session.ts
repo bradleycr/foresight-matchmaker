@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { restoreOwnedProfile, hydrateListings } from "@/lib/db/durable"
 import { getProfileById, getProfilesByEmail } from "@/lib/db/profiles"
-import { createSession, getSession, type Session } from "@/lib/auth/session"
+import { createSession, getSession, touchSession, type Session } from "@/lib/auth/session"
 import { safeNextPath } from "@/lib/auth/next-path"
 
 /**
@@ -71,6 +71,7 @@ export async function resolveLiveSession(): Promise<LiveSession | null> {
   const live = await peekLiveSession()
   if (live) {
     if (live.needsReconcile) await createSession(live.profile.id, live.session.email)
+    else await touchSession(live.session)
     return live
   }
   return null

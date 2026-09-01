@@ -1,6 +1,7 @@
 import { getT } from "@/lib/i18n/server"
 import { magicLinkMode } from "@/lib/auth/mail"
 import { SigninForm } from "@/components/signin-form"
+import { MagicLinkNote } from "@/components/magic-link-note"
 import { isBrowsePath, safeNextPath } from "@/lib/auth/next-path"
 
 /**
@@ -37,6 +38,7 @@ export default async function SigninPage({
         </p>
       )}
       <p className="mt-3 leading-relaxed">{explainer}</p>
+      <MagicLinkNote className="mt-4" />
       <SigninForm mode={mode} next={next} intent={browsing ? "browse" : "signin"} />
     </div>
   )
