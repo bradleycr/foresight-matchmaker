@@ -8,4 +8,10 @@ describe("qrSvgMarkup", () => {
     expect(svg).toContain("currentColor")
     expect(svg).toContain("viewBox")
   })
+
+  it("supports a tighter quiet zone for tile QRs", () => {
+    const large = qrSvgMarkup("https://example.test/a")
+    const compact = qrSvgMarkup("https://example.test/a", { border: 1 })
+    expect(compact).not.toEqual(large)
+  })
 })

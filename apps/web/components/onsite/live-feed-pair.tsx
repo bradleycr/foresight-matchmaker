@@ -9,12 +9,16 @@ export function LiveFeedPair({
   title,
   countdown,
   lookingForLabel,
+  profileOrigin,
+  profileQrLabel,
 }: {
   left: OnsiteFeed["people"][number]
   right: OnsiteFeed["people"][number]
   title: string
   countdown?: ReactNode
   lookingForLabel: string
+  profileOrigin: string
+  profileQrLabel: string
 }) {
   return (
     <section
@@ -25,7 +29,13 @@ export function LiveFeedPair({
       {countdown}
       <div className="relative mt-5 grid min-h-0 flex-1 grid-rows-2 gap-5">
         <div className="min-h-0">
-          <LiveFeedPersonCard {...left} tone="pair" lookingForLabel={lookingForLabel} />
+          <LiveFeedPersonCard
+            {...left}
+            tone="pair"
+            lookingForLabel={lookingForLabel}
+            profileOrigin={profileOrigin}
+            profileQrLabel={profileQrLabel}
+          />
         </div>
         <div
           className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 border-2 border-ink bg-mark px-4 py-1.5 text-sm font-semibold uppercase tracking-widest text-mark-ink shadow-[0_0_0_2px_var(--color-paper)]"
@@ -34,7 +44,13 @@ export function LiveFeedPair({
           +
         </div>
         <div className="min-h-0">
-          <LiveFeedPersonCard {...right} tone="pair" lookingForLabel={lookingForLabel} />
+          <LiveFeedPersonCard
+            {...right}
+            tone="pair"
+            lookingForLabel={lookingForLabel}
+            profileOrigin={profileOrigin}
+            profileQrLabel={profileQrLabel}
+          />
         </div>
       </div>
     </section>

@@ -801,6 +801,7 @@
   "onsite.feed.empty": "Scannen, um dem Raum beizutreten.",
   "onsite.feed.spotlight": "Sollten reden",
   "onsite.feed.rotate_in": "Nächster Match in {n}s",
+  "onsite.feed.profile_qr": "Profil öffnen",
   "onsite.here.signin_lead": "Dem Raum beitreten.",
   "onsite.here.signin_hint": "Schon dagewesen? Gleiche E-Mail, ein Link. Danach merkt sich dieses Gerät Sie 30 Tage.",
   "onsite.here.verify_button": "Check-in-Link senden",

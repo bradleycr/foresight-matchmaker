@@ -1,4 +1,5 @@
 import { FittedName } from "@/components/onsite/fitted-name"
+import { TileProfileQr } from "@/components/onsite/tile-profile-qr"
 import { KIND_SKIN } from "@/lib/onsite/kind-skin"
 import { pairNameMaxPx, tileNameMaxPx } from "@/lib/onsite/name-fit"
 import type { OnsiteFeed } from "@/lib/onsite/types"
@@ -19,24 +20,38 @@ function formatLookingFor(labels: readonly string[], heading: string, max: numbe
  */
 export function LiveFeedPersonCard({
   org_name,
+  slug,
   kind_label,
   one_liner,
   looking_for,
   kind,
   tone,
   lookingForLabel,
-}: Card & { tone: Tone; lookingForLabel?: string }) {
+  profileOrigin,
+  profileQrLabel,
+}: Card & {
+  tone: Tone
+  lookingForLabel?: string
+  profileOrigin?: string
+  profileQrLabel?: string
+}) {
   const showSeeking = Boolean(lookingForLabel) && looking_for.length > 0
   const seekingMax = tone === "tile" ? 1 : looking_for.length
   const seekingLine = showSeeking ? formatLookingFor(looking_for, lookingForLabel!, seekingMax) : undefined
   const blurb = tone === "tile" ? undefined : one_liner
+  const showQr = Boolean(profileOrigin && profileQrLabel)
 
   if (tone === "tile") {
     return (
       <article
-        className={`box-border grid h-full min-h-0 min-w-0 grid-rows-[auto_1fr_auto] overflow-hidden border-2 border-ink ${KIND_SKIN[kind]} border-l-4 px-3 py-2`}
+        className={`relative box-border grid h-full min-h-0 min-w-0 grid-rows-[auto_1fr_auto] overflow-hidden border-2 border-ink ${KIND_SKIN[kind]} border-l-4 px-3 py-2 ${showQr ? "pr-10" : ""}`}
       >
-        <p className="shrink-0 text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-teal-deep">
+        {showQr ? (
+          <div className="absolute right-1 top-1 z-10">
+            <TileProfileQr origin={profileOrigin!} slug={slug} tone="tile" label={profileQrLabel!} />
+          </div>
+        ) : null}
+        <p className="shrink-0 pr-1 text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-teal-deep">
           {kind_label}
         </p>
         <FittedName
@@ -57,10 +72,15 @@ export function LiveFeedPersonCard({
 
   return (
     <article
-      className={`box-border grid h-full min-h-0 min-w-0 overflow-hidden border-2 border-ink ${KIND_SKIN[kind]} border-l-8 px-5 py-4 ${
+      className={`relative box-border grid h-full min-h-0 min-w-0 overflow-hidden border-2 border-ink ${KIND_SKIN[kind]} border-l-8 px-5 py-4 ${
         tone === "pair" ? "grid-rows-[auto_minmax(0,1fr)_auto_auto]" : "grid-rows-[auto_auto_auto]"
-      }`}
+      } ${showQr ? "pr-14" : ""}`}
     >
+      {showQr ? (
+        <div className="absolute right-3 top-3 z-10">
+          <TileProfileQr origin={profileOrigin!} slug={slug} tone={tone} label={profileQrLabel!} />
+        </div>
+      ) : null}
       <p className="shrink-0 text-[10px] font-semibold uppercase leading-tight tracking-[0.14em] text-teal-deep">
         {kind_label}
       </p>

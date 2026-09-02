@@ -800,6 +800,7 @@
   "onsite.feed.empty": "Scan to join the room.",
   "onsite.feed.spotlight": "Should talk",
   "onsite.feed.rotate_in": "Next match in {n}s",
+  "onsite.feed.profile_qr": "Open profile",
   "onsite.here.signin_lead": "Join the room.",
   "onsite.here.signin_hint": "Returning? Same email, one link. After that this phone remembers you for 30 days.",
   "onsite.here.verify_button": "Send check-in link",

@@ -1,9 +1,10 @@
 import type { Kind } from "@rmm/schema"
 import type { OnsiteCitySlug } from "./cities"
 
-/** One person on the room board. No email, no URL, no private fields. */
+/** One person on the room board. Slug is public; profile opens after sign-in. */
 export interface OnsiteCard {
   id: string
+  slug: string
   org_name: string
   kind: Kind
   kind_label: string

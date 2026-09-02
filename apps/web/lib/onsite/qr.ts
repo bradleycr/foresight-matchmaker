@@ -1,8 +1,13 @@
 import { encode } from "uqr"
 
+type QrOpts = {
+  border?: number
+  ecc?: "L" | "M" | "Q" | "H"
+}
+
 /** QR as an inline SVG using currentColor so the kiosk ink token paints it. */
-export function qrSvgMarkup(value: string): string {
-  const { data, size } = encode(value, { ecc: "M", border: 4 })
+export function qrSvgMarkup(value: string, opts: QrOpts = {}): string {
+  const { data, size } = encode(value, { ecc: opts.ecc ?? "M", border: opts.border ?? 4 })
   const cells: string[] = []
   for (let y = 0; y < size; y += 1) {
     const row = data[y]

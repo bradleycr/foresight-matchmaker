@@ -47,6 +47,7 @@ describe("onsite presence", () => {
     const holder = buildDataHolder({ contact_email: "secret@example.invalid" })
     const card = cardFromProfile(holder, "2026-09-02T18:00:00.000Z", t)
     expect(JSON.stringify(card)).not.toContain("secret@")
+    expect(card.slug).toBe(holder.slug)
   })
 
   it("fills the wall left-to-right, top-down — earliest check-in first", () => {

@@ -30,5 +30,5 @@ export default async function LiveFeedCityPage({ params }: { params: Promise<{ c
   const feed = buildOnsiteFeed(raw, listProfiles(), listEvents(), t)
   const joinUrl = `${publicOrigin()}/here/${raw}`
 
-  return <LiveFeedScreen city={raw} initial={feed} joinUrl={joinUrl} qrSvg={qrSvgMarkup(joinUrl)} />
+  return <LiveFeedScreen city={raw} initial={feed} joinUrl={joinUrl} qrSvg={qrSvgMarkup(joinUrl)} profileOrigin={publicOrigin()} />
 }

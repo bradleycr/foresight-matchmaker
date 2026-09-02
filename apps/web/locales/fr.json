@@ -801,6 +801,7 @@
   "onsite.feed.empty": "Scannez pour rejoindre la salle.",
   "onsite.feed.spotlight": "Devraient se parler",
   "onsite.feed.rotate_in": "Prochain match dans {n} s",
+  "onsite.feed.profile_qr": "Ouvrir le profil",
   "onsite.here.signin_lead": "Rejoindre la salle.",
   "onsite.here.signin_hint": "Déjà venu ? Même e-mail, un lien. Ensuite cet appareil vous reconnaît pendant 30 jours.",
   "onsite.here.verify_button": "Envoyer le lien",

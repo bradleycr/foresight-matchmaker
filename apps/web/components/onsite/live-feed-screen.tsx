@@ -31,9 +31,13 @@ function KindKey({ t }: { t: (key: string) => string }) {
 function RoomWall({
   people,
   lookingForLabel,
+  profileOrigin,
+  profileQrLabel,
 }: {
   people: OnsiteFeed["people"]
   lookingForLabel: string
+  profileOrigin: string
+  profileQrLabel: string
 }) {
   const { cols, rows } = roomShape(people.length)
   return (
@@ -46,7 +50,13 @@ function RoomWall({
     >
       {people.map((person) => (
         <li key={person.id} className="min-h-0 min-w-0">
-          <LiveFeedPersonCard {...person} tone="tile" lookingForLabel={lookingForLabel} />
+          <LiveFeedPersonCard
+            {...person}
+            tone="tile"
+            lookingForLabel={lookingForLabel}
+            profileOrigin={profileOrigin}
+            profileQrLabel={profileQrLabel}
+          />
         </li>
       ))}
     </ul>
@@ -62,11 +72,13 @@ export function LiveFeedScreen({
   initial,
   joinUrl,
   qrSvg,
+  profileOrigin,
 }: {
   city: OnsiteCitySlug
   initial: OnsiteFeed
   joinUrl: string
   qrSvg: string
+  profileOrigin: string
 }) {
   const t = useT()
   const [feed, setFeed] = useState(initial)
@@ -98,6 +110,7 @@ export function LiveFeedScreen({
   const empty = feed.people.length === 0
   const solo = feed.people[0]
   const lookingForLabel = t("field.looking_for")
+  const profileQrLabel = t("onsite.feed.profile_qr")
   const rest = feed.people.filter(
     (person) => person.id !== feed.spotlight?.left.id && person.id !== feed.spotlight?.right.id,
   )
@@ -142,6 +155,8 @@ export function LiveFeedScreen({
                   right={feed.spotlight.right}
                   title={t("onsite.feed.spotlight")}
                   lookingForLabel={lookingForLabel}
+                  profileOrigin={profileOrigin}
+                  profileQrLabel={profileQrLabel}
                   countdown={
                     feed.spotlight.rotates ? (
                       <LiveFeedCountdown
@@ -153,17 +168,33 @@ export function LiveFeedScreen({
                 />
                 {rest.length > 0 ? (
                   <div className="min-h-0 min-w-0 flex-1">
-                    <RoomWall people={rest} lookingForLabel={lookingForLabel} />
+                    <RoomWall
+                      people={rest}
+                      lookingForLabel={lookingForLabel}
+                      profileOrigin={profileOrigin}
+                      profileQrLabel={profileQrLabel}
+                    />
                   </div>
                 ) : null}
               </>
             ) : solo && feed.people.length === 1 ? (
               <div className="flex h-full w-full max-w-3xl items-stretch">
-                <LiveFeedPersonCard {...solo} tone="hero" lookingForLabel={lookingForLabel} />
+                <LiveFeedPersonCard
+                  {...solo}
+                  tone="hero"
+                  lookingForLabel={lookingForLabel}
+                  profileOrigin={profileOrigin}
+                  profileQrLabel={profileQrLabel}
+                />
               </div>
             ) : (
               <div className="min-h-0 min-w-0 flex-1">
-                <RoomWall people={feed.people} lookingForLabel={lookingForLabel} />
+                <RoomWall
+                  people={feed.people}
+                  lookingForLabel={lookingForLabel}
+                  profileOrigin={profileOrigin}
+                  profileQrLabel={profileQrLabel}
+                />
               </div>
             )}
           </div>

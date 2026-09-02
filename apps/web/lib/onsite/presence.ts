@@ -33,6 +33,7 @@ function lookingForLabels(profile: Profile, t: (key: string) => string): string[
 export function cardFromProfile(profile: Profile, arrivedAt: string, t: (key: string) => string): OnsiteCard {
   return {
     id: profile.id,
+    slug: profile.slug,
     org_name: profile.org_name,
     kind: profile.kind,
     kind_label: t(`enum.kind.${profile.kind}`),
