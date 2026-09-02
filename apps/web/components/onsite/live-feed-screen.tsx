@@ -17,7 +17,7 @@ const POLL_MS = 8_000
 /** Miniature cards, so the legend reads as the same object as the wall. */
 function KindKey({ t }: { t: (key: string) => string }) {
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
+    <ul className="flex flex-wrap justify-end gap-x-4 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
       {KIND_LEGEND.map((key) => (
         <li key={key} className="flex items-center gap-2">
           <span className={`h-3.5 w-6 border border-ink border-l-4 ${KIND_SKIN[key]}`} aria-hidden="true" />
@@ -54,8 +54,8 @@ function RoomWall({
 }
 
 /**
- * One landscape HDMI frame. Nothing scrolls. Names and colour carry the
- * room; the gold pair is “these two should talk”; the QR is always in view.
+ * One landscape HDMI frame. Title-safe padding lives on [data-kiosk] in
+ * globals.css so TV overscan cannot eat the board. Nothing scrolls.
  */
 export function LiveFeedScreen({
   city,
@@ -103,72 +103,78 @@ export function LiveFeedScreen({
   )
 
   return (
-    <div data-kiosk className="flex h-dvh w-dvw flex-col overflow-hidden bg-paper text-ink">
-      <div className="brand-band h-1.5 w-full shrink-0" aria-hidden="true" />
+    <div data-kiosk className="flex flex-col overflow-hidden bg-paper text-ink">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-2 border-ink bg-paper">
+        <div className="brand-band h-1.5 w-full shrink-0" aria-hidden="true" />
 
-      <header className="flex shrink-0 items-end justify-between gap-8 border-b-2 border-ink px-8 py-4">
-        <div className="flex min-w-0 items-end gap-5">
-          <ForesightMark className="mb-0.5 h-7" />
-          <span aria-hidden="true" className="mb-0.5 hidden h-7 w-px shrink-0 bg-ink sm:block" />
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal">{t("onsite.feed.kicker")}</p>
-            <h1 className="mt-0.5 font-listing text-5xl uppercase leading-none tracking-tight">{feed.city_label}</h1>
-            <p className="mt-1.5 text-xs uppercase tracking-[0.18em] text-ink-soft">{feed.date_label}</p>
+        <header className="flex shrink-0 items-end justify-between gap-6 border-b-2 border-ink px-5 py-3 sm:gap-8 sm:px-6 sm:py-3.5">
+          <div className="flex min-w-0 items-end gap-4 sm:gap-5">
+            <ForesightMark className="mb-0.5 h-6 sm:h-7" />
+            <span aria-hidden="true" className="mb-0.5 hidden h-7 w-px shrink-0 bg-ink sm:block" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal">{t("onsite.feed.kicker")}</p>
+              <h1 className="mt-0.5 font-listing text-4xl uppercase leading-none tracking-tight sm:text-5xl">
+                {feed.city_label}
+              </h1>
+              <p className="mt-1.5 text-xs uppercase tracking-[0.18em] text-ink-soft">{feed.date_label}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-3">
-          <p className="tnum font-listing text-5xl uppercase leading-none">{t("onsite.feed.here_count", { n: feed.count })}</p>
-          <KindKey t={t} />
-        </div>
-      </header>
+          <div className="flex max-w-[46%] shrink-0 flex-col items-end gap-2 sm:gap-3">
+            <p className="tnum font-listing text-4xl uppercase leading-none sm:text-5xl">
+              {t("onsite.feed.here_count", { n: feed.count })}
+            </p>
+            <KindKey t={t} />
+          </div>
+        </header>
 
-      <div className="flex min-h-0 flex-1">
-        <div className="flex min-h-0 min-w-0 flex-1 gap-5 px-8 py-5">
-          {empty ? (
-            <div className="flex h-full flex-col justify-center">
-              <p className="max-w-3xl font-listing text-6xl uppercase leading-[0.92] tracking-tight">
-                {t("onsite.feed.empty")}
-              </p>
-            </div>
-          ) : feed.spotlight ? (
-            <>
-              <LiveFeedPair
-                left={feed.spotlight.left}
-                right={feed.spotlight.right}
-                title={t("onsite.feed.spotlight")}
-                lookingForLabel={lookingForLabel}
-                countdown={
-                  feed.spotlight.rotates ? (
-                    <LiveFeedCountdown
-                      label={(seconds) => t("onsite.feed.rotate_in", { n: seconds })}
-                      onRotate={refresh}
-                    />
-                  ) : null
-                }
-              />
-              {rest.length > 0 ? (
-                <div className="min-h-0 min-w-0 flex-1 pl-1">
-                  <RoomWall people={rest} lookingForLabel={lookingForLabel} />
-                </div>
-              ) : null}
-            </>
-          ) : solo && feed.people.length === 1 ? (
-            <div className="flex h-full w-full max-w-3xl items-stretch">
-              <LiveFeedPersonCard {...solo} tone="hero" lookingForLabel={lookingForLabel} />
-            </div>
-          ) : (
-            <div className="min-h-0 min-w-0 flex-1">
-              <RoomWall people={feed.people} lookingForLabel={lookingForLabel} />
-            </div>
-          )}
-        </div>
+        <div className="flex min-h-0 min-w-0 flex-1">
+          <div className="flex min-h-0 min-w-0 flex-1 gap-4 px-4 py-4 sm:gap-5 sm:px-5 sm:py-4">
+            {empty ? (
+              <div className="flex h-full flex-col justify-center">
+                <p className="max-w-3xl font-listing text-5xl uppercase leading-[0.92] tracking-tight sm:text-6xl">
+                  {t("onsite.feed.empty")}
+                </p>
+              </div>
+            ) : feed.spotlight ? (
+              <>
+                <LiveFeedPair
+                  left={feed.spotlight.left}
+                  right={feed.spotlight.right}
+                  title={t("onsite.feed.spotlight")}
+                  lookingForLabel={lookingForLabel}
+                  countdown={
+                    feed.spotlight.rotates ? (
+                      <LiveFeedCountdown
+                        label={(seconds) => t("onsite.feed.rotate_in", { n: seconds })}
+                        onRotate={refresh}
+                      />
+                    ) : null
+                  }
+                />
+                {rest.length > 0 ? (
+                  <div className="min-h-0 min-w-0 flex-1">
+                    <RoomWall people={rest} lookingForLabel={lookingForLabel} />
+                  </div>
+                ) : null}
+              </>
+            ) : solo && feed.people.length === 1 ? (
+              <div className="flex h-full w-full max-w-3xl items-stretch">
+                <LiveFeedPersonCard {...solo} tone="hero" lookingForLabel={lookingForLabel} />
+              </div>
+            ) : (
+              <div className="min-h-0 min-w-0 flex-1">
+                <RoomWall people={feed.people} lookingForLabel={lookingForLabel} />
+              </div>
+            )}
+          </div>
 
-        <LiveFeedQrRail
-          qrSvg={qrSvg}
-          joinUrl={joinUrl}
-          scanLabel={t("onsite.feed.scan")}
-          scanHint={t("onsite.feed.scan_hint")}
-        />
+          <LiveFeedQrRail
+            qrSvg={qrSvg}
+            joinUrl={joinUrl}
+            scanLabel={t("onsite.feed.scan")}
+            scanHint={t("onsite.feed.scan_hint")}
+          />
+        </div>
       </div>
     </div>
   )

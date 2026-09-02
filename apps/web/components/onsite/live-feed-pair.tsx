@@ -19,9 +19,9 @@ export function LiveFeedPair({
   return (
     <section
       aria-label={title}
-      className="flex h-full w-[min(32rem,34vw)] shrink-0 flex-col pr-6"
+      className="flex h-full w-[min(28rem,30vw)] shrink-0 flex-col pr-4 sm:pr-5"
     >
-      <p className="font-listing text-[3.25rem] uppercase leading-[0.92] tracking-tight">{title}</p>
+      <p className="font-listing text-[clamp(2rem,4.2vw,3rem)] uppercase leading-[0.92] tracking-tight">{title}</p>
       {countdown}
       <div className="relative mt-5 grid min-h-0 flex-1 grid-rows-2 gap-5">
         <div className="min-h-0">

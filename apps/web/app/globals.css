@@ -131,7 +131,35 @@
   }
 }
 
-/* Projector: the board is the viewport. */
+/* Projector / TV: fill the display, never scroll, keep content inside
+ * the title-safe zone. Consumer TVs still crop edges (overscan); phones
+ * and modern panels contribute safe-area insets. */
+html:has([data-kiosk]),
 html:has([data-kiosk]) body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
   overflow: hidden;
+}
+
+html:has([data-kiosk]) {
+  /* ~2.5–3.5% of the short axis, floored for laptop HDMI and capped so a
+   * 4K panel does not waste half the frame. Safe-area wins on notched devices. */
+  --kiosk-gutter-x: max(
+    env(safe-area-inset-left, 0px),
+    env(safe-area-inset-right, 0px),
+    clamp(1.25rem, 3vw, 2.75rem)
+  );
+  --kiosk-gutter-y: max(
+    env(safe-area-inset-top, 0px),
+    env(safe-area-inset-bottom, 0px),
+    clamp(1rem, 2.6vh, 2.25rem)
+  );
+}
+
+[data-kiosk] {
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  padding: var(--kiosk-gutter-y) var(--kiosk-gutter-x);
 }
