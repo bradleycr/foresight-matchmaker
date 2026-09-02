@@ -12,12 +12,9 @@ import { browseDirectoryPath } from "@/lib/challenges/catalog"
 export function ProfileCompleteChoices({ profile, t }: { profile: Profile; t: T }) {
   return (
     <section aria-labelledby="profile-complete-title" className="mx-auto max-w-4xl py-8 sm:py-14">
-      <p className="inline-block bg-mark px-2 py-1 text-xs font-bold uppercase tracking-widest text-mark-ink">
-        {t("me.complete_kicker")}
-      </p>
       <h1
         id="profile-complete-title"
-        className="mt-4 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl"
+        className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl"
       >
         {t("me.complete_title")}
       </h1>

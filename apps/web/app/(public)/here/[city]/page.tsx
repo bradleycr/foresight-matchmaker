@@ -43,6 +43,8 @@ export default async function HereCityPage({ params }: { params: Promise<{ city:
 
   const registerHref = `/register?challenge=recoding_medicine&next=${encodeURIComponent(next)}`
 
+  const mode = magicLinkMode()
+
   return (
     <div className="mx-auto max-w-md py-14">
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">{t("onsite.feed.kicker")}</p>
@@ -54,10 +56,9 @@ export default async function HereCityPage({ params }: { params: Promise<{ city:
       {!session ? (
         <>
           <p className="mt-8 text-lg leading-relaxed">{t("onsite.here.signin_lead")}</p>
-          <MagicLinkNote className="mt-4" />
-          <p className="mt-4 text-sm leading-relaxed text-ink-soft">{t("onsite.here.signin_hint")}</p>
+          <MagicLinkNote mode={mode} className="mt-4" />
           <div className="mt-6">
-            <SigninForm mode={magicLinkMode()} next={next} intent="here" />
+            <SigninForm mode={mode} next={next} intent="here" />
           </div>
         </>
       ) : !live ? (

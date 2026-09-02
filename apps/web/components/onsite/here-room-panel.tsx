@@ -92,10 +92,7 @@ export function HereRoomPanel({
 
   return (
     <div className="mt-10">
-      <p className="inline-block bg-mark px-2 py-1 text-xs font-bold uppercase tracking-widest text-mark-ink">
-        {t("onsite.here.done_kicker")}
-      </p>
-      <h2 className="mt-4 font-listing text-4xl uppercase leading-none tracking-tight">{t("onsite.here.done_title")}</h2>
+      <h2 className="font-listing text-4xl uppercase leading-none tracking-tight">{t("onsite.here.done_title")}</h2>
       <p className="mt-4 text-lg leading-relaxed">
         {hidden ? t("onsite.here.done_hidden", { name: orgName }) : t("onsite.here.done_body", { name: orgName })}
       </p>

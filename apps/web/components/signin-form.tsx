@@ -134,7 +134,9 @@ export function SigninForm({
       <div className="mt-8 border-2 border-ink bg-paper-shade px-5 py-6">
         <p className="font-listing text-2xl font-bold uppercase tracking-tight">{t(titleKey)}</p>
         <p className="mt-3 leading-relaxed">{t(bodyKey)}</p>
-        <p className="mt-3 text-sm leading-relaxed text-ink-soft">{t("auth.magic_link_after_send")}</p>
+        {intent !== "here" && intent !== "browse" ? (
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">{t("auth.magic_link_after_send")}</p>
+        ) : null}
       </div>
     )
   }

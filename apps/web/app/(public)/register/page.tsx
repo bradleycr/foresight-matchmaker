@@ -58,9 +58,8 @@ export default async function RegisterPage({
             {t("register.deleted")}
           </p>
         ) : null}
-        <p className="mt-3 leading-relaxed">{explainer}</p>
-        <MagicLinkNote className="mt-4" />
-        <OneListingNote className="mt-4" />
+        {explainer ? <p className="mt-3 leading-relaxed">{explainer}</p> : null}
+        <MagicLinkNote mode={mode} className={explainer ? "mt-4" : "mt-3"} />
         <SigninForm mode={mode} next={next} intent="signup" />
       </div>
     )

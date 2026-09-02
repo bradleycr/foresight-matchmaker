@@ -22,7 +22,7 @@ export default async function SigninPage({
   const explainer = browsing
     ? t("signin.browse_explainer")
     : mode === "email"
-      ? t("signin.explainer_email")
+      ? null
       : mode === "on_screen"
         ? t("signin.explainer_on_screen")
         : t("signin.explainer_server_log")
@@ -37,8 +37,8 @@ export default async function SigninPage({
           {t("signin.stale")}
         </p>
       )}
-      <p className="mt-3 leading-relaxed">{explainer}</p>
-      <MagicLinkNote className="mt-4" />
+      {explainer ? <p className="mt-3 leading-relaxed">{explainer}</p> : null}
+      <MagicLinkNote mode={mode} className={explainer ? "mt-4" : "mt-3"} />
       <SigninForm mode={mode} next={next} intent={browsing ? "browse" : "signin"} />
     </div>
   )
