@@ -48,4 +48,15 @@ describe("onsite presence", () => {
     const card = cardFromProfile(holder, "2026-09-02T18:00:00.000Z", t)
     expect(JSON.stringify(card)).not.toContain("secret@")
   })
+
+  it("fills the wall left-to-right, top-down — earliest check-in first", () => {
+    const early = buildDataHolder({ org_name: "Early Hospital" })
+    const late = buildAiTeam({ org_name: "Late Lab" })
+    const checkIns = new Map([
+      [early.id, "2026-09-02T18:00:00.000Z"],
+      [late.id, "2026-09-02T18:30:00.000Z"],
+    ])
+    const cards = presentCards([early, late], checkIns, t)
+    expect(cards.map((card) => card.org_name)).toEqual(["Early Hospital", "Late Lab"])
+  })
 })

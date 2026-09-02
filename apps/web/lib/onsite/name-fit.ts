@@ -34,10 +34,21 @@ function stepForWord(length: number): number {
   return 3
 }
 
-export function tileNameClass(orgName: string): string {
+export function tileNameClass(orgName: string, opts?: { withFooter?: boolean }): string {
   const name = orgName.trim()
-  const step = Math.max(stepForTotal(name.length), stepForWord(longestWordLength(name)))
+  let step = Math.max(stepForTotal(name.length), stepForWord(longestWordLength(name)))
+  if (opts?.withFooter && step < TILE_STEPS.length - 1) step += 1
   return TILE_STEPS[step]!
+}
+
+/** Starting pixel size before auto-fit walks down. */
+const TILE_MAX_PX = [18, 15, 12, 10] as const
+
+export function tileNameMaxPx(orgName: string, opts?: { withFooter?: boolean }): number {
+  const name = orgName.trim()
+  let step = Math.max(stepForTotal(name.length), stepForWord(longestWordLength(name)))
+  if (opts?.withFooter && step < TILE_MAX_PX.length - 1) step += 1
+  return TILE_MAX_PX[step] ?? 10
 }
 
 /** Same idea for the two large “should talk” cards. */
@@ -46,4 +57,11 @@ export function pairNameClass(orgName: string): string {
   if (name.length <= 24 && longestWordLength(name) <= 14) return "text-3xl"
   if (name.length <= 40) return "text-2xl"
   return "text-xl"
+}
+
+export function pairNameMaxPx(orgName: string): number {
+  const name = orgName.trim()
+  if (name.length <= 24 && longestWordLength(name) <= 14) return 30
+  if (name.length <= 40) return 24
+  return 20
 }

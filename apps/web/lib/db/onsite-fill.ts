@@ -12,33 +12,95 @@ import type { Profile } from "@rmm/schema"
 import { getDb } from "./client"
 import { events } from "./schema"
 import { listEvents } from "./events"
-import { listProfiles } from "./profiles"
+import { listProfiles, saveProfile } from "./profiles"
 
 const CITY = "berlin"
 const TARGET = 22
+
+/** Local rehearsal experts — brown cards on the wall when seed has no individuals. */
+const PREVIEW_INDIVIDUALS = [
+  { slug: "preview-dr-chen", org_name: "Dr. Alex Chen", one_liner: "Clinical ML lead open to joining an imaging AI team." },
+  { slug: "preview-sarah-klein", org_name: "Sarah Klein", one_liner: "Regulatory strategist for SaMD and EU MDR." },
+  { slug: "preview-james-ortiz", org_name: "James Ortiz", one_liner: "Radiologist with federated learning experience." },
+] as const
 
 if (process.env.VERCEL || process.env.NODE_ENV === "production") {
   console.error("onsite-fill is local SQLite only.")
   process.exit(1)
 }
 
-function pickRoom(pool: readonly Profile[], n: number): Profile[] {
-  const buckets: Profile[][] = [[], [], []]
-  for (const profile of pool) {
-    if (profile.kind === "data_holder") buckets[0]!.push(profile)
-    else if (profile.kind === "ai_team") buckets[1]!.push(profile)
-    else buckets[2]!.push(profile)
+function ensurePreviewIndividuals(): Profile[] {
+  const out: Profile[] = []
+  for (const preview of PREVIEW_INDIVIDUALS) {
+    const existing = listProfiles().find((profile) => profile.slug === preview.slug)
+    if (existing) {
+      out.push(existing)
+      continue
+    }
+    out.push(
+      saveProfile(
+        {
+          kind: "individual",
+          org_name: preview.org_name,
+          slug: preview.slug,
+          org_type: "individual",
+          country: "DE",
+          one_liner: preview.one_liner,
+          summary: preview.one_liner,
+          languages: ["en"],
+          looking_for: ["join_team"],
+          application_status: "intend_to_apply",
+          parallel_public_funding: "no",
+          attending: ["event_sept_1"],
+          open_to_intros: true,
+          visibility: "public",
+          contact_name: preview.org_name,
+          contact_email: `${preview.slug}@preview.invalid`,
+          methods: ["computer_vision"],
+          application_target: ["diagnostics"],
+          domain_expertise: ["oncology"],
+          clinical_partner: "not_needed",
+          regulatory_experience: [],
+          compute: "cloud_budget",
+          privacy_capability: ["can_work_in_tre"],
+          team_size: "1",
+          track_record: [],
+          data_needs: {
+            modality: ["imaging_mri"],
+            disease_area: ["oncology"],
+            linkage_required: [],
+            standards_preferred: [],
+          },
+        },
+        { isNew: true },
+      ),
+    )
   }
+  return out
+}
+
+function pickRoom(pool: readonly Profile[], n: number): Profile[] {
+  const buckets: Record<Profile["kind"], Profile[]> = {
+    data_holder: [],
+    ai_team: [],
+    consortium: [],
+    individual: [],
+  }
+  for (const profile of pool) buckets[profile.kind].push(profile)
+
+  const order: Profile["kind"][] = ["data_holder", "ai_team", "consortium", "individual"]
   const out: Profile[] = []
   let i = 0
-  while (out.length < n && buckets.some((b) => b.length > 0)) {
-    const bucket = buckets[i % buckets.length]!
-    const next = bucket.shift()
+  while (out.length < n && order.some((kind) => buckets[kind].length > 0)) {
+    const kind = order[i % order.length]!
+    const next = buckets[kind].shift()
     if (next) out.push(next)
     i += 1
   }
   return out
 }
+
+const previewIndividuals = ensurePreviewIndividuals()
 
 const already = new Set(
   listEvents()
@@ -53,21 +115,25 @@ const pool = [...berlin, ...others].filter((profile) => !already.has(profile.id)
 const need = Math.max(0, TARGET - already.size)
 const chosen = pickRoom(pool, need)
 
+// Always show brown individual cards in local rehearsal.
+const forced = previewIndividuals.filter((profile) => !already.has(profile.id))
+const toCheckIn = [...forced, ...chosen.filter((profile) => !forced.some((p) => p.id === profile.id))]
+
 const db = getDb()
 const base = Date.now()
-for (const [index, profile] of chosen.entries()) {
+for (const [index, profile] of toCheckIn.entries()) {
   db.insert(events)
     .values({
       uid: randomUUID(),
       type: "onsite_checkin",
       actorId: profile.id,
       payload: JSON.stringify({ city: CITY, preview: true }),
-      createdAt: new Date(base - (chosen.length - index) * 90_000).toISOString(),
+      createdAt: new Date(base - (toCheckIn.length - index) * 90_000).toISOString(),
     })
     .run()
 }
 
-const total = already.size + chosen.length
+const total = already.size + toCheckIn.length
 console.log(
-  `Berlin board: ${total} here (${chosen.length} added, ${already.size} already). Mix: ${chosen.map((p) => p.kind).join(", ") || "none"}.`,
+  `Berlin board: ${total} here (${toCheckIn.length} added, ${already.size} already). Mix: ${toCheckIn.map((p) => p.kind).join(", ") || "none"}.`,
 )

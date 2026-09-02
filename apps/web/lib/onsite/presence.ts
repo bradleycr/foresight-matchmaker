@@ -42,7 +42,7 @@ export function cardFromProfile(profile: Profile, arrivedAt: string, t: (key: st
   }
 }
 
-/** Newest arrivals first. Hidden listings never leave this function. */
+/** First check-in top-left; new arrivals fill left-to-right, top-down. */
 export function presentCards(
   profiles: readonly Profile[],
   checkIns: ReadonlyMap<string, string>,
@@ -56,6 +56,6 @@ export function presentCards(
     if (profile.visibility === "hidden") continue
     cards.push(cardFromProfile(profile, arrivedAt, t))
   }
-  cards.sort((a, b) => (a.arrived_at < b.arrived_at ? 1 : a.arrived_at > b.arrived_at ? -1 : a.org_name.localeCompare(b.org_name)))
+  cards.sort((a, b) => (a.arrived_at > b.arrived_at ? 1 : a.arrived_at < b.arrived_at ? -1 : a.org_name.localeCompare(b.org_name)))
   return cards
 }

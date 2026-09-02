@@ -43,7 +43,7 @@ export function LiveFeedCountdown({
   if (seconds === null) return null
 
   return (
-    <p className="tnum mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-faint" aria-hidden="true">
+    <p className="tnum mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-teal-deep" aria-hidden="true">
       {label(seconds)}
     </p>
   )

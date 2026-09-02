@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { longestWordLength, pairNameClass, tileNameClass } from "./name-fit"
+import { longestWordLength, pairNameClass, pairNameMaxPx, tileNameClass, tileNameMaxPx } from "./name-fit"
 
 const SHORT = "Helix Vision Labs"
 const LONG = "Universitätsklinikum Nordharz — Datenintegrationszentrum"
@@ -24,9 +24,15 @@ describe("name fit", () => {
   it("shrinks the pair cards too", () => {
     expect(pairNameClass(SHORT)).toBe("text-3xl")
     expect(pairNameClass(LONG)).toBe("text-xl")
+    expect(pairNameMaxPx(SHORT)).toBeGreaterThan(pairNameMaxPx(LONG))
   })
 
   it("ignores padding whitespace", () => {
     expect(tileNameClass(`  ${SHORT}  `)).toBe(tileNameClass(SHORT))
+  })
+
+  it("shrinks further when a tile also carries a looking-for line", () => {
+    const name = "Nordhavn Cancer Imaging Bank"
+    expect(tileNameMaxPx(name, { withFooter: true })).toBeLessThan(tileNameMaxPx(name))
   })
 })

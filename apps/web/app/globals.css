@@ -27,12 +27,14 @@
   --color-teal: #2f9f96;
   --color-teal-deep: #1f7a74;
   --color-mint: #c8ead1;
+  --color-brown: #8f7354;
 
-  /* Room-board washes. One step off paper: enough to group the three kinds
+  /* Room-board washes. One step off paper: enough to group the four kinds
    * from the back of the room, not enough to become a second palette. */
   --color-tint-teal: #d9ecea;
   --color-tint-mark: #f6efd9;
   --color-tint-ink: #dde5e9;
+  --color-tint-brown: #ebe3d6;
 
   /* Semantic states stay ink-adjacent, not decorative. */
   --color-alert: #a4262c;

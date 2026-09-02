@@ -8,6 +8,7 @@ import { LiveFeedPair } from "@/components/onsite/live-feed-pair"
 import { LiveFeedPersonCard } from "@/components/onsite/live-feed-person-card"
 import { LiveFeedQrRail } from "@/components/onsite/live-feed-qr-rail"
 import type { OnsiteCitySlug } from "@/lib/onsite/cities"
+import { KIND_LEGEND, KIND_SKIN } from "@/lib/onsite/kind-skin"
 import { roomShape } from "@/lib/onsite/room-shape"
 import type { OnsiteFeed } from "@/lib/onsite/types"
 
@@ -15,17 +16,11 @@ const POLL_MS = 8_000
 
 /** Miniature cards, so the legend reads as the same object as the wall. */
 function KindKey({ t }: { t: (key: string) => string }) {
-  const kinds = [
-    { key: "data_holder", skin: "border-l-teal bg-tint-teal" },
-    { key: "ai_team", skin: "border-l-mark bg-tint-mark" },
-    { key: "consortium", skin: "border-l-ink bg-tint-ink" },
-  ] as const
-
   return (
-    <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
-      {kinds.map(({ key, skin }) => (
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
+      {KIND_LEGEND.map((key) => (
         <li key={key} className="flex items-center gap-2">
-          <span className={`h-3.5 w-6 border border-ink border-l-4 ${skin}`} aria-hidden="true" />
+          <span className={`h-3.5 w-6 border border-ink border-l-4 ${KIND_SKIN[key]}`} aria-hidden="true" />
           {t(`enum.kind.${key}`)}
         </li>
       ))}
@@ -33,7 +28,13 @@ function KindKey({ t }: { t: (key: string) => string }) {
   )
 }
 
-function RoomWall({ people }: { people: OnsiteFeed["people"] }) {
+function RoomWall({
+  people,
+  lookingForLabel,
+}: {
+  people: OnsiteFeed["people"]
+  lookingForLabel: string
+}) {
   const { cols, rows } = roomShape(people.length)
   return (
     <ul
@@ -45,7 +46,7 @@ function RoomWall({ people }: { people: OnsiteFeed["people"] }) {
     >
       {people.map((person) => (
         <li key={person.id} className="min-h-0 min-w-0">
-          <LiveFeedPersonCard {...person} tone="tile" />
+          <LiveFeedPersonCard {...person} tone="tile" lookingForLabel={lookingForLabel} />
         </li>
       ))}
     </ul>
@@ -96,6 +97,7 @@ export function LiveFeedScreen({
 
   const empty = feed.people.length === 0
   const solo = feed.people[0]
+  const lookingForLabel = t("field.looking_for")
   const rest = feed.people.filter(
     (person) => person.id !== feed.spotlight?.left.id && person.id !== feed.spotlight?.right.id,
   )
@@ -134,6 +136,7 @@ export function LiveFeedScreen({
                 left={feed.spotlight.left}
                 right={feed.spotlight.right}
                 title={t("onsite.feed.spotlight")}
+                lookingForLabel={lookingForLabel}
                 countdown={
                   feed.spotlight.rotates ? (
                     <LiveFeedCountdown
@@ -144,18 +147,18 @@ export function LiveFeedScreen({
                 }
               />
               {rest.length > 0 ? (
-                <div className="min-h-0 min-w-0 flex-1">
-                  <RoomWall people={rest} />
+                <div className="min-h-0 min-w-0 flex-1 pl-1">
+                  <RoomWall people={rest} lookingForLabel={lookingForLabel} />
                 </div>
               ) : null}
             </>
           ) : solo && feed.people.length === 1 ? (
             <div className="flex h-full w-full max-w-3xl items-stretch">
-              <LiveFeedPersonCard {...solo} tone="hero" />
+              <LiveFeedPersonCard {...solo} tone="hero" lookingForLabel={lookingForLabel} />
             </div>
           ) : (
             <div className="min-h-0 min-w-0 flex-1">
-              <RoomWall people={feed.people} />
+              <RoomWall people={feed.people} lookingForLabel={lookingForLabel} />
             </div>
           )}
         </div>

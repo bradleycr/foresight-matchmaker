@@ -38,14 +38,17 @@ export function isSpotlightPair(a: OnsiteCard, b: OnsiteCard): boolean {
 }
 
 /**
- * The scarce side holds the top card. Data holders outrank consortia so a
- * DH+consortium match always shows the dataset on top.
+ * The scarce side holds the top card. Data holders outrank consortia and
+ * individuals; experts anchor when paired with an AI team.
  */
 export function anchorForPair(a: OnsiteCard, b: OnsiteCard): OnsiteCard {
   if (a.kind === "data_holder") return a
   if (b.kind === "data_holder") return b
   if (a.kind === "consortium") return a
-  return b
+  if (b.kind === "consortium") return b
+  if (a.kind === "individual") return a
+  if (b.kind === "individual") return b
+  return a
 }
 
 function partnerForPair(a: OnsiteCard, b: OnsiteCard, anchor: OnsiteCard): OnsiteCard {
@@ -144,9 +147,9 @@ function spotlightRotates(schedule: RoomSchedule): boolean {
 }
 
 /**
- * Scarce orgs hold the top card; AI teams (and occasional consortia) rotate
- * through the bottom. Each full pass through the room shifts which slice of
- * partners an anchor shows, so the long tail of AI teams still gets airtime.
+ * Scarce orgs and individuals hold the top card; AI teams rotate through the
+ * bottom. Each full pass through the room shifts which slice of partners an
+ * anchor shows, so the long tail of AI teams still gets airtime.
  */
 export function pickSpotlight(
   cards: readonly OnsiteCard[],

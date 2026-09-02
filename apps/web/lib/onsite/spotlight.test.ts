@@ -3,6 +3,7 @@ import {
   buildAiTeam,
   buildConsortium,
   buildDataHolder,
+  buildIndividual,
 } from "../../../../packages/matching/src/__fixtures__/build"
 import { SPOTLIGHT_MS } from "./rotation"
 import { cardFromProfile } from "./presence"
@@ -82,6 +83,20 @@ describe("onsite spotlight", () => {
 
     const spotlight = pickSpotlight(cards, [holder, consortium], 0)
     if (spotlight) expect(spotlight.left.kind).toBe("data_holder")
+  })
+
+  it("anchors an individual above an AI team in spotlight", () => {
+    const expert = buildIndividual({ org_name: "Dr. Alex Chen", looking_for: ["join_team"] })
+    const team = buildAiTeam({ looking_for: ["dataset_access"], org_name: "Helix Vision" })
+    const cards = [
+      cardFromProfile(team, "2026-09-02T18:00:00.000Z", t),
+      cardFromProfile(expert, "2026-09-02T18:01:00.000Z", t),
+    ]
+    expect(anchorForPair(cards[0]!, cards[1]!).org_name).toBe("Dr. Alex Chen")
+
+    const spotlight = pickSpotlight(cards, [expert, team], 0)
+    expect(spotlight?.left.kind).toBe("individual")
+    expect(spotlight?.right.kind).toBe("ai_team")
   })
 
   it("shifts partner slice after a full room pass", () => {
