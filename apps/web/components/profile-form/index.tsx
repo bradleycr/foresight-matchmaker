@@ -399,6 +399,8 @@ export type ProfileFormHandle = {
     current_profile: Record<string, unknown>
   }
   getSnapshot: () => Record<string, unknown>
+  /** Create or save — same path as the submit button. */
+  publish: () => Promise<void>
 }
 
 function groupsFilledFromState(s: FormState): Set<OptionalGroupId> {
@@ -547,6 +549,7 @@ export function ProfileForm({
       current_profile: remmySnapshot(state),
     }),
     getSnapshot: () => ({ ...state }) as Record<string, unknown>,
+    publish: () => submitListing(),
   }))
 
   async function rewriteNarrative() {
@@ -596,25 +599,38 @@ export function ProfileForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    await submitListing()
+  }
+
+  async function submitListing() {
     setApiError(null)
     setLastStatus(null)
 
+    const ready: FormState = {
+      ...state,
+      contact_email: (lockedEmail ?? state.contact_email).trim(),
+      contact_name: state.contact_name.trim() || state.org_name.trim(),
+    }
+    if (ready.contact_name !== state.contact_name || ready.contact_email !== state.contact_email) {
+      setState(ready)
+    }
+
     const issues = collectValidationIssues({
-      kind: state.kind,
-      website: state.website,
-      track_record: state.track_record,
-      datasets: state.datasets,
-      org_type: state.org_type,
-      org_type_other: state.org_type_other,
-      looking_for: state.looking_for,
-      still_seeking: state.still_seeking,
-      looking_for_other: state.looking_for_other,
-      methods: state.methods,
-      methods_other: state.methods_other,
-      needs_modality: state.needs_modality,
-      needs_modality_other: state.needs_modality_other,
-      needs_disease_area: state.needs_disease_area,
-      needs_disease_area_other: state.needs_disease_area_other,
+      kind: ready.kind,
+      website: ready.website,
+      track_record: ready.track_record,
+      datasets: ready.datasets,
+      org_type: ready.org_type,
+      org_type_other: ready.org_type_other,
+      looking_for: ready.looking_for,
+      still_seeking: ready.still_seeking,
+      looking_for_other: ready.looking_for_other,
+      methods: ready.methods,
+      methods_other: ready.methods_other,
+      needs_modality: ready.needs_modality,
+      needs_modality_other: ready.needs_modality_other,
+      needs_disease_area: ready.needs_disease_area,
+      needs_disease_area_other: ready.needs_disease_area_other,
     })
 
     if (issues.length > 0) {
@@ -644,9 +660,7 @@ export function ProfileForm({
         method: isCreate ? "POST" : "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          lockedEmail ? { ...toPayload(state), contact_email: lockedEmail } : toPayload(state),
-        ),
+        body: JSON.stringify(toPayload(ready)),
       })
     } catch {
       setLastStatus(0)

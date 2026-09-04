@@ -135,6 +135,23 @@ export function RegisterEntry({
   }, [])
 
   const getFormContext = useCallback(() => formRef.current?.getContext() ?? null, [])
+  const pendingPublish = useRef(false)
+
+  const publishFromRemmy = useCallback(() => {
+    setFormVisible(true)
+    setRemmyOpen(false)
+    if (formRef.current) {
+      void formRef.current.publish()
+      return
+    }
+    pendingPublish.current = true
+  }, [])
+
+  useEffect(() => {
+    if (!formVisible || !pendingPublish.current) return
+    pendingPublish.current = false
+    void formRef.current?.publish()
+  }, [formVisible])
 
   if (!hydrated) {
     return <p className="text-sm text-ink-soft">{t("remmy.draft_loading")}</p>
@@ -219,10 +236,7 @@ export function RegisterEntry({
                 setFormVisible(true)
                 setRemmyOpen(false)
               }}
-              onReadyToPublish={() => {
-                setFormVisible(true)
-                setRemmyOpen(false)
-              }}
+              onReadyToPublish={publishFromRemmy}
             />
           </div>
         </div>

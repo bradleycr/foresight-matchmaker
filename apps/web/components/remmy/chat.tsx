@@ -426,21 +426,12 @@ export function RemmyChat({
             </div>
           </div>
         )}
-        {ready && mode === "create" && !busy ? (
+        {ready && mode === "create" && !busy && onReadyToPublish ? (
           <ProfileReadyCard
             oneLiner={readyCopy.oneLiner}
             summary={readyCopy.summary}
-            onPublish={() => {
-              onReadyToPublish?.()
-              onUseFormInstead()
-              queueMicrotask(() => {
-                document.getElementById("gap-contact_name")?.scrollIntoView({ behavior: "smooth", block: "center" })
-              })
-            }}
+            onPublish={() => onReadyToPublish?.()}
             onMore={() => setReady(false)}
-            onForm={() => {
-              onUseFormInstead()
-            }}
           />
         ) : null}
       </div>

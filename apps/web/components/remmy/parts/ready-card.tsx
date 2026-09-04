@@ -5,20 +5,18 @@ import { Button } from "@/components/ui/primitives"
 
 /**
  * Finish line after required fields are in. Code decides this, not the model.
- * Three actions, almost no copy — publish, add optional, or open the form.
+ * Primary action publishes the listing. Optional details can wait.
  */
 export function ProfileReadyCard({
   oneLiner,
   summary,
   onPublish,
   onMore,
-  onForm,
 }: {
   oneLiner?: string
   summary?: string
   onPublish: () => void
   onMore: () => void
-  onForm: () => void
 }) {
   const t = useT()
 
@@ -31,11 +29,8 @@ export function ProfileReadyCard({
         <Button type="button" variant="primary" className="text-sm" onClick={onPublish}>
           {t("remmy.ready_publish")}
         </Button>
-        <Button type="button" className="text-sm" onClick={onMore}>
+        <Button type="button" variant="ghost" className="text-sm" onClick={onMore}>
           {t("remmy.ready_more")}
-        </Button>
-        <Button type="button" variant="ghost" className="text-sm" onClick={onForm}>
-          {t("remmy.ready_form")}
         </Button>
       </div>
     </div>
