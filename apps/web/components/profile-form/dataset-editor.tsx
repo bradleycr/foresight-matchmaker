@@ -47,7 +47,13 @@ function datasetStatus(dataset: Dataset, t: (k: string, p?: Record<string, strin
   const missing: string[] = []
   if (!dataset.name.trim()) missing.push(t("form.dataset_missing_name"))
   if (dataset.modality.length === 0) missing.push(t("form.dataset_missing_modality"))
+  if (dataset.modality.includes("other") && !dataset.modality_other?.trim()) {
+    missing.push(t("form.dataset_missing_modality_other"))
+  }
   if (dataset.disease_area.length === 0) missing.push(t("form.dataset_missing_disease"))
+  if (dataset.disease_area.includes("other") && !dataset.disease_area_other?.trim()) {
+    missing.push(t("form.dataset_missing_disease_other"))
+  }
   return missing
 }
 
@@ -113,6 +119,23 @@ export function DatasetEditor({
           required
           fieldId={`ds-modality-${index}`}
         />
+        {dataset.modality.includes("other") ? (
+          <Field
+            label={t("field.modality_other")}
+            htmlFor={`ds-modality-other-${index}`}
+            required
+            hint={t("form.modality_other_hint")}
+          >
+            <Input
+              id={`ds-modality-other-${index}`}
+              required
+              maxLength={200}
+              placeholder={t("form.modality_other_placeholder")}
+              value={dataset.modality_other ?? ""}
+              onChange={(e) => set("modality_other", e.target.value || undefined)}
+            />
+          </Field>
+        ) : null}
         <EnumChips
           label={t("field.disease_area")}
           group="disease_area"
@@ -122,11 +145,29 @@ export function DatasetEditor({
           required
           fieldId={`ds-disease-${index}`}
         />
+        {dataset.disease_area.includes("other") ? (
+          <Field
+            label={t("field.disease_area_other")}
+            htmlFor={`ds-disease-other-${index}`}
+            required
+            hint={t("form.disease_area_other_hint")}
+          >
+            <Input
+              id={`ds-disease-other-${index}`}
+              required
+              maxLength={200}
+              placeholder={t("form.disease_area_other_placeholder")}
+              value={dataset.disease_area_other ?? ""}
+              onChange={(e) => set("disease_area_other", e.target.value || undefined)}
+            />
+          </Field>
+        ) : null}
 
-        <h3 className="mt-2 border-t border-rule pt-4 font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">
-          {t("form.dataset_section_optional")}
-        </h3>
-
+        <details className="mt-2 border-t border-rule pt-4">
+          <summary className="cursor-pointer font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">
+            {t("form.dataset_section_optional")}
+          </summary>
+          <div className="mt-4 flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <EnumSelect label={t("field.n_subjects")} group="n_subjects" options={N_SUBJECTS} value={dataset.n_subjects} onChange={(v) => v && set("n_subjects", v)} id={`ds-nsub-${index}`} />
           <EnumSelect label={t("field.volume")} group="volume" options={VOLUME} value={dataset.volume} onChange={(v) => v && set("volume", v)} id={`ds-vol-${index}`} />
@@ -202,6 +243,9 @@ export function DatasetEditor({
             onChange={(e) => set("governance_notes", e.target.value || undefined)}
           />
         </Field>
+
+          </div>
+        </details>
 
         {removable && (
           <Button type="button" variant="danger" onClick={onRemove} className="self-start">

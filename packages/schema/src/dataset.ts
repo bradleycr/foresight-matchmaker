@@ -21,10 +21,13 @@ import {
  * `publicly_describable: false` means the dataset is matched on but its detail
  * page is hidden from public view — the internal/external boundary.
  */
-export const datasetSchema = z.object({
+export const datasetSchema = z
+  .object({
   name: z.string().min(1).max(160),
   modality: z.array(modalityEnum).min(1),
+  modality_other: z.string().max(200).optional(),
   disease_area: z.array(diseaseAreaEnum).min(1),
+  disease_area_other: z.string().max(200).optional(),
   n_subjects: nSubjectsEnum,
   volume: volumeEnum,
   time_span_years: z.number().int().nonnegative().max(200).optional(),
@@ -42,6 +45,22 @@ export const datasetSchema = z.object({
   /** PRIVATE — server-side redacted, never in public payloads. */
   governance_notes: z.string().max(2000).optional(),
 })
+  .superRefine((data, ctx) => {
+    if (data.modality.includes("other") && !data.modality_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["modality_other"],
+        message: "Please define the data type.",
+      })
+    }
+    if (data.disease_area.includes("other") && !data.disease_area_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["disease_area_other"],
+        message: "Please define the disease area.",
+      })
+    }
+  })
 
 export type Dataset = z.infer<typeof datasetSchema>
 
@@ -49,13 +68,32 @@ export type Dataset = z.infer<typeof datasetSchema>
  * What an AI team needs from a dataset. Mirrors the dataset shape so the
  * matcher can compare like with like.
  */
-export const dataNeedsSchema = z.object({
-  modality: z.array(modalityEnum).default([]),
-  disease_area: z.array(diseaseAreaEnum).default([]),
-  min_n_subjects: nSubjectsEnum.optional(),
-  annotation_required: annotationEnum.optional(),
-  linkage_required: z.array(linkageEnum).default([]),
-  standards_preferred: z.array(standardsEnum).default([]),
-})
+export const dataNeedsSchema = z
+  .object({
+    modality: z.array(modalityEnum).default([]),
+    modality_other: z.string().max(200).optional(),
+    disease_area: z.array(diseaseAreaEnum).default([]),
+    disease_area_other: z.string().max(200).optional(),
+    min_n_subjects: nSubjectsEnum.optional(),
+    annotation_required: annotationEnum.optional(),
+    linkage_required: z.array(linkageEnum).default([]),
+    standards_preferred: z.array(standardsEnum).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.modality.includes("other") && !data.modality_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["modality_other"],
+        message: "Please define the data type.",
+      })
+    }
+    if (data.disease_area.includes("other") && !data.disease_area_other?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["disease_area_other"],
+        message: "Please define the disease area.",
+      })
+    }
+  })
 
 export type DataNeeds = z.infer<typeof dataNeedsSchema>

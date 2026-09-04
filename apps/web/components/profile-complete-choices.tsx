@@ -1,7 +1,7 @@
 import Link from "next/link"
 import type { Profile } from "@rmm/schema"
 import type { T } from "@/lib/i18n"
-import { browseDirectoryPath } from "@/lib/challenges/catalog"
+import { browseDirectoryPath } from "@/lib/challenges/visibility"
 
 /**
  * A deliberate hand-off from profile creation into matchmaking.

@@ -4,6 +4,7 @@ import { hydrateListings } from "@/lib/db/durable"
 import { collectSignupRows } from "@/lib/db/signups"
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES } from "@/lib/challenges/catalog"
+import { ProgrammeStatusTag } from "@/components/programme-status"
 import { SignupList } from "@/components/admin/signup-list"
 import { AdminLoginForm } from "@/components/admin/login-form"
 
@@ -40,7 +41,10 @@ export default async function AdminHubPage({
         <ul>
           {CHALLENGES.map((challenge) => (
             <li key={challenge.id} className="border-b border-rule px-3 py-3 last:border-0">
-              <p className="font-listing text-lg font-bold uppercase">{t(`challenge.${challenge.id}.name`)}</p>
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-listing text-lg font-bold uppercase">
+                {t(`challenge.${challenge.id}.name`)}
+                <ProgrammeStatusTag challenge={challenge} t={t} />
+              </p>
               <p className="mt-1 text-sm text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
               <Link
                 href={`/admin/${challenge.slug}`}

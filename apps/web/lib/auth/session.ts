@@ -6,15 +6,21 @@ import { cookies } from "next/headers"
  * `base64url(payload).hmac-sha256(payload)` — nothing server-side to store
  * or garbage-collect, and tampering with the payload breaks the signature.
  *
- * httpOnly, SameSite=Lax, 30-day expiry, per the spec. No passwords, no
- * OAuth, no third-party SDK.
+ * Host-only (no Domain), httpOnly, SameSite=Lax, 30-day expiry. A Domain
+ * attribute would not share the cookie with Vercel preview hosts, and it
+ * would split from any existing host-only cookie — two `rmm_session` values,
+ * logout clearing one, the other still signing people in.
  */
 
 const SESSION_COOKIE = "rmm_session"
 const SESSION_TTL_DAYS = 30
 const SESSION_TTL_MS = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000
-/** Refresh the cookie when less than half the TTL remains — keeps active users signed in. */
-const REFRESH_WHEN_REMAINING_LT_MS = SESSION_TTL_MS / 2
+/**
+ * Refresh when the cookie is older than a day. Safari’s ITP can drop idle
+ * cookies well before 30 days; sliding on activity keeps event-day visits
+ * signed in without rewriting the cookie on every request.
+ */
+const REFRESH_WHEN_REMAINING_LT_MS = SESSION_TTL_MS - 24 * 60 * 60 * 1000
 
 export interface Session {
   /**
@@ -101,7 +107,7 @@ export async function destroySession(): Promise<void> {
   jar.delete(SESSION_COOKIE)
 }
 
-/** True when the signed session is past the halfway mark — time to slide the expiry. */
+/** True when the cookie is older than a day — time to slide the expiry. */
 export function sessionNeedsRefresh(session: Session, nowMs = Date.now()): boolean {
   return session.exp - nowMs < REFRESH_WHEN_REMAINING_LT_MS
 }

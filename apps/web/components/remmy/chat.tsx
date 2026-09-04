@@ -1,16 +1,20 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import type { Kind } from "@rmm/schema"
+import { CHALLENGE_ID, DEFAULT_CHALLENGE_ID, type ChallengeId, type Kind } from "@rmm/schema"
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Button, Textarea } from "@/components/ui/primitives"
 import { blankProposal, type PrefillProposal } from "@/lib/llm/prefill"
 import { fetchPrefill } from "@/lib/llm/fetch-prefill"
+import { fetchRemmyTurn } from "@/lib/llm/fetch-remmy"
 import { transcriptForExtraction } from "@/lib/llm/proposal-utils"
 import { websiteFromPaste } from "@/lib/paste-is-url"
+import { essentialsReady, remmySprintGaps, type GapField } from "@/lib/profile-form-gaps"
 import { ASK_CATALOG, activeChipTurn, answeredAsksFromMessages, gapsWithoutAnswered, isAskId, overlayAskOnProfile, proposalFromAsk, type AskId } from "@/lib/remmy/ask"
 import { AskChipsPart } from "./parts/ask-chips"
+import { ProfileReadyCard } from "./parts/ready-card"
+import { cn } from "@/lib/utils"
 
 export interface RemmyChatMessage {
   role: "user" | "assistant"
@@ -21,6 +25,8 @@ export interface RemmyChatMessage {
 
 export interface RemmyFormContext {
   open_gaps: string[]
+  required_gaps?: string[]
+  optional_gaps?: string[]
   current_profile: Record<string, unknown>
 }
 
@@ -55,6 +61,7 @@ export function RemmyChat({
   onMessagesChange,
   onDraftApplied,
   onUseFormInstead,
+  onReadyToPublish,
 }: {
   mode: "create" | "update"
   currentProfile?: Record<string, unknown> | null
@@ -65,6 +72,7 @@ export function RemmyChat({
   onMessagesChange?: (messages: RemmyChatMessage[]) => void
   onDraftApplied: (proposal: PrefillProposal, opts?: RemmyApplyOpts) => void
   onUseFormInstead: () => void
+  onReadyToPublish?: () => void
 }) {
   const t = useT()
   const scroller = useRef<HTMLDivElement>(null)
@@ -85,6 +93,9 @@ export function RemmyChat({
   const [input, setInput] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [streamingReply, setStreamingReply] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
+  const [readyCopy, setReadyCopy] = useState<{ oneLiner?: string; summary?: string }>({})
 
   useEffect(() => {
     if (restored.current) {
@@ -109,7 +120,7 @@ export function RemmyChat({
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" })
-  }, [messages, busy])
+  }, [messages, busy, streamingReply])
 
   const userTurns = messages.filter((m) => m.role === "user").length
 
@@ -137,17 +148,55 @@ export function RemmyChat({
     return undefined
   }
 
+  function liveChallenge(): ChallengeId {
+    const candidates = [profileOverlay.current.challenge_id, getFormContext?.()?.current_profile.challenge_id, currentProfile?.challenge_id]
+    for (const value of candidates) {
+      if (typeof value === "string" && CHALLENGE_ID.includes(value as ChallengeId)) return value as ChallengeId
+    }
+    return DEFAULT_CHALLENGE_ID
+  }
+
   /** Form snapshot Remmy reads — includes chips that React has not painted yet. */
   function contextForTurn(transcript: RemmyChatMessage[] = messages) {
     const ctx = getFormContext?.() ?? null
     const answered = [...new Set([...answeredAsks.current, ...answeredAsksFromMessages(transcript)])]
+    const required = ctx?.required_gaps ?? ctx?.open_gaps ?? []
+    const optional = ctx?.optional_gaps ?? []
     return {
       current_profile: {
         ...(ctx?.current_profile ?? (mode === "update" ? currentProfile ?? null : null) ?? {}),
         ...profileOverlay.current,
       },
-      open_gaps: gapsWithoutAnswered(ctx?.open_gaps ?? [], answered),
+      open_gaps: gapsWithoutAnswered(required, answered),
+      required_gaps: gapsWithoutAnswered(required, answered),
+      optional_gaps: gapsWithoutAnswered(optional, answered),
       answered_asks: answered,
+    }
+  }
+
+  function markReadyFromContext(proposal?: PrefillProposal) {
+    if (mode !== "create") return
+    const ctx = getFormContext?.()
+    const required = (ctx?.required_gaps ?? ctx?.open_gaps ?? []) as GapField[]
+    const profile = ctx?.current_profile ?? {}
+    const name = (proposal?.org_name || profile.org_name || "").toString().trim()
+    const one = (proposal?.one_liner || profile.one_liner || "").toString().trim()
+    const kind = (proposal?.kind || profile.kind || "").toString()
+    const holder = kind === "data_holder" || kind === "consortium"
+    const rows = [
+      ...(Array.isArray(profile.datasets) ? profile.datasets : []),
+      ...(proposal?.datasets ?? []),
+    ] as Array<{ name?: string; modality?: unknown[]; disease_area?: unknown[] }>
+    const datasetOk =
+      !holder ||
+      rows.some((d) => Boolean(d.name?.trim() && d.modality?.length && d.disease_area?.length))
+    const fromForm = essentialsReady(remmySprintGaps(required))
+    if (fromForm || (name && one && datasetOk)) {
+      setReady(true)
+      setReadyCopy({
+        oneLiner: proposal?.one_liner ?? (typeof profile.one_liner === "string" ? profile.one_liner : undefined),
+        summary: proposal?.summary ?? (typeof profile.summary === "string" ? profile.summary : undefined),
+      })
     }
   }
 
@@ -206,6 +255,7 @@ export function RemmyChat({
         if (extracted.ok) {
           setMessages((m) => [...m, { role: "assistant", content: t("remmy.paste_ready") }])
           onDraftApplied(extracted.proposal, { spotlight: true })
+          markReadyFromContext(extracted.proposal)
           return
         }
         setError(extracted.message)
@@ -213,29 +263,19 @@ export function RemmyChat({
       }
 
       const ctx = contextForTurn(nextMessages)
-      const res = await fetch("/api/v1/remmy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const turn = await fetchRemmyTurn(
+        {
           mode,
           messages: nextMessages.map(({ role, content }) => ({ role, content })),
           current_profile: ctx.current_profile,
           open_gaps: ctx.open_gaps,
+          required_gaps: ctx.required_gaps,
+          optional_gaps: ctx.optional_gaps,
           answered_asks: ctx.answered_asks,
-        }),
-      })
-
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as { error?: string } | null
-        throw new Error(body?.error ?? t("remmy.error"))
-      }
-
-      const turn = (await res.json()) as {
-        reply: string
-        ready_for_review: boolean
-        draft_summary: string[]
-        ask?: AskId | null
-      }
+        },
+        { onDelta: (reply) => setStreamingReply(reply) },
+      )
+      setStreamingReply(null)
 
       const ask =
         isAskId(turn.ask) && !ctx.answered_asks.includes(turn.ask) ? turn.ask : undefined
@@ -248,10 +288,13 @@ export function RemmyChat({
 
       if (turn.ready_for_review) {
         const extracted = await extractDraft(withReply)
-        if (extracted.ok) onDraftApplied(extracted.proposal, { spotlight: true })
-        else if (!formAlreadyOpen) setError(extracted.message)
+        if (extracted.ok) {
+          onDraftApplied(extracted.proposal, { spotlight: true })
+          markReadyFromContext(extracted.proposal)
+        } else if (!formAlreadyOpen) setError(extracted.message)
       }
     } catch (e) {
+      setStreamingReply(null)
       setError(e instanceof Error ? e.message : t("remmy.error"))
     } finally {
       setBusy(false)
@@ -272,6 +315,7 @@ export function RemmyChat({
       const extracted = await extractDraft(messages)
       if (extracted.ok) {
         onDraftApplied(extracted.proposal, { spotlight: true })
+        markReadyFromContext(extracted.proposal)
         return
       }
       setError(extracted.message)
@@ -305,6 +349,7 @@ export function RemmyChat({
           <AskChipsPart
             key={`${i}-${m.ask}`}
             ask={m.ask}
+            challengeId={liveChallenge()}
             disabled={busy}
             onCommit={(values) => commitAsk(i, m.ask!, values)}
             onSkip={() => skipAsk(i, m.ask!)}
@@ -314,9 +359,17 @@ export function RemmyChat({
     )
   }
 
+  const fullscreen = !formAlreadyOpen && !compact
+
   return (
-    <div className="flex flex-col border-2 border-ink bg-paper" aria-busy={busy}>
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-paper-shade px-4 py-3">
+    <div
+      className={cn(
+        "flex flex-col border-2 border-ink bg-paper",
+        fullscreen && "max-sm:fixed max-sm:inset-0 max-sm:z-30 max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:border-0",
+      )}
+      aria-busy={busy}
+    >
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-paper-shade px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div>
           <p className="font-listing text-xs font-bold uppercase tracking-widest text-ink-soft">{t("remmy.kicker")}</p>
           <h2 className="font-listing text-xl font-bold uppercase tracking-tight sm:text-2xl">{t("remmy.name")}</h2>
@@ -341,13 +394,22 @@ export function RemmyChat({
 
       <div
         ref={scroller}
-        className="max-h-[min(32rem,60vh)] space-y-3 overflow-y-auto overscroll-contain px-4 py-3"
+        className={cn(
+          "space-y-3 overflow-y-auto overscroll-contain px-4 py-3",
+          fullscreen ? "max-sm:min-h-0 max-sm:flex-1 sm:max-h-[min(32rem,60vh)]" : "max-h-[min(32rem,60vh)]",
+        )}
       >
         {messages.map((m, i) => {
           const showChips = chipTurn !== null && i === chipTurn.index && m.ask === chipTurn.ask && !m.askDone
           return bubble(m, i, showChips)
         })}
-        {busy && (
+        {busy && streamingReply ? (
+          <div className="mr-2 border border-rule bg-paper-shade px-3 py-2 text-sm leading-relaxed sm:mr-4">
+            <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-widest text-ink-faint">{t("remmy.name")}</p>
+            <p className="whitespace-pre-wrap">{streamingReply}</p>
+          </div>
+        ) : null}
+        {busy && !streamingReply && (
           <div
             role="status"
             aria-live="polite"
@@ -364,9 +426,26 @@ export function RemmyChat({
             </div>
           </div>
         )}
+        {ready && mode === "create" && !busy ? (
+          <ProfileReadyCard
+            oneLiner={readyCopy.oneLiner}
+            summary={readyCopy.summary}
+            onPublish={() => {
+              onReadyToPublish?.()
+              onUseFormInstead()
+              queueMicrotask(() => {
+                document.getElementById("gap-contact_name")?.scrollIntoView({ behavior: "smooth", block: "center" })
+              })
+            }}
+            onMore={() => setReady(false)}
+            onForm={() => {
+              onUseFormInstead()
+            }}
+          />
+        ) : null}
       </div>
 
-      <form onSubmit={submit} className="border-t-2 border-ink bg-paper-shade p-3">
+      <form onSubmit={submit} className="sticky bottom-0 border-t-2 border-ink bg-paper-shade p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {error && (
           <p role="alert" className="mb-2 border border-alert px-2 py-1 text-sm text-alert">
             {error}

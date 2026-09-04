@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session"
 import { rateLimit } from "@/lib/auth/rate-limit"
 import { llmEnabled } from "@/lib/llm/client"
 import { proposeProfile } from "@/lib/llm/prefill"
+import { composeNarrative } from "@/lib/llm/narrative"
 import { proposalIsSubstantial } from "@/lib/llm/proposal-utils"
 import { logEvent } from "@/lib/db/events"
 
@@ -44,12 +45,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return zodError(parsed.error)
 
-  const proposal = await proposeProfile(parsed.data.text)
+  const [proposal, narrative] = await Promise.all([
+    proposeProfile(parsed.data.text),
+    composeNarrative({ sourceText: parsed.data.text }),
+  ])
   if (!proposal) {
     return NextResponse.json(
       { error: "Could not derive a proposal from that text. Try more detail, or fill in the form directly.", code: "extraction_failed" },
       { status: 400 },
     )
+  }
+
+  if (narrative) {
+    proposal.one_liner = narrative.one_liner
+    proposal.summary = narrative.summary
   }
 
   if (!proposalIsSubstantial(proposal)) {

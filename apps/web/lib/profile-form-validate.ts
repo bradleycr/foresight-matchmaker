@@ -11,6 +11,8 @@ export function filterDatasetsForSubmit(datasets: Dataset[]): Dataset[] {
     .filter((d) => !isDatasetBlank(d))
     .map((d) => ({
       ...d,
+      modality_other: d.modality.includes("other") ? d.modality_other?.trim() || undefined : undefined,
+      disease_area_other: d.disease_area.includes("other") ? d.disease_area_other?.trim() || undefined : undefined,
       linkage: d.linkage.length > 0 ? d.linkage : (["none"] as Dataset["linkage"]),
       standards: d.standards.length > 0 ? d.standards : (["none"] as Dataset["standards"]),
     }))
@@ -37,6 +39,10 @@ interface ValidateInput {
   looking_for_other?: string
   methods?: string[]
   methods_other?: string
+  needs_modality?: string[]
+  needs_modality_other?: string
+  needs_disease_area?: string[]
+  needs_disease_area_other?: string
 }
 
 /** Client-side checks with human-readable issue keys — run before hitting the API. */
@@ -70,6 +76,14 @@ export function collectValidationIssues(input: ValidateInput): ValidationIssue[]
     issues.push({ fieldId: "methods_other", messageKey: "form.validation.methods_other" })
   }
 
+  if (input.needs_modality?.includes("other") && !input.needs_modality_other?.trim()) {
+    issues.push({ fieldId: "needs_modality_other", messageKey: "form.validation.modality_other" })
+  }
+
+  if (input.needs_disease_area?.includes("other") && !input.needs_disease_area_other?.trim()) {
+    issues.push({ fieldId: "needs_disease_area_other", messageKey: "form.validation.disease_area_other" })
+  }
+
   const showData = input.kind === "data_holder" || input.kind === "consortium"
   if (showData) {
     const datasets = filterDatasetsForSubmit(input.datasets)
@@ -100,6 +114,20 @@ export function collectValidationIssues(input: ValidateInput): ValidationIssue[]
             params: { n },
           })
         }
+        if (d.modality.includes("other") && !d.modality_other?.trim()) {
+          issues.push({
+            fieldId: `ds-modality-other-${i}`,
+            messageKey: "form.validation.modality_other",
+            params: { n },
+          })
+        }
+        if (d.disease_area.includes("other") && !d.disease_area_other?.trim()) {
+          issues.push({
+            fieldId: `ds-disease-other-${i}`,
+            messageKey: "form.validation.disease_area_other",
+            params: { n },
+          })
+        }
       })
     }
   }
@@ -127,6 +155,16 @@ export function fieldIdFromApiPath(path: string): string | null {
   if (path === "org_type_other") return "org_type_other"
   if (path === "looking_for_other") return "looking_for_other"
   if (path === "methods_other") return "methods_other"
+  if (path === "modality_other" || path.endsWith(".modality_other")) {
+    const m = path.match(/^datasets\.(\d+)/)
+    return m ? `ds-modality-other-${m[1]}` : "needs_modality_other"
+  }
+  if (path === "disease_area_other" || path.endsWith(".disease_area_other")) {
+    const m = path.match(/^datasets\.(\d+)/)
+    return m ? `ds-disease-other-${m[1]}` : "needs_disease_area_other"
+  }
+  if (path === "data_needs.modality_other") return "needs_modality_other"
+  if (path === "data_needs.disease_area_other") return "needs_disease_area_other"
   return null
 }
 

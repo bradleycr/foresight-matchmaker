@@ -6,6 +6,7 @@ import {
   applicationStatusEnum,
   yesNoUnsureEnum,
   attendingEnum,
+  isAttendingOfChallenge,
   visibilityEnum,
   methodsEnum,
   applicationTargetEnum,
@@ -182,6 +183,17 @@ export const profileSchema = z
         path: ["methods_other"],
         message: "Please define the method.",
       })
+    }
+    // Rooms belong to one programme. Without this, a listing could claim a
+    // seat at another programme's event and appear on its live feed.
+    for (const chip of data.attending ?? []) {
+      if (!isAttendingOfChallenge(chip, data.challenge_id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["attending"],
+          message: `"${chip}" is not an event of this programme.`,
+        })
+      }
     }
   })
 export type Profile = z.infer<typeof profileSchema>

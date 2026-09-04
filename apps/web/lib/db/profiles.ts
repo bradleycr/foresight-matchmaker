@@ -11,6 +11,7 @@ import { getDb } from "./client"
 import { profiles, matches, intros, authTokens } from "./schema"
 import { recomputeMatchesFor } from "./matches"
 import { anonymiseEventsFor, logEvent } from "./events"
+import { isChallengeVisible } from "@/lib/challenges/visibility"
 
 /**
  * Profile repository. Every write path funnels through `saveProfile`, which
@@ -87,10 +88,15 @@ export function getJointApplicationOutcome(id: string): string | null {
  * Members-only. `hidden` never appears. Signed-in callers also receive
  * `authenticated_only` listings.
  */
-export function listDirectoryProfiles(opts: { includeAuthenticatedOnly?: boolean } = {}): PublicProfile[] {
+export function listDirectoryProfiles(
+  opts: { includeAuthenticatedOnly?: boolean; challengeId?: string } = {},
+): PublicProfile[] {
   return listProfiles()
     .filter((p) => {
       if (p.visibility === "hidden") return false
+      const challengeId = p.challenge_id ?? "recoding_medicine"
+      if (!isChallengeVisible(challengeId)) return false
+      if (opts.challengeId && challengeId !== opts.challengeId) return false
       if (p.visibility === "public") return true
       if (p.visibility === "authenticated_only") return opts.includeAuthenticatedOnly === true
       return false

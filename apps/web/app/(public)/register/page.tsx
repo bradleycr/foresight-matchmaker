@@ -9,7 +9,7 @@ import { SigninForm } from "@/components/signin-form"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { MagicLinkNote } from "@/components/magic-link-note"
 import { OneListingNote } from "@/components/one-listing-note"
-import { challengeIdOf } from "@/lib/challenges/catalog"
+import { visibleChallengeIdOf } from "@/lib/challenges/visibility"
 import { isHerePath, ownedListingRedirect, safeNextPath } from "@/lib/auth/next-path"
 
 /**
@@ -33,7 +33,7 @@ export default async function RegisterPage({
   const session = await getSession()
   const { t } = await getT()
   const remmy = llmEnabled()
-  const defaultChallengeId = challengeIdOf(challenge)
+  const defaultChallengeId = visibleChallengeIdOf(challenge)
   const afterCreateHref = isHerePath(safeNextPath(rawNext)) ? safeNextPath(rawNext)! : undefined
   const nextParams = new URLSearchParams()
   if (defaultChallengeId) nextParams.set("challenge", defaultChallengeId)

@@ -61,7 +61,9 @@ function looseString(max: number) {
 const datasetProposalSchema = z.object({
   name: looseString(160),
   modality: looseArray(MODALITY),
+  modality_other: looseString(200),
   disease_area: looseArray(DISEASE_AREA),
+  disease_area_other: looseString(200),
   n_subjects: loose(N_SUBJECTS),
   volume: loose(VOLUME),
   longitudinal: z.boolean().optional().catch(undefined),
@@ -123,7 +125,9 @@ export const prefillProposalSchema = z.object({
   data_needs: z
     .object({
       modality: looseArray(MODALITY),
+      modality_other: looseString(200),
       disease_area: looseArray(DISEASE_AREA),
+      disease_area_other: looseString(200),
       min_n_subjects: loose(N_SUBJECTS),
       annotation_required: loose(ANNOTATION),
       linkage_required: looseArray(LINKAGE),

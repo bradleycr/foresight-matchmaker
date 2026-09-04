@@ -63,26 +63,27 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   )
 }
 
+/**
+ * Chip styling, shared so a chip that navigates can be a real link instead
+ * of a button pretending to be one.
+ */
+export function chipClassName(active?: boolean, className?: string): string {
+  return cn(
+    "chip-transition inline-flex min-h-9 items-center border px-3 py-1 text-sm",
+    active
+      ? "border-ink bg-mark font-semibold text-mark-ink"
+      : "border-rule bg-transparent text-ink-soft hover:border-ink hover:text-ink",
+    className,
+  )
+}
+
 /** Filter chip / multi-select toggle. Active state = the mark colour. */
 export function Chip({
   active,
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      className={cn(
-        "chip-transition inline-flex min-h-9 items-center border px-3 py-1 text-sm",
-        active
-          ? "border-ink bg-mark font-semibold text-mark-ink"
-          : "border-rule bg-transparent text-ink-soft hover:border-ink hover:text-ink",
-        className,
-      )}
-      {...props}
-    />
-  )
+  return <button type="button" aria-pressed={active} className={chipClassName(active, className)} {...props} />
 }
 
 /** Form field wrapper: label, control, optional hint — always stacked. */

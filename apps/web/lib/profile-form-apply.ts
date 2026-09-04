@@ -59,6 +59,8 @@ export interface ProposalMergeTarget {
   track_record: string
   needs_modality: Modality[]
   needs_disease_area: DiseaseArea[]
+  needs_modality_other: string
+  needs_disease_area_other: string
   needs_min_n_subjects: NSubjects | ""
   needs_annotation: Annotation | ""
   needs_linkage: Linkage[]
@@ -75,7 +77,9 @@ function mergePartialDataset(partial: Partial<Dataset>): Dataset {
   const d = emptyDataset()
   if (partial.name?.trim()) d.name = partial.name.trim().slice(0, 160)
   if (partial.modality?.length) d.modality = partial.modality
+  if (partial.modality_other?.trim()) d.modality_other = partial.modality_other.trim().slice(0, 200)
   if (partial.disease_area?.length) d.disease_area = partial.disease_area
+  if (partial.disease_area_other?.trim()) d.disease_area_other = partial.disease_area_other.trim().slice(0, 200)
   if (partial.n_subjects) d.n_subjects = partial.n_subjects
   if (partial.volume) d.volume = partial.volume
   if (partial.time_span_years !== undefined) d.time_span_years = partial.time_span_years
@@ -123,6 +127,8 @@ function resetForKind<T extends ProposalMergeTarget>(state: T, kind: Kind): T {
       track_record: "",
       needs_modality: [],
       needs_disease_area: [],
+      needs_modality_other: "",
+      needs_disease_area_other: "",
       needs_min_n_subjects: "",
       needs_annotation: "",
       needs_linkage: [],
@@ -161,35 +167,60 @@ function resetForKind<T extends ProposalMergeTarget>(state: T, kind: Kind): T {
   }
 }
 
+const PRESERVE_TEXT = new Set([
+  "org_name",
+  "one_liner",
+  "summary",
+  "website",
+  "affiliation",
+    "looking_for_other",
+    "methods_other",
+    "org_type_other",
+    "needs_modality_other",
+    "needs_disease_area_other",
+    "compute_scale",
+  "intended_public_contribution",
+  "funding_mainly_needed_for",
+  "best_public_dataset",
+  "track_record",
+])
+
+function mayWrite(key: string, current: string, preserve?: ReadonlySet<string>): boolean {
+  if (!preserve?.has(key)) return true
+  if (!PRESERVE_TEXT.has(key)) return true
+  return current.trim().length === 0
+}
+
 export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
   state: T,
   raw: PrefillProposal,
   countryCodes: readonly string[],
+  preserve?: ReadonlySet<string>,
 ): T {
   const p = sanitizeProposal(raw)
   let next: T = p.kind ? resetForKind(state, p.kind) : { ...state }
 
-  if (p.org_name) next = { ...next, org_name: p.org_name }
+  if (p.org_name && mayWrite("org_name", next.org_name, preserve)) next = { ...next, org_name: p.org_name }
   if (p.org_type) next = { ...next, org_type: p.org_type }
   if (p.country && countryCodes.includes(p.country)) next = { ...next, country: p.country }
-  if (p.one_liner) next = { ...next, one_liner: p.one_liner }
-  if (p.summary) next = { ...next, summary: p.summary }
-  if (p.website) next = { ...next, website: p.website }
+  if (p.one_liner && mayWrite("one_liner", next.one_liner, preserve)) next = { ...next, one_liner: p.one_liner }
+  if (p.summary && mayWrite("summary", next.summary, preserve)) next = { ...next, summary: p.summary }
+  if (p.website && mayWrite("website", next.website, preserve)) next = { ...next, website: p.website }
   if (p.languages.length) next = { ...next, languages: p.languages }
   if (p.looking_for.length) next = { ...next, looking_for: p.looking_for }
   if (p.still_seeking?.length) next = { ...next, still_seeking: p.still_seeking }
   if (p.attending?.length) next = { ...next, attending: p.attending }
   if (p.application_status) next = { ...next, application_status: p.application_status }
-  if (p.affiliation) next = { ...next, affiliation: p.affiliation }
+  if (p.affiliation && mayWrite("affiliation", next.affiliation, preserve)) next = { ...next, affiliation: p.affiliation }
   if (p.methods.length) next = { ...next, methods: p.methods }
-  if (p.methods_other) {
+  if (p.methods_other && mayWrite("methods_other", next.methods_other, preserve)) {
     next = {
       ...next,
       methods_other: p.methods_other,
       methods: next.methods.includes("other") ? next.methods : [...next.methods, "other"],
     }
   }
-  if (p.looking_for_other) {
+  if (p.looking_for_other && mayWrite("looking_for_other", next.looking_for_other, preserve)) {
     const hasOther = next.looking_for.includes("other") || next.still_seeking.includes("other")
     next = {
       ...next,
@@ -197,7 +228,7 @@ export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
       looking_for: hasOther ? next.looking_for : [...next.looking_for, "other"],
     }
   }
-  if (p.org_type_other && next.kind !== "individual") {
+  if (p.org_type_other && next.kind !== "individual" && mayWrite("org_type_other", next.org_type_other, preserve)) {
     next = { ...next, org_type_other: p.org_type_other, org_type: "other" }
   }
   if (p.application_target.length) next = { ...next, application_target: p.application_target }
@@ -205,17 +236,29 @@ export function mergeProposalIntoForm<T extends ProposalMergeTarget>(
   if (p.clinical_partner) next = { ...next, clinical_partner: p.clinical_partner }
   if (p.regulatory_experience.length) next = { ...next, regulatory_experience: p.regulatory_experience }
   if (p.compute) next = { ...next, compute: p.compute }
-  if (p.compute_scale) next = { ...next, compute_scale: p.compute_scale }
+  if (p.compute_scale && mayWrite("compute_scale", next.compute_scale, preserve)) next = { ...next, compute_scale: p.compute_scale }
   if (p.privacy_capability.length) next = { ...next, privacy_capability: p.privacy_capability }
   if (p.team_size) next = { ...next, team_size: p.team_size }
-  if (p.track_record.length) next = { ...next, track_record: p.track_record.join("\n") }
-  if (p.intended_public_contribution) next = { ...next, intended_public_contribution: p.intended_public_contribution }
-  if (p.funding_mainly_needed_for) next = { ...next, funding_mainly_needed_for: p.funding_mainly_needed_for }
-  if (p.best_public_dataset) next = { ...next, best_public_dataset: p.best_public_dataset }
+  if (p.track_record.length && mayWrite("track_record", next.track_record, preserve)) next = { ...next, track_record: p.track_record.join("\n") }
+  if (p.intended_public_contribution && mayWrite("intended_public_contribution", next.intended_public_contribution, preserve)) {
+    next = { ...next, intended_public_contribution: p.intended_public_contribution }
+  }
+  if (p.funding_mainly_needed_for && mayWrite("funding_mainly_needed_for", next.funding_mainly_needed_for, preserve)) {
+    next = { ...next, funding_mainly_needed_for: p.funding_mainly_needed_for }
+  }
+  if (p.best_public_dataset && mayWrite("best_public_dataset", next.best_public_dataset, preserve)) {
+    next = { ...next, best_public_dataset: p.best_public_dataset }
+  }
 
   if (p.data_needs) {
     if (p.data_needs.modality.length) next = { ...next, needs_modality: p.data_needs.modality }
+    if (p.data_needs.modality_other && mayWrite("needs_modality_other", next.needs_modality_other, preserve)) {
+      next = { ...next, needs_modality_other: p.data_needs.modality_other }
+    }
     if (p.data_needs.disease_area.length) next = { ...next, needs_disease_area: p.data_needs.disease_area }
+    if (p.data_needs.disease_area_other && mayWrite("needs_disease_area_other", next.needs_disease_area_other, preserve)) {
+      next = { ...next, needs_disease_area_other: p.data_needs.disease_area_other }
+    }
     if (p.data_needs.min_n_subjects) next = { ...next, needs_min_n_subjects: p.data_needs.min_n_subjects }
     if (p.data_needs.annotation_required) next = { ...next, needs_annotation: p.data_needs.annotation_required }
     if (p.data_needs.linkage_required.length) next = { ...next, needs_linkage: p.data_needs.linkage_required }
@@ -293,7 +336,9 @@ function overlayDataset(base: Dataset, incoming: Dataset): Dataset {
     ...base,
     name: base.name.trim() || incoming.name,
     modality: base.modality.length > 0 ? base.modality : incoming.modality,
+    modality_other: incoming.modality_other?.trim() || base.modality_other,
     disease_area: base.disease_area.length > 0 ? base.disease_area : incoming.disease_area,
+    disease_area_other: incoming.disease_area_other?.trim() || base.disease_area_other,
     n_subjects: scalar("n_subjects"),
     volume: scalar("volume"),
     time_span_years: incoming.time_span_years ?? base.time_span_years,

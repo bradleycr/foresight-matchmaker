@@ -3,15 +3,24 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
-import { CHALLENGES, challengeBySlug, PLATFORM, RECODING_MATCHMAKING_EVENTS, RECODING_MATCHMAKING_EVENT_URLS } from "@/lib/challenges/catalog"
+import { CHALLENGES, challengeBySlug, sessionUrl, type ChallengeDef } from "@/lib/challenges/catalog"
+import { isChallengeVisible } from "@/lib/challenges/visibility"
 import { ListingCounts } from "@/components/listing-counts"
+import { ProgrammePreviewNotice } from "@/components/programme-status"
 import { hydrateListings } from "@/lib/db/durable"
 import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
+import type { T } from "@/lib/i18n"
 
 export const dynamic = "force-dynamic"
 
 export function generateStaticParams() {
   return CHALLENGES.map((c) => ({ slug: c.slug }))
+}
+
+function visibleChallenge(slug: string): ChallengeDef | undefined {
+  const challenge = challengeBySlug(slug)
+  if (!challenge || !isChallengeVisible(challenge.id)) return undefined
+  return challenge
 }
 
 export async function generateMetadata({
@@ -20,7 +29,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const challenge = challengeBySlug(slug)
+  const challenge = visibleChallenge(slug)
   if (!challenge) return {}
   const { t } = await getT()
   return {
@@ -30,8 +39,9 @@ export async function generateMetadata({
 }
 
 /**
- * One programme inside Foresight Matchmaking. Schema, matching, and
- * challenge-host facts live here — the rest of the chrome is Foresight.
+ * One programme inside Foresight Matchmaking. Facts and sessions come from
+ * the catalog so a second programme does not inherit Recoding Medicine's
+ * deadline, webinar, or city series.
  */
 export default async function ChallengePage({
   params,
@@ -39,7 +49,7 @@ export default async function ChallengePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const challenge = challengeBySlug(slug)
+  const challenge = visibleChallenge(slug)
   if (!challenge) notFound()
 
   const [{ t }, live] = await Promise.all([getT(), peekLiveSession()])
@@ -48,17 +58,15 @@ export default async function ChallengePage({
   const counts = byChallenge[challenge.id] ?? { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const id = challenge.id
 
-  const facts = [
-    [t("landing.fact_deadline_label"), t("landing.fact_deadline")],
-    [t("landing.fact_webinar_label"), t("landing.fact_webinar")],
-    [t("landing.fact_stages_label"), t("landing.fact_stages")],
-    [t("landing.fact_funding_label"), t("landing.fact_funding")],
-    [t("landing.fact_hq_label"), t("landing.fact_hq")],
-    [t("landing.fact_dataset_label"), t("landing.fact_dataset")],
-  ] as const
+  const facts = challenge.factKeys.map((key) => [
+    t(`${challenge.factsNamespace}.fact_${key}_label`),
+    t(`${challenge.factsNamespace}.fact_${key}`),
+  ]) as ReadonlyArray<readonly [string, string]>
 
   return (
     <div className="py-8">
+      <ProgrammePreviewNotice challenge={challenge} t={t} className="mb-8" />
+
       <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
         {t(`challenge.${id}.kicker`)}
       </p>
@@ -84,64 +92,84 @@ export default async function ChallengePage({
       </div>
 
       <div className="mt-12">
-        <ListingCounts counts={counts} t={t} />
+        <ListingCounts counts={counts} t={t} captionKey={`challenge.${id}.counts_caption`} />
       </div>
 
-      <section aria-labelledby="facts" className="mt-12 max-w-3xl">
-        <h2 id="facts" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
-          {t("landing.facts_title")}
-        </h2>
-        <dl className="divide-y divide-rule">
-          {facts.map(([label, value]) => (
-            <div key={label} className="grid gap-x-4 py-2 sm:grid-cols-[14rem_1fr]">
-              <dt className="text-sm font-semibold uppercase tracking-wide text-ink-soft">{label}</dt>
-              <dd className="tnum text-base">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      <FactsSection facts={facts} t={t} />
+      <SessionsSection challenge={challenge} t={t} />
 
-      {id === "recoding_medicine" ? (
-        <section aria-labelledby="matchmaking-events" className="mt-12 max-w-3xl">
-          <h2
-            id="matchmaking-events"
-            className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase"
-          >
-            {t("challenge.matchmaking_events_title")}
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-ink-soft">{t("challenge.matchmaking_events_body")}</p>
-          <ul className="mt-4 list-disc space-y-2 pl-5 text-base">
-            {RECODING_MATCHMAKING_EVENTS.map((key) => (
-              <li key={key}>
-                <a
-                  href={RECODING_MATCHMAKING_EVENT_URLS[key]}
-                  className="font-semibold underline underline-offset-2"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {t(`enum.attending.${key}`)}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-5">
+      <p className="mt-8">
+        <a href={challenge.hostUrl} className="font-semibold underline" rel="noopener noreferrer" target="_blank">
+          {t(`challenge.${id}.host_link`)}
+        </a>
+      </p>
+    </div>
+  )
+}
+
+function FactsSection({
+  facts,
+  t,
+}: {
+  facts: ReadonlyArray<readonly [string, string]>
+  t: T
+}) {
+  if (facts.length === 0) return null
+
+  return (
+    <section aria-labelledby="facts" className="mt-12 max-w-3xl">
+      <h2 id="facts" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
+        {t("landing.facts_title")}
+      </h2>
+      <dl className="divide-y divide-rule">
+        {facts.map(([label, value]) => (
+          <div key={label} className="grid gap-x-4 py-2 sm:grid-cols-[14rem_1fr]">
+            <dt className="text-sm font-semibold uppercase tracking-wide text-ink-soft">{label}</dt>
+            <dd className="tnum text-base">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
+}
+
+function SessionsSection({ challenge, t }: { challenge: ChallengeDef; t: T }) {
+  if (challenge.sessions.length === 0) return null
+  const id = challenge.id
+
+  return (
+    <section aria-labelledby="matchmaking-events" className="mt-12 max-w-3xl">
+      <h2
+        id="matchmaking-events"
+        className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase"
+      >
+        {t(`challenge.${id}.events_title`)}
+      </h2>
+      <p className="mt-4 text-base leading-relaxed text-ink-soft">{t(`challenge.${id}.events_body`)}</p>
+      <ul className="mt-4 list-disc space-y-2 pl-5 text-base">
+        {challenge.sessions.map((key) => (
+          <li key={key}>
             <a
-              href={PLATFORM.lumaCalendarUrl}
+              href={sessionUrl(challenge, key)}
               className="font-semibold underline underline-offset-2"
               rel="noopener noreferrer"
               target="_blank"
             >
-              {t("challenge.matchmaking_events_luma")}
+              {t(`enum.attending.${key}`)}
             </a>
-          </p>
-        </section>
-      ) : null}
-
-      <p className="mt-8">
-        <a href={challenge.hostUrl} className="font-semibold underline" rel="noopener noreferrer" target="_blank">
-          {t("footer.challenge_page")}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-5">
+        <a
+          href={challenge.calendarUrl}
+          className="font-semibold underline underline-offset-2"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {t(`challenge.${id}.events_luma`)}
         </a>
       </p>
-    </div>
+    </section>
   )
 }

@@ -36,6 +36,13 @@ const CHALLENGE_THEMES: Partial<Record<ChallengeId, Partial<ChallengeTheme>>> = 
     rule: "#b4ccc4",
     accent: "#2a8f86",
   },
+  // Cooler ink-blue: a community room, not a health-challenge wash.
+  ai_safety_berlin: {
+    paper: "#e6ebf2",
+    paperShade: "#d4dce8",
+    rule: "#b0bbcc",
+    accent: "#3d5a80",
+  },
 }
 
 export function challengeTheme(id: ChallengeId): ChallengeTheme {

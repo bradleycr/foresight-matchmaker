@@ -4,12 +4,10 @@ import { getT } from "@/lib/i18n/server"
 import { getSession } from "@/lib/auth/session"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { signInHref } from "@/lib/auth/next-path"
-import {
-  CHALLENGES,
-  browseDirectoryPath,
-  directoryHref,
-} from "@/lib/challenges/catalog"
+import { directoryHref } from "@/lib/challenges/catalog"
+import { browseDirectoryPath, visibleChallenges } from "@/lib/challenges/visibility"
 import { challengeTheme } from "@/lib/challenges/themes"
+import { ProgrammePreviewNotice, ProgrammeStatusTag } from "@/components/programme-status"
 import { DirectoryBrowser } from "@/components/directory/browser"
 import { kindCountTotal } from "@/components/listing-counts"
 import { hydrateListings } from "@/lib/db/durable"
@@ -34,7 +32,8 @@ export default async function DirectoryPage({
   await hydrateListings()
 
   const { challenge: raw } = await searchParams
-  const selected = raw ? CHALLENGES.find((c) => c.id === raw) : undefined
+  const visible = visibleChallenges()
+  const selected = raw ? visible.find((c) => c.id === raw) : undefined
 
   if (!selected) {
     const live = await peekLiveSession()
@@ -50,7 +49,7 @@ export default async function DirectoryPage({
         <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("directory.choose_title")}</h1>
         <p className="mt-2 max-w-xl text-ink-soft">{t("directory.choose_intro")}</p>
         <ul className="mt-8 grid gap-4">
-          {CHALLENGES.map((challenge) => {
+          {visible.map((challenge) => {
             const counts = byChallenge[challenge.id] ?? empty
             return (
               <li key={challenge.id}>
@@ -59,8 +58,9 @@ export default async function DirectoryPage({
                   className="block border-2 border-rule-strong bg-paper p-5 hover:bg-paper-shade"
                   style={{ borderLeftWidth: "4px", borderLeftColor: challengeTheme(challenge.id).accent }}
                 >
-                  <h2 className="font-listing text-2xl font-bold uppercase leading-none tracking-tight">
+                  <h2 className="flex flex-wrap items-center gap-x-3 gap-y-2 font-listing text-2xl font-bold uppercase leading-none tracking-tight">
                     {t(`challenge.${challenge.id}.name`)}
+                    <ProgrammeStatusTag challenge={challenge} t={t} />
                   </h2>
                   <p className="mt-2 max-w-xl text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
                   {kindCountTotal(counts) > 0 ? (
@@ -81,18 +81,25 @@ export default async function DirectoryPage({
   }
 
   const { t } = await getT()
-  const profiles = listDirectoryProfiles({ includeAuthenticatedOnly: true }) as unknown as DirectoryProfile[]
+  // A directory belongs to exactly one programme. Scoping here rather than in
+  // the browser means another programme's listings never reach the client,
+  // whatever the query string says.
+  const profiles = listDirectoryProfiles({
+    includeAuthenticatedOnly: true,
+    challengeId: selected.id,
+  }) as unknown as DirectoryProfile[]
   const name = t(`challenge.${selected.id}.name`)
 
   return (
     <div className="py-6">
+      <ProgrammePreviewNotice challenge={selected} t={t} className="mb-6" />
       <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
         {t(`challenge.${selected.id}.kicker`)}
       </p>
       <h1 className="mb-4 font-listing text-3xl font-bold uppercase tracking-tight">
         {t("directory.programme_title", { programme: name })}
       </h1>
-      <DirectoryBrowser profiles={profiles} />
+      <DirectoryBrowser profiles={profiles} challengeId={selected.id} />
     </div>
   )
 }

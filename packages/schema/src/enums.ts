@@ -32,8 +32,12 @@ export function hasAiCapabilityKind(kind: Kind): boolean {
  * Which programme a profile is listed for. The platform is Foresight
  * Matchmaking; each challenge carries its own schema flavour, copy, and
  * matching rules. Adding an id is backwards compatible.
+ *
+ * An id existing here does not make the programme public — the web app's
+ * challenge catalog decides that, so a programme can be built and demoed
+ * before it launches.
  */
-export const CHALLENGE_ID = ["recoding_medicine"] as const
+export const CHALLENGE_ID = ["recoding_medicine", "ai_safety_berlin"] as const
 export const challengeIdEnum = z.enum(CHALLENGE_ID)
 export type ChallengeId = (typeof CHALLENGE_ID)[number]
 export const DEFAULT_CHALLENGE_ID: ChallengeId = "recoding_medicine"
@@ -104,11 +108,23 @@ export const YES_NO_UNSURE = ["yes", "no", "unsure"] as const
 export const yesNoUnsureEnum = z.enum(YES_NO_UNSURE)
 export type YesNoUnsure = (typeof YES_NO_UNSURE)[number]
 
+/**
+ * Rooms a person can tick. Every programme runs its own, so the union grows
+ * with the catalog while `attendingChoices` keeps each programme's form
+ * showing only its own — see `PROGRAMME_ATTENDING` below.
+ */
 export const ATTENDING = [
+  // Recoding Medicine — a fixed series that ends with the application deadline.
   "webinar_2026_08_20",
   "event_sept_1",
   "event_sept_2",
   "event_sept_3",
+  // AI Safety Berlin — a standing community, so the chips name recurring
+  // formats rather than dates. Dates live on Luma.
+  "asb_coworking",
+  "asb_lunch",
+  "asb_talks",
+  // Shared across programmes.
   "remote_only",
 ] as const
 export const attendingEnum = z.enum(ATTENDING)
@@ -125,9 +141,29 @@ export function isWebinarOpen(_now = new Date()): boolean {
   return false
 }
 
-/** In-person / remote chips for the form — webinar is not offered. */
-export function attendingChoices(_now = new Date()): Attending[] {
-  return ATTENDING.filter((v) => v !== WEBINAR_ATTENDING)
+/**
+ * The chips one programme offers, in form order. A profile carrying another
+ * programme's chip is a validation error, which is what keeps two directories
+ * from quietly sharing a room.
+ */
+const PROGRAMME_ATTENDING: Record<ChallengeId, readonly Attending[]> = {
+  recoding_medicine: ["event_sept_1", "event_sept_2", "event_sept_3", "remote_only"],
+  ai_safety_berlin: ["asb_coworking", "asb_lunch", "asb_talks", "remote_only"],
+}
+
+/** In-person / remote chips for one programme's form. */
+export function attendingChoices(
+  challengeId: ChallengeId = DEFAULT_CHALLENGE_ID,
+  _now = new Date(),
+): Attending[] {
+  return [...PROGRAMME_ATTENDING[challengeId]]
+}
+
+/** Does this chip belong to this programme? Used by the profile schema. */
+export function isAttendingOfChallenge(value: Attending, challengeId: ChallengeId): boolean {
+  // The webinar chip predates programme scoping; stored rows still carry it.
+  if (value === WEBINAR_ATTENDING) return challengeId === "recoding_medicine"
+  return PROGRAMME_ATTENDING[challengeId].includes(value)
 }
 
 export const VISIBILITY = ["authenticated_only", "public", "hidden"] as const

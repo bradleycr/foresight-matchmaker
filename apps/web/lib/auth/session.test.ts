@@ -46,17 +46,20 @@ describe("session cookie", () => {
     expect(decodeSession(`${payload}.not-a-signature`)).toBeNull()
   })
 
-  it("slides the cookie when less than half the TTL remains", async () => {
+  it("slides the cookie when less than 29 days remain (i.e. after ~1 day)", async () => {
     const now = Date.now()
     const session = sample({ exp: now + SESSION_TTL_MS / 4 })
     expect(sessionNeedsRefresh(session, now)).toBe(true)
-    expect(sessionNeedsRefresh(sample({ exp: now + SESSION_TTL_MS * 0.75 }), now)).toBe(false)
+    // A session created moments ago still has ~30 days — no refresh needed
+    expect(sessionNeedsRefresh(sample({ exp: now + SESSION_TTL_MS }), now)).toBe(false)
+    // After 2 days (28 days remaining < 29-day threshold) → needs refresh
+    expect(sessionNeedsRefresh(sample({ exp: now + 28 * 24 * 60 * 60 * 1000 }), now)).toBe(true)
     const renewed = await touchSession(session)
     expect(renewed).toBe(true)
   })
 
-  it("skips a touch when plenty of time remains", async () => {
-    const renewed = await touchSession(sample({ exp: Date.now() + SESSION_TTL_MS * 0.9 }))
+  it("skips a touch when the full TTL remains (just created)", async () => {
+    const renewed = await touchSession(sample({ exp: Date.now() + SESSION_TTL_MS }))
     expect(renewed).toBe(false)
   })
 })

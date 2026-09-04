@@ -1,19 +1,19 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
+import { usePathname } from "next/navigation"
 
 /**
- * Once per tab, ask the server to slide the httpOnly session forward.
- * Returning visitors stay signed in without another magic link.
+ * On every client navigation, ask the server to slide the httpOnly session
+ * forward. At events people scan QR codes repeatedly — each page view
+ * should refresh the cookie so they never hit an expiry mid-session.
  */
 export function SessionRenew() {
-  const ran = useRef(false)
+  const pathname = usePathname()
 
   useEffect(() => {
-    if (ran.current) return
-    ran.current = true
     void fetch("/api/v1/auth/touch", { cache: "no-store" })
-  }, [])
+  }, [pathname])
 
   return null
 }

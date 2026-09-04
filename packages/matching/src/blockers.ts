@@ -44,6 +44,15 @@ function aiCapabilitiesOf(p: Profile): readonly string[] {
  * everyone else's shortlist (`b.visibility_hidden`), but the owner can
  * still rank visible peers above the usual threshold.
  */
+/** Recoding Medicine is a call for applications. Community programmes are not. */
+function isApplicationProgramme(p: Profile): boolean {
+  return (p.challenge_id ?? "recoding_medicine") === "recoding_medicine"
+}
+
+function challengeOf(p: Profile): string {
+  return p.challenge_id ?? "recoding_medicine"
+}
+
 function profileHardBlockers(p: Profile, label: "a" | "b"): Blocker[] {
   const out: Blocker[] = []
   if (p.open_to_intros === false) {
@@ -52,14 +61,17 @@ function profileHardBlockers(p: Profile, label: "a" | "b"): Blocker[] {
   if (label === "b" && p.visibility === "hidden") {
     out.push({ key: `${label}.visibility_hidden`, severity: "hard", note: "This profile is hidden." })
   }
-  if (p.eligible_hq === false && p.partner_only !== true) {
+  if (isApplicationProgramme(p) && p.eligible_hq === false && p.partner_only !== true) {
     out.push({
       key: `${label}.eligible_hq`,
       severity: "hard",
       note: "Headquarters is outside the eligible region (EU, EFTA, UK, or Israel).",
     })
   }
-  if (p.application_status === "not_applying" || p.application_status === "team_complete") {
+  if (
+    isApplicationProgramme(p) &&
+    (p.application_status === "not_applying" || p.application_status === "team_complete")
+  ) {
     out.push({
       key: `${label}.application_status`,
       severity: "hard",
@@ -187,6 +199,14 @@ function profileSoftBlockers(a: Profile, b: Profile): Blocker[] {
 export function structuralHardBlockers(a: Profile, b: Profile, oriented: PairingSides | null): Blocker[] {
   const out: Blocker[] = []
 
+  if (challengeOf(a) !== challengeOf(b)) {
+    out.push({
+      key: "challenge_mismatch",
+      severity: "hard",
+      note: "These profiles belong to different programmes.",
+    })
+  }
+
   if (a.kind === b.kind && a.kind !== "consortium") {
     out.push({
       key: "same_kind",
@@ -205,16 +225,18 @@ export function structuralHardBlockers(a: Profile, b: Profile, oriented: Pairing
 
   // No eligible lead applicant in the pair: both sides are collaboration-only
   // (or otherwise ineligible without partner_only). SPRIND requires at least
-  // one HQ inside the eligible region to lead.
-  const aCanLead = a.eligible_hq && !a.partner_only
-  const bCanLead = b.eligible_hq && !b.partner_only
-  if (!aCanLead && !bCanLead) {
-    out.push({
-      key: "no_eligible_lead",
-      severity: "hard",
-      note:
-        "Neither organisation can lead an application (HQ outside the eligible region or marked collaboration-only).",
-    })
+  // one HQ inside the eligible region to lead. Community programmes do not.
+  if (isApplicationProgramme(a) || isApplicationProgramme(b)) {
+    const aCanLead = a.eligible_hq && !a.partner_only
+    const bCanLead = b.eligible_hq && !b.partner_only
+    if (!aCanLead && !bCanLead) {
+      out.push({
+        key: "no_eligible_lead",
+        severity: "hard",
+        note:
+          "Neither organisation can lead an application (HQ outside the eligible region or marked collaboration-only).",
+      })
+    }
   }
 
   // Consortium not in the market.
@@ -254,6 +276,14 @@ export function computePeopleBlockers(
 ): Blocker[] {
   const out: Blocker[] = []
 
+  if (challengeOf(a) !== challengeOf(b)) {
+    out.push({
+      key: "challenge_mismatch",
+      severity: "hard",
+      note: "These profiles belong to different programmes.",
+    })
+  }
+
   if (a.kind === b.kind) {
     out.push({
       key: "same_kind",
@@ -270,15 +300,17 @@ export function computePeopleBlockers(
     })
   }
 
-  const aCanLead = a.eligible_hq && !a.partner_only
-  const bCanLead = b.eligible_hq && !b.partner_only
-  if (!aCanLead && !bCanLead) {
-    out.push({
-      key: "no_eligible_lead",
-      severity: "hard",
-      note:
-        "Neither organisation can lead an application (HQ outside the eligible region or marked collaboration-only).",
-    })
+  if (isApplicationProgramme(a) || isApplicationProgramme(b)) {
+    const aCanLead = a.eligible_hq && !a.partner_only
+    const bCanLead = b.eligible_hq && !b.partner_only
+    if (!aCanLead && !bCanLead) {
+      out.push({
+        key: "no_eligible_lead",
+        severity: "hard",
+        note:
+          "Neither organisation can lead an application (HQ outside the eligible region or marked collaboration-only).",
+      })
+    }
   }
 
   if (!consortiumIsSeeking(a)) {

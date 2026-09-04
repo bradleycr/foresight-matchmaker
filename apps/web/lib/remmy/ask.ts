@@ -8,6 +8,8 @@ import {
   MODALITY,
   PRIVACY_CAPABILITY,
   attendingChoices,
+  DEFAULT_CHALLENGE_ID,
+  type ChallengeId,
   type Kind,
 } from "@rmm/schema"
 import type { PrefillProposal } from "@/lib/llm/prefill"
@@ -42,6 +44,13 @@ export interface AskCatalogEntry {
   multi: boolean
   labelKey: string
   skipKey?: string
+}
+
+export function askCatalogFor(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): Record<AskId, AskCatalogEntry> {
+  return {
+    ...ASK_CATALOG,
+    attending: { ...ASK_CATALOG.attending, options: attendingChoices(challengeId) },
+  }
 }
 
 export const ASK_CATALOG: Record<AskId, AskCatalogEntry> = {

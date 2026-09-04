@@ -40,7 +40,9 @@ import type { Factor, Blocker } from "@rmm/matching"
 export interface PublicDataset {
   name: string
   modality: Modality[]
+  modality_other?: string
   disease_area: DiseaseArea[]
+  disease_area_other?: string
   n_subjects: NSubjects
   volume: Volume
   time_span_years?: number
@@ -106,7 +108,9 @@ export interface DirectoryProfile {
   track_record?: string[]
   data_needs?: {
     modality: Modality[]
+    modality_other?: string
     disease_area: DiseaseArea[]
+    disease_area_other?: string
     min_n_subjects?: NSubjects
     annotation_required?: Annotation
     linkage_required: Linkage[]

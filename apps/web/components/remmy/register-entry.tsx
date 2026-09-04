@@ -219,6 +219,10 @@ export function RegisterEntry({
                 setFormVisible(true)
                 setRemmyOpen(false)
               }}
+              onReadyToPublish={() => {
+                setFormVisible(true)
+                setRemmyOpen(false)
+              }}
             />
           </div>
         </div>

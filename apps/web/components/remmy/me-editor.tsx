@@ -35,6 +35,8 @@ export function MeEditor({
     () =>
       formRef.current?.getContext() ?? {
         open_gaps: [] as string[],
+        required_gaps: [] as string[],
+        optional_gaps: [] as string[],
         current_profile: profile as unknown as Record<string, unknown>,
       },
     [profile],

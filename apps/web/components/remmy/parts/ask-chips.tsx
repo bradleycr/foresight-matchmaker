@@ -4,7 +4,8 @@ import { useState } from "react"
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Button, Chip } from "@/components/ui/primitives"
-import { ASK_CATALOG, type AskId } from "@/lib/remmy/ask"
+import type { ChallengeId } from "@rmm/schema"
+import { askCatalogFor, type AskId } from "@/lib/remmy/ask"
 
 /**
  * Generative UI: Remmy names a vocabulary, this renders the real options.
@@ -12,17 +13,19 @@ import { ASK_CATALOG, type AskId } from "@/lib/remmy/ask"
  */
 export function AskChipsPart({
   ask,
+  challengeId,
   disabled,
   onCommit,
   onSkip,
 }: {
   ask: AskId
+  challengeId?: ChallengeId
   disabled?: boolean
   onCommit: (values: string[]) => void
   onSkip: () => void
 }) {
   const t = useT()
-  const catalog = ASK_CATALOG[ask]
+  const catalog = askCatalogFor(challengeId)[ask]
   const [picked, setPicked] = useState<string[]>([])
 
   function toggle(option: string) {

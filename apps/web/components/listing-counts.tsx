@@ -19,7 +19,15 @@ export function kindCountTotal(counts: KindCounts | undefined | null): number {
  * Programme listing totals. Hidden when the directory is empty so four
  * zeroes are never mistaken for a broken page.
  */
-export function ListingCounts({ counts, t }: { counts: KindCounts; t: T }) {
+export function ListingCounts({
+  counts,
+  t,
+  captionKey = "landing.counts_caption",
+}: {
+  counts: KindCounts
+  t: T
+  captionKey?: string
+}) {
   if (kindCountTotal(counts) === 0) {
     return <p className="text-sm text-ink-soft">{t("landing.counts_empty")}</p>
   }
@@ -34,7 +42,7 @@ export function ListingCounts({ counts, t }: { counts: KindCounts; t: T }) {
           </div>
         ))}
       </dl>
-      <p className="mt-3 max-w-2xl text-sm text-ink-soft">{t("landing.counts_caption")}</p>
+      <p className="mt-3 max-w-2xl text-sm text-ink-soft">{t(captionKey)}</p>
     </div>
   )
 }

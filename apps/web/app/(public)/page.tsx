@@ -3,8 +3,9 @@ import { getT } from "@/lib/i18n/server"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
 import { signInHref } from "@/lib/auth/next-path"
-import { CHALLENGES, browseDirectoryPath } from "@/lib/challenges/catalog"
+import { browseDirectoryPath, visibleChallenges } from "@/lib/challenges/visibility"
 import { challengeTheme } from "@/lib/challenges/themes"
+import { ProgrammeStatusTag } from "@/components/programme-status"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { kindCountTotal } from "@/components/listing-counts"
 import { hydrateListings } from "@/lib/db/durable"
@@ -75,7 +76,7 @@ export default async function LandingPage({
         </h2>
 
         <ul className="mt-6 grid gap-4">
-          {CHALLENGES.map((challenge) => {
+          {visibleChallenges().map((challenge) => {
             const counts = byChallenge[challenge.id] ?? empty
             return (
               <li key={challenge.id}>
@@ -84,12 +85,16 @@ export default async function LandingPage({
                   className="block border-2 border-rule-strong bg-paper p-5 hover:bg-paper-shade"
                   style={{ borderLeftWidth: "4px", borderLeftColor: challengeTheme(challenge.id).accent }}
                 >
-                  <h3 className="font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
+                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-2 font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
                     {t(`challenge.${challenge.id}.name`)}
+                    <ProgrammeStatusTag challenge={challenge} t={t} />
                   </h3>
                   <p className="mt-2 max-w-xl text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
+                  {/* Programmes that close show their deadline; standing ones show their rhythm. */}
                   <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
-                    {t("landing.programme_deadline", { date: challenge.deadlineLabel })}
+                    {challenge.deadlineLabel
+                      ? t("landing.programme_deadline", { date: challenge.deadlineLabel })
+                      : t(`challenge.${challenge.id}.cadence`)}
                   </p>
                   {kindCountTotal(counts) > 0 ? (
                     <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">

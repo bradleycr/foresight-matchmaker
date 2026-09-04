@@ -1,3 +1,5 @@
+import { extractJsonObject } from "./json"
+
 /**
  * The single LLM gateway (master prompt §8). Callers are optional: every
  * path has a no-LLM fallback. Points at any OpenAI-compatible endpoint.
@@ -80,6 +82,91 @@ async function once(
   } catch (e) {
     console.error("[llm] complete failed:", e instanceof Error ? e.message : e)
     return { ok: false, status: 0, text: null }
+  }
+}
+
+export type StreamDelta = { text: string; done?: boolean }
+
+/**
+ * Stream an OpenAI-compatible completion. Yields content deltas.
+ * Returns no values when the gateway rejects streaming — caller should
+ * fall back to `complete()`.
+ */
+export async function* completeStream(
+  messages: ChatMessage[],
+  opts?: { json?: boolean },
+): AsyncGenerator<string> {
+  if (!llmEnabled()) return
+
+  const baseUrl = (process.env.LLM_BASE_URL ?? "https://api.openai.com/v1").replace(/\/$/, "")
+  try {
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.LLM_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: process.env.LLM_MODEL,
+        messages,
+        temperature: 0.2,
+        max_tokens: MAX_TOKENS,
+        stream: true,
+        ...(opts?.json ? { response_format: { type: "json_object" } } : {}),
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    })
+    if (!res.ok || !res.body) return
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let carry = ""
+    let reasoning = ""
+    let yielded = false
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      carry += decoder.decode(value, { stream: true })
+      const lines = carry.split("\n")
+      carry = lines.pop() ?? ""
+      let finished = false
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed.startsWith("data:")) continue
+        const payload = trimmed.slice(5).trim()
+        if (payload === "[DONE]") {
+          finished = true
+          break
+        }
+        try {
+          const json = JSON.parse(payload) as {
+            choices?: Array<{
+              delta?: {
+                content?: string | null
+                reasoning?: string | null
+                reasoning_content?: string | null
+              }
+            }>
+          }
+          const delta = json.choices?.[0]?.delta
+          const piece = delta?.content
+          if (typeof piece === "string" && piece) {
+            yielded = true
+            yield piece
+          }
+          const think = delta?.reasoning_content ?? delta?.reasoning
+          if (typeof think === "string" && think) reasoning += think
+        } catch {
+          // ignore keepalives / partial JSON
+        }
+      }
+      if (finished) break
+    }
+    if (!yielded && reasoning.includes("{")) {
+      yield extractJsonObject(reasoning)
+    }
+  } catch (e) {
+    console.error("[llm] stream failed:", e instanceof Error ? e.message : e)
   }
 }
 

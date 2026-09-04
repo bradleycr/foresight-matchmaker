@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { findManualGaps, type GapInspectable } from "./profile-form-gaps"
+import { classifyGaps, essentialsReady, findManualGaps, remmySprintGaps, type GapInspectable } from "./profile-form-gaps"
 
 function blank(kind: GapInspectable["kind"]): GapInspectable {
   return {
@@ -48,8 +48,35 @@ describe("findManualGaps", () => {
     expect(findManualGaps(holder)).toContain("datasets")
   })
 
-  it("flags a consortium that has not said what it is still seeking", () => {
-    expect(findManualGaps(blank("consortium"))).toContain("still_seeking")
+  it("treats consortium still-seeking as optional, not publish-blocking", () => {
+    const gaps = classifyGaps(blank("consortium"))
+    expect(gaps.optional).toContain("still_seeking")
+    expect(gaps.required).not.toContain("still_seeking")
+  })
+
+  it("treats summary as optional", () => {
+    const team = blank("ai_team")
+    team.summary = ""
+    const gaps = classifyGaps(team)
+    expect(gaps.optional).toContain("summary")
+    expect(gaps.required).not.toContain("summary")
+  })
+
+  it("treats contact as required for publish but not for Remmy's sprint", () => {
+    const team = blank("ai_team")
+    team.contact_name = ""
+    team.contact_email = ""
+    const gaps = classifyGaps(team)
+    expect(gaps.required).toEqual(expect.arrayContaining(["contact_name", "contact_email"]))
+    expect(essentialsReady(remmySprintGaps(gaps.required))).toBe(true)
+  })
+
+  it("flags a dataset Other chip until they define it", () => {
+    const holder = blank("data_holder")
+    holder.datasets = [
+      { name: "Cohort", modality: ["other"], disease_area: ["oncology"], modality_other: "" },
+    ]
+    expect(classifyGaps(holder).required).toContain("datasets")
   })
 
   it("flags methods Other until they define it", () => {

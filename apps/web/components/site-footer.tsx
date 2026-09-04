@@ -3,13 +3,15 @@ import { getT } from "@/lib/i18n/server"
 import { contactEmail } from "@/lib/contact"
 import { BugReportMailto } from "./bug-report"
 import { PartnerLogos } from "./partner-logos"
-import { CHALLENGES, PLATFORM } from "@/lib/challenges/catalog"
+import { PLATFORM } from "@/lib/challenges/catalog"
+import { visibleChallenges } from "@/lib/challenges/visibility"
 
 /** Site colophon: Foresight operates the platform. */
 export async function SiteFooter() {
   const { t } = await getT()
-  const programme = CHALLENGES[0]
+  const programmes = visibleChallenges()
   const inbox = contactEmail()
+  const closing = programmes.find((c) => c.deadlineLabel)
 
   return (
     <footer className="border-t-2 border-rule-strong py-8 text-sm text-ink-soft">
@@ -31,14 +33,16 @@ export async function SiteFooter() {
 
         <div>
           <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.challenge")}</h2>
-          {programme ? (
-            <p>
-              <Link href={`/challenges/${programme.slug}`} className="font-semibold text-ink underline underline-offset-2">
-                {t(`challenge.${programme.id}.name`)}
-              </Link>
-            </p>
-          ) : null}
-          <p className={programme ? "mt-2" : undefined}>{t("footer.deadline")}</p>
+          <ul className="space-y-2">
+            {programmes.map((programme) => (
+              <li key={programme.id}>
+                <Link href={`/challenges/${programme.slug}`} className="font-semibold text-ink underline underline-offset-2">
+                  {t(`challenge.${programme.id}.name`)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {closing ? <p className="mt-2">{t("footer.deadline")}</p> : null}
         </div>
 
         <div>

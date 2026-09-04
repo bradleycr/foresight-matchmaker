@@ -1,36 +1,33 @@
 "use client"
 
 import { useT } from "@/lib/i18n/client"
-import { findManualGaps, type GapField } from "@/lib/profile-form-gaps"
+import { type ClassifiedGaps, type GapField } from "@/lib/profile-form-gaps"
 
-/** Sticky checklist of fields still empty after an LLM draft — click jumps
- * to the highlighted control so the human can finish before submit.
+/**
+ * Checklist after an LLM draft. Required (blocks publish) is alert-coloured;
+ * optional (helps matching) is quiet ink — so finishing does not look like failure.
  */
 export function GapsBanner({
   gaps,
   onDismiss,
 }: {
-  gaps: GapField[]
+  gaps: ClassifiedGaps
   onDismiss: () => void
 }) {
   const t = useT()
-  if (gaps.length === 0) return null
+  const { required, optional } = gaps
+  if (required.length === 0 && optional.length === 0) return null
 
   return (
-    <section
-      role="status"
-      aria-live="polite"
-      className="border-2 border-alert bg-paper p-4"
-    >
+    <section role="status" aria-live="polite" className="border-2 border-ink bg-paper p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="inline-block bg-alert px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-paper">
-            {t("form.gaps_badge")}
+          <p className="inline-block bg-mark px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-mark-ink">
+            {required.length > 0 ? t("form.gaps_badge") : t("form.gaps_optional_badge")}
           </p>
           <h2 className="mt-2 font-listing text-lg font-bold uppercase tracking-tight">
-            {t("form.gaps_title")}
+            {required.length > 0 ? t("form.gaps_title") : t("form.gaps_optional_title")}
           </h2>
-          <p className="mt-1 text-sm leading-relaxed text-ink-soft">{t("form.gaps_body")}</p>
         </div>
         <button
           type="button"
@@ -40,23 +37,59 @@ export function GapsBanner({
           {t("form.gaps_dismiss")}
         </button>
       </div>
-      <ul className="mt-3 flex flex-wrap gap-2">
-        {gaps.map((g) => (
-          <li key={g}>
-            <a
-              href={`#gap-${g}`}
-              className="inline-flex border border-alert bg-paper-shade px-2 py-1 text-sm font-semibold text-alert hover:bg-alert hover:text-paper"
-              onClick={(e) => {
-                e.preventDefault()
-                document.getElementById(`gap-${g}`)?.scrollIntoView({ behavior: "smooth", block: "center" })
-              }}
-            >
-              {gapLabel(t, g)}
-            </a>
-          </li>
-        ))}
-      </ul>
+
+      {required.length > 0 ? (
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {required.map((g) => (
+            <GapChip key={g} field={g} tone="required" label={gapLabel(t, g)} />
+          ))}
+        </ul>
+      ) : null}
+
+      {optional.length > 0 ? (
+        <div className={required.length > 0 ? "mt-4" : "mt-3"}>
+          {required.length > 0 ? (
+            <p className="text-xs font-bold uppercase tracking-widest text-ink-faint">
+              {t("form.gaps_optional_title")}
+            </p>
+          ) : null}
+          <ul className={`flex flex-wrap gap-2 ${required.length > 0 ? "mt-2" : ""}`}>
+            {optional.map((g) => (
+              <GapChip key={g} field={g} tone="optional" label={gapLabel(t, g)} />
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
+  )
+}
+
+function GapChip({
+  field,
+  tone,
+  label,
+}: {
+  field: GapField
+  tone: "required" | "optional"
+  label: string
+}) {
+  return (
+    <li>
+      <a
+        href={`#gap-${field}`}
+        className={
+          tone === "required"
+            ? "inline-flex border border-alert bg-paper-shade px-2 py-1 text-sm font-semibold text-alert hover:bg-alert hover:text-paper"
+            : "inline-flex border border-rule bg-paper-shade px-2 py-1 text-sm text-ink-soft hover:border-ink hover:text-ink"
+        }
+        onClick={(e) => {
+          e.preventDefault()
+          document.getElementById(`gap-${field}`)?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }}
+      >
+        {label}
+      </a>
+    </li>
   )
 }
 
@@ -69,6 +102,5 @@ function gapLabel(t: (key: string) => string, g: GapField): string {
   return t(`field.${g}`)
 }
 
-/** Re-export for callers that already hold form state. */
-export { findManualGaps }
-export type { GapField }
+export { findManualGaps, classifyGaps } from "@/lib/profile-form-gaps"
+export type { GapField, ClassifiedGaps } from "@/lib/profile-form-gaps"

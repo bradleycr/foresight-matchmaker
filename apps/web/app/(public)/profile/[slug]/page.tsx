@@ -24,9 +24,10 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   )
 }
 
-function joinEnum(t: T, group: string, values: readonly string[] | undefined): string {
-  if (!values || values.length === 0) return "—"
-  return values.map((v) => enumLabel(t, group, v)).join(", ")
+function joinEnum(t: T, group: string, values: readonly string[] | undefined, other?: string): string {
+  if (!values || values.length === 0) return other?.trim() || "—"
+  const base = values.map((v) => enumLabel(t, group, v)).join(", ")
+  return other?.trim() ? `${base} — ${other.trim()}` : base
 }
 
 function DatasetBlock({ dataset, t }: { dataset: PublicDataset; t: T }) {
@@ -36,8 +37,8 @@ function DatasetBlock({ dataset, t }: { dataset: PublicDataset; t: T }) {
         {dataset.name}
       </h3>
       <dl className="px-3 pb-2">
-        <Row label={t("field.modality")}>{joinEnum(t, "modality", dataset.modality)}</Row>
-        <Row label={t("field.disease_area")}>{joinEnum(t, "disease_area", dataset.disease_area)}</Row>
+        <Row label={t("field.modality")}>{joinEnum(t, "modality", dataset.modality, dataset.modality_other)}</Row>
+        <Row label={t("field.disease_area")}>{joinEnum(t, "disease_area", dataset.disease_area, dataset.disease_area_other)}</Row>
         <Row label={t("field.n_subjects")}>{enumLabel(t, "n_subjects", dataset.n_subjects)}</Row>
         <Row label={t("field.volume")}>{enumLabel(t, "volume", dataset.volume)}</Row>
         {dataset.time_span_years !== undefined && (
@@ -173,9 +174,11 @@ export default async function ProfilePage({ params }: Params) {
                 {t("profile.needs_section")}
               </h2>
               <dl>
-                <Row label={t("field.modality")}>{joinEnum(t, "modality", profile.data_needs.modality)}</Row>
+                <Row label={t("field.modality")}>
+                  {joinEnum(t, "modality", profile.data_needs.modality, profile.data_needs.modality_other)}
+                </Row>
                 <Row label={t("field.disease_area")}>
-                  {joinEnum(t, "disease_area", profile.data_needs.disease_area)}
+                  {joinEnum(t, "disease_area", profile.data_needs.disease_area, profile.data_needs.disease_area_other)}
                 </Row>
                 {profile.data_needs.min_n_subjects && (
                   <Row label={t("field.min_n_subjects")}>

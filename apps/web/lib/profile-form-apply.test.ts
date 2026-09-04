@@ -33,6 +33,8 @@ function blankTarget(): ProposalMergeTarget {
     track_record: "",
     needs_modality: [],
     needs_disease_area: [],
+    needs_modality_other: "",
+    needs_disease_area_other: "",
     needs_min_n_subjects: "",
     needs_annotation: "",
     needs_linkage: [],
@@ -125,6 +127,30 @@ describe("mergeProposalIntoForm", () => {
     expect(next.datasets[0]?.name).toBe("Berlin MRI")
     expect(next.datasets[0]?.modality).toEqual(["imaging_mri"])
     expect(next.datasets[0]?.disease_area).toEqual(["neurology"])
+  })
+
+  it("keeps a dataset Other definition through merge", () => {
+    const next = mergeProposalIntoForm(
+      blankTarget(),
+      proposal({
+        kind: "data_holder",
+        datasets: [
+          {
+            name: "Exposure registry",
+            modality: ["other"],
+            modality_other: "Environmental exposure",
+            disease_area: ["other"],
+            disease_area_other: "Hepatology",
+            linkage: [],
+            standards: [],
+          },
+        ],
+      }),
+      COUNTRIES,
+    )
+    expect(next.datasets[0]?.modality).toEqual(["other"])
+    expect(next.datasets[0]?.modality_other).toBe("Environmental exposure")
+    expect(next.datasets[0]?.disease_area_other).toBe("Hepatology")
   })
 
   it("folds nameless modality then disease chips into one dataset row", () => {
@@ -292,6 +318,17 @@ describe("mergeProposalIntoForm", () => {
     expect(next.datasets[0]?.disease_area).toEqual(["oncology"])
     expect(next.datasets[0]?.n_subjects).toBe("10k_100k")
     expect(next.datasets[0]?.access_model).toBe("dua_required")
+  })
+
+  it("does not overwrite a one-liner the human already edited", () => {
+    const started = mergeProposalIntoForm(
+      { ...blankTarget(), one_liner: "Hand-written line." },
+      proposal({ one_liner: "LLM rewrite that should lose.", summary: "A longer summary about the cohort." }),
+      COUNTRIES,
+      new Set(["one_liner"]),
+    )
+    expect(started.one_liner).toBe("Hand-written line.")
+    expect(started.summary).toBe("A longer summary about the cohort.")
   })
 
   it("does not reset scale to empty-dataset defaults on a later named overlay", () => {

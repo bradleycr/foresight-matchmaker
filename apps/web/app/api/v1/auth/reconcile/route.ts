@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { CLEAR_SESSION_PATH, findOwnedProfile } from "@/lib/auth/live-session"
+import { findOwnedProfile } from "@/lib/auth/live-session"
 import { safeNextPath } from "@/lib/auth/next-path"
 import { createSession, getSession, hasListing, touchSession } from "@/lib/auth/session"
 import { restoreOwnedProfile } from "@/lib/db/durable"
@@ -22,14 +22,18 @@ export async function GET(req: NextRequest): Promise<Response> {
   const requested = safeNextPath(req.nextUrl.searchParams.get("next"))
 
   if (!profile) {
-    // A session that names a profile has registered before, so a silent trip
-    // to the empty form would read as losing their work without explanation.
-    if (hasListing(session)) {
-      const stale = new URL(CLEAR_SESSION_PATH, req.url)
-      stale.searchParams.set("stale", "1")
-      return NextResponse.redirect(stale, 303)
+    // The listing row is missing from this Vercel isolate. A valid HMAC
+    // session should never be destroyed just because /tmp SQLite was cold.
+    // Send them where they were going — their session is still good, and
+    // the next page load will retry hydration. Only clear when the session
+    // itself has no profileId (they genuinely never published).
+    if (!hasListing(session)) {
+      return NextResponse.redirect(new URL("/register", req.url), 303)
     }
-    return NextResponse.redirect(new URL("/register", req.url), 303)
+    // Keep the cookie alive — touch it so it does not expire between now
+    // and the next successful hydration.
+    await touchSession(session)
+    return NextResponse.redirect(new URL(requested ?? "/me", req.url), 303)
   }
 
   if (session.profileId !== profile.id) {
