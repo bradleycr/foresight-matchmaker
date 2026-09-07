@@ -184,6 +184,8 @@ export const profileSchema = z
         message: "Please define the method.",
       })
     }
+    // Write-time event scoping. Stored rows that fail this must be logged
+    // by parseStoredProfile, never silently dropped at hydrate.
     // Rooms belong to one programme. Without this, a listing could claim a
     // seat at another programme's event and appear on its live feed.
     for (const chip of data.attending ?? []) {

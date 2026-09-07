@@ -1,4 +1,4 @@
-import { profileSchema, type Profile } from "@rmm/schema"
+import { parseStoredProfile, type Profile } from "@rmm/schema"
 import { cacheRemoteListing, getJointApplicationOutcome, getProfileById, getProfilesByEmail, listProfiles } from "./profiles"
 import { recomputeMatchesFor } from "./matches"
 import { cacheRemoteEvent, listEvents, type DurableEvent } from "./events"
@@ -53,20 +53,58 @@ function eventPath(uid: string): string {
   return `${EVENT_PREFIX}${uid}.json`
 }
 
-function parseListing(raw: unknown): DurableListing | null {
+function jointOf(record: Record<string, unknown>): DurableListing["joint_application"] {
+  const joint = record.joint_application
+  return joint === "yes" || joint === "no" || joint === "not_yet" ? joint : null
+}
+
+type ParsedListing =
+  | { ok: true; listing: DurableListing; repaired: boolean }
+  | { ok: false; issues: string[] }
+
+/**
+ * Turn durable JSON into a listing.
+ *
+ * Must not use the write schema as a drop condition. A later form rule
+ * (Other must be defined, a new required field) cannot make an already
+ * published row disappear from the directory or from /me.
+ */
+function parseListing(raw: unknown): ParsedListing | null {
   if (!raw || typeof raw !== "object") return null
   const record = raw as Record<string, unknown>
   const candidate = "profile" in record ? record.profile : raw
-  const parsed = profileSchema.safeParse(candidate)
-  if (!parsed.success) return null
-  const joint = record.joint_application
-  const joint_application =
-    joint === "yes" || joint === "no" || joint === "not_yet" ? joint : joint === null ? null : null
-  return { profile: parsed.data, joint_application }
+  const parsed = parseStoredProfile(candidate)
+  if (!parsed.success) return { ok: false, issues: parsed.issues }
+  return {
+    ok: true,
+    listing: { profile: parsed.data, joint_application: jointOf(record) },
+    repaired: parsed.repaired,
+  }
+}
+
+async function persistRepairedListing(listing: DurableListing): Promise<void> {
+  try {
+    await writeListing(listing.profile)
+  } catch (error) {
+    console.error("[durable] persist Other-field repair failed", { id: listing.profile.id }, error)
+  }
 }
 
 async function fetchListingById(id: string): Promise<DurableListing | null> {
-  return parseListing(await getDurableStore().getJson(profilePath(id)))
+  const parsed = parseListing(await getDurableStore().getJson(profilePath(id)))
+  if (!parsed) return null
+  if (!parsed.ok) {
+    console.error("[durable] skip unreadable listing", { id, issues: parsed.issues })
+    return null
+  }
+  if (parsed.repaired) {
+    console.warn("[durable] restored listing that used Other without a definition", {
+      id: parsed.listing.profile.id,
+      org: parsed.listing.profile.org_name,
+    })
+    await persistRepairedListing(parsed.listing)
+  }
+  return parsed.listing
 }
 
 async function fetchListingByEmail(email: string): Promise<DurableListing | null> {
@@ -363,13 +401,27 @@ export async function hydrateListings(opts?: { force?: boolean }): Promise<void>
     try {
       await importBlobIntoSupabase()
       const records = await getDurableStore().listRecords(PROFILE_PREFIX)
+      const repaired: DurableListing[] = []
       for (const record of records) {
-        try {
-          const listing = parseListing(record.value)
-          if (listing) adoptListing(listing, false)
-        } catch (error) {
-          console.error("[durable] skip unreadable listing", { key: record.key }, error)
+        const parsed = parseListing(record.value)
+        if (!parsed) continue
+        if (!parsed.ok) {
+          console.error("[durable] skip unreadable listing", { key: record.key, issues: parsed.issues })
+          continue
         }
+        adoptListing(parsed.listing, false)
+        if (parsed.repaired) {
+          console.warn("[durable] restored listing that used Other without a definition", {
+            key: record.key,
+            id: parsed.listing.profile.id,
+            org: parsed.listing.profile.org_name,
+          })
+          repaired.push(parsed.listing)
+        }
+      }
+
+      if (repaired.length > 0) {
+        await Promise.all(repaired.map((listing) => persistRepairedListing(listing)))
       }
 
       for (const profile of listProfiles()) {

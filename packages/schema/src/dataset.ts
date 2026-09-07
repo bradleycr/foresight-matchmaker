@@ -45,6 +45,8 @@ export const datasetSchema = z
   /** PRIVATE — server-side redacted, never in public payloads. */
   governance_notes: z.string().max(2000).optional(),
 })
+  // Write-time only. Hydrate uses parseStoredProfile so already-published
+  // listings that ticked Other before this rule existed stay in the directory.
   .superRefine((data, ctx) => {
     if (data.modality.includes("other") && !data.modality_other?.trim()) {
       ctx.addIssue({
@@ -79,6 +81,8 @@ export const dataNeedsSchema = z
     linkage_required: z.array(linkageEnum).default([]),
     standards_preferred: z.array(standardsEnum).default([]),
   })
+  // Same write-time rule as datasetSchema. Do not use this refine as a
+  // reason to skip a durable row — see parseStoredProfile.
   .superRefine((data, ctx) => {
     if (data.modality.includes("other") && !data.modality_other?.trim()) {
       ctx.addIssue({
