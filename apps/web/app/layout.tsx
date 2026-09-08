@@ -2,9 +2,6 @@ import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 import { I18nProvider } from "@/lib/i18n/client"
 import { getT } from "@/lib/i18n/server"
-import en from "@/locales/en.json"
-import de from "@/locales/de.json"
-import fr from "@/locales/fr.json"
 import { publicOrigin } from "@/lib/public-origin"
 import { contactEmail } from "@/lib/contact"
 import "./globals.css"
@@ -40,8 +37,6 @@ const arizona = localFont({
   variable: "--font-arizona",
   display: "swap",
 })
-
-const dictionaries = { en, de, fr } as const
 
 const ORIGIN = publicOrigin()
 
@@ -84,7 +79,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale}>
       <body className={`${unica.variable} ${arizona.variable} font-sans`} data-contact-email={contactEmail()}>
-        <I18nProvider locale={locale} dict={dictionaries[locale]} fallback={dictionaries.en}>
+        <I18nProvider locale={locale}>
           {children}
         </I18nProvider>
       </body>

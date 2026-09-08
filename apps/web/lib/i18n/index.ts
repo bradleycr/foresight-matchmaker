@@ -13,10 +13,15 @@ export type Locale = (typeof LOCALES)[number]
 
 export const LOCALE_COOKIE = "rmm_locale"
 
-const dictionaries: Record<Locale, Record<string, string>> = {
+export const dictionaries: Record<Locale, Record<string, string>> = {
   en: en as Record<string, string>,
   de: de as Record<string, string>,
   fr: fr as Record<string, string>,
+}
+
+/** Client-set locale cookie. Not httpOnly — the switcher writes it before refresh. */
+export function localeCookie(locale: Locale): string {
+  return `${LOCALE_COOKIE}=${locale};path=/;max-age=${365 * 24 * 60 * 60};samesite=lax`
 }
 
 export function isLocale(value: string | undefined): value is Locale {
