@@ -127,10 +127,41 @@
     }
   }
 
+  /*
+   * Loading skeleton. Bars that hold perfectly still read as a frozen page,
+   * which is the moment people tap the tab again. Rows are staggered by the
+   * component so the block looks like it is working, not blinking in unison.
+   */
+  .skeleton-line {
+    /* Longhands on purpose: the `animation` shorthand resets
+     * `animation-delay`, which would silently flatten the stagger set by
+     * Tailwind's utility on each row. */
+    animation-name: skeleton-breathe;
+    animation-duration: 1.5s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes skeleton-breathe {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .nav-progress-bar {
       animation: none;
       transform: none;
+    }
+
+    /* Still legible as a placeholder, just not moving. */
+    .skeleton-line {
+      animation-name: none;
+      opacity: 1;
     }
   }
 
@@ -150,7 +181,7 @@
     background: var(--color-paper);
   }
 
-  /* The ONLY motion in the app: a 120ms state transition on filter chips. */
+  /* Motion is reserved for work in flight; this is the one state change. */
   .chip-transition {
     transition:
       background-color 120ms ease,
