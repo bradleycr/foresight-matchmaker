@@ -32,15 +32,17 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
     // Keep the cookie alive — touch it so it does not expire between now
     // and the next successful hydration.
-    await touchSession(session)
-    return NextResponse.redirect(new URL(requested ?? "/me", req.url), 303)
+    const res = NextResponse.redirect(new URL(requested ?? "/me", req.url), 303)
+    await touchSession(session, res.cookies)
+    return res
   }
 
+  const res = NextResponse.redirect(new URL(requested ?? "/me", req.url), 303)
   if (session.profileId !== profile.id) {
-    await createSession(profile.id, session.email)
+    await createSession(profile.id, session.email, res.cookies)
   } else {
-    await touchSession({ ...session, profileId: profile.id })
+    await touchSession({ ...session, profileId: profile.id }, res.cookies)
   }
 
-  return NextResponse.redirect(new URL(requested ?? "/me", req.url), 303)
+  return res
 }

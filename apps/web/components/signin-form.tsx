@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button, Field, Input } from "@/components/ui/primitives"
 import { afterClaimHref } from "@/lib/auth/next-path"
@@ -34,7 +33,6 @@ export function SigninForm({
   intent?: "signin" | "signup" | "browse" | "here"
 }) {
   const t = useT()
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "working" | "done" | "error">("idle")
   const [result, setResult] = useState<Result | null>(null)
@@ -47,6 +45,7 @@ export function SigninForm({
     try {
       res = await fetch("/api/v1/auth/claim", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       })
@@ -55,8 +54,7 @@ export function SigninForm({
     }
     if (!res.ok) return false
     const claimed = (await res.json().catch(() => null)) as ClaimResult | null
-    router.push(afterClaimHref(claimed?.profile_id ?? null, next))
-    router.refresh()
+    window.location.assign(afterClaimHref(claimed?.profile_id ?? null, next))
     return true
   }
 

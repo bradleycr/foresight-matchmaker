@@ -12,7 +12,7 @@ export function SessionRenew() {
   const pathname = usePathname()
 
   useEffect(() => {
-    void fetch("/api/v1/auth/touch", { cache: "no-store" })
+    void fetch("/api/v1/auth/touch", { cache: "no-store", credentials: "include" })
   }, [pathname])
 
   return null

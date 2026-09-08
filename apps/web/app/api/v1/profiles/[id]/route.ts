@@ -165,6 +165,7 @@ export async function DELETE(req: NextRequest, { params }: Params): Promise<Resp
   } catch (error) {
     console.error("[durable] forget after delete failed", { id: profile.id }, error)
   }
-  await createSession(null, session.email)
-  return ok({ deleted: true })
+  const res = ok({ deleted: true })
+  await createSession(null, session.email, res.cookies)
+  return res
 }

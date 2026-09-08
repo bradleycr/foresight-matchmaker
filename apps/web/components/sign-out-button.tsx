@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useState } from "react"
-import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
@@ -14,7 +13,6 @@ export function SignOutButton({
   variant?: "primary" | "outline" | "ghost" | "danger"
 }) {
   const t = useT()
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
 
@@ -26,9 +24,8 @@ export function SignOutButton({
     if (busy) return
     setBusy(true)
     try {
-      await fetch("/api/v1/auth/logout", { method: "POST" })
-      router.push("/")
-      router.refresh()
+      await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" })
+      window.location.assign("/")
     } catch {
       setBusy(false)
     }

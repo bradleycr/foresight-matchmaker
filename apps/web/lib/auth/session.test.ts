@@ -15,7 +15,7 @@ vi.mock("next/headers", () => ({
   }),
 }))
 
-import { decodeSession, encodeSession, hasListing, sessionNeedsRefresh, touchSession, type Session } from "./session"
+import { decodeSession, encodeSession, hasListing, sessionCookieOptions, sessionNeedsRefresh, touchSession, SESSION_TTL_DAYS, type Session } from "./session"
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -61,5 +61,16 @@ describe("session cookie", () => {
   it("skips a touch when the full TTL remains (just created)", async () => {
     const renewed = await touchSession(sample({ exp: Date.now() + SESSION_TTL_MS }))
     expect(renewed).toBe(false)
+  })
+
+  it("issues a 30-day cookie with both Max-Age and Expires", () => {
+    const now = Date.now()
+    const options = sessionCookieOptions(now)
+    expect(SESSION_TTL_DAYS).toBe(30)
+    expect(options.maxAge).toBe(30 * 24 * 60 * 60)
+    expect(options.expires.getTime()).toBe(now + SESSION_TTL_MS)
+    expect(options.path).toBe("/")
+    expect(options.httpOnly).toBe(true)
+    expect(options.sameSite).toBe("lax")
   })
 })

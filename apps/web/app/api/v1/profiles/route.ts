@@ -32,11 +32,13 @@ export async function POST(req: NextRequest): Promise<Response> {
       await persistListing(current)
     } catch (error) {
       console.error("[durable] persist existing listing failed", { id: current.id }, error)
-      await createSession(current.id, session.email)
-      return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
+      const res = unavailable(PERSIST_UNAVAILABLE_MESSAGE)
+      await createSession(current.id, session.email, res.cookies)
+      return res
     }
-    await createSession(current.id, session.email)
-    return ok({ profile: toPublicProfile(current), email_sent: false, already: true })
+    const res = ok({ profile: toPublicProfile(current), email_sent: false, already: true })
+    await createSession(current.id, session.email, res.cookies)
+    return res
   }
 
   let body: unknown
@@ -74,18 +76,19 @@ export async function POST(req: NextRequest): Promise<Response> {
     // backup so a retry can bind the existing row — but do not pretend the
     // lasting copy landed.
     console.error("[durable] persist after create failed", { id: claimed.id }, error)
-    await createSession(claimed.id, session.email)
+    const res = unavailable(PERSIST_UNAVAILABLE_MESSAGE)
+    await createSession(claimed.id, session.email, res.cookies)
     await backupProfileByEmail(claimed, "created")
-    return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
+    return res
   }
-  await createSession(claimed.id, session.email)
-  await backupProfileByEmail(claimed, "created")
-
-  return ok(
+  const res = ok(
     {
       profile: toPublicProfile(claimed),
       email_sent: false,
     },
     { status: 201 },
   )
+  await createSession(claimed.id, session.email, res.cookies)
+  await backupProfileByEmail(claimed, "created")
+  return res
 }

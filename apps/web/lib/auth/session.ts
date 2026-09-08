@@ -10,11 +10,19 @@ import { cookies } from "next/headers"
  * attribute would not share the cookie with Vercel preview hosts, and it
  * would split from any existing host-only cookie — two `rmm_session` values,
  * logout clearing one, the other still signing people in.
+ *
+ * Writes go onto both `cookies()` and, when the caller has one, the
+ * `NextResponse` itself. Admin login already stamped Set-Cookie on the
+ * response because a 303 built with `NextResponse.redirect()` can drop the
+ * mutable cookie store. Session cookies had the same gap: `maxAge` never
+ * made it onto the wire, so the browser treated them as session cookies
+ * and forgot them the next time the app was opened.
  */
 
-const SESSION_COOKIE = "rmm_session"
-const SESSION_TTL_DAYS = 30
+export const SESSION_COOKIE = "rmm_session"
+export const SESSION_TTL_DAYS = 30
 const SESSION_TTL_MS = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000
+const SESSION_TTL_SECONDS = SESSION_TTL_DAYS * 24 * 60 * 60
 /**
  * Refresh when the cookie is older than a day. Safari’s ITP can drop idle
  * cookies well before 30 days; sliding on activity keeps event-day visits
@@ -77,24 +85,84 @@ export function decodeSession(value: string | undefined): Session | null {
   }
 }
 
+export type SessionCookieJar = {
+  set: (
+    name: string,
+    value: string,
+    options?: {
+      httpOnly?: boolean
+      sameSite?: "lax" | "strict" | "none"
+      secure?: boolean
+      path?: string
+      maxAge?: number
+      expires?: Date
+    },
+  ) => unknown
+}
+
+function cookieSecure(): boolean {
+  return process.env.NODE_ENV === "production" || process.env.VERCEL === "1"
+}
+
+/** Attributes every `rmm_session` write must share, including logout. */
+export function sessionCookieOptions(nowMs = Date.now()): {
+  httpOnly: true
+  sameSite: "lax"
+  secure: boolean
+  path: "/"
+  maxAge: number
+  expires: Date
+} {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: cookieSecure(),
+    path: "/",
+    maxAge: SESSION_TTL_SECONDS,
+    // Safari historically honoured Expires more reliably than Max-Age alone.
+    expires: new Date(nowMs + SESSION_TTL_MS),
+  }
+}
+
+export function writeSessionCookie(jar: SessionCookieJar, session: Session): void {
+  jar.set(SESSION_COOKIE, encodeSession(session), sessionCookieOptions())
+}
+
+export function clearSessionCookie(jar: SessionCookieJar): void {
+  jar.set(SESSION_COOKIE, "", {
+    ...sessionCookieOptions(),
+    maxAge: 0,
+    expires: new Date(0),
+  })
+}
+
+export function makeSession(profileId: string | null, email: string, nowMs = Date.now()): Session {
+  return {
+    profileId,
+    email: email.toLowerCase(),
+    exp: nowMs + SESSION_TTL_MS,
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Cookie plumbing (server components / route handlers)
 // ---------------------------------------------------------------------------
 
-export async function createSession(profileId: string | null, email: string): Promise<void> {
-  const session: Session = {
-    profileId,
-    email: email.toLowerCase(),
-    exp: Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000,
-  }
-  const jar = await cookies()
-  jar.set(SESSION_COOKIE, encodeSession(session), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_TTL_DAYS * 24 * 60 * 60,
-  })
+/**
+ * Issue a session. When `jar` is the response cookie store, Set-Cookie is
+ * stamped on the bytes that actually leave the server — not only Next's
+ * mutable request cookie store, which a later `NextResponse.json()` /
+ * `redirect()` can fail to copy.
+ */
+export async function createSession(
+  profileId: string | null,
+  email: string,
+  jar?: SessionCookieJar,
+): Promise<Session> {
+  const session = makeSession(profileId, email)
+  writeSessionCookie(await cookies(), session)
+  if (jar) writeSessionCookie(jar, session)
+  return session
 }
 
 export async function getSession(): Promise<Session | null> {
@@ -102,9 +170,9 @@ export async function getSession(): Promise<Session | null> {
   return decodeSession(jar.get(SESSION_COOKIE)?.value)
 }
 
-export async function destroySession(): Promise<void> {
-  const jar = await cookies()
-  jar.delete(SESSION_COOKIE)
+export async function destroySession(jar?: SessionCookieJar): Promise<void> {
+  clearSessionCookie(await cookies())
+  if (jar) clearSessionCookie(jar)
 }
 
 /** True when the cookie is older than a day — time to slide the expiry. */
@@ -116,8 +184,8 @@ export function sessionNeedsRefresh(session: Session, nowMs = Date.now()): boole
  * Extend a valid session to a full 30 days from now. No-op when plenty of
  * time remains, so we are not rewriting the cookie on every request.
  */
-export async function touchSession(session: Session): Promise<boolean> {
+export async function touchSession(session: Session, jar?: SessionCookieJar): Promise<boolean> {
   if (!sessionNeedsRefresh(session)) return false
-  await createSession(session.profileId, session.email)
+  await createSession(session.profileId, session.email, jar)
   return true
 }

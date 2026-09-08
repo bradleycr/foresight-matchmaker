@@ -44,7 +44,8 @@ export async function POST(req: NextRequest): Promise<Response> {
   await ensureOwnedListing(result.profileId, result.email)
   const profileId = result.profileId ?? getProfilesByEmail(result.email)[0]?.id ?? null
 
-  await createSession(profileId, result.email)
+  const res = ok({ signed_in: true, profile_id: profileId })
+  await createSession(profileId, result.email, res.cookies)
   try {
     await persistSignup({
       email: result.email,
@@ -66,5 +67,5 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
   }
 
-  return ok({ signed_in: true, profile_id: profileId })
+  return res
 }

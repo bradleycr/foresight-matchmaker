@@ -13,6 +13,8 @@ export const dynamic = "force-dynamic"
 export async function GET(_req: NextRequest): Promise<Response> {
   const session = await getSession()
   if (!session) return ok({ renewed: false })
-  const renewed = await touchSession(session)
-  return ok({ renewed })
+  const res = ok({ renewed: true })
+  const renewed = await touchSession(session, res.cookies)
+  if (!renewed) return ok({ renewed: false })
+  return res
 }

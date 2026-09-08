@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
 import { afterClaimHref } from "@/lib/auth/next-path"
@@ -18,7 +17,6 @@ export function ClaimForm({
   intent?: "signin" | "signup" | "here"
 }) {
   const t = useT()
-  const router = useRouter()
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle")
   const [error, setError] = useState("")
 
@@ -30,6 +28,7 @@ export function ClaimForm({
     try {
       res = await fetch("/api/v1/auth/claim", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       })
@@ -43,8 +42,10 @@ export function ClaimForm({
 
     if (res.ok) {
       const claimed = (await res.json().catch(() => null)) as { profile_id?: string | null } | null
-      router.push(afterClaimHref(claimed?.profile_id ?? null, next))
-      router.refresh()
+      // Full document navigation so the browser commits Set-Cookie before
+      // the next page reads it — client-side router.push can race Safari.
+      window.location.assign(afterClaimHref(claimed?.profile_id ?? null, next))
+      return
     } else {
       const body = (await res.json().catch(() => ({}))) as { error?: string }
       setError(body.error ?? t("claim.error_generic"))
