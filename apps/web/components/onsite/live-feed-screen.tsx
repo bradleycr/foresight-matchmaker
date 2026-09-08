@@ -9,7 +9,7 @@ import { LiveFeedPersonCard } from "@/components/onsite/live-feed-person-card"
 import { LiveFeedQrRail } from "@/components/onsite/live-feed-qr-rail"
 import type { OnsiteCitySlug } from "@/lib/onsite/cities"
 import { KIND_LEGEND, KIND_SKIN } from "@/lib/onsite/kind-skin"
-import { roomShape } from "@/lib/onsite/room-shape"
+import { isSparseRoom, roomShape } from "@/lib/onsite/room-shape"
 import type { OnsiteFeed } from "@/lib/onsite/types"
 
 const POLL_MS = 8_000
@@ -33,26 +33,40 @@ function RoomWall({
   lookingForLabel,
   profileOrigin,
   profileQrLabel,
+  sparse,
 }: {
   people: OnsiteFeed["people"]
   lookingForLabel: string
   profileOrigin: string
   profileQrLabel: string
+  sparse?: boolean
 }) {
   const { cols, rows } = roomShape(people.length)
+  const tone = sparse && people.length <= 2 ? "pair" : "tile"
   return (
     <ul
-      className="grid h-full min-h-0 min-w-0 gap-2"
-      style={{
-        gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-        gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
-      }}
+      className={
+        sparse
+          ? "mx-auto grid w-max max-w-full gap-3"
+          : "grid h-full min-h-0 min-w-0 gap-2"
+      }
+      style={
+        sparse
+          ? {
+              gridTemplateColumns: `repeat(${cols}, minmax(11rem, 18rem))`,
+              gridTemplateRows: `repeat(${rows}, 12.5rem)`,
+            }
+          : {
+              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+            }
+      }
     >
       {people.map((person) => (
         <li key={person.id} className="min-h-0 min-w-0">
           <LiveFeedPersonCard
             {...person}
-            tone="tile"
+            tone={tone}
             lookingForLabel={lookingForLabel}
             profileOrigin={profileOrigin}
             profileQrLabel={profileQrLabel}
@@ -60,6 +74,64 @@ function RoomWall({
         </li>
       ))}
     </ul>
+  )
+}
+
+function GatheringRoom({
+  people,
+  spotlight,
+  title,
+  gathering,
+  lookingForLabel,
+  profileOrigin,
+  profileQrLabel,
+  rotateLabel,
+  onRotate,
+}: {
+  people: OnsiteFeed["people"]
+  spotlight: OnsiteFeed["spotlight"]
+  title: string
+  gathering: string
+  lookingForLabel: string
+  profileOrigin: string
+  profileQrLabel: string
+  rotateLabel: (seconds: number) => string
+  onRotate: () => void
+}) {
+  const rest = people.filter(
+    (person) => person.id !== spotlight?.left.id && person.id !== spotlight?.right.id,
+  )
+  const wall = spotlight ? rest : people
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col items-center justify-center gap-7">
+      {spotlight ? (
+        <LiveFeedPair
+          compact
+          left={spotlight.left}
+          right={spotlight.right}
+          title={title}
+          lookingForLabel={lookingForLabel}
+          profileOrigin={profileOrigin}
+          profileQrLabel={profileQrLabel}
+          countdown={
+            spotlight.rotates ? <LiveFeedCountdown label={rotateLabel} onRotate={onRotate} /> : null
+          }
+        />
+      ) : null}
+      {wall.length > 0 ? (
+        <RoomWall
+          sparse
+          people={wall}
+          lookingForLabel={lookingForLabel}
+          profileOrigin={profileOrigin}
+          profileQrLabel={profileQrLabel}
+        />
+      ) : null}
+      <p className="max-w-lg text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-soft sm:text-xs">
+        {gathering}
+      </p>
+    </div>
   )
 }
 
@@ -73,12 +145,15 @@ export function LiveFeedScreen({
   joinUrl,
   qrSvg,
   profileOrigin,
+  poll = true,
 }: {
   city: OnsiteCitySlug
   initial: OnsiteFeed
   joinUrl: string
   qrSvg: string
   profileOrigin: string
+  /** False when the board is a local rehearsal and must not fetch the empty room. */
+  poll?: boolean
 }) {
   const t = useT()
   const [feed, setFeed] = useState(initial)
@@ -96,6 +171,7 @@ export function LiveFeedScreen({
   }, [city])
 
   useEffect(() => {
+    if (!poll) return
     alive.current = true
     void refresh()
     const id = window.setInterval(() => {
@@ -105,10 +181,10 @@ export function LiveFeedScreen({
       alive.current = false
       window.clearInterval(id)
     }
-  }, [refresh])
+  }, [poll, refresh])
 
   const empty = feed.people.length === 0
-  const solo = feed.people[0]
+  const sparse = isSparseRoom(feed.people.length)
   const lookingForLabel = t("field.looking_for")
   const profileQrLabel = t("onsite.feed.profile_qr")
   const rest = feed.people.filter(
@@ -148,6 +224,18 @@ export function LiveFeedScreen({
                   {t("onsite.feed.empty")}
                 </p>
               </div>
+            ) : sparse ? (
+              <GatheringRoom
+                people={feed.people}
+                spotlight={feed.spotlight}
+                title={t("onsite.feed.spotlight")}
+                gathering={t("onsite.feed.gathering")}
+                lookingForLabel={lookingForLabel}
+                profileOrigin={profileOrigin}
+                profileQrLabel={profileQrLabel}
+                rotateLabel={(seconds) => t("onsite.feed.rotate_in", { n: seconds })}
+                onRotate={refresh}
+              />
             ) : feed.spotlight ? (
               <>
                 <LiveFeedPair
@@ -177,16 +265,6 @@ export function LiveFeedScreen({
                   </div>
                 ) : null}
               </>
-            ) : solo && feed.people.length === 1 ? (
-              <div className="flex h-full w-full max-w-3xl items-stretch">
-                <LiveFeedPersonCard
-                  {...solo}
-                  tone="hero"
-                  lookingForLabel={lookingForLabel}
-                  profileOrigin={profileOrigin}
-                  profileQrLabel={profileQrLabel}
-                />
-              </div>
             ) : (
               <div className="min-h-0 min-w-0 flex-1">
                 <RoomWall

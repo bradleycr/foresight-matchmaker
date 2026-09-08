@@ -855,6 +855,7 @@
   "onsite.feed.scan": "Scanner",
   "onsite.feed.scan_hint": "Votre profil, ou en créer un.",
   "onsite.feed.empty": "Scannez pour rejoindre la salle.",
+  "onsite.feed.gathering": "Le mur se remplit à mesure que les gens rejoignent la salle.",
   "onsite.feed.spotlight": "Devraient se parler",
   "onsite.feed.rotate_in": "Prochain match dans {n} s",
   "onsite.feed.profile_qr": "Ouvrir le profil",

@@ -5,7 +5,7 @@ import { pairNameMaxPx, tileNameMaxPx } from "@/lib/onsite/name-fit"
 import type { OnsiteFeed } from "@/lib/onsite/types"
 
 type Card = OnsiteFeed["people"][number]
-type Tone = "hero" | "pair" | "tile"
+type Tone = "pair" | "tile"
 
 function formatLookingFor(labels: readonly string[], heading: string, max: number): string | undefined {
   if (labels.length === 0) return undefined
@@ -72,9 +72,7 @@ export function LiveFeedPersonCard({
 
   return (
     <article
-      className={`relative box-border grid h-full min-h-0 min-w-0 overflow-hidden border-2 border-ink ${KIND_SKIN[kind]} border-l-8 px-5 py-4 ${
-        tone === "pair" ? "grid-rows-[auto_minmax(0,1fr)_auto_auto]" : "grid-rows-[auto_auto_auto]"
-      } ${showQr ? "pr-14" : ""}`}
+      className={`relative box-border grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-hidden border-2 border-ink ${KIND_SKIN[kind]} border-l-8 px-5 py-4 ${showQr ? "pr-14" : ""}`}
     >
       {showQr ? (
         <div className="absolute right-3 top-3 z-10">
@@ -84,13 +82,7 @@ export function LiveFeedPersonCard({
       <p className="shrink-0 text-[10px] font-semibold uppercase leading-tight tracking-[0.14em] text-teal-deep">
         {kind_label}
       </p>
-      {tone === "hero" ? (
-        <h3 className="mt-1 break-words font-listing text-5xl uppercase leading-[1.06] tracking-tight hyphens-auto text-pretty [overflow-wrap:anywhere]">
-          {org_name}
-        </h3>
-      ) : (
-        <FittedName name={org_name} maxPx={pairNameMaxPx(org_name)} minPx={14} />
-      )}
+      <FittedName name={org_name} maxPx={pairNameMaxPx(org_name)} minPx={14} />
       {blurb ? (
         <p className="mt-2 min-h-0 shrink-0 break-words leading-snug text-ink-soft [overflow-wrap:anywhere] line-clamp-2 text-sm">
           {blurb}

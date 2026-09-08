@@ -854,6 +854,7 @@
   "onsite.feed.scan": "Scan",
   "onsite.feed.scan_hint": "Your profile, or add one.",
   "onsite.feed.empty": "Scan to join the room.",
+  "onsite.feed.gathering": "The wall fills as people check in.",
   "onsite.feed.spotlight": "Should talk",
   "onsite.feed.rotate_in": "Next match in {n}s",
   "onsite.feed.profile_qr": "Open profile",

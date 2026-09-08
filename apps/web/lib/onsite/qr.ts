@@ -5,7 +5,7 @@ type QrOpts = {
   ecc?: "L" | "M" | "Q" | "H"
 }
 
-/** QR as an inline SVG using currentColor so the kiosk ink token paints it. */
+/** QR as an inline SVG. Modules use currentColor; the quiet zone is whatever sits behind — no paper square. */
 export function qrSvgMarkup(value: string, opts: QrOpts = {}): string {
   const { data, size } = encode(value, { ecc: opts.ecc ?? "M", border: opts.border ?? 4 })
   const cells: string[] = []
@@ -16,5 +16,5 @@ export function qrSvgMarkup(value: string, opts: QrOpts = {}): string {
       if (row[x]) cells.push(`M${x} ${y}h1v1h-1z`)
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img"><path fill="currentColor" d="${cells.join("")}"/></svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="100%" height="100%" shape-rendering="crispEdges" role="img" fill="none" style="background:transparent"><path fill="currentColor" d="${cells.join("")}"/></svg>`
 }

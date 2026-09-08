@@ -6,7 +6,8 @@ describe("qrSvgMarkup", () => {
     const svg = qrSvgMarkup("https://foresightmatchmaker.app/here/berlin")
     expect(svg.startsWith("<svg")).toBe(true)
     expect(svg).toContain("currentColor")
-    expect(svg).toContain("viewBox")
+    expect(svg).toContain("background:transparent")
+    expect(svg).not.toMatch(/fill="(?:white|#fff|#ffffff)"/i)
   })
 
   it("supports a tighter quiet zone for tile QRs", () => {

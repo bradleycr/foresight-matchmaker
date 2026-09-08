@@ -8,9 +8,9 @@ const SIZE: Record<"tile" | "pair" | "hero", string> = {
 }
 
 /**
- * Tiny profile QR for wall tiles. Scans open /profile/{slug} on the same
- * site — an existing session cookie skips sign-in; otherwise magic link
- * returns to this profile after one tap.
+ * Tiny profile QR for wall tiles. Quiet zone is the card wash — no paper
+ * square. Scans open /profile/{slug} on the same site; an existing session
+ * cookie skips sign-in, otherwise the magic link returns here after one tap.
  */
 export function TileProfileQr({
   origin,
@@ -28,7 +28,7 @@ export function TileProfileQr({
 
   return (
     <div
-      className={`${SIZE[tone]} shrink-0 border border-ink bg-paper p-px text-ink`}
+      className={`${SIZE[tone]} shrink-0 bg-transparent p-px text-ink`}
       role="img"
       aria-label={label}
       title={label}

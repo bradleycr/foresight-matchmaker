@@ -855,6 +855,7 @@
   "onsite.feed.scan": "Scannen",
   "onsite.feed.scan_hint": "Ihr Profil, oder eines anlegen.",
   "onsite.feed.empty": "Scannen, um dem Raum beizutreten.",
+  "onsite.feed.gathering": "Die Wand füllt sich, wenn weitere Personen einchecken.",
   "onsite.feed.spotlight": "Sollten reden",
   "onsite.feed.rotate_in": "Nächster Match in {n}s",
   "onsite.feed.profile_qr": "Profil öffnen",
