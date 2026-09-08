@@ -1,11 +1,14 @@
 import { sortSignupsForOperator, summarizeSignups, type SignupRow } from "@/lib/db/signups"
 import type { T } from "@/lib/i18n"
+import { SignupTable } from "./signup-table"
 
 /**
  * Contactable register of every email that requested a magic link.
  *
  * The drop-off between a signup and a listing is the operator's bug-and-
- * reminder list: people who confirmed an email and never published.
+ * reminder list: people who confirmed an email and never published. The
+ * table pages on the client so a long register does not bury the rest of
+ * the desk; the summary and CSV still cover every row.
  */
 export function SignupList({
   signups,
@@ -62,51 +65,7 @@ export function SignupList({
       {signups.length === 0 ? (
         <p className="px-3 py-3 text-sm text-ink-soft">{t("admin.no_data")}</p>
       ) : (
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[40rem] text-sm">
-            <thead>
-              <tr className="border-y border-rule bg-paper-shade text-left">
-                <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
-                  {t("admin.accounts_email")}
-                </th>
-                <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
-                  {t("admin.accounts_status")}
-                </th>
-                <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
-                  {t("admin.accounts_org")}
-                </th>
-                <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
-                  {t("admin.accounts_kind")}
-                </th>
-                <th scope="col" className="px-3 py-1.5 font-semibold uppercase tracking-wide">
-                  {t("admin.accounts_created")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {ordered.map((signup) => (
-                <tr
-                  key={signup.contact_email}
-                  className={
-                    signup.status === "listed"
-                      ? "border-b border-rule last:border-0"
-                      : "border-b border-rule bg-paper-shade last:border-0"
-                  }
-                >
-                  <td className="px-3 py-1.5">
-                    <a href={`mailto:${signup.contact_email}`} className="underline underline-offset-2">
-                      {signup.contact_email}
-                    </a>
-                  </td>
-                  <td className="px-3 py-1.5">{t(`admin.status_${signup.status}`)}</td>
-                  <td className="px-3 py-1.5">{signup.org_name || "—"}</td>
-                  <td className="px-3 py-1.5">{signup.kind || "—"}</td>
-                  <td className="tnum px-3 py-1.5 text-ink-soft">{signup.created_at.slice(0, 10)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <SignupTable rows={ordered} />
       )}
     </section>
   )
