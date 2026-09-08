@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { forbidden, notFound } from "@/lib/api/respond"
 import { isAdmin } from "@/lib/auth/admin"
-import { hydrateListings, hydrateEvents } from "@/lib/db/durable"
+import { buildProgrammeReport } from "@/lib/admin/report"
 import { CHALLENGES } from "@/lib/challenges/catalog"
-import { computeMetrics, metricsToCsv } from "@/lib/metrics"
-import { collectSignupRows, summarizeSignups } from "@/lib/db/signups"
+import { metricsToCsv } from "@/lib/metrics"
 
 export const dynamic = "force-dynamic"
 
@@ -21,14 +20,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     : undefined
   if (raw && !challenge) return notFound("Unknown programme.")
 
-  await hydrateListings()
-  await hydrateEvents()
-  const challengeId = challenge?.id
-  const signups = await collectSignupRows(challengeId ? { challengeId } : undefined)
-  const metrics = computeMetrics({
-    challengeId,
-    signups: summarizeSignups(signups),
-  })
+  const { metrics } = await buildProgrammeReport(challenge?.id)
 
   const stamp = new Date().toISOString().slice(0, 10)
   const slug = challenge?.slug ?? "all"

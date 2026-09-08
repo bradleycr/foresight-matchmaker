@@ -1,7 +1,13 @@
 import { parseStoredProfile, type Profile } from "@rmm/schema"
-import { cacheRemoteListing, getJointApplicationOutcome, getProfileById, getProfilesByEmail, listProfiles } from "./profiles"
-import { recomputeMatchesFor } from "./matches"
-import { cacheRemoteEvent, listEvents, type DurableEvent } from "./events"
+import {
+  cacheRemoteListing,
+  cacheRemoteListings,
+  getJointApplicationOutcome,
+  getProfileById,
+  getProfilesByEmail,
+  listProfiles,
+} from "./profiles"
+import { cacheRemoteEvents, listEvents, type DurableEvent } from "./events"
 import {
   durableEnabled,
   getDurableStore,
@@ -30,7 +36,9 @@ const PROFILE_PREFIX = "matchmaker/profiles/"
 const EMAIL_PREFIX = "matchmaker/emails/"
 const SIGNUP_PREFIX = "matchmaker/signups/"
 const EVENT_PREFIX = "matchmaker/events/"
-const HYDRATE_DEBOUNCE_MS = 4_000
+/** Warm isolates keep the last pull. Four seconds used to expire during a
+ *  single click-through, so every header tab rebuilt the corpus. */
+const HYDRATE_DEBOUNCE_MS = 60_000
 
 export interface DurableListing {
   profile: Profile
@@ -382,9 +390,9 @@ let hydrateInflight: Promise<void> | null = null
 /**
  * Fill the local cache from the durable store.
  *
- * Cold isolates (empty SQLite) always hydrate. Warm isolates debounce so a
- * burst of public pageviews cannot burn through the remote quota — that is
- * how the Hobby Blob store got suspended.
+ * Cold isolates (empty SQLite) always hydrate. Warm isolates wait a minute
+ * so a header click-through does not re-download the corpus. Match scores
+ * are not rebuilt here — shortlist reads fill that table on demand.
  */
 export async function hydrateListings(opts?: { force?: boolean }): Promise<void> {
   if (!durableEnabled()) return
@@ -402,6 +410,7 @@ export async function hydrateListings(opts?: { force?: boolean }): Promise<void>
       await importBlobIntoSupabase()
       const records = await getDurableStore().listRecords(PROFILE_PREFIX)
       const repaired: DurableListing[] = []
+      const readable: DurableListing[] = []
       for (const record of records) {
         const parsed = parseListing(record.value)
         if (!parsed) continue
@@ -409,7 +418,7 @@ export async function hydrateListings(opts?: { force?: boolean }): Promise<void>
           console.error("[durable] skip unreadable listing", { key: record.key, issues: parsed.issues })
           continue
         }
-        adoptListing(parsed.listing, false)
+        readable.push(parsed.listing)
         if (parsed.repaired) {
           console.warn("[durable] restored listing that used Other without a definition", {
             key: record.key,
@@ -420,13 +429,14 @@ export async function hydrateListings(opts?: { force?: boolean }): Promise<void>
         }
       }
 
+      cacheRemoteListings(readable)
+
       if (repaired.length > 0) {
         await Promise.all(repaired.map((listing) => persistRepairedListing(listing)))
       }
 
-      for (const profile of listProfiles()) {
-        recomputeMatchesFor(profile.id)
-      }
+      // Listings only. Match rows are rebuilt when a shortlist is actually
+      // read — scoring the whole corpus here made every header click wait.
       lastHydrateAt = Date.now()
     } catch (error) {
       console.error("[durable] hydrate failed", error)
@@ -495,14 +505,16 @@ export async function hydrateEvents(opts?: { force?: boolean }): Promise<void> {
     try {
       await importBlobIntoSupabase()
       const records = await getDurableStore().listRecords(EVENT_PREFIX)
+      const readable: DurableEvent[] = []
       for (const record of records) {
         try {
           const event = parseEvent(record.value)
-          if (event) cacheRemoteEvent(event)
+          if (event) readable.push(event)
         } catch (error) {
           console.error("[durable] skip unreadable event", { key: record.key }, error)
         }
       }
+      cacheRemoteEvents(readable)
       lastEventHydrateAt = Date.now()
     } catch (error) {
       console.error("[durable] hydrate events failed", error)

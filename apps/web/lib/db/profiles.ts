@@ -240,6 +240,32 @@ export function cacheRemoteListing(
 }
 
 /**
+ * Adopt a whole durable pull in one commit.
+ *
+ * Row-at-a-time adoption paid a separate SQLite transaction per listing, so a
+ * cold isolate spent most of its first render committing, not fetching.
+ */
+export function cacheRemoteListings(
+  listings: readonly { profile: Profile; joint_application: string | null }[],
+): void {
+  if (listings.length === 0) return
+  getDb().transaction(() => {
+    for (const listing of listings) {
+      // One unreadable row must not roll back the pull, which is what an
+      // uncaught throw inside a transaction would do.
+      try {
+        cacheRemoteListing(listing.profile, {
+          jointApplication: listing.joint_application,
+          recompute: false,
+        })
+      } catch (error) {
+        console.error("[profiles] skip listing during bulk adopt", { id: listing.profile.id }, error)
+      }
+    }
+  })
+}
+
+/**
  * GDPR erasure — hard-delete the profile and every record that names it.
  *
  * Removes: the profile row, match-cache rows in both directions, all

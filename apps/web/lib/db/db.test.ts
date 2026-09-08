@@ -3,7 +3,14 @@ import { describe, it, expect, beforeAll } from "vitest"
 // An isolated in-memory database per test run — no disk state, no cleanup.
 process.env.DATABASE_PATH = ":memory:"
 
-import { saveProfile, listPublicProfiles, getProfilesByEmail, getProfileById, deleteProfile } from "./profiles"
+import {
+  saveProfile,
+  listProfiles,
+  listPublicProfiles,
+  getProfilesByEmail,
+  getProfileById,
+  deleteProfile,
+} from "./profiles"
 import { isSyntheticContactEmail, purgeSyntheticProfiles } from "./purge-core"
 import { getShortlist, getAllCachedMatches } from "./matches"
 import { requestIntro, listIntrosFor, rateLimitPer24h } from "./intros"
@@ -11,7 +18,7 @@ import { listEvents } from "./events"
 import { issueToken } from "../auth/tokens"
 import { getDb } from "./client"
 import { authTokens, matches as matchesTable, intros as introsTable } from "./schema"
-import { eq, or } from "drizzle-orm"
+import { and, eq, or } from "drizzle-orm"
 
 const PRIVATE_KEYS = ["contact_name", "contact_role", "governance_notes"]
 
@@ -275,6 +282,33 @@ describe("match cache", () => {
     const visibleTeam = makeAiTeam(40, { slug: "team-private-matches" })
     expect(getShortlist(secret.id).some((m) => m.otherId === visibleTeam.id)).toBe(true)
     expect(getShortlist(visibleTeam.id).some((m) => m.otherId === secret.id)).toBe(false)
+  })
+
+  it("rebuilds a shortlist when the match table was never filled", () => {
+    const a = makeDataHolder(41, { slug: "holder-lazy-matches" })
+    const b = makeAiTeam(41, { slug: "team-lazy-matches" })
+    getDb().delete(matchesTable).run()
+    expect(getShortlist(a.id).some((m) => m.otherId === b.id)).toBe(true)
+  })
+
+  it("fills the admin matrix for unscored profiles but never rescores a full one", () => {
+    getDb().delete(matchesTable).run()
+    const built = getAllCachedMatches()
+    const scored = new Set(built.flatMap((m) => [m.subjectId, m.otherId]))
+    expect(listProfiles().every((p) => scored.has(p.id))).toBe(true)
+
+    // Drop one pair. Every profile still owns rows, so the next read must
+    // serve the cache — rescoring the whole corpus here is what made the
+    // admin report take seconds on every load.
+    const [pair] = built
+    getDb()
+      .delete(matchesTable)
+      .where(and(eq(matchesTable.subjectId, pair.subjectId), eq(matchesTable.otherId, pair.otherId)))
+      .run()
+    expect(getAllCachedMatches()).toHaveLength(built.length - 1)
+
+    // Both readers self-heal, so an empty table is the safe hand-off.
+    getDb().delete(matchesTable).run()
   })
 })
 

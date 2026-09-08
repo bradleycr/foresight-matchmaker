@@ -10,6 +10,17 @@ const nextConfig = {
   ...(process.env.STANDALONE === "1" || (!process.env.VERCEL && process.env.DOCKER_BUILD === "1")
     ? { output: "standalone" }
     : {}),
+  // Header tabs used to refetch every dynamic page from scratch (Next 15
+  // defaulted this to 0). Thirty seconds is long enough to go back without
+  // the skeleton, short enough that a newly published listing still appears.
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+  },
+  // Local verification hits 127.0.0.1 (localhost is a different app on this machine).
+  allowedDevOrigins: ["127.0.0.1"],
   // Trace from the monorepo root so workspace packages + seed/ ship with
   // serverless functions (opt-in via SEED_ON_EMPTY=true).
   outputFileTracingRoot: monorepoRoot,

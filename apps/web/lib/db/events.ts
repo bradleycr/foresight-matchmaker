@@ -77,27 +77,44 @@ export async function flushEvent(row: DurableEvent): Promise<void> {
 }
 
 /**
- * Adopt an event that already exists in Blob. SQLite is only the cache —
- * skip when this isolate has already seen the uid.
+ * Adopt events that already exist in the durable store. SQLite is only the
+ * cache, so uids this isolate has already seen are skipped.
+ *
+ * Deliberately batched: one uid lookup and one commit for the whole pull.
+ * Doing it per row cost a SELECT and an fsync each, which over a log of
+ * thousands was most of a cold admin render.
  */
-export function cacheRemoteEvent(event: DurableEvent): void {
-  if (!event.uid) return
+export function cacheRemoteEvents(rows: readonly DurableEvent[]): void {
+  if (rows.length === 0) return
   const db = getDb()
-  const hit = db.select({ uid: events.uid }).from(events).where(eq(events.uid, event.uid)).get()
-  if (hit) return
-  try {
-    db.insert(events)
-      .values({
-        uid: event.uid,
-        type: event.type,
-        actorId: event.actorId,
-        payload: JSON.stringify(event.payload),
-        createdAt: event.createdAt,
-      })
-      .run()
-  } catch (error) {
-    console.error("[events] skip duplicate uid", { uid: event.uid }, error)
-  }
+  const seen = new Set(db.select({ uid: events.uid }).from(events).all().map((r) => r.uid))
+
+  const fresh = rows.filter((row) => {
+    if (!row.uid || seen.has(row.uid)) return false
+    seen.add(row.uid)
+    return true
+  })
+  if (fresh.length === 0) return
+
+  db.transaction((tx) => {
+    for (const row of fresh) {
+      // One bad row must not roll back the pull, which is what an uncaught
+      // throw inside a transaction would do.
+      try {
+        tx.insert(events)
+          .values({
+            uid: row.uid,
+            type: row.type,
+            actorId: row.actorId,
+            payload: JSON.stringify(row.payload),
+            createdAt: row.createdAt,
+          })
+          .run()
+      } catch (error) {
+        console.error("[events] skip unstorable event", { uid: row.uid, type: row.type }, error)
+      }
+    }
+  })
 }
 
 /**

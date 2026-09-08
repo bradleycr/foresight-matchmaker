@@ -15,6 +15,9 @@ import { matches, profiles } from "./schema"
  *
  * Blocked pairings (score 0) are stored too — the admin blocker-frequency
  * histogram is built from them. Shortlist reads filter them out.
+ *
+ * Hydrate used to rebuild this table for every profile on every page load.
+ * Reads now fill missing rows for the subject that actually needs them.
  */
 
 /** Interactive shortlist cutoff — same number the empty-state copy quotes. */
@@ -106,8 +109,40 @@ export function recomputeAllMatches(): void {
   })
 }
 
+function profileIds(): string[] {
+  return getDb()
+    .select({ id: profiles.id })
+    .from(profiles)
+    .all()
+    .map((r) => r.id)
+}
+
+/**
+ * Has this profile been scored at all?
+ *
+ * Deliberately either direction. A consortium that is not seeking produces no
+ * outgoing rows by design, so "does it own a shortlist" is not the same
+ * question as "has the scorer seen it" — reading the former as a gap made
+ * every call rebuild.
+ */
+function isScored(profileId: string): boolean {
+  const row = getDb()
+    .select({ id: matches.subjectId })
+    .from(matches)
+    .where(or(eq(matches.subjectId, profileId), eq(matches.otherId, profileId)))
+    .limit(1)
+    .get()
+  return Boolean(row)
+}
+
 /** Ranked shortlist for one profile: score ≥ 35, unblocked, best first. */
 export function getShortlist(subjectId: string): CachedMatch[] {
+  // Filled on read rather than on hydrate: scoring the whole corpus for every
+  // profile on every page load is what put a wait behind each header click.
+  if (profileIds().length > 1 && !isScored(subjectId)) {
+    recomputeMatchesFor(subjectId)
+  }
+
   const hiddenIds = new Set(
     getDb()
       .select({ id: profiles.id })
@@ -134,18 +169,40 @@ export function getShortlist(subjectId: string): CachedMatch[] {
     }))
 }
 
-/** Every cached pairing, blocked ones included — admin metrics input. */
+function allMatchRows() {
+  return getDb().select().from(matches).all()
+}
+
+/**
+ * Every cached pairing, blocked ones included — admin metrics input.
+ *
+ * Rebuilds only when a profile is missing from the table altogether. The
+ * earlier guard compared row count against the full n×(n−1) matrix, which
+ * rescored the entire corpus on every admin load and was most of why the
+ * report read as an outage.
+ */
 export function getAllCachedMatches(): CachedMatch[] {
-  return getDb()
-    .select()
-    .from(matches)
-    .all()
-    .map((r) => ({
-      subjectId: r.subjectId,
-      otherId: r.otherId,
-      score: r.score,
-      factors: JSON.parse(r.factors),
-      blockers: JSON.parse(r.blockers),
-      computedAt: r.computedAt,
-    }))
+  let rows = allMatchRows()
+  const ids = profileIds()
+
+  if (ids.length > 1) {
+    const scored = new Set<string>()
+    for (const row of rows) {
+      scored.add(row.subjectId)
+      scored.add(row.otherId)
+    }
+    if (ids.some((id) => !scored.has(id))) {
+      recomputeAllMatches()
+      rows = allMatchRows()
+    }
+  }
+
+  return rows.map((r) => ({
+    subjectId: r.subjectId,
+    otherId: r.otherId,
+    score: r.score,
+    factors: JSON.parse(r.factors),
+    blockers: JSON.parse(r.blockers),
+    computedAt: r.computedAt,
+  }))
 }

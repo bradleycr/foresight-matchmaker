@@ -1,12 +1,9 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { apiFetch } from "@/lib/api/server-fetch"
+import { buildProgrammeReport } from "@/lib/admin/report"
 import { isAdmin } from "@/lib/auth/admin"
-import { hydrateListings, hydrateEvents } from "@/lib/db/durable"
-import { collectSignupRows } from "@/lib/db/signups"
 import { getT } from "@/lib/i18n/server"
 import { challengeBySlug } from "@/lib/challenges/catalog"
-import type { Metrics } from "@/lib/metrics"
 import { SignupList } from "@/components/admin/signup-list"
 import { AdminLoginForm } from "@/components/admin/login-form"
 import { MetricsReport } from "@/components/admin/metrics-report"
@@ -35,13 +32,8 @@ export default async function ProgrammeAdminPage({
     return <AdminLoginForm next={next} error={error} t={t} />
   }
 
-  await hydrateListings()
-  await hydrateEvents()
   const qs = new URLSearchParams({ challenge: challenge.id })
-  const [metrics, signups] = await Promise.all([
-    apiFetch(`/api/v1/metrics?${qs}`).then((r) => r.json() as Promise<Metrics>),
-    collectSignupRows({ challengeId: challenge.id }),
-  ])
+  const { metrics, signups } = await buildProgrammeReport(challenge.id)
 
   return (
     <div className="py-6">

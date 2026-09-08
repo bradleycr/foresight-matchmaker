@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { redirect } from "next/navigation"
 import type { Profile } from "@rmm/schema"
 import { restoreOwnedProfile, hydrateListings } from "@/lib/db/durable"
@@ -43,7 +44,7 @@ export function findOwnedProfile(session: Session): Profile | null {
   return getProfilesByEmail(session.email)[0] ?? null
 }
 
-export async function peekLiveSession(): Promise<LiveSession | null> {
+export const peekLiveSession = cache(async function peekLiveSession(): Promise<LiveSession | null> {
   const session = await getSession()
   if (!session) return null
   let profile = findOwnedProfile(session)
@@ -61,7 +62,7 @@ export async function peekLiveSession(): Promise<LiveSession | null> {
     profile,
     needsReconcile: session.profileId !== profile.id,
   }
-}
+})
 
 /**
  * Route-handler variant: may delete the cookie. Do not call from RSC.

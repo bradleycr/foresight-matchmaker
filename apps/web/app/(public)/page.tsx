@@ -22,11 +22,14 @@ export default async function LandingPage({
 }: {
   searchParams: Promise<{ deleted?: string }>
 }) {
-  const { t } = await getT()
-  const { deleted } = await searchParams
-  const live = await peekLiveSession()
+  // The corpus pull and the session lookup do not depend on each other. Run
+  // in series they cost a cold isolate two round trips before first paint;
+  // concurrent hydrate calls dedupe on the in-flight promise.
+  const corpus = hydrateListings()
+  const [{ t }, { deleted }, live] = await Promise.all([getT(), searchParams, peekLiveSession()])
   const session = live ? live.session : await getSession()
-  await hydrateListings()
+  await corpus
+
   const byChallenge = countVisibleProfilesByChallenge()
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")
