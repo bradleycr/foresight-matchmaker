@@ -4,10 +4,11 @@ import { getT } from "@/lib/i18n/server"
 import { getSession } from "@/lib/auth/session"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { signInHref } from "@/lib/auth/next-path"
-import { directoryHref } from "@/lib/challenges/catalog"
+import { directoryHref, isApplicationChallenge } from "@/lib/challenges/catalog"
 import { browseDirectoryPath, visibleChallenges } from "@/lib/challenges/visibility"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { ProgrammePreviewNotice, ProgrammeStatusTag } from "@/components/programme-status"
+import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { DirectoryBrowser } from "@/components/directory/browser"
 import { kindCountTotal } from "@/components/listing-counts"
 import { hydrateListings } from "@/lib/db/durable"
@@ -99,6 +100,14 @@ export default async function DirectoryPage({
       <h1 className="mb-4 font-listing text-3xl font-bold uppercase tracking-tight">
         {t("directory.programme_title", { programme: name })}
       </h1>
+      {isApplicationChallenge(selected.id) ? (
+        <DirectoryDisclaimer
+          className="mb-6"
+          applyHref={selected.hostUrl}
+          applyNote={t(`challenge.${selected.id}.host_note`)}
+          applyLabel={t(`challenge.${selected.id}.host_link`)}
+        />
+      ) : null}
       <DirectoryBrowser profiles={profiles} challengeId={selected.id} />
     </div>
   )

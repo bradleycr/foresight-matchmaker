@@ -4,6 +4,7 @@ import { peekLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
 import { signInHref } from "@/lib/auth/next-path"
 import { browseDirectoryPath, visibleChallenges } from "@/lib/challenges/visibility"
+import { isApplicationChallenge } from "@/lib/challenges/catalog"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { ProgrammeStatusTag } from "@/components/programme-status"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
@@ -56,7 +57,7 @@ export default async function LandingPage({
       </h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed">{t("landing.subhead")}</p>
 
-      <DirectoryDisclaimer className="mt-8" />
+      <DirectoryDisclaimer tone="quiet" className="mt-5" />
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
@@ -83,46 +84,60 @@ export default async function LandingPage({
             const counts = byChallenge[challenge.id] ?? empty
             return (
               <li key={challenge.id}>
-                <Link
-                  href={`/challenges/${challenge.slug}`}
-                  className="block border-2 border-rule-strong bg-paper p-5 hover:bg-paper-shade"
+                <div
+                  className="border-2 border-rule-strong bg-paper p-5"
                   style={{ borderLeftWidth: "4px", borderLeftColor: challengeTheme(challenge.id).accent }}
                 >
-                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-2 font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
-                    {t(`challenge.${challenge.id}.name`)}
-                    <ProgrammeStatusTag challenge={challenge} t={t} />
-                  </h3>
-                  <p className="mt-2 max-w-xl text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
-                  {/* Programmes that close show their deadline; standing ones show their rhythm. */}
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
-                    {challenge.deadlineLabel
-                      ? t("landing.programme_deadline", { date: challenge.deadlineLabel })
-                      : t(`challenge.${challenge.id}.cadence`)}
-                  </p>
-                  {kindCountTotal(counts) > 0 ? (
-                    <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
-                      <div>
-                        <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.data_holder}</dd>{" "}
-                        <dt className="inline">{t("landing.count_data_holders")}</dt>
-                      </div>
-                      <div>
-                        <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.ai_team}</dd>{" "}
-                        <dt className="inline">{t("landing.count_ai_teams")}</dt>
-                      </div>
-                      <div>
-                        <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.consortium}</dd>{" "}
-                        <dt className="inline">{t("landing.count_consortia")}</dt>
-                      </div>
-                      <div>
-                        <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.individual}</dd>{" "}
-                        <dt className="inline">{t("landing.count_individuals")}</dt>
-                      </div>
-                    </dl>
+                  <Link href={`/challenges/${challenge.slug}`} className="block hover:bg-transparent">
+                    <h3 className="flex flex-wrap items-center gap-x-3 gap-y-2 font-listing text-2xl font-bold uppercase leading-none tracking-tight sm:text-3xl">
+                      {t(`challenge.${challenge.id}.name`)}
+                      <ProgrammeStatusTag challenge={challenge} t={t} />
+                    </h3>
+                    <p className="mt-2 max-w-xl text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
+                    {/* Programmes that close show their deadline; standing ones show their rhythm. */}
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
+                      {challenge.deadlineLabel
+                        ? t("landing.programme_deadline", { date: challenge.deadlineLabel })
+                        : t(`challenge.${challenge.id}.cadence`)}
+                    </p>
+                    {kindCountTotal(counts) > 0 ? (
+                      <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
+                        <div>
+                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.data_holder}</dd>{" "}
+                          <dt className="inline">{t("landing.count_data_holders")}</dt>
+                        </div>
+                        <div>
+                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.ai_team}</dd>{" "}
+                          <dt className="inline">{t("landing.count_ai_teams")}</dt>
+                        </div>
+                        <div>
+                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.consortium}</dd>{" "}
+                          <dt className="inline">{t("landing.count_consortia")}</dt>
+                        </div>
+                        <div>
+                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.individual}</dd>{" "}
+                          <dt className="inline">{t("landing.count_individuals")}</dt>
+                        </div>
+                      </dl>
+                    ) : null}
+                    <p className="mt-4 text-sm font-semibold uppercase tracking-wide underline underline-offset-2">
+                      {t("landing.programme_open")} →
+                    </p>
+                  </Link>
+                  {isApplicationChallenge(challenge.id) ? (
+                    <p className="mt-3 border-t border-rule pt-3 text-sm leading-snug text-ink-soft">
+                      {t(`challenge.${challenge.id}.host_note`)}{" "}
+                      <a
+                        href={challenge.hostUrl}
+                        className="font-semibold text-ink underline underline-offset-2 hover:no-underline"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {t(`challenge.${challenge.id}.host_link`)}
+                      </a>
+                    </p>
                   ) : null}
-                  <p className="mt-4 text-sm font-semibold uppercase tracking-wide underline underline-offset-2">
-                    {t("landing.programme_open")} →
-                  </p>
-                </Link>
+                </div>
               </li>
             )
           })}

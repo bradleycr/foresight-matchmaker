@@ -3,8 +3,9 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
-import { CHALLENGES, challengeBySlug, sessionUrl, type ChallengeDef } from "@/lib/challenges/catalog"
+import { CHALLENGES, challengeBySlug, isApplicationChallenge, sessionUrl, type ChallengeDef } from "@/lib/challenges/catalog"
 import { isChallengeVisible } from "@/lib/challenges/visibility"
+import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { ListingCounts } from "@/components/listing-counts"
 import { ProgrammePreviewNotice } from "@/components/programme-status"
 import { hydrateListings } from "@/lib/db/durable"
@@ -76,6 +77,15 @@ export default async function ChallengePage({
 
       <p className="mt-5 max-w-xl text-ink-soft">{t(`challenge.${id}.intro`)}</p>
 
+      {isApplicationChallenge(id) ? (
+        <DirectoryDisclaimer
+          className="mt-6"
+          applyHref={challenge.hostUrl}
+          applyNote={t(`challenge.${id}.host_note`)}
+          applyLabel={t(`challenge.${id}.host_link`)}
+        />
+      ) : null}
+
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href={`/directory?challenge=${challenge.id}`}
@@ -89,6 +99,16 @@ export default async function ChallengePage({
         >
           {t(live ? "nav.me" : "nav.register")}
         </Link>
+        {isApplicationChallenge(id) ? (
+          <a
+            href={challenge.hostUrl}
+            className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {t("challenge.cta_apply", { host: challenge.host })}
+          </a>
+        ) : null}
       </div>
 
       <div className="mt-12">
@@ -97,12 +117,6 @@ export default async function ChallengePage({
 
       <FactsSection facts={facts} t={t} />
       <SessionsSection challenge={challenge} t={t} />
-
-      <p className="mt-8">
-        <a href={challenge.hostUrl} className="font-semibold underline" rel="noopener noreferrer" target="_blank">
-          {t(`challenge.${id}.host_link`)}
-        </a>
-      </p>
     </div>
   )
 }

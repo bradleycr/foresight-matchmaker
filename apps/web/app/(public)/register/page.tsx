@@ -9,6 +9,7 @@ import { SigninForm } from "@/components/signin-form"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { MagicLinkNote } from "@/components/magic-link-note"
 import { OneListingNote } from "@/components/one-listing-note"
+import { challengeById, isApplicationChallenge } from "@/lib/challenges/catalog"
 import { visibleChallengeIdOf } from "@/lib/challenges/visibility"
 import { isHerePath, ownedListingRedirect, safeNextPath } from "@/lib/auth/next-path"
 
@@ -68,7 +69,16 @@ export default async function RegisterPage({
   return (
     <div className="py-6">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("register.title")}</h1>
-      <DirectoryDisclaimer className="mt-6" />
+      {isApplicationChallenge(defaultChallengeId) ? (
+        <DirectoryDisclaimer
+          className="mt-6"
+          applyHref={challengeById(defaultChallengeId).hostUrl}
+          applyNote={t(`challenge.${defaultChallengeId}.host_note`)}
+          applyLabel={t(`challenge.${defaultChallengeId}.host_link`)}
+        />
+      ) : (
+        <DirectoryDisclaimer className="mt-6" />
+      )}
       <OneListingNote className="mt-4" />
       {!remmy ? (
         <p className="mt-4 max-w-xl text-sm text-ink-soft">{t("register.explainer")}</p>
