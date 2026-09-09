@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { buildAiTeam, buildDataHolder } from "../../../../packages/matching/src/__fixtures__/build"
+import { buildAiTeam, buildDataHolder, buildIndividual } from "../../../../packages/matching/src/__fixtures__/build"
 import type { EventRow } from "@/lib/db/events"
-import { cardFromProfile, checkInsForCity, isCheckedIn, presentCards } from "./presence"
+import { boardName, cardFromProfile, checkInsForCity, isCheckedIn, presentCards } from "./presence"
 
 const t = (key: string) => key.replace("enum.looking_for.", "").replace("enum.kind.", "")
 
@@ -59,5 +59,14 @@ describe("onsite presence", () => {
     ])
     const cards = presentCards([early, late], checkIns, t)
     expect(cards.map((card) => card.org_name)).toEqual(["Early Hospital", "Late Lab"])
+  })
+
+  it("puts an individual's affiliation on the wall when they listed a firm", () => {
+    const person = buildIndividual({
+      org_name: "Maurits Bogaards",
+      affiliation: "AEC Partners",
+    })
+    expect(boardName(person)).toBe("AEC Partners")
+    expect(cardFromProfile(person, "2026-09-09T18:00:00.000Z", t).org_name).toBe("AEC Partners")
   })
 })

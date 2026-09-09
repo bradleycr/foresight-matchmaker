@@ -40,6 +40,17 @@ const EVENT_PREFIX = "matchmaker/events/"
  *  single click-through, so every header tab rebuilt the corpus. */
 const HYDRATE_DEBOUNCE_MS = 60_000
 
+export type HydrateOpts = {
+  force?: boolean
+  /**
+   * Cap how stale a warm cache may be before we pull again. The live feed
+   * polls every 8s across many isolates — a 60s debounce made a fresh
+   * check-in flash on the isolate that wrote it, then vanish on the next
+   * poll that hit a sibling still inside the window.
+   */
+  maxStaleMs?: number
+}
+
 export interface DurableListing {
   profile: Profile
   joint_application: string | null
@@ -413,13 +424,14 @@ let hydrateInflight: Promise<void> | null = null
  * so a header click-through does not re-download the corpus. Match scores
  * are not rebuilt here — shortlist reads fill that table on demand.
  */
-export async function hydrateListings(opts?: { force?: boolean }): Promise<void> {
+export async function hydrateListings(opts?: HydrateOpts): Promise<void> {
   if (!durableEnabled()) return
 
   const force = opts?.force === true || listProfiles().length === 0
+  const maxStaleMs = opts?.maxStaleMs ?? HYDRATE_DEBOUNCE_MS
   if (!force) {
     if (hydrateInflight) return hydrateInflight
-    if (Date.now() - lastHydrateAt < HYDRATE_DEBOUNCE_MS) return
+    if (Date.now() - lastHydrateAt < maxStaleMs) return
   } else if (hydrateInflight) {
     await hydrateInflight
   }
@@ -509,13 +521,14 @@ let eventHydrateInflight: Promise<void> | null = null
  * requested” reads zero after a Vercel cold start even though Blob still
  * holds every click. Warm isolates debounce like listings.
  */
-export async function hydrateEvents(opts?: { force?: boolean }): Promise<void> {
+export async function hydrateEvents(opts?: HydrateOpts): Promise<void> {
   if (!durableEnabled()) return
 
   const force = opts?.force === true || listEvents().length === 0
+  const maxStaleMs = opts?.maxStaleMs ?? HYDRATE_DEBOUNCE_MS
   if (!force) {
     if (eventHydrateInflight) return eventHydrateInflight
-    if (Date.now() - lastEventHydrateAt < HYDRATE_DEBOUNCE_MS) return
+    if (Date.now() - lastEventHydrateAt < maxStaleMs) return
   } else if (eventHydrateInflight) {
     await eventHydrateInflight
   }

@@ -30,11 +30,22 @@ function lookingForLabels(profile: Profile, t: (key: string) => string): string[
     .map((value) => t(`enum.looking_for.${value}`))
 }
 
+/**
+ * Name on the HDMI wall. Individuals often put their personal name in
+ * `org_name` and the firm in `affiliation` (AEC Partners, …) — the room
+ * recognises the firm, so prefer that when present.
+ */
+export function boardName(profile: Profile): string {
+  const affiliation = profile.affiliation?.trim()
+  if (profile.kind === "individual" && affiliation) return affiliation
+  return profile.org_name
+}
+
 export function cardFromProfile(profile: Profile, arrivedAt: string, t: (key: string) => string): OnsiteCard {
   return {
     id: profile.id,
     slug: profile.slug,
-    org_name: profile.org_name,
+    org_name: boardName(profile),
     kind: profile.kind,
     kind_label: t(`enum.kind.${profile.kind}`),
     one_liner: profile.one_liner,
