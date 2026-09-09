@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest"
-import { verifyDemoSecret } from "@/lib/auth/demo"
+import { resolveDemoCity, resolveDemoEmail, verifyDemoSecret, DEMO_EMAIL } from "@/lib/auth/demo"
 
 const original = process.env.DEMO_SECRET
 
@@ -27,5 +27,20 @@ describe("verifyDemoSecret", () => {
     delete process.env.DEMO_SECRET
     expect(verifyDemoSecret("  FSRM2026!  ")).toBe(true)
     expect(verifyDemoSecret("")).toBe(false)
+  })
+})
+
+describe("resolveDemoEmail / resolveDemoCity", () => {
+  it("defaults blank email to the operator demo account", () => {
+    expect(resolveDemoEmail("")).toBe(DEMO_EMAIL)
+    expect(resolveDemoEmail("  ")).toBe(DEMO_EMAIL)
+    expect(resolveDemoEmail("Robin.Wilkening@opening.science")).toBe("robin.wilkening@opening.science")
+  })
+
+  it("only accepts known room cities", () => {
+    expect(resolveDemoCity("")).toBeNull()
+    expect(resolveDemoCity("paris")).toBe("paris")
+    expect(resolveDemoCity("PARIS")).toBe("paris")
+    expect(resolveDemoCity("lyon")).toBeNull()
   })
 })
