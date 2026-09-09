@@ -3,7 +3,8 @@ import path from "node:path"
 import { finalizeGolden, profileSchema, type Profile } from "@rmm/schema"
 import { getDb } from "./client"
 import { profiles } from "./schema"
-import { recomputeAllMatches } from "./matches"
+import { recomputeAllMatches, recomputeMatchesFor } from "./matches"
+import { getProfileById, getProfilesByEmail } from "./profiles"
 
 /**
  * Seeding, shared between the CLI (`pnpm db:seed`) and the container
@@ -98,6 +99,37 @@ export function seedFromDirectory(seedDir: string): number {
 
   recomputeAllMatches()
   return golden.length + operators.length + bulk.length
+}
+
+/**
+ * Operator demo fixtures (real QA emails under seed/operators/).
+ *
+ * Used when a known operator signs in on a cold isolate whose durable store
+ * never received their listing — without this they land on /register with an
+ * empty shortlist instead of the staged demo walkthrough.
+ */
+export function findOperatorProfileByEmail(email: string): Profile | null {
+  const needle = email.trim().toLowerCase()
+  if (!needle) return null
+  try {
+    const operators = loadFinalizedDir(findSeedDir(), "operators", OPERATOR_FILES)
+    return operators.find((p) => p.contact_email.toLowerCase() === needle) ?? null
+  } catch (error) {
+    console.error("[seed] operator lookup failed", { email: needle }, error)
+    return null
+  }
+}
+
+/**
+ * Install one operator listing into this isolate's SQLite. Idempotent: a row
+ * that already owns the email or the stable golden id is left alone.
+ */
+export function installOperatorProfile(profile: Profile): Profile {
+  const existing = getProfileById(profile.id) ?? getProfilesByEmail(profile.contact_email)[0]
+  if (existing) return existing
+  upsertProfile(profile)
+  recomputeMatchesFor(profile.id)
+  return profile
 }
 
 /**

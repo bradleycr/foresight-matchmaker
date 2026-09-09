@@ -375,13 +375,32 @@ export async function restoreOwnedProfile(id: string | null, email: string): Pro
  *
  * Restore is the cheap path (one email pointer). If that misses — pointer
  * lost, cold SQLite — hydrate the durable corpus so sign-in still binds
- * the profile they already published.
+ * the profile they already published. Operator demo emails (seed/operators)
+ * get a last-resort install so a stage walkthrough never lands on /register.
  */
 export async function ensureOwnedListing(id: string | null, email: string): Promise<void> {
   await restoreOwnedProfile(id, email)
   if (id && getProfileById(id)) return
   if (getProfilesByEmail(email).length > 0) return
   await hydrateListings()
+  if (id && getProfileById(id)) return
+  if (getProfilesByEmail(email).length > 0) return
+
+  const { findOperatorProfileByEmail, installOperatorProfile } = await import("./seed-core")
+  const fixture = findOperatorProfileByEmail(email)
+  if (!fixture) return
+  const installed = installOperatorProfile(fixture)
+  try {
+    await persistListing(installed)
+    console.info("[durable] installed operator demo listing", {
+      email: email.toLowerCase(),
+      id: installed.id,
+      slug: installed.slug,
+    })
+  } catch (error) {
+    // SQLite still has the row for this isolate; the next claim will retry.
+    console.error("[durable] persist operator listing failed", { email }, error)
+  }
 }
 
 let lastHydrateAt = 0
