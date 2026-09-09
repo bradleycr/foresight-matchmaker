@@ -36,8 +36,10 @@ function lookingForLabels(profile: Profile, t: (key: string) => string): string[
  * recognises the firm, so prefer that when present.
  */
 export function boardName(profile: Profile): string {
-  const affiliation = profile.affiliation?.trim()
-  if (profile.kind === "individual" && affiliation) return affiliation
+  if (profile.kind === "individual") {
+    const affiliation = profile.affiliation?.trim()
+    if (affiliation) return affiliation
+  }
   return profile.org_name
 }
 
