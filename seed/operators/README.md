@@ -10,4 +10,4 @@ shortlist instead of bouncing to `/register`.
 
 | Email | Slug | Purpose |
 |---|---|---|
-| `bradley@foresight.org` | `foresight-bradley` | Data-holder demo login (sign-in → /me → ranked AI-team shortlist) |
+| `bradley@foresight.org` | `foresight-bradley` | Data-holder demo login (sign-in → /me → ranked AI-team shortlist). Also unlocked via `/demo` with the shared event password (no magic link). |
