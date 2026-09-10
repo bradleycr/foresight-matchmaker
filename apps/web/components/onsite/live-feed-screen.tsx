@@ -12,7 +12,24 @@ import { KIND_LEGEND, KIND_SKIN } from "@/lib/onsite/kind-skin"
 import { isSparseRoom, roomShape } from "@/lib/onsite/room-shape"
 import type { OnsiteFeed } from "@/lib/onsite/types"
 
-const POLL_MS = 8_000
+const POLL_MS = 12_000
+
+/** Keep anyone already on the wall if a sibling isolate returns a stale set. */
+function mergeFeed(prev: OnsiteFeed, next: OnsiteFeed): OnsiteFeed {
+  if (prev.people.length === 0) return next
+  const byId = new Map(prev.people.map((person) => [person.id, person]))
+  for (const person of next.people) byId.set(person.id, person)
+  if (byId.size === next.people.length) return next
+
+  const people = [...byId.values()].sort((a, b) =>
+    a.arrived_at > b.arrived_at
+      ? 1
+      : a.arrived_at < b.arrived_at
+        ? -1
+        : a.org_name.localeCompare(b.org_name),
+  )
+  return { ...next, people, count: people.length }
+}
 
 /** Miniature cards, so the legend reads as the same object as the wall. */
 function KindKey({ t }: { t: (key: string) => string }) {
@@ -164,7 +181,7 @@ export function LiveFeedScreen({
       const res = await fetch(`/api/v1/onsite/feed?city=${city}`, { cache: "no-store" })
       if (!res.ok) return
       const next = (await res.json()) as OnsiteFeed
-      if (alive.current) setFeed(next)
+      if (alive.current) setFeed((prev) => mergeFeed(prev, next))
     } catch {
       // Keep the last good frame — the projector must not go blank.
     }

@@ -20,10 +20,9 @@ export async function GET(req: NextRequest): Promise<Response> {
   if (raw && !isOnsiteCitySlug(raw)) return badRequest("Unknown room.")
 
   const { t } = await getT()
-  // Live board polls every 8s across many isolates. Keep the cache fresher
-  // than one poll so a check-in cannot flash on the writer and vanish on the
-  // next sibling that is still inside the default 60s debounce.
-  const live = { maxStaleMs: 2_000 } as const
-  await Promise.all([hydrateListings(live), hydrateEvents(live)])
+  // Hobby-friendly: listings stay on the normal 60s debounce (heavy pull).
+  // Events refresh at most about twice a minute so a check-in reaches every
+  // isolate without re-downloading the whole corpus on each 8s poll.
+  await Promise.all([hydrateListings(), hydrateEvents({ maxStaleMs: 30_000 })])
   return ok(buildOnsiteFeed(city, listProfiles(), listEvents(), t))
 }
