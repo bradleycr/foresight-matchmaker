@@ -217,7 +217,7 @@
   "me.sign_out_cancel": "Angemeldet bleiben",
   "me.sign_out_working": "Wird abgemeldet…",
   "me.delete_title": "Profil löschen",
-  "me.delete_body": "Entfernt Profil, Matches, Vorstellungen und Anmelde-Token. Nicht rückgängig zu machen. Sie bleiben angemeldet und können sofort ein neues Profil anlegen — auch mit anderem Typ. Sichtbarkeit „Verborgen“ reicht, wenn Sie nur aus dem Verzeichnis verschwinden möchten.",
+  "me.delete_body": "Entfernt Profil, Matches, Vorstellungen und Anmelde-Token. Nicht rückgängig zu machen. Nicht nutzen, um einen Speicherfehler zu beheben — schreiben Sie uns lieber, oder setzen Sie die Sichtbarkeit auf „Verborgen“, wenn Sie nur aus dem Verzeichnis verschwinden möchten. Sie bleiben angemeldet und können danach ein neues Profil anlegen (auch mit anderem Typ).",
   "me.delete_email_alt": "Lieber per E-Mail? Senden Sie eine Löschanfrage von der Kontaktadresse des Profils an",
   "me.delete_open": "Profil löschen…",
   "me.delete_confirm_prompt": "Geben Sie zur Bestätigung den Profilnamen genau ein: {name}",

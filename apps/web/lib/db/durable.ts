@@ -415,12 +415,21 @@ export async function restoreOwnedProfile(id: string | null, email: string): Pro
  * A requested id that is missing after restore is fine: callers resolve by
  * email next. We must not treat “some other local row for this email” as
  * proof the requested id exists (that was the stale-UUID 404).
+ *
+ * When hydrate recovers a listing the pointer forgot, rewrite the pointer so
+ * the next cold isolate does not offer /register and mint a second UUID.
  */
 export async function ensureOwnedListing(id: string | null, email: string): Promise<void> {
   await restoreOwnedProfile(id, email)
-  if (getProfilesByEmail(email).length > 0) return
+  if (getProfilesByEmail(email).length > 0) {
+    await repairEmailPointer(email)
+    return
+  }
   await hydrateListings()
-  if (getProfilesByEmail(email).length > 0) return
+  if (getProfilesByEmail(email).length > 0) {
+    await repairEmailPointer(email)
+    return
+  }
 
   const { findOperatorProfileByEmail, installOperatorProfile } = await import("./seed-core")
   const fixture = findOperatorProfileByEmail(email)
@@ -436,6 +445,25 @@ export async function ensureOwnedListing(id: string | null, email: string): Prom
   } catch (error) {
     // SQLite still has the row for this isolate; the next claim will retry.
     console.error("[durable] persist operator listing failed", { email }, error)
+  }
+}
+
+/** Point the durable email key at the local listing for this mailbox. */
+async function repairEmailPointer(email: string): Promise<void> {
+  if (!durableEnabled()) return
+  const profile = getProfilesByEmail(email)[0]
+  if (!profile) return
+  try {
+    const pointed = await fetchListingByEmail(email)
+    if (pointed?.profile.id === profile.id) return
+    await rewriteEmailPointer(email, profile.id)
+    console.info("[durable] repaired email pointer", {
+      email: email.toLowerCase(),
+      id: profile.id,
+      previous: pointed?.profile.id ?? null,
+    })
+  } catch (error) {
+    console.error("[durable] repair email pointer failed", { email }, error)
   }
 }
 

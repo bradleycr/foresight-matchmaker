@@ -216,7 +216,7 @@
   "me.sign_out_cancel": "Rester connecté",
   "me.sign_out_working": "Déconnexion…",
   "me.delete_title": "Supprimer le profil",
-  "me.delete_body": "Supprime le profil, les correspondances, les mises en relation et les jetons de connexion. Irréversible. Vous restez connecté et pouvez envoyer un nouveau profil tout de suite — y compris avec un autre type. Masquer le profil (visibilité) suffit si vous voulez seulement quitter l’annuaire.",
+  "me.delete_body": "Supprime le profil, les correspondances, les mises en relation et les jetons de connexion. Irréversible. Ne l’utilisez pas pour corriger une erreur d’enregistrement — écrivez-nous plutôt, ou masquez le profil si vous voulez seulement quitter l’annuaire. Vous restez connecté et pourrez ensuite envoyer un nouveau profil (y compris avec un autre type).",
   "me.delete_email_alt": "Vous préférez écrire ? Envoyez une demande de suppression depuis l’adresse de contact du profil à",
   "me.delete_open": "Supprimer le profil…",
   "me.delete_confirm_prompt": "Saisissez exactement le nom du profil pour confirmer : {name}",

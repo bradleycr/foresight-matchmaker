@@ -219,7 +219,7 @@
   "me.sign_out_cancel": "Stay signed in",
   "me.sign_out_working": "Signing out…",
   "me.delete_title": "Delete profile",
-  "me.delete_body": "Removes the profile, matches, introductions, and sign-in tokens. Cannot be undone. You stay signed in and can submit a new profile straight away — including a different type. Set visibility to Hidden if you only want to leave the directory without deleting.",
+  "me.delete_body": "Removes the profile, matches, introductions, and sign-in tokens. Cannot be undone. Do not use this to fix a save error — email us instead, or set visibility to Hidden if you only want to leave the directory. You stay signed in and can submit a new profile afterwards (including a different type).",
   "me.delete_email_alt": "Prefer email? Send a deletion request from the profile contact address to",
   "me.delete_open": "Delete profile…",
   "me.delete_confirm_prompt": "Type the profile name exactly to confirm: {name}",

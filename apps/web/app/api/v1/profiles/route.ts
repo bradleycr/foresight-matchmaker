@@ -4,7 +4,7 @@ import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema } from "@/lib/api/input"
 import { ok, zodError, badRequest, unauthorized, unavailable } from "@/lib/api/respond"
 import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
-import { persistListing, restoreOwnedProfile, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
+import { persistListing, ensureOwnedListing, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
 import { createSession, getSession } from "@/lib/auth/session"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
 
@@ -20,11 +20,10 @@ export async function POST(req: NextRequest): Promise<Response> {
   const session = await getSession()
   if (!session) return unauthorized("Confirm your email before adding a profile.")
 
-  // One profile per email, decided by the database alone. A cookie can still
-  // name a profile that no longer exists, and refusing on that basis would
-  // block the only recovery someone in that state has left. Restore from Blob
-  // first so a listing created on another instance is not duplicated.
-  await restoreOwnedProfile(session.profileId, session.email)
+  // One profile per email. Cheap restore is not enough — a missing email
+  // pointer with the listing still in the durable corpus used to mint a
+  // second UUID (Cottrell-class re-register). Hydrate before create.
+  await ensureOwnedListing(session.profileId, session.email)
   const existing = getProfilesByEmail(session.email)
   if (existing.length > 0) {
     const current = existing[0]!

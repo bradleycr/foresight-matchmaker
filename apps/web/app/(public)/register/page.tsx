@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { peekLiveSession, RECONCILE_SESSION_PATH } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
+import { ensureOwnedListing } from "@/lib/db/durable"
 import { getT } from "@/lib/i18n/server"
 import { llmEnabled } from "@/lib/llm/client"
 import { magicLinkMode } from "@/lib/auth/mail"
@@ -22,6 +23,13 @@ export default async function RegisterPage({
 }: {
   searchParams: Promise<{ challenge?: string; deleted?: string; next?: string }>
 }) {
+  const session = await getSession()
+  // Verified mailboxes must see a durable listing if one exists — never the
+  // create form for an email that already published on another isolate.
+  if (session) {
+    await ensureOwnedListing(session.profileId, session.email)
+  }
+
   const live = await peekLiveSession()
   const { challenge, deleted, next: rawNext } = await searchParams
   const returnTo = ownedListingRedirect(rawNext)
@@ -31,7 +39,6 @@ export default async function RegisterPage({
     )
   }
 
-  const session = await getSession()
   const { t } = await getT()
   const remmy = llmEnabled()
   const defaultChallengeId = visibleChallengeIdOf(challenge)
