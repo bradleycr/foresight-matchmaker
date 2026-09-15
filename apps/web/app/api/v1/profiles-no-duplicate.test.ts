@@ -18,14 +18,13 @@ vi.mock("next/headers", () => ({
   }),
 }))
 
-const ensureOwnedListing = vi.fn()
-const persistListing = vi.fn(async () => undefined)
+const ensureOwnedListing = vi.fn(async (_id: string | null, _email: string) => undefined)
 vi.mock("@/lib/db/durable", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/db/durable")>()
   return {
     ...actual,
-    ensureOwnedListing: (...args: unknown[]) => ensureOwnedListing(...args),
-    persistListing: (...args: unknown[]) => persistListing(...args),
+    ensureOwnedListing,
+    persistListing: vi.fn(async () => undefined),
   }
 })
 
@@ -47,7 +46,6 @@ describe("POST /profiles refuses a second listing", () => {
     cookieJar.clear()
     ensureOwnedListing.mockReset()
     ensureOwnedListing.mockResolvedValue(undefined)
-    persistListing.mockClear()
   })
 
   it("hydrates ownership before create and returns already when the mailbox is listed", async () => {
