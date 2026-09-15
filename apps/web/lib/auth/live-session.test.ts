@@ -29,7 +29,8 @@ vi.mock("@/lib/auth/session", () => ({
   getSession: (...args: unknown[]) => getSession(...args),
 }))
 
-const { peekLiveSession, redirectIfOwnListingGone, redirectToClearSession, CLEAR_SESSION_PATH } = await import("./live-session")
+const { peekLiveSession, redirectIfOwnListingGone, redirectToClearSession, CLEAR_SESSION_PATH } =
+  await import("./live-session")
 
 beforeEach(() => {
   createSession.mockReset()
@@ -64,6 +65,7 @@ describe("peekLiveSession", () => {
 
     const live = await peekLiveSession()
 
+    expect(restoreOwnedProfile).toHaveBeenCalledWith(null, "owner@example.org")
     expect(live).toMatchObject({
       profile,
       session: { profileId: "profile-1", email: "owner@example.org" },
@@ -71,7 +73,7 @@ describe("peekLiveSession", () => {
     })
   })
 
-  it("uses the profile id in a healthy session without reconciliation", async () => {
+  it("always restores from durable before trusting a local row", async () => {
     const profile = { id: "profile-1", contact_email: "owner@example.org" }
     getSession.mockResolvedValue({
       profileId: "profile-1",
@@ -82,8 +84,47 @@ describe("peekLiveSession", () => {
 
     const live = await peekLiveSession()
 
+    expect(restoreOwnedProfile).toHaveBeenCalledWith("profile-1", "owner@example.org")
     expect(live).toMatchObject({ profile, needsReconcile: false })
-    expect(getProfilesByEmail).not.toHaveBeenCalled()
+  })
+
+  it("reconciles when durable restore replaces a ghost id with the email listing", async () => {
+    const liveListing = { id: "profile-live", contact_email: "owner@example.org" }
+    getSession.mockResolvedValue({
+      profileId: "profile-ghost",
+      email: "owner@example.org",
+      exp: Date.now() + 60_000,
+    })
+    getProfileById.mockReturnValue(null)
+    getProfilesByEmail.mockReturnValue([])
+    restoreOwnedProfile.mockImplementation(async () => {
+      getProfilesByEmail.mockReturnValue([liveListing])
+    })
+
+    const live = await peekLiveSession()
+
+    expect(live).toMatchObject({
+      profile: liveListing,
+      session: { profileId: "profile-live" },
+      needsReconcile: true,
+    })
+  })
+
+  it("ignores a local row whose email does not match the session", async () => {
+    getSession.mockResolvedValue({
+      profileId: "profile-1",
+      email: "owner@example.org",
+      exp: Date.now() + 60_000,
+    })
+    getProfileById.mockReturnValue({ id: "profile-1", contact_email: "other@example.org" })
+    getProfilesByEmail.mockReturnValue([{ id: "profile-2", contact_email: "owner@example.org" }])
+
+    const live = await peekLiveSession()
+
+    expect(live).toMatchObject({
+      profile: { id: "profile-2" },
+      needsReconcile: true,
+    })
   })
 
   it("returns null when the verified email owns no profile", async () => {

@@ -6,8 +6,8 @@ import { rateLimit } from "@/lib/auth/rate-limit"
 import { llmEnabled } from "@/lib/llm/client"
 import { remmyGuideTurn } from "@/lib/llm/remmy-guide"
 import { buildGuideContext, hydrateGuideIntents } from "@/lib/remmy/hydrate-guide"
-import { getProfileById } from "@/lib/db/profiles"
 import { hydrateListings, restoreOwnedProfile } from "@/lib/db/durable"
+import { findOwnedProfile } from "@/lib/auth/live-session"
 import { logEvent } from "@/lib/db/events"
 
 export const dynamic = "force-dynamic"
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   await hydrateListings()
   await restoreOwnedProfile(session.profileId, session.email)
-  const subject = getProfileById(session.profileId)
+  const subject = findOwnedProfile(session)
   if (!subject) return notFound("Your profile no longer exists.")
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))

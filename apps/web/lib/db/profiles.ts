@@ -266,6 +266,39 @@ export function cacheRemoteListings(
 }
 
 /**
+ * Drop a listing from this isolate's SQLite only.
+ *
+ * Used when durable storage says the mailbox owns a different id — a warm
+ * `/tmp` cache can keep a ghost row that makes `/me` bind the wrong UUID
+ * while the directory (full hydrate) still shows the real listing. Never
+ * touches durable storage; never anonymises events (the person still owns
+ * the canonical listing).
+ */
+export function evictLocalProfile(id: string): boolean {
+  if (!getProfileById(id)) return false
+  const db = getDb()
+  db.transaction((tx) => {
+    tx.delete(matches)
+      .where(or(eq(matches.subjectId, id), eq(matches.otherId, id)))
+      .run()
+    tx.delete(intros)
+      .where(or(eq(intros.fromId, id), eq(intros.toId, id)))
+      .run()
+    tx.delete(profiles).where(eq(profiles.id, id)).run()
+  })
+  return true
+}
+
+/**
+ * Keep one local listing for a mailbox; drop every other row for that email.
+ */
+export function evictSiblingLocalProfiles(email: string, keepId: string): void {
+  for (const profile of getProfilesByEmail(email)) {
+    if (profile.id !== keepId) evictLocalProfile(profile.id)
+  }
+}
+
+/**
  * GDPR erasure — hard-delete the profile and every record that names it.
  *
  * Removes: the profile row, match-cache rows in both directions, all

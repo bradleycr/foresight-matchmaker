@@ -10,7 +10,7 @@ import {
   getJointApplicationOutcome,
   deleteProfile,
 } from "@/lib/db/profiles"
-import { forgetListing, persistListing, ensureOwnedListing, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
+import { forgetListing, persistListing, loadOwnedListing, ensureOwnedListing, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
 import { getSession, createSession } from "@/lib/auth/session"
 import { isAdmin } from "@/lib/auth/admin"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
@@ -18,6 +18,18 @@ import { backupProfileByEmail } from "@/lib/ops/profile-backup"
 export const dynamic = "force-dynamic"
 
 type Params = { params: Promise<{ id: string }> }
+
+/**
+ * Verified-email ownership. The cookie id is a hint; the durable email
+ * pointer is the source of truth. A stale UUID in the URL or session must
+ * not 404 when this mailbox still owns a listing.
+ */
+function ownsListing(
+  session: { profileId: string | null; email: string },
+  profile: { id: string; contact_email: string },
+): boolean {
+  return session.email.toLowerCase() === profile.contact_email.toLowerCase()
+}
 
 /**
  * GET /api/v1/profiles/[id]
@@ -34,13 +46,17 @@ export async function GET(_req: NextRequest, { params }: Params): Promise<Respon
   const profile = getProfileById(id)
   if (!profile) return notFound("No profile with that id.")
 
-  const owner = session.profileId === profile.id || session.email.toLowerCase() === profile.contact_email.toLowerCase()
+  const owner = ownsListing(session, profile)
 
   if (owner || (await isAdmin())) {
-    return ok({
+    const res = ok({
       profile,
       joint_application: getJointApplicationOutcome(profile.id),
     })
+    if (owner && session.profileId !== profile.id) {
+      await createSession(profile.id, session.email, res.cookies)
+    }
+    return res
   }
 
   if (profile.visibility === "hidden") return notFound("No profile with that id.")
@@ -59,10 +75,9 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
   const { id } = await params
   const session = await getSession()
   if (!session) return unauthorized()
-  await ensureOwnedListing(id, session.email)
-  const profile = getProfileById(id)
+  const profile = await loadOwnedListing(session.email, id)
   if (!profile) return notFound("No profile with that id.")
-  if (session.profileId !== profile.id) return forbidden("Only the profile owner can edit it.")
+  if (!ownsListing(session, profile)) return forbidden("Only the profile owner can edit it.")
 
   let body: unknown
   try {
@@ -82,7 +97,11 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
       console.error("[durable] persist after outcome failed", { id: profile.id }, error)
       return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
     }
-    return ok({ joint_application: outcome.data.joint_application })
+    const res = ok({ joint_application: outcome.data.joint_application })
+    if (session.profileId !== profile.id) {
+      await createSession(profile.id, session.email, res.cookies)
+    }
+    return res
   }
 
   // The full-edit path.
@@ -122,7 +141,11 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<Respo
     console.error("[durable] persist after update failed", { id: updated.id }, error)
     return unavailable(PERSIST_UNAVAILABLE_MESSAGE)
   }
-  return ok({ profile: updated })
+  const res = ok({ profile: updated })
+  if (session.profileId !== updated.id) {
+    await createSession(updated.id, session.email, res.cookies)
+  }
+  return res
 }
 
 /**
@@ -138,10 +161,9 @@ export async function DELETE(req: NextRequest, { params }: Params): Promise<Resp
   const { id } = await params
   const session = await getSession()
   if (!session) return unauthorized()
-  await ensureOwnedListing(id, session.email)
-  const profile = getProfileById(id)
+  const profile = await loadOwnedListing(session.email, id)
   if (!profile) return notFound("No profile with that id.")
-  if (session.profileId !== profile.id) return forbidden("Only the profile owner can delete it.")
+  if (!ownsListing(session, profile)) return forbidden("Only the profile owner can delete it.")
 
   let body: unknown
   try {

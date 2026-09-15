@@ -4,6 +4,7 @@ import { ok, unauthorized, notFound, zodError, badRequest } from "@/lib/api/resp
 import { getSession } from "@/lib/auth/session"
 import { getProfileById } from "@/lib/db/profiles"
 import { restoreOwnedProfile } from "@/lib/db/durable"
+import { findOwnedProfile } from "@/lib/auth/live-session"
 import { getShortlist } from "@/lib/db/matches"
 import { llmEnabled } from "@/lib/llm/client"
 import { explainMatch, templateRationale } from "@/lib/llm/rationale"
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!session?.profileId) return unauthorized()
 
   await restoreOwnedProfile(session.profileId, session.email)
-  const subject = getProfileById(session.profileId)
+  const subject = findOwnedProfile(session)
   if (!subject) return notFound("Your profile no longer exists.")
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))

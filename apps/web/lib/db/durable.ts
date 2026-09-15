@@ -2,6 +2,7 @@ import { parseStoredProfile, type Profile } from "@rmm/schema"
 import {
   cacheRemoteListing,
   cacheRemoteListings,
+  evictSiblingLocalProfiles,
   getJointApplicationOutcome,
   getProfileById,
   getProfilesByEmail,
@@ -342,33 +343,55 @@ async function rewriteEmailPointer(email: string, profileId: string): Promise<vo
 
 /**
  * Pull one listing into this instance's SQLite. Used when a signed cookie
- * names a profile the local file has never seen.
+ * names a profile the local file has never seen — and when a members-only
+ * GET needs another listing warmed into a cold isolate.
  *
- * Lookup order: cookie id → email pointer → signup register's profile_id.
- * The register is the durable copy of “this mailbox already listed”, so a
- * missing `matchmaker/emails/…` pointer must not look like a new user.
+ * Canonical ownership is the email pointer (one listing per mailbox). Cookie
+ * id is only a hint for *your* listing. A requested id is still fetched so
+ * viewing someone else on a cold isolate keeps working; ghost rows for this
+ * mailbox that disagree with the pointer are dropped so `/me` cannot keep
+ * editing a UUID the directory no longer serves.
+ *
+ * Lookup for ownership: email pointer → cookie id (when it belongs to this
+ * mailbox) → signup register's profile_id.
  */
 export async function restoreOwnedProfile(id: string | null, email: string): Promise<void> {
   if (!durableEnabled()) return
   try {
     await importBlobIntoSupabase()
+
+    // Warm the URL id into cache first (may be another member's listing).
     if (id) {
       const byId = await fetchListingById(id)
-      if (byId) {
-        adoptListing(byId, true)
-        return
-      }
+      if (byId) adoptListing(byId, true)
     }
+
     const byEmail = await fetchListingByEmail(email)
     if (byEmail) {
       adoptListing(byEmail, true)
+      evictSiblingLocalProfiles(email, byEmail.profile.id)
       return
     }
+
+    if (id) {
+      const byId = getProfileById(id)
+      if (byId && byId.contact_email.toLowerCase() === email.toLowerCase()) {
+        evictSiblingLocalProfiles(email, byId.id)
+        try {
+          await rewriteEmailPointer(email, byId.id)
+        } catch (error) {
+          console.error("[durable] rewrite email pointer failed", { email }, error)
+        }
+        return
+      }
+    }
+
     const signup = await fetchSignup(email)
     if (!signup?.profile_id) return
     const bySignup = await fetchListingById(signup.profile_id)
     if (!bySignup) return
     adoptListing(bySignup, true)
+    evictSiblingLocalProfiles(email, bySignup.profile.id)
     try {
       await rewriteEmailPointer(email, bySignup.profile.id)
     } catch (error) {
@@ -384,17 +407,19 @@ export async function restoreOwnedProfile(id: string | null, email: string): Pro
 /**
  * Make sure this isolate has the listing for a verified mailbox.
  *
- * Restore is the cheap path (one email pointer). If that misses — pointer
+ * Restore is the cheap path (email pointer). If that misses — pointer
  * lost, cold SQLite — hydrate the durable corpus so sign-in still binds
  * the profile they already published. Operator demo emails (seed/operators)
  * get a last-resort install so a stage walkthrough never lands on /register.
+ *
+ * A requested id that is missing after restore is fine: callers resolve by
+ * email next. We must not treat “some other local row for this email” as
+ * proof the requested id exists (that was the stale-UUID 404).
  */
 export async function ensureOwnedListing(id: string | null, email: string): Promise<void> {
   await restoreOwnedProfile(id, email)
-  if (id && getProfileById(id)) return
   if (getProfilesByEmail(email).length > 0) return
   await hydrateListings()
-  if (id && getProfileById(id)) return
   if (getProfilesByEmail(email).length > 0) return
 
   const { findOperatorProfileByEmail, installOperatorProfile } = await import("./seed-core")
@@ -412,6 +437,26 @@ export async function ensureOwnedListing(id: string | null, email: string): Prom
     // SQLite still has the row for this isolate; the next claim will retry.
     console.error("[durable] persist operator listing failed", { email }, error)
   }
+}
+
+/**
+ * Listing this verified mailbox may read or edit on this isolate.
+ *
+ * Prefers `requestedId` when that row exists and belongs to the mailbox;
+ * otherwise the email's listing (durable pointer / local cache). This is what
+ * closes “directory shows me, PATCH says No profile with that id.”
+ */
+export async function loadOwnedListing(
+  email: string,
+  requestedId: string | null,
+): Promise<Profile | null> {
+  await ensureOwnedListing(requestedId, email)
+  const normalised = email.toLowerCase()
+  if (requestedId) {
+    const byId = getProfileById(requestedId)
+    if (byId && byId.contact_email.toLowerCase() === normalised) return byId
+  }
+  return getProfilesByEmail(email)[0] ?? null
 }
 
 let lastHydrateAt = 0

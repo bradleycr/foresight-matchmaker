@@ -33,13 +33,16 @@ export interface LiveSession {
 /**
  * Resolve ownership by the signed profile id first, then by verified email.
  *
- * The fallback closes an important gap: an email can own a profile even when
- * an older or partially-created session still carries `profileId: null`.
+ * The id must belong to this mailbox — a warm isolate can keep a ghost row
+ * whose UUID no longer matches the durable email pointer. Falling back by
+ * email closes that gap (and the case where the cookie still has
+ * `profileId: null` after a partial create).
  */
 export function findOwnedProfile(session: Session): Profile | null {
+  const email = session.email.toLowerCase()
   if (session.profileId) {
     const profile = getProfileById(session.profileId)
-    if (profile) return profile
+    if (profile && profile.contact_email.toLowerCase() === email) return profile
   }
   return getProfilesByEmail(session.email)[0] ?? null
 }
@@ -47,11 +50,10 @@ export function findOwnedProfile(session: Session): Profile | null {
 export const peekLiveSession = cache(async function peekLiveSession(): Promise<LiveSession | null> {
   const session = await getSession()
   if (!session) return null
+  // Always refill from durable first. Skipping when a local row exists left
+  // ghost UUIDs bound to /me while the directory showed the real listing.
+  await restoreOwnedProfile(session.profileId, session.email)
   let profile = findOwnedProfile(session)
-  if (!profile) {
-    await restoreOwnedProfile(session.profileId, session.email)
-    profile = findOwnedProfile(session)
-  }
   if (!profile) {
     await hydrateListings()
     profile = findOwnedProfile(session)
