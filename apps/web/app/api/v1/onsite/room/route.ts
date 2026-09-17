@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { ok, badRequest, unauthorized } from "@/lib/api/respond"
-import { resolveLiveSession } from "@/lib/auth/live-session"
+import { findOwnedProfile, resolveLiveSession } from "@/lib/auth/live-session"
+import { getSession } from "@/lib/auth/session"
 import { hydrateEvents, hydrateListings } from "@/lib/db/durable"
 import { listEvents } from "@/lib/db/events"
 import { getShortlist } from "@/lib/db/matches"
@@ -27,21 +28,33 @@ export async function GET(req: NextRequest): Promise<Response> {
   if (raw && !isOnsiteCitySlug(raw)) return badRequest("Unknown room.")
   const city = isOnsiteCitySlug(raw) ? raw : liveFeedCity()
 
-  const live = await resolveLiveSession()
-  if (!live) return unauthorized()
+  const session = await getSession()
+  if (!session) return unauthorized()
 
   const { t } = await getT()
   // Listings keep the standard debounce; events refresh faster so a new
   // arrival reaches every isolate without re-pulling the whole corpus.
   await Promise.all([hydrateListings(), hydrateEvents({ maxStaleMs: 30_000 })])
 
+  // Resolve against the warm cache first. `resolveLiveSession` reads the
+  // durable email pointer on every call, and a room full of phones polling
+  // all evening must not pay for that once the listings are local. The
+  // durable path stays as the fallback for the poll that arrives before
+  // this isolate has the listing.
+  let profile = findOwnedProfile(session)
+  if (!profile) {
+    const live = await resolveLiveSession()
+    if (!live) return unauthorized()
+    profile = live.profile
+  }
+
   return ok(
     buildOnsiteRoom({
       city,
-      viewerId: live.profile.id,
+      viewerId: profile.id,
       profiles: listProfiles(),
       events: listEvents(),
-      shortlist: getShortlist(live.profile.id),
+      shortlist: getShortlist(profile.id),
       t,
     }),
   )

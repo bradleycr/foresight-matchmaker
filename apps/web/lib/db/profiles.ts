@@ -9,7 +9,7 @@ import {
 } from "@rmm/schema"
 import { getDb } from "./client"
 import { profiles, matches, intros, authTokens } from "./schema"
-import { recomputeMatchesFor } from "./matches"
+import { recomputeAllMatches, recomputeMatchesFor } from "./matches"
 import { anonymiseEventsFor, logEvent } from "./events"
 import { isChallengeVisible } from "@/lib/challenges/visibility"
 
@@ -240,6 +240,18 @@ export function cacheRemoteListing(
 }
 
 /**
+ * Above this many first-time listings in one pull, a single full rebuild is
+ * cheaper than one targeted rescore each — the targeted path re-reads the
+ * whole corpus per profile.
+ */
+const BULK_RESCORE_THRESHOLD = 10
+
+/** Cheaper than counting: the pull only needs to know empty from non-empty. */
+function hasAnyProfile(): boolean {
+  return Boolean(getDb().select({ id: profiles.id }).from(profiles).limit(1).get())
+}
+
+/**
  * Adopt a whole durable pull in one commit.
  *
  * Row-at-a-time adoption paid a separate SQLite transaction per listing, so a
@@ -249,20 +261,39 @@ export function cacheRemoteListings(
   listings: readonly { profile: Profile; joint_application: string | null }[],
 ): void {
   if (listings.length === 0) return
+
+  const coldStart = !hasAnyProfile()
+  const firstSeen: string[] = []
+
   getDb().transaction(() => {
     for (const listing of listings) {
       // One unreadable row must not roll back the pull, which is what an
       // uncaught throw inside a transaction would do.
       try {
+        const known = Boolean(getProfileById(listing.profile.id))
         cacheRemoteListing(listing.profile, {
           jointApplication: listing.joint_application,
           recompute: false,
         })
+        if (!known) firstSeen.push(listing.profile.id)
       } catch (error) {
         console.error("[profiles] skip listing during bulk adopt", { id: listing.profile.id }, error)
       }
     }
   })
+
+  // Scoring is deliberately skipped inside the commit, and on a cold isolate
+  // skipped entirely — the first shortlist read fills what it needs. But a
+  // warm isolate meeting a brand-new listing (someone registering at the
+  // door) is a different case: nobody's cached shortlist mentions them, and
+  // no read will ever notice, because every existing profile is already
+  // scored. Score them now or they stay invisible all evening.
+  if (coldStart || firstSeen.length === 0) return
+  if (firstSeen.length > BULK_RESCORE_THRESHOLD) {
+    recomputeAllMatches()
+    return
+  }
+  for (const id of firstSeen) recomputeMatchesFor(id)
 }
 
 /**

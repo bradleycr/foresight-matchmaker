@@ -900,7 +900,7 @@
   "onsite.room.title": "Im Raum",
   "onsite.room.count": "{n} hier",
   "onsite.room.tab_matches": "Ihre Matches ({n})",
-  "onsite.room.tab_everyone": "Alle ({n})",
+  "onsite.room.tab_everyone": "Alle anderen ({n})",
   "onsite.room.strong_on": "Stark bei",
   "onsite.room.score_a11y": "Match-Score {n} von 100",
   "onsite.room.matches_empty": "Noch keine Matches hier. Der Raum füllt sich — die Liste aktualisiert sich selbst.",

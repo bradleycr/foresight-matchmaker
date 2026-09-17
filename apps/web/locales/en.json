@@ -899,7 +899,7 @@
   "onsite.room.title": "In the room",
   "onsite.room.count": "{n} here",
   "onsite.room.tab_matches": "Your matches ({n})",
-  "onsite.room.tab_everyone": "Everyone ({n})",
+  "onsite.room.tab_everyone": "Everyone else ({n})",
   "onsite.room.strong_on": "Strong on",
   "onsite.room.score_a11y": "Match score {n} out of 100",
   "onsite.room.matches_empty": "No matches here yet. The room is still filling — this updates on its own.",
