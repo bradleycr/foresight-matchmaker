@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useT } from "@/lib/i18n/client"
 import { Button } from "@/components/ui/primitives"
+import { HereRoomBoard } from "@/components/onsite/here-room-board"
 import type { OnsiteCitySlug } from "@/lib/onsite/cities"
 
 type Phase = "joining" | "done" | "error"
@@ -96,6 +97,8 @@ export function HereRoomPanel({
       <p className="mt-4 text-lg leading-relaxed">
         {hidden ? t("onsite.here.done_hidden", { name: orgName }) : t("onsite.here.done_body", { name: orgName })}
       </p>
+
+      <HereRoomBoard city={city} />
 
       <div className="mt-8 flex flex-col gap-3">
         <Link

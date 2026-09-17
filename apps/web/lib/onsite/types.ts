@@ -28,3 +28,23 @@ export interface OnsiteFeed {
   people: OnsiteCard[]
   spotlight: OnsiteSpotlight | null
 }
+
+/** A shortlist match who is also standing in the room. */
+export interface OnsiteRoomMatch extends OnsiteCard {
+  score: number
+  /** Strongest factors, already localised — a phone card cannot hold prose. */
+  reasons: string[]
+}
+
+/**
+ * The phone view after check-in. `count` matches the projector so the two
+ * screens never disagree; `everyone` excludes the viewer, who already knows
+ * they are here.
+ */
+export interface OnsiteRoom {
+  city: OnsiteCitySlug
+  city_label: string
+  count: number
+  matches: OnsiteRoomMatch[]
+  everyone: OnsiteCard[]
+}
