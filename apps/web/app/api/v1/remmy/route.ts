@@ -3,7 +3,7 @@ import { z } from "zod"
 import { ok, badRequest, unauthorized, zodError } from "@/lib/api/respond"
 import { getSession } from "@/lib/auth/session"
 import { rateLimit } from "@/lib/auth/rate-limit"
-import { llmEnabled } from "@/lib/llm/client"
+import { llmEnabled, llmReady } from "@/lib/llm/client"
 import { remmyTurn, remmyTurnStream } from "@/lib/llm/remmy"
 import { logEvent } from "@/lib/db/events"
 
@@ -33,6 +33,12 @@ export async function POST(req: NextRequest): Promise<NextResponse | Response> {
   if (!llmEnabled()) {
     return NextResponse.json(
       { error: "Remmy is not available on this deployment. Use the traditional form." },
+      { status: 503 },
+    )
+  }
+  if (!(await llmReady())) {
+    return NextResponse.json(
+      { error: "Remmy is updating right now. Use the traditional form, and check back later." },
       { status: 503 },
     )
   }

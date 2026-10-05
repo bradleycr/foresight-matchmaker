@@ -17,9 +17,11 @@ import { RemmyChat } from "./chat"
 export function MeEditor({
   profile,
   remmyEnabled,
+  remmyMaintenance = false,
 }: {
   profile: Profile
   remmyEnabled: boolean
+  remmyMaintenance?: boolean
 }) {
   const t = useT()
   const formRef = useRef<ProfileFormHandle>(null)
@@ -44,6 +46,11 @@ export function MeEditor({
 
   return (
     <div className="space-y-4">
+      {remmyMaintenance ? (
+        <p role="status" className="border border-rule-strong bg-paper-shade px-4 py-3 text-sm leading-relaxed">
+          {t("remmy.maintenance")}
+        </p>
+      ) : null}
       {remmyEnabled && (
         <div className="flex flex-wrap items-center justify-between gap-3 border border-rule-strong bg-paper-shade px-4 py-3">
           <div>

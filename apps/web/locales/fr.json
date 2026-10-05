@@ -723,6 +723,7 @@
   "remmy.thinking": "Remmy réfléchit…",
   "remmy.thinking_hint": "Cela peut prendre quelques secondes. Le chat reste ici.",
   "remmy.error": "Remmy n’a pas pu répondre pour le moment. Réessayez, ou passez au formulaire.",
+  "remmy.maintenance": "Remmy est en cours de mise à jour. Utilisez le formulaire pour l’instant, et revenez plus tard.",
   "remmy.input_label": "Message à Remmy",
   "remmy.input_placeholder": "Collez un site, le texte À propos, ou répondez à Remmy…",
   "remmy.hint_verify": "Publiez depuis la carte dès qu’elle apparaît.",

@@ -724,6 +724,7 @@
   "remmy.thinking": "Remmy denkt nach…",
   "remmy.thinking_hint": "Das kann ein paar Sekunden dauern. Der Chat bleibt hier.",
   "remmy.error": "Remmy konnte gerade nicht antworten. Versuchen Sie es erneut oder wechseln Sie zum Formular.",
+  "remmy.maintenance": "Remmy wird gerade aktualisiert. Nutzen Sie vorerst das Formular und schauen Sie später wieder vorbei.",
   "remmy.input_label": "Nachricht an Remmy",
   "remmy.input_placeholder": "Website, About-Text oder Remmys Frage beantworten…",
   "remmy.hint_verify": "Veröffentlichen über die Karte, sobald sie erscheint.",

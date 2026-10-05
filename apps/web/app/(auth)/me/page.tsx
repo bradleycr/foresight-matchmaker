@@ -5,7 +5,7 @@ import {
   RECONCILE_SESSION_PATH,
 } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
-import { llmEnabled } from "@/lib/llm/client"
+import { llmEnabled, llmReady } from "@/lib/llm/client"
 import { MeEditor } from "@/components/remmy/me-editor"
 import { OutcomeReport } from "@/components/outcome-report"
 import { SignOutButton } from "@/components/sign-out-button"
@@ -31,6 +31,8 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
   const { saved, created } = await searchParams
   const profile = live.profile
   const joint = getJointApplicationOutcome(profile.id) as "yes" | "no" | "not_yet" | null
+  const remmyConfigured = llmEnabled()
+  const remmy = remmyConfigured ? await llmReady() : false
 
   if (created) return <ProfileCompleteChoices profile={profile} t={t} />
 
@@ -56,7 +58,11 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
       <OutcomeReport profileId={profile.id} initial={joint} />
 
       <div className="mt-8">
-        <MeEditor profile={profile} remmyEnabled={llmEnabled()} />
+        <MeEditor
+          profile={profile}
+          remmyEnabled={remmy}
+          remmyMaintenance={remmyConfigured && !remmy}
+        />
       </div>
 
       <DeleteAccountPanel profileId={profile.id} orgName={profile.org_name} privacyEmail={PRIVACY_EMAIL} />

@@ -3,7 +3,7 @@ import { peekLiveSession, RECONCILE_SESSION_PATH } from "@/lib/auth/live-session
 import { getSession } from "@/lib/auth/session"
 import { ensureOwnedListing } from "@/lib/db/durable"
 import { getT } from "@/lib/i18n/server"
-import { llmEnabled } from "@/lib/llm/client"
+import { llmEnabled, llmReady } from "@/lib/llm/client"
 import { magicLinkMode } from "@/lib/auth/mail"
 import { RegisterEntry } from "@/components/remmy/register-entry"
 import { SigninForm } from "@/components/signin-form"
@@ -40,7 +40,6 @@ export default async function RegisterPage({
   }
 
   const { t } = await getT()
-  const remmy = llmEnabled()
   const defaultChallengeId = visibleChallengeIdOf(challenge)
   const afterCreateHref = isHerePath(safeNextPath(rawNext)) ? safeNextPath(rawNext)! : undefined
   const nextParams = new URLSearchParams()
@@ -73,6 +72,11 @@ export default async function RegisterPage({
     )
   }
 
+  // Probe only when someone can actually open Remmy — not on the verify gate.
+  const remmyConfigured = llmEnabled()
+  const remmy = remmyConfigured ? await llmReady() : false
+  const remmyMaintenance = remmyConfigured && !remmy
+
   return (
     <div className="py-6">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("register.title")}</h1>
@@ -87,8 +91,13 @@ export default async function RegisterPage({
         <DirectoryDisclaimer className="mt-6" />
       )}
       <OneListingNote className="mt-4" />
-      {!remmy ? (
+      {!remmy && !remmyMaintenance ? (
         <p className="mt-4 max-w-xl text-sm text-ink-soft">{t("register.explainer")}</p>
+      ) : null}
+      {remmyMaintenance ? (
+        <p role="status" className="mt-4 max-w-xl border border-rule-strong bg-paper-shade px-3 py-2 text-sm leading-relaxed">
+          {t("remmy.maintenance")}
+        </p>
       ) : null}
       <p className="mt-4 max-w-xl text-sm text-ink-soft">
         {t("register.verified_as", { email: session.email })}

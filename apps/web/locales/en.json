@@ -747,6 +747,7 @@
   "remmy.thinking": "Remmy is thinking…",
   "remmy.thinking_hint": "This can take a few seconds. The chat stays here.",
   "remmy.error": "Remmy could not respond just now. Try again, or switch to the form.",
+  "remmy.maintenance": "Remmy is updating right now. Use the form instead, and check back later.",
   "remmy.input_label": "Message to Remmy",
   "remmy.input_placeholder": "Paste a website, About-page text, or answer Remmy’s question…",
   "remmy.hint_verify": "Publish from the card when it appears.",

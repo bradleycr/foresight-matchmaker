@@ -3,7 +3,7 @@ import { z } from "zod"
 import { ok, badRequest, unauthorized, zodError, notFound } from "@/lib/api/respond"
 import { getSession } from "@/lib/auth/session"
 import { rateLimit } from "@/lib/auth/rate-limit"
-import { llmEnabled } from "@/lib/llm/client"
+import { llmEnabled, llmReady } from "@/lib/llm/client"
 import { remmyGuideTurn } from "@/lib/llm/remmy-guide"
 import { buildGuideContext, hydrateGuideIntents } from "@/lib/remmy/hydrate-guide"
 import { hydrateListings, restoreOwnedProfile } from "@/lib/db/durable"
@@ -31,6 +31,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!llmEnabled()) {
     return NextResponse.json(
       { error: "Remmy is not available on this deployment. Use Your matches for the classic list." },
+      { status: 503 },
+    )
+  }
+  if (!(await llmReady())) {
+    return NextResponse.json(
+      { error: "Remmy is updating right now. Use Your matches for the classic list, and check back later." },
       { status: 503 },
     )
   }

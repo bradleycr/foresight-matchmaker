@@ -134,6 +134,7 @@ RATE_LIMIT_PER_24H=20
 # LLM_BASE_URL=https://dev1.ycluster.net/v1
 # LLM_MODEL=deepseek-v4-flash
 # LLM_API_KEY=             # mint at https://dev1.ycluster.net/admin/settings/api-keys
+# LLM_MODEL_FALLBACKS=glm-5.3-flash,nemotron-3-nano-omni,mlx-community/Kimi-K2.6-mlx-DQ3_K_M-q8
 ```
 
 Do **not** set `DATABASE_PATH` in `.env` — `docker-compose.yml` already points at `/data/app.db`.

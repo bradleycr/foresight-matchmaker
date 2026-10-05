@@ -73,6 +73,7 @@ revoke and recreate if lost).
 | `LLM_BASE_URL` | `https://dev1.ycluster.net/v1` |
 | `LLM_API_KEY` | `sk-…` gateway key (env only — never commit) |
 | `LLM_MODEL` | `deepseek-v4-flash` |
+| `LLM_MODEL_FALLBACKS` | `glm-5.3-flash,nemotron-3-nano-omni,mlx-community/Kimi-K2.6-mlx-DQ3_K_M-q8` (optional; built-in defaults match) |
 
 Existing client: `apps/web/lib/llm/client.ts` already posts to
 `${LLM_BASE_URL}/chat/completions` with `Authorization: Bearer …`. Prefill and
