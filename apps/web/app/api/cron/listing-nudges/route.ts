@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { cronAuthorized } from "@/lib/nudge/cron-auth"
+import { syncResendListingNudges } from "@/lib/nudge/resend-sync"
 import { runListingNudges } from "@/lib/nudge/run"
 
 export const dynamic = "force-dynamic"
@@ -16,7 +17,8 @@ export async function GET(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 })
   }
 
+  const sync = await syncResendListingNudges({ maxPages: 20 })
   const result = await runListingNudges()
-  console.info("[nudge] listing drip", result)
-  return NextResponse.json(result, { headers: { "Cache-Control": "private, no-store" } })
+  console.info("[nudge] listing drip", { sync, ...result })
+  return NextResponse.json({ sync, ...result }, { headers: { "Cache-Control": "private, no-store" } })
 }

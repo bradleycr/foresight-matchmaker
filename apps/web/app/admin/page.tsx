@@ -16,6 +16,7 @@ import { durableEnabled } from "@/lib/db/durable-store"
 import { mailConfigured } from "@/lib/auth/mail"
 
 export const dynamic = "force-dynamic"
+export const maxDuration = 60
 
 /**
  * /admin — operator desk for the whole app: accounts, and links into
@@ -34,7 +35,7 @@ export default async function AdminHubPage({
   }
 
   await hydrateListings()
-  await syncResendListingNudges()
+  await syncResendListingNudges({ maxPages: 15 })
   const [signups, autoNudge, sentKeys, optedOut] = await Promise.all([
     collectSignupRows(),
     autoNudgeByProgramme(),

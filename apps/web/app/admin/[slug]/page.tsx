@@ -17,6 +17,7 @@ import { durableEnabled } from "@/lib/db/durable-store"
 import { mailConfigured } from "@/lib/auth/mail"
 
 export const dynamic = "force-dynamic"
+export const maxDuration = 60
 
 /**
  * /admin/{slug} — reporting for one programme. The app-wide desk is /admin.
@@ -41,7 +42,7 @@ export default async function ProgrammeAdminPage({
   }
 
   const qs = new URLSearchParams({ challenge: challenge.id })
-  await syncResendListingNudges()
+  await syncResendListingNudges({ maxPages: 15 })
   const [{ metrics, signups }, autoNudge, sentKeys, optedOut] = await Promise.all([
     buildProgrammeReport(challenge.id),
     autoNudgeByProgramme(),
