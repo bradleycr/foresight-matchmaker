@@ -34,7 +34,6 @@ import {
   type Profile,
 } from "@rmm/schema"
 import { challengeById, isApplicationChallenge } from "@/lib/challenges/catalog"
-import { visibleChallengeIds } from "@/lib/challenges/visibility"
 import { useT, useLocale } from "@/lib/i18n/client"
 import { Button, Field, Input, Select, Textarea } from "@/components/ui/primitives"
 import { EnumChips, EnumSelect } from "./enum-controls"
@@ -447,6 +446,7 @@ export function ProfileForm({
   initialSnapshot,
   highlightGapsOnMount = false,
   defaultChallengeId = DEFAULT_CHALLENGE_ID,
+  visibleChallengeIds: challengeOptions,
   lockedEmail,
   onSnapshotChange,
   onPublished,
@@ -464,6 +464,8 @@ export function ProfileForm({
   highlightGapsOnMount?: boolean
   /** Programme selected on /register?challenge=… */
   defaultChallengeId?: ChallengeId
+  /** Programmes this visitor may pick — from the server, includes demo unlock. */
+  visibleChallengeIds?: readonly ChallengeId[]
   /** Confirmed address — the listing is bound to this, not typed again. */
   lockedEmail?: string
   onSnapshotChange?: (snapshot: Record<string, unknown>) => void
@@ -471,6 +473,7 @@ export function ProfileForm({
   /** After first publish — room check-in instead of /me. */
   afterCreateHref?: string
 }) {
+  const visibleChallengeIds = challengeOptions ?? [defaultChallengeId]
   const t = useT()
   const locale = useLocale()
   const [state, setState] = useState<FormState>(() => {
@@ -761,11 +764,11 @@ export function ProfileForm({
       {/* Programme first — schema flavour follows. Kind is fixed after create. */}
       {isCreate ? (
         <>
-          {visibleChallengeIds().length > 1 ? (
+          {visibleChallengeIds.length > 1 ? (
             <EnumChips
               label={t("field.challenge")}
               group="challenge"
-              options={visibleChallengeIds()}
+              options={visibleChallengeIds}
               value={[state.challenge_id]}
               onChange={(v) => {
                 const next = v.filter((id) => id !== state.challenge_id)[0] as ChallengeId | undefined

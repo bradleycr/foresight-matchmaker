@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth/session"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { signInHref } from "@/lib/auth/next-path"
 import { directoryHref, isApplicationChallenge } from "@/lib/challenges/catalog"
-import { browseDirectoryPath, visibleChallenges } from "@/lib/challenges/visibility"
+import { browseDirectoryPath, requestDemoUnlock, visibleChallenges } from "@/lib/challenges/visibility"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { ProgrammePreviewNotice, ProgrammeStatusTag } from "@/components/programme-status"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
@@ -32,13 +32,14 @@ export default async function DirectoryPage({
 
   await hydrateListings()
 
+  const unlock = await requestDemoUnlock()
   const { challenge: raw } = await searchParams
-  const visible = visibleChallenges()
+  const visible = visibleChallenges(unlock)
   const selected = raw ? visible.find((c) => c.id === raw) : undefined
 
   if (!selected) {
     const live = await peekLiveSession()
-    const dest = browseDirectoryPath(live?.profile.challenge_id)
+    const dest = browseDirectoryPath(live?.profile.challenge_id, unlock)
     if (dest !== "/directory") redirect(dest)
 
     const { t } = await getT()
@@ -88,6 +89,7 @@ export default async function DirectoryPage({
   const profiles = listDirectoryProfiles({
     includeAuthenticatedOnly: true,
     challengeId: selected.id,
+    unlock,
   }) as unknown as DirectoryProfile[]
   const name = t(`challenge.${selected.id}.name`)
 
@@ -108,7 +110,11 @@ export default async function DirectoryPage({
           applyLabel={t(`challenge.${selected.id}.host_link`)}
         />
       ) : null}
-      <DirectoryBrowser profiles={profiles} challengeId={selected.id} />
+      <DirectoryBrowser
+        profiles={profiles}
+        challengeId={selected.id}
+        siblings={visible.map((c) => ({ id: c.id, slug: c.slug }))}
+      />
     </div>
   )
 }

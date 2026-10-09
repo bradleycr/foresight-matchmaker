@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
 import { CHALLENGES, challengeBySlug, isApplicationChallenge, sessionUrl, type ChallengeDef } from "@/lib/challenges/catalog"
-import { isChallengeVisible } from "@/lib/challenges/visibility"
+import { isChallengeVisible, requestDemoUnlock } from "@/lib/challenges/visibility"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { ListingCounts } from "@/components/listing-counts"
 import { ProgrammePreviewNotice } from "@/components/programme-status"
@@ -18,9 +18,10 @@ export function generateStaticParams() {
   return CHALLENGES.map((c) => ({ slug: c.slug }))
 }
 
-function visibleChallenge(slug: string): ChallengeDef | undefined {
+async function visibleChallenge(slug: string): Promise<ChallengeDef | undefined> {
   const challenge = challengeBySlug(slug)
-  if (!challenge || !isChallengeVisible(challenge.id)) return undefined
+  const unlock = await requestDemoUnlock()
+  if (!challenge || !isChallengeVisible(challenge.id, unlock)) return undefined
   return challenge
 }
 
@@ -30,7 +31,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const challenge = visibleChallenge(slug)
+  const challenge = await visibleChallenge(slug)
   if (!challenge) return {}
   const { t } = await getT()
   return {
@@ -50,7 +51,7 @@ export default async function ChallengePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const challenge = visibleChallenge(slug)
+  const challenge = await visibleChallenge(slug)
   if (!challenge) notFound()
 
   const [{ t }, live] = await Promise.all([getT(), peekLiveSession()])

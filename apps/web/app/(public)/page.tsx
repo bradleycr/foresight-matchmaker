@@ -3,7 +3,7 @@ import { getT } from "@/lib/i18n/server"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
 import { signInHref } from "@/lib/auth/next-path"
-import { browseDirectoryPath, visibleChallenges } from "@/lib/challenges/visibility"
+import { browseDirectoryPath, requestDemoUnlock, visibleChallenges } from "@/lib/challenges/visibility"
 import { isApplicationChallenge } from "@/lib/challenges/catalog"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { ProgrammeStatusTag } from "@/components/programme-status"
@@ -31,10 +31,14 @@ export default async function LandingPage({
   const session = live ? live.session : await getSession()
   await corpus
 
+  const unlock = await requestDemoUnlock()
+  const programmes = visibleChallenges(unlock)
   const byChallenge = countVisibleProfilesByChallenge()
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
-  const directoryHref = session ? browseDirectoryPath(live?.profile.challenge_id) : signInHref("/directory")
-  const profileHref = live ? "/me" : "/register"
+  const directoryHref = session
+    ? browseDirectoryPath(live?.profile.challenge_id, unlock)
+    : signInHref("/directory")
+  const profileHref = live ? "/me" : `/register?challenge=${programmes[0]?.id ?? "recoding_medicine"}`
   const profileLabel = live ? t("nav.me") : t("nav.register")
 
   return (
@@ -80,7 +84,7 @@ export default async function LandingPage({
         </h2>
 
         <ul className="mt-6 grid gap-4">
-          {visibleChallenges().map((challenge) => {
+          {programmes.map((challenge) => {
             const counts = byChallenge[challenge.id] ?? empty
             return (
               <li key={challenge.id}>

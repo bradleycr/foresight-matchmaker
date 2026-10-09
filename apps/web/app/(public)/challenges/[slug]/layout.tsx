@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import { ProgrammeTheme } from "@/components/programme-theme"
 import { challengeBySlug } from "@/lib/challenges/catalog"
-import { isChallengeVisible } from "@/lib/challenges/visibility"
+import { isChallengeVisible, requestDemoUnlock } from "@/lib/challenges/visibility"
 import { challengeTheme } from "@/lib/challenges/themes"
 
 /** Programme pages tint the full viewport — not a boxed section in main. */
@@ -14,7 +14,8 @@ export default async function ChallengeLayout({
 }) {
   const { slug } = await params
   const challenge = challengeBySlug(slug)
-  if (!challenge || !isChallengeVisible(challenge.id)) notFound()
+  const unlock = await requestDemoUnlock()
+  if (!challenge || !isChallengeVisible(challenge.id, unlock)) notFound()
 
   const theme = challengeTheme(challenge.id)
 

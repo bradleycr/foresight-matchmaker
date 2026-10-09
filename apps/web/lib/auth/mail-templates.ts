@@ -291,6 +291,24 @@ export function renderProfileNudgeEmail(
   )
 }
 
+/** Published but Hidden — partners cannot see them in the directory. */
+export function renderHiddenListingEmail(): { subject: string; text: string; html: string } {
+  const deadline = `Reminder: Recoding Medicine applications close ${RECODING_DEADLINE}.`
+  const cta = `${SITE}/signin?next=${encodeURIComponent("/me")}`
+  return renderListingNudgeEmail(
+    {
+      subject: "Your Recoding Medicine listing is hidden",
+      preheader: deadline,
+      deadlineLead: deadline,
+      title: "Your listing is hidden",
+      body: "You published a Recoding Medicine profile, but visibility is set to Hidden. Other members cannot see you in the directory or on their shortlists. Sign in, open Visibility, and switch to Signed-in users (or Public) if you want partners to find you before the deadline.",
+      button: "Change visibility",
+      ignore: "If you meant to stay hidden, ignore this. If you do not want another reminder, reply to this email and we will stop.",
+    },
+    cta,
+  )
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

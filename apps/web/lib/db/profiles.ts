@@ -12,6 +12,7 @@ import { profiles, matches, intros, authTokens } from "./schema"
 import { recomputeAllMatches, recomputeMatchesFor } from "./matches"
 import { anonymiseEventsFor, logEvent } from "./events"
 import { isChallengeVisible } from "@/lib/challenges/visibility"
+import type { DemoUnlock } from "@/lib/challenges/demo-unlock"
 
 /**
  * Profile repository. Every write path funnels through `saveProfile`, which
@@ -89,13 +90,17 @@ export function getJointApplicationOutcome(id: string): string | null {
  * `authenticated_only` listings.
  */
 export function listDirectoryProfiles(
-  opts: { includeAuthenticatedOnly?: boolean; challengeId?: string } = {},
+  opts: {
+    includeAuthenticatedOnly?: boolean
+    challengeId?: string
+    unlock?: DemoUnlock | null
+  } = {},
 ): PublicProfile[] {
   return listProfiles()
     .filter((p) => {
       if (p.visibility === "hidden") return false
       const challengeId = p.challenge_id ?? "recoding_medicine"
-      if (!isChallengeVisible(challengeId)) return false
+      if (!isChallengeVisible(challengeId, opts.unlock ?? null)) return false
       if (opts.challengeId && challengeId !== opts.challengeId) return false
       if (p.visibility === "public") return true
       if (p.visibility === "authenticated_only") return opts.includeAuthenticatedOnly === true

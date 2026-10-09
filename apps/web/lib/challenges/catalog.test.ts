@@ -40,6 +40,13 @@ describe("visibility", () => {
     // In test env (not production), preview programmes are on by default
     expect(isChallengeVisible("ai_safety_berlin")).toBe(true)
   })
+
+  it("solo demo unlock hides Recoding Medicine for that browser", () => {
+    const unlock = { programme: "ai_safety_berlin" as const, solo: true }
+    expect(isChallengeVisible("ai_safety_berlin", unlock)).toBe(true)
+    expect(isChallengeVisible("recoding_medicine", unlock)).toBe(false)
+    expect(visibleChallenges(unlock).map((c) => c.id)).toEqual(["ai_safety_berlin"])
+  })
 })
 
 describe("programmeAutoNudge", () => {

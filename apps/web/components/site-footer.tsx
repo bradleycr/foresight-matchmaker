@@ -4,12 +4,12 @@ import { contactEmail } from "@/lib/contact"
 import { BugReportMailto } from "./bug-report"
 import { PartnerLogos } from "./partner-logos"
 import { PLATFORM } from "@/lib/challenges/catalog"
-import { visibleChallenges } from "@/lib/challenges/visibility"
+import { requestDemoUnlock, visibleChallenges } from "@/lib/challenges/visibility"
 
 /** Site colophon: Foresight operates the platform. */
 export async function SiteFooter() {
   const { t } = await getT()
-  const programmes = visibleChallenges()
+  const programmes = visibleChallenges(await requestDemoUnlock())
   const inbox = contactEmail()
   const closing = programmes.find((c) => c.deadlineLabel)
 

@@ -29,11 +29,13 @@ function toChatMessages(rows: RemmyDraftMessage[]): RemmyChatMessage[] {
 export function RegisterEntry({
   remmyEnabled,
   defaultChallengeId,
+  visibleChallengeIds,
   verifiedEmail,
   afterCreateHref,
 }: {
   remmyEnabled: boolean
   defaultChallengeId?: ChallengeId
+  visibleChallengeIds?: readonly ChallengeId[]
   verifiedEmail: string
   afterCreateHref?: string
 }) {
@@ -263,6 +265,7 @@ export function RegisterEntry({
           initialSnapshot={initialForm}
           highlightGapsOnMount={spotlightSeed}
           defaultChallengeId={defaultChallengeId}
+          visibleChallengeIds={visibleChallengeIds}
           lockedEmail={verifiedEmail}
           onSnapshotChange={setFormSnapshot}
           onPublished={clearRegisterDraft}

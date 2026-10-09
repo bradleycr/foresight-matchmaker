@@ -9,7 +9,6 @@ import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Chip, Input, Select, Tag, chipClassName } from "@/components/ui/primitives"
 import { directoryHref } from "@/lib/challenges/catalog"
-import { visibleChallenges } from "@/lib/challenges/visibility"
 
 /**
  * The directory browser. One programme's redacted corpus arrives as a prop
@@ -78,18 +77,17 @@ function rowFigure(p: DirectoryProfile, t: ReturnType<typeof useT>): string {
 export function DirectoryBrowser({
   profiles,
   challengeId,
+  siblings = [],
 }: {
   profiles: DirectoryProfile[]
   challengeId: ChallengeId
+  /** Sister programmes from the server — includes cookie unlocks. */
+  siblings?: readonly { id: ChallengeId; slug: string }[]
 }) {
   const t = useT()
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
-
-  // Sister directories to offer as tabs. With one programme there is nowhere
-  // to switch to, so the row stays out of the way.
-  const siblings = visibleChallenges()
 
   const filters: Filters = {
     q: params.get("q") ?? "",

@@ -3,7 +3,7 @@ import { isAdmin } from "@/lib/auth/admin"
 import { hydrateListings } from "@/lib/db/durable"
 import { collectSignupRows } from "@/lib/db/signups"
 import { getT } from "@/lib/i18n/server"
-import { CHALLENGES } from "@/lib/challenges/catalog"
+import { visibleChallenges } from "@/lib/challenges/visibility"
 import { ProgrammeStatusTag } from "@/components/programme-status"
 import { SignupList } from "@/components/admin/signup-list"
 import { AdminLoginForm } from "@/components/admin/login-form"
@@ -36,6 +36,9 @@ export default async function AdminHubPage({
 
   await hydrateListings()
   await syncResendListingNudges({ maxPages: 15 })
+  // Hub lists only programmes this desk may show publicly — preview
+  // programmes stay off so a Recoding Medicine screenshare never leaks ASB.
+  const programmes = visibleChallenges(null)
   const [signups, autoNudge, sentKeys, optedOut] = await Promise.all([
     collectSignupRows(),
     autoNudgeByProgramme(),
@@ -48,7 +51,6 @@ export default async function AdminHubPage({
     mailConfigured: mailConfigured(),
     durable: durableEnabled(),
   }
-
   return (
     <div className="py-6">
       <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("admin.title")}</h1>
@@ -59,7 +61,7 @@ export default async function AdminHubPage({
           {t("admin.programmes_title")}
         </h2>
         <ul>
-          {CHALLENGES.map((challenge) => (
+          {programmes.map((challenge) => (
             <li key={challenge.id} className="border-b border-rule px-3 py-3 last:border-0">
               <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-listing text-lg font-bold uppercase">
                 {t(`challenge.${challenge.id}.name`)}

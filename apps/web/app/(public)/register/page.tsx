@@ -11,7 +11,7 @@ import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { MagicLinkNote } from "@/components/magic-link-note"
 import { OneListingNote } from "@/components/one-listing-note"
 import { challengeById, isApplicationChallenge } from "@/lib/challenges/catalog"
-import { visibleChallengeIdOf } from "@/lib/challenges/visibility"
+import { requestDemoUnlock, visibleChallengeIdOf, visibleChallengeIds } from "@/lib/challenges/visibility"
 import { isHerePath, ownedListingRedirect, safeNextPath } from "@/lib/auth/next-path"
 
 /**
@@ -40,7 +40,9 @@ export default async function RegisterPage({
   }
 
   const { t } = await getT()
-  const defaultChallengeId = visibleChallengeIdOf(challenge)
+  const unlock = await requestDemoUnlock()
+  const defaultChallengeId = visibleChallengeIdOf(challenge, unlock)
+  const challengeOptions = visibleChallengeIds(unlock)
   const afterCreateHref = isHerePath(safeNextPath(rawNext)) ? safeNextPath(rawNext)! : undefined
   const nextParams = new URLSearchParams()
   if (defaultChallengeId) nextParams.set("challenge", defaultChallengeId)
@@ -106,6 +108,7 @@ export default async function RegisterPage({
         <RegisterEntry
           remmyEnabled={remmy}
           defaultChallengeId={defaultChallengeId}
+          visibleChallengeIds={challengeOptions}
           verifiedEmail={session.email}
           afterCreateHref={afterCreateHref}
         />

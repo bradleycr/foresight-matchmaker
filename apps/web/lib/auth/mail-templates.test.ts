@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 import { challengeById } from "@/lib/challenges/catalog"
-import { PROFILE_NUDGE_CTA, RECODING_DEADLINE, renderProfileNudgeEmail, renderProgrammeNudgeEmail } from "./mail-templates"
+import {
+  PROFILE_NUDGE_CTA,
+  RECODING_DEADLINE,
+  renderHiddenListingEmail,
+  renderProfileNudgeEmail,
+  renderProgrammeNudgeEmail,
+} from "./mail-templates"
 
 describe("renderProfileNudgeEmail", () => {
   it("leads unpublished mail with the 16 October deadline in subject, preheader, and bold first line", () => {
@@ -49,5 +55,21 @@ describe("renderProgrammeNudgeEmail", () => {
     const mail = renderProgrammeNudgeEmail(rm, "unpublished", "https://example.org/stop")
     expect(mail.subject).toBe("Reminder: Recoding Medicine applications close 16 October")
     expect(mail.html).toContain("font-weight:bold")
+  })
+})
+
+describe("renderHiddenListingEmail", () => {
+  it("leads with the deadline and points Hidden listings at Visibility on /me", () => {
+    const mail = renderHiddenListingEmail()
+    expect(mail.subject).toBe("Your Recoding Medicine listing is hidden")
+    expect(mail.text.startsWith(`Reminder: Recoding Medicine applications close ${RECODING_DEADLINE}.`)).toBe(true)
+    expect(mail.html).toContain("Your listing is hidden")
+    expect(mail.html).toContain("visibility is set to Hidden")
+    expect(mail.html).toContain("Change visibility")
+    expect(mail.html).toContain("signin?next=%2Fme")
+    const deadlineAt = mail.html.indexOf("Reminder: Recoding Medicine applications close 16 October 2026")
+    const titleAt = mail.html.indexOf("Your listing is hidden")
+    expect(deadlineAt).toBeGreaterThan(0)
+    expect(deadlineAt).toBeLessThan(titleAt)
   })
 })
