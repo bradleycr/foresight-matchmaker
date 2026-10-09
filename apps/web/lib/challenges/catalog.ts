@@ -63,6 +63,8 @@ export interface ChallengeDef {
    * Example: label `16 October 2026, 18:00 CET` → short `16 October`.
    */
   deadlineShort?: string
+  /** Optional brand mark under `apps/web/public` for the programme page. */
+  logoSrc?: string
 }
 
 /** In-person Recoding Medicine matchmaking — dates align with `enum.attending` chips. */
@@ -109,7 +111,8 @@ export const CHALLENGES: readonly ChallengeDef[] = [
     status: "preview",
     host: "AI Safety Berlin",
     hostUrl: "https://aisafety.berlin",
-    hostEmail: "contact@aisafety.berlin",
+    hostEmail: "info@aisafety.berlin",
+    logoSrc: "/partners/ai-safety-berlin.svg",
     autoNudge: true,
     calendarUrl: "https://luma.com/AISafetyBerlin",
     factsNamespace: "challenge.ai_safety_berlin",

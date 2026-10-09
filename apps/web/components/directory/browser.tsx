@@ -3,12 +3,20 @@
 import { useMemo } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { KIND, DISEASE_AREA, MODALITY, type Kind, type DiseaseArea, type Modality, type ChallengeId } from "@rmm/schema"
+import {
+  DISEASE_AREA,
+  MODALITY,
+  kindsForChallenge,
+  type Kind,
+  type DiseaseArea,
+  type Modality,
+  type ChallengeId,
+} from "@rmm/schema"
 import type { DirectoryProfile } from "@/lib/api/types"
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Chip, Input, Select, Tag, chipClassName } from "@/components/ui/primitives"
-import { directoryHref } from "@/lib/challenges/catalog"
+import { directoryHref, isApplicationChallenge } from "@/lib/challenges/catalog"
 
 /**
  * The directory browser. One programme's redacted corpus arrives as a prop
@@ -129,6 +137,8 @@ export function DirectoryBrowser({
   }, [visible])
 
   const letters = groups.map(([letter]) => letter)
+  const kindOptions = kindsForChallenge(challengeId)
+  const medicineFilters = isApplicationChallenge(challengeId)
 
   return (
     <div>
@@ -147,24 +157,28 @@ export function DirectoryBrowser({
         </nav>
       ) : null}
 
-      {/* Category tabs: the applicant kinds within this programme. */}
-      <div
-        role="tablist"
-        aria-label={t("directory.kind_filter")}
-        className={`flex flex-wrap gap-1 border-b-2 border-rule-strong pb-2 ${siblings.length > 1 ? "mt-2" : ""}`}
-      >
-        <Chip active={filters.kind === ""} onClick={() => setFilter("kind", "")}>
-          {t("directory.all_kinds")} ({profiles.length})
-        </Chip>
-        {KIND.map((kind) => (
-          <Chip key={kind} active={filters.kind === kind} onClick={() => setFilter("kind", filters.kind === kind ? "" : kind)}>
-            {enumLabel(t, "kind", kind)} ({profiles.filter((p) => p.kind === kind).length})
+      {/* Category tabs: only when a programme has more than one applicant kind. */}
+      {kindOptions.length > 1 ? (
+        <div
+          role="tablist"
+          aria-label={t("directory.kind_filter")}
+          className={`flex flex-wrap gap-1 border-b-2 border-rule-strong pb-2 ${siblings.length > 1 ? "mt-2" : ""}`}
+        >
+          <Chip active={filters.kind === ""} onClick={() => setFilter("kind", "")}>
+            {t("directory.all_kinds")} ({profiles.length})
           </Chip>
-        ))}
-      </div>
+          {kindOptions.map((kind) => (
+            <Chip key={kind} active={filters.kind === kind} onClick={() => setFilter("kind", filters.kind === kind ? "" : kind)}>
+              {enumLabel(t, "kind", kind)} ({profiles.filter((p) => p.kind === kind).length})
+            </Chip>
+          ))}
+        </div>
+      ) : null}
 
       {/* Search and secondary filters. */}
-      <div className="grid gap-2 py-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        className={`grid gap-2 py-3 sm:grid-cols-2 ${medicineFilters ? "lg:grid-cols-4" : "lg:grid-cols-2"} ${kindOptions.length > 1 || siblings.length > 1 ? "" : "border-b-2 border-rule-strong"}`}
+      >
         <Input
           type="search"
           aria-label={t("directory.search_label")}
@@ -172,26 +186,30 @@ export function DirectoryBrowser({
           defaultValue={filters.q}
           onChange={(e) => setFilter("q", e.target.value)}
         />
-        <Select aria-label={t("directory.area_filter")} value={filters.area} onChange={(e) => setFilter("area", e.target.value)}>
-          <option value="">{t("directory.any_area")}</option>
-          {DISEASE_AREA.map((a) => (
-            <option key={a} value={a}>
-              {enumLabel(t, "disease_area", a)}
-            </option>
-          ))}
-        </Select>
-        <Select
-          aria-label={t("directory.modality_filter")}
-          value={filters.modality}
-          onChange={(e) => setFilter("modality", e.target.value)}
-        >
-          <option value="">{t("directory.any_modality")}</option>
-          {MODALITY.map((m) => (
-            <option key={m} value={m}>
-              {enumLabel(t, "modality", m)}
-            </option>
-          ))}
-        </Select>
+        {medicineFilters ? (
+          <>
+            <Select aria-label={t("directory.area_filter")} value={filters.area} onChange={(e) => setFilter("area", e.target.value)}>
+              <option value="">{t("directory.any_area")}</option>
+              {DISEASE_AREA.map((a) => (
+                <option key={a} value={a}>
+                  {enumLabel(t, "disease_area", a)}
+                </option>
+              ))}
+            </Select>
+            <Select
+              aria-label={t("directory.modality_filter")}
+              value={filters.modality}
+              onChange={(e) => setFilter("modality", e.target.value)}
+            >
+              <option value="">{t("directory.any_modality")}</option>
+              {MODALITY.map((m) => (
+                <option key={m} value={m}>
+                  {enumLabel(t, "modality", m)}
+                </option>
+              ))}
+            </Select>
+          </>
+        ) : null}
         <Select aria-label={t("directory.country_filter")} value={filters.country} onChange={(e) => setFilter("country", e.target.value)}>
           <option value="">{t("directory.any_country")}</option>
           {countries.map((c) => (
@@ -250,7 +268,11 @@ export function DirectoryBrowser({
                             {p.org_name}
                           </span>
                           <span className="ml-2 whitespace-nowrap text-sm text-ink-soft">{p.country}</span>
-                          <Tag className="ml-2 align-middle">{enumLabel(t, "kind", p.kind)}</Tag>
+                          {medicineFilters ? (
+                            <Tag className="ml-2 align-middle">{enumLabel(t, "kind", p.kind)}</Tag>
+                          ) : p.looking_for?.[0] ? (
+                            <Tag className="ml-2 align-middle">{enumLabel(t, "looking_for", p.looking_for[0])}</Tag>
+                          ) : null}
                           <span className="mt-0.5 block truncate text-sm text-ink-soft">{p.one_liner}</span>
                         </span>
                         <span className="tnum whitespace-nowrap text-right font-listing text-sm">

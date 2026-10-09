@@ -2,13 +2,14 @@
 
 import { useEffect, useImperativeHandle, useMemo, useState, type Ref } from "react"
 import {
-  KIND,
   ORG_TYPE,
   LANGUAGE,
   LOOKING_FOR,
   APPLICATION_STATUS,
   attendingChoices,
   isAttendingOfChallenge,
+  kindsForChallenge,
+  lookingForChoices,
   VISIBILITY,
   METHODS,
   APPLICATION_TARGET,
@@ -130,11 +131,12 @@ interface FormState {
 }
 
 function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState {
+  const peopleOnly = !isApplicationChallenge(challengeId)
   return {
-    kind: "data_holder",
+    kind: peopleOnly ? "individual" : "data_holder",
     challenge_id: challengeId,
     org_name: "",
-    org_type: "hospital",
+    org_type: peopleOnly ? "individual" : "hospital",
     country: "DE",
     one_liner: "",
     summary: "",
@@ -143,7 +145,7 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     languages: [],
     looking_for: [],
     looking_for_other: "",
-    application_status: "undecided",
+    application_status: peopleOnly ? "not_applying" : "undecided",
     attending: [],
     open_to_intros: true,
     visibility: "authenticated_only",
@@ -161,7 +163,7 @@ function blankState(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): FormState 
     compute: "unsure",
     compute_scale: "",
     privacy_capability: [],
-    team_size: "2_5",
+    team_size: peopleOnly ? "1" : "2_5",
     track_record: "",
     needs_modality: [],
     needs_modality_other: "",
@@ -510,9 +512,17 @@ export function ProfileForm({
   }
 
   const isCreate = !profileId
-  const showDatasets = state.kind === "data_holder" || state.kind === "consortium"
-  const showAiFields = state.kind === "ai_team" || state.kind === "consortium" || state.kind === "individual"
+  const showDatasets =
+    isApplicationChallenge(state.challenge_id) &&
+    (state.kind === "data_holder" || state.kind === "consortium")
+  // Medicine AI / data-needs blocks stay off community programmes — coworking
+  // people are not filling clinical modality chips.
+  const showAiFields =
+    isApplicationChallenge(state.challenge_id) &&
+    (state.kind === "ai_team" || state.kind === "consortium" || state.kind === "individual")
   const isPerson = state.kind === "individual"
+  const kindOptions = kindsForChallenge(state.challenge_id)
+  const lookingOptions = lookingForChoices(state.challenge_id)
 
   const classified = useMemo(() => classifyGaps(state), [state])
   const gaps = spotlightGaps ? classified : { required: [] as GapField[], optional: [] as GapField[] }
@@ -773,53 +783,65 @@ export function ProfileForm({
               onChange={(v) => {
                 const next = v.filter((id) => id !== state.challenge_id)[0] as ChallengeId | undefined
                 if (!next) return
-                setState((s) => ({
-                  ...s,
-                  challenge_id: next,
-                  attending: s.attending.filter((chip) => isAttendingOfChallenge(chip, next)),
-                }))
+                setState((s) => {
+                  const nextKinds = kindsForChallenge(next)
+                  const peopleOnly = !isApplicationChallenge(next)
+                  const kind = nextKinds.includes(s.kind) ? s.kind : (nextKinds[0] ?? "individual")
+                  return {
+                    ...s,
+                    challenge_id: next,
+                    kind,
+                    org_type: kind === "individual" ? ("individual" as const) : s.org_type === "individual" ? "startup" : s.org_type,
+                    team_size: kind === "individual" ? ("1" as const) : s.team_size === "1" ? ("2_5" as const) : s.team_size,
+                    application_status: peopleOnly ? ("not_applying" as const) : s.application_status,
+                    attending: s.attending.filter((chip) => isAttendingOfChallenge(chip, next)),
+                    looking_for: s.looking_for.filter((chip) => lookingForChoices(next).includes(chip)),
+                  }
+                })
               }}
               hint={t("form.challenge_hint")}
             />
           ) : null}
-          <EnumChips
-            label={t("field.kind")}
-            group="kind"
-            options={KIND}
-            value={[state.kind]}
-            onChange={(v) => {
-              const next = v.filter((k) => k !== state.kind)[0]
-              if (!next) return
-              setClientIssues([])
-              setState((s) => {
-                if (next === "individual") {
+          {kindOptions.length > 1 ? (
+            <EnumChips
+              label={t("field.kind")}
+              group="kind"
+              options={kindOptions}
+              value={[state.kind]}
+              onChange={(v) => {
+                const next = v.filter((k) => k !== state.kind)[0]
+                if (!next) return
+                setClientIssues([])
+                setState((s) => {
+                  if (next === "individual") {
+                    return {
+                      ...s,
+                      kind: next,
+                      org_type: "individual" as const,
+                      team_size: "1" as const,
+                      looking_for: s.looking_for.includes("join_team")
+                        ? s.looking_for
+                        : [...s.looking_for, "join_team" as const],
+                    }
+                  }
                   return {
                     ...s,
                     kind: next,
-                    org_type: "individual" as const,
-                    team_size: "1" as const,
-                    looking_for: s.looking_for.includes("join_team")
-                      ? s.looking_for
-                      : [...s.looking_for, "join_team" as const],
+                    org_type:
+                      s.org_type === "individual"
+                        ? next === "ai_team"
+                          ? "startup"
+                          : next === "consortium"
+                            ? "university"
+                            : "hospital"
+                        : s.org_type,
+                    team_size: s.kind === "individual" ? "2_5" : s.team_size,
                   }
-                }
-                return {
-                  ...s,
-                  kind: next,
-                  org_type:
-                    s.org_type === "individual"
-                      ? next === "ai_team"
-                        ? "startup"
-                        : next === "consortium"
-                          ? "university"
-                          : "hospital"
-                      : s.org_type,
-                  team_size: s.kind === "individual" ? "2_5" : s.team_size,
-                }
-              })
-            }}
-            hint={t("form.kind_hint")}
-          />
+                })
+              }}
+              hint={t("form.kind_hint")}
+            />
+          ) : null}
         </>
       ) : (
         <div>
@@ -973,7 +995,20 @@ export function ProfileForm({
         open={openOptional.has("application")}
         onToggle={() => toggleOptional("application")}
       >
-        <EnumChips label={t("field.looking_for")} group="looking_for" options={LOOKING_FOR} value={state.looking_for} onChange={(v) => set("looking_for", v)} attention={needs("looking_for")} fieldId="gap-looking_for" />
+        <EnumChips
+          label={t("field.looking_for")}
+          group="looking_for"
+          options={lookingOptions}
+          value={state.looking_for}
+          onChange={(v) => set("looking_for", v)}
+          attention={needs("looking_for")}
+          fieldId="gap-looking_for"
+          hint={
+            isApplicationChallenge(state.challenge_id)
+              ? undefined
+              : t(`form.looking_for_hint_${state.challenge_id}`)
+          }
+        />
         {state.looking_for.includes("other") ? (
           <Field
             label={t("field.looking_for_other")}
@@ -1191,7 +1226,7 @@ export function ProfileForm({
           ) : null}
           {state.kind === "consortium" ? (
             <>
-              <EnumChips label={t("field.still_seeking")} group="looking_for" options={LOOKING_FOR} value={state.still_seeking} onChange={(v) => set("still_seeking", v)} hint={t("form.still_seeking_hint")} attention={needs("still_seeking")} fieldId="gap-still_seeking" />
+              <EnumChips label={t("field.still_seeking")} group="looking_for" options={lookingOptions} value={state.still_seeking} onChange={(v) => set("still_seeking", v)} hint={t("form.still_seeking_hint")} attention={needs("still_seeking")} fieldId="gap-still_seeking" />
               {state.still_seeking.includes("other") && !state.looking_for.includes("other") ? (
                 <Field
                   label={t("field.looking_for_other")}

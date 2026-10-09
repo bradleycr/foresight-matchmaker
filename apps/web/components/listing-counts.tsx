@@ -17,19 +17,38 @@ export function kindCountTotal(counts: KindCounts | undefined | null): number {
 
 /**
  * Programme listing totals. Hidden when the directory is empty so four
- * zeroes are never mistaken for a broken page.
+ * zeroes are never mistaken for a broken page. Community programmes use
+ * a single people count — they do not have data holders / AI teams.
  */
 export function ListingCounts({
   counts,
   t,
   captionKey = "landing.counts_caption",
+  layout = "kinds",
 }: {
   counts: KindCounts
   t: T
   captionKey?: string
+  /** `people` for coworking directories; `kinds` for multi-kind challenges. */
+  layout?: "kinds" | "people"
 }) {
-  if (kindCountTotal(counts) === 0) {
+  const total = kindCountTotal(counts)
+  if (total === 0) {
     return <p className="text-sm text-ink-soft">{t("landing.counts_empty")}</p>
+  }
+
+  if (layout === "people") {
+    return (
+      <div>
+        <div className="border border-rule-strong bg-paper px-4 py-5 sm:max-w-xs">
+          <p className="tnum font-listing text-5xl font-bold">{total}</p>
+          <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+            {t("landing.count_people")}
+          </p>
+        </div>
+        <p className="mt-3 max-w-2xl text-sm text-ink-soft">{t(captionKey)}</p>
+      </div>
+    )
   }
 
   return (

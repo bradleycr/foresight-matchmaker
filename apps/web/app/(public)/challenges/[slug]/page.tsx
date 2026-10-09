@@ -69,12 +69,28 @@ export default async function ChallengePage({
     <div className="py-8">
       <ProgrammePreviewNotice challenge={challenge} t={t} className="mb-8" />
 
-      <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
-        {t(`challenge.${id}.kicker`)}
-      </p>
-      <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl">
-        {t(`challenge.${id}.name`)}
-      </h1>
+      <div className="flex flex-wrap items-start gap-5">
+        {challenge.logoSrc ? (
+          // Host mark from their public site — kept small beside the title so
+          // the programme name stays the hero signal on a pitch screen.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={challenge.logoSrc}
+            alt=""
+            width={64}
+            height={64}
+            className="mt-1 h-14 w-14 shrink-0 sm:h-16 sm:w-16"
+          />
+        ) : null}
+        <div className="min-w-0">
+          <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
+            {t(`challenge.${id}.kicker`)}
+          </p>
+          <h1 className="mt-2 max-w-3xl font-listing text-4xl font-bold uppercase leading-none tracking-tight sm:text-5xl">
+            {t(`challenge.${id}.name`)}
+          </h1>
+        </div>
+      </div>
 
       <p className="mt-5 max-w-xl text-ink-soft">{t(`challenge.${id}.intro`)}</p>
 
@@ -113,7 +129,12 @@ export default async function ChallengePage({
       </div>
 
       <div className="mt-12">
-        <ListingCounts counts={counts} t={t} captionKey={`challenge.${id}.counts_caption`} />
+        <ListingCounts
+          counts={counts}
+          t={t}
+          captionKey={`challenge.${id}.counts_caption`}
+          layout={isApplicationChallenge(id) ? "kinds" : "people"}
+        />
       </div>
 
       <FactsSection facts={facts} t={t} />

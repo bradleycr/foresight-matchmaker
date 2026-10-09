@@ -45,6 +45,10 @@
           },
           "minItems": 1
         },
+        "modality_other": {
+          "type": "string",
+          "maxLength": 200
+        },
         "disease_area": {
           "type": "array",
           "items": {
@@ -72,6 +76,10 @@
             ]
           },
           "minItems": 1
+        },
+        "disease_area_other": {
+          "type": "string",
+          "maxLength": 200
         },
         "n_subjects": {
           "type": "string",

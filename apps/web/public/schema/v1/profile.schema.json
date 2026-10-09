@@ -22,7 +22,8 @@
             "challenge_id": {
               "type": "string",
               "enum": [
-                "recoding_medicine"
+                "recoding_medicine",
+                "ai_safety_berlin"
               ],
               "default": "recoding_medicine"
             },
@@ -71,6 +72,10 @@
               "type": "string",
               "format": "uri"
             },
+            "linkedin": {
+              "type": "string",
+              "format": "uri"
+            },
             "languages": {
               "type": "array",
               "items": {
@@ -109,6 +114,11 @@
                   "compute",
                   "join_team",
                   "individual_expert",
+                  "collaborators",
+                  "career_chat",
+                  "feedback",
+                  "co_host",
+                  "introductions",
                   "not_looking",
                   "other"
                 ]
@@ -147,6 +157,9 @@
                   "event_sept_1",
                   "event_sept_2",
                   "event_sept_3",
+                  "asb_coworking",
+                  "asb_lunch",
+                  "asb_talks",
                   "remote_only"
                 ]
               },
@@ -258,6 +271,10 @@
                     },
                     "minItems": 1
                   },
+                  "modality_other": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
                   "disease_area": {
                     "type": "array",
                     "items": {
@@ -285,6 +302,10 @@
                       ]
                     },
                     "minItems": 1
+                  },
+                  "disease_area_other": {
+                    "type": "string",
+                    "maxLength": 200
                   },
                   "n_subjects": {
                     "type": "string",
@@ -476,7 +497,8 @@
             "challenge_id": {
               "type": "string",
               "enum": [
-                "recoding_medicine"
+                "recoding_medicine",
+                "ai_safety_berlin"
               ],
               "default": "recoding_medicine"
             },
@@ -525,6 +547,10 @@
               "type": "string",
               "format": "uri"
             },
+            "linkedin": {
+              "type": "string",
+              "format": "uri"
+            },
             "languages": {
               "type": "array",
               "items": {
@@ -563,6 +589,11 @@
                   "compute",
                   "join_team",
                   "individual_expert",
+                  "collaborators",
+                  "career_chat",
+                  "feedback",
+                  "co_host",
+                  "introductions",
                   "not_looking",
                   "other"
                 ]
@@ -601,6 +632,9 @@
                   "event_sept_1",
                   "event_sept_2",
                   "event_sept_3",
+                  "asb_coworking",
+                  "asb_lunch",
+                  "asb_talks",
                   "remote_only"
                 ]
               },
@@ -843,6 +877,10 @@
                   },
                   "default": []
                 },
+                "modality_other": {
+                  "type": "string",
+                  "maxLength": 200
+                },
                 "disease_area": {
                   "type": "array",
                   "items": {
@@ -870,6 +908,10 @@
                     ]
                   },
                   "default": []
+                },
+                "disease_area_other": {
+                  "type": "string",
+                  "maxLength": 200
                 },
                 "min_n_subjects": {
                   "type": "string",
@@ -966,7 +1008,8 @@
             "challenge_id": {
               "type": "string",
               "enum": [
-                "recoding_medicine"
+                "recoding_medicine",
+                "ai_safety_berlin"
               ],
               "default": "recoding_medicine"
             },
@@ -1015,6 +1058,10 @@
               "type": "string",
               "format": "uri"
             },
+            "linkedin": {
+              "type": "string",
+              "format": "uri"
+            },
             "languages": {
               "type": "array",
               "items": {
@@ -1053,6 +1100,11 @@
                   "compute",
                   "join_team",
                   "individual_expert",
+                  "collaborators",
+                  "career_chat",
+                  "feedback",
+                  "co_host",
+                  "introductions",
                   "not_looking",
                   "other"
                 ]
@@ -1091,6 +1143,9 @@
                   "event_sept_1",
                   "event_sept_2",
                   "event_sept_3",
+                  "asb_coworking",
+                  "asb_lunch",
+                  "asb_talks",
                   "remote_only"
                 ]
               },
@@ -1202,6 +1257,10 @@
                     },
                     "minItems": 1
                   },
+                  "modality_other": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
                   "disease_area": {
                     "type": "array",
                     "items": {
@@ -1229,6 +1288,10 @@
                       ]
                     },
                     "minItems": 1
+                  },
+                  "disease_area_other": {
+                    "type": "string",
+                    "maxLength": 200
                   },
                   "n_subjects": {
                     "type": "string",
@@ -1557,6 +1620,10 @@
                   },
                   "default": []
                 },
+                "modality_other": {
+                  "type": "string",
+                  "maxLength": 200
+                },
                 "disease_area": {
                   "type": "array",
                   "items": {
@@ -1584,6 +1651,10 @@
                     ]
                   },
                   "default": []
+                },
+                "disease_area_other": {
+                  "type": "string",
+                  "maxLength": 200
                 },
                 "min_n_subjects": {
                   "type": "string",
@@ -1652,6 +1723,11 @@
                   "compute",
                   "join_team",
                   "individual_expert",
+                  "collaborators",
+                  "career_chat",
+                  "feedback",
+                  "co_host",
+                  "introductions",
                   "not_looking",
                   "other"
                 ]
@@ -1699,7 +1775,8 @@
             "challenge_id": {
               "type": "string",
               "enum": [
-                "recoding_medicine"
+                "recoding_medicine",
+                "ai_safety_berlin"
               ],
               "default": "recoding_medicine"
             },
@@ -1748,6 +1825,10 @@
               "type": "string",
               "format": "uri"
             },
+            "linkedin": {
+              "type": "string",
+              "format": "uri"
+            },
             "languages": {
               "type": "array",
               "items": {
@@ -1786,6 +1867,11 @@
                   "compute",
                   "join_team",
                   "individual_expert",
+                  "collaborators",
+                  "career_chat",
+                  "feedback",
+                  "co_host",
+                  "introductions",
                   "not_looking",
                   "other"
                 ]
@@ -1824,6 +1910,9 @@
                   "event_sept_1",
                   "event_sept_2",
                   "event_sept_3",
+                  "asb_coworking",
+                  "asb_lunch",
+                  "asb_talks",
                   "remote_only"
                 ]
               },
@@ -2066,6 +2155,10 @@
                   },
                   "default": []
                 },
+                "modality_other": {
+                  "type": "string",
+                  "maxLength": 200
+                },
                 "disease_area": {
                   "type": "array",
                   "items": {
@@ -2093,6 +2186,10 @@
                     ]
                   },
                   "default": []
+                },
+                "disease_area_other": {
+                  "type": "string",
+                  "maxLength": 200
                 },
                 "min_n_subjects": {
                   "type": "string",

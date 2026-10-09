@@ -42,6 +42,25 @@ export const challengeIdEnum = z.enum(CHALLENGE_ID)
 export type ChallengeId = (typeof CHALLENGE_ID)[number]
 export const DEFAULT_CHALLENGE_ID: ChallengeId = "recoding_medicine"
 
+/**
+ * Which profile kinds a programme offers on the form and directory tabs.
+ * Recoding Medicine is a multi-kind call for applications; AI Safety Berlin
+ * is a people directory for open coworking, so only individuals list there.
+ */
+const PROGRAMME_KINDS: Record<ChallengeId, readonly Kind[]> = {
+  recoding_medicine: KIND,
+  ai_safety_berlin: ["individual"],
+}
+
+/** Form / directory kinds for one programme, in display order. */
+export function kindsForChallenge(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): Kind[] {
+  return [...PROGRAMME_KINDS[challengeId]]
+}
+
+export function isKindOfChallenge(kind: Kind, challengeId: ChallengeId): boolean {
+  return PROGRAMME_KINDS[challengeId].includes(kind)
+}
+
 export const ORG_TYPE = [
   "university",
   "research_institute",
@@ -81,6 +100,7 @@ export const languageEnum = z.enum(LANGUAGE)
 export type Language = (typeof LANGUAGE)[number]
 
 export const LOOKING_FOR = [
+  // Recoding Medicine — challenge partnership vocabulary.
   "dataset_access",
   "ai_partner",
   "clinical_partner",
@@ -88,11 +108,51 @@ export const LOOKING_FOR = [
   "compute",
   "join_team",
   "individual_expert",
+  // AI Safety Berlin — open-coworking intents (research, policy, field building).
+  "collaborators",
+  "career_chat",
+  "feedback",
+  "co_host",
+  "introductions",
+  // Shared.
   "not_looking",
   "other",
 ] as const
 export const lookingForEnum = z.enum(LOOKING_FOR)
 export type LookingFor = (typeof LOOKING_FOR)[number]
+
+/**
+ * Looking-for chips one programme offers. The union above stays shared so
+ * stored rows keep parsing; the form only shows this programme's chips.
+ */
+const PROGRAMME_LOOKING_FOR: Record<ChallengeId, readonly LookingFor[]> = {
+  recoding_medicine: [
+    "dataset_access",
+    "ai_partner",
+    "clinical_partner",
+    "data_governance_support",
+    "compute",
+    "join_team",
+    "individual_expert",
+    "not_looking",
+    "other",
+  ],
+  ai_safety_berlin: [
+    "collaborators",
+    "career_chat",
+    "feedback",
+    "co_host",
+    "introductions",
+    "join_team",
+    "not_looking",
+    "other",
+  ],
+}
+
+/** Looking-for chips for one programme's form, in display order. */
+export function lookingForChoices(challengeId: ChallengeId = DEFAULT_CHALLENGE_ID): LookingFor[] {
+  return [...PROGRAMME_LOOKING_FOR[challengeId]]
+}
 
 export const APPLICATION_STATUS = [
   "undecided",
