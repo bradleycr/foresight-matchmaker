@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { directoryHref, challengeBySlug, sessionUrl } from "./catalog"
+import { directoryHref, challengeBySlug, sessionUrl, programmeAutoNudge, challengeById } from "./catalog"
 import { browseDirectoryPath, visibleChallenges, isChallengeVisible } from "./visibility"
 
 describe("browseDirectoryPath", () => {
@@ -39,5 +39,16 @@ describe("visibility", () => {
   it("AI Safety Berlin is visible in dev (NODE_ENV !== production)", () => {
     // In test env (not production), preview programmes are on by default
     expect(isChallengeVisible("ai_safety_berlin")).toBe(true)
+  })
+})
+
+describe("programmeAutoNudge", () => {
+  it("leaves Recoding Medicine off after the operator blast", () => {
+    expect(programmeAutoNudge("recoding_medicine")).toBe(false)
+    expect(challengeById("recoding_medicine").autoNudge).toBe(false)
+  })
+
+  it("mails AI Safety Berlin and any later programme that does not opt out", () => {
+    expect(programmeAutoNudge("ai_safety_berlin")).toBe(true)
   })
 })

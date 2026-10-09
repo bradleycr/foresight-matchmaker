@@ -7,7 +7,7 @@ import { persistSignup, ensureOwnedListing } from "@/lib/db/durable"
 import { issueToken } from "@/lib/auth/tokens"
 import { magicLinkMode, sendMagicLink, revealLinksAllowed } from "@/lib/auth/mail"
 import { rateLimit } from "@/lib/auth/rate-limit"
-import { safeNextPath } from "@/lib/auth/next-path"
+import { challengeIdFromPath, safeNextPath } from "@/lib/auth/next-path"
 
 export const dynamic = "force-dynamic"
 
@@ -62,7 +62,11 @@ export async function POST(req: NextRequest): Promise<Response> {
   const mail = await sendMagicLink(email, link, kind)
 
   try {
-    await persistSignup({ email })
+    const challengeId = challengeIdFromPath(next)
+    await persistSignup({
+      email,
+      ...(challengeId ? { challenge_id: challengeId } : {}),
+    })
   } catch (error) {
     console.error("[durable] persist signup after request-link failed", { email }, error)
   }

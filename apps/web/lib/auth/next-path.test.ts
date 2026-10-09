@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { afterClaimHref, hereCityFromPath, isBrowsePath, isHerePath, isRegisterPath, needsEmailVerify, ownedListingRedirect, safeNextPath, signInHref } from "./next-path"
+import { afterClaimHref, challengeIdFromPath, hereCityFromPath, isBrowsePath, isHerePath, isRegisterPath, needsEmailVerify, ownedListingRedirect, safeNextPath, signInHref } from "./next-path"
 
 describe("safeNextPath", () => {
   it("accepts same-origin relative pages", () => {
@@ -32,6 +32,15 @@ describe("isRegisterPath", () => {
     expect(isRegisterPath("/register")).toBe(true)
     expect(isRegisterPath("/register?challenge=recoding")).toBe(true)
     expect(isRegisterPath("/me")).toBe(false)
+  })
+})
+
+describe("challengeIdFromPath", () => {
+  it("reads a programme from the listing form, not from directory browse", () => {
+    expect(challengeIdFromPath("/register?challenge=ai_safety_berlin")).toBe("ai_safety_berlin")
+    expect(challengeIdFromPath("/challenges/ai-safety-berlin")).toBe("ai_safety_berlin")
+    expect(challengeIdFromPath("/directory?challenge=ai_safety_berlin")).toBeNull()
+    expect(challengeIdFromPath("/register")).toBeNull()
   })
 })
 

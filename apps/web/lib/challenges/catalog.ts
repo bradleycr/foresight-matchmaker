@@ -53,6 +53,16 @@ export interface ChallengeDef {
   sessions: readonly Attending[]
   /** Per-session pages. Any session left out falls back to `calendarUrl`. */
   sessionUrls?: Partial<Record<Attending, string>>
+  /**
+   * Catalogue default for the week-later drip. Operators can flip this on
+   * /admin without a deploy — a durable override wins when present.
+   */
+  autoNudge?: boolean
+  /**
+   * Short date for inbox subjects when `deadlineLabel` is the long form.
+   * Example: label `16 October 2026, 18:00 CET` → short `16 October`.
+   */
+  deadlineShort?: string
 }
 
 /** In-person Recoding Medicine matchmaking — dates align with `enum.attending` chips. */
@@ -79,6 +89,8 @@ export const CHALLENGES: readonly ChallengeDef[] = [
     /** Application inbox for the programme — never shown as a directory contact. */
     hostEmail: "challenge@sprind.org",
     deadlineLabel: "16 October 2026, 18:00 CET",
+    deadlineShort: "16 October",
+    autoNudge: false,
     calendarUrl: PLATFORM.lumaCalendarUrl,
     factsNamespace: "landing",
     factKeys: ["deadline", "webinar", "stages", "funding", "hq", "dataset"],
@@ -98,6 +110,7 @@ export const CHALLENGES: readonly ChallengeDef[] = [
     host: "AI Safety Berlin",
     hostUrl: "https://aisafety.berlin",
     hostEmail: "contact@aisafety.berlin",
+    autoNudge: true,
     calendarUrl: "https://luma.com/AISafetyBerlin",
     factsNamespace: "challenge.ai_safety_berlin",
     factKeys: ["cadence", "venue", "format", "cost", "who"],
@@ -130,6 +143,11 @@ export function directoryHref(challengeId: ChallengeId): string {
 /** Recoding Medicine is a call for applications. Community programmes are not. */
 export function isApplicationChallenge(id: ChallengeId): boolean {
   return id === "recoding_medicine"
+}
+
+/** True unless the catalogue opts a programme out of the week-later drip. */
+export function programmeAutoNudge(id: ChallengeId): boolean {
+  return challengeById(id).autoNudge !== false
 }
 
 export { CHALLENGE_ID, DEFAULT_CHALLENGE_ID }

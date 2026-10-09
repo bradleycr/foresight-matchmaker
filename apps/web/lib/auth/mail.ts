@@ -47,7 +47,9 @@ export function magicLinkMode(): DeliveryMode {
   return "server_log"
 }
 
-export type MailResult = { sent: true } | { sent: false; reason: "no_smtp" | "smtp_error" }
+export type MailResult =
+  | { sent: true }
+  | { sent: false; reason: "no_smtp" | "smtp_error" | "quota" }
 
 const SEND_TIMEOUT_MS = 8_000
 const RETRY_WAIT_MS = 400
@@ -61,7 +63,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function retryableHttp(status: number): boolean {
-  return status === 429 || status >= 500
+  return status >= 500
 }
 
 function asList(value: string | string[] | undefined): string[] | undefined {
@@ -76,6 +78,8 @@ async function sendViaResend(opts: {
   subject: string
   text: string
   html?: string
+  idempotencyKey?: string
+  headers?: Record<string, string>
 }): Promise<MailResult> {
   const key = process.env.RESEND_API_KEY
   if (!key) return { sent: false, reason: "no_smtp" }
@@ -88,10 +92,12 @@ async function sendViaResend(opts: {
     subject: opts.subject,
     text: opts.text,
     html: opts.html,
+    ...(opts.headers ? { headers: opts.headers } : {}),
   })
 
-  // One retry on timeout / 429 / 5xx — a webinar burst of ~50 concurrent
+  // One retry on timeout / 5xx — a webinar burst of ~50 concurrent
   // sign-ins is well inside Resend's API; a single blip should not drop a seat.
+  // 429 is the daily quota: do not retry, so a drip can stop cleanly.
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const res = await fetch(RESEND_API, {
@@ -100,6 +106,7 @@ async function sendViaResend(opts: {
           Authorization: `Bearer ${key}`,
           "Content-Type": "application/json",
           "User-Agent": "foresight-matchmaker/mail",
+          ...(opts.idempotencyKey ? { "Idempotency-Key": opts.idempotencyKey } : {}),
         },
         body: payload,
         signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
@@ -107,6 +114,7 @@ async function sendViaResend(opts: {
       if (res.ok) return { sent: true }
       const detail = await res.text().catch(() => "")
       console.error("[mail] Resend rejected:", res.status, detail.slice(0, 500))
+      if (res.status === 429) return { sent: false, reason: "quota" }
       if (retryableHttp(res.status) && attempt < 2) {
         const retryAfter = Number(res.headers.get("retry-after"))
         await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 2_000) : RETRY_WAIT_MS)
@@ -151,6 +159,8 @@ export async function sendMail(opts: {
   subject: string
   text: string
   html?: string
+  idempotencyKey?: string
+  headers?: Record<string, string>
 }): Promise<MailResult> {
   if (!mailConfigured()) {
     console.info("[mail] unset; would send:", {

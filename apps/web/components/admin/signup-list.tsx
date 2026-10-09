@@ -1,5 +1,6 @@
 import { sortSignupsForOperator, summarizeSignups, type SignupRow } from "@/lib/db/signups"
 import type { T } from "@/lib/i18n"
+import type { ChallengeId } from "@/lib/challenges/catalog"
 import { SignupTable } from "./signup-table"
 
 /**
@@ -14,10 +15,18 @@ export function SignupList({
   signups,
   t,
   exportHref = "/api/admin/signups?format=csv",
+  remind,
 }: {
   signups: SignupRow[]
   t: T
   exportHref?: string
+  remind?: {
+    challengeId?: ChallengeId
+    sentKeys: string[]
+    optedOut: string[]
+    mailConfigured: boolean
+    durable: boolean
+  }
 }) {
   const summary = summarizeSignups(signups)
   const ordered = sortSignupsForOperator(signups)
@@ -65,7 +74,7 @@ export function SignupList({
       {signups.length === 0 ? (
         <p className="px-3 py-3 text-sm text-ink-soft">{t("admin.no_data")}</p>
       ) : (
-        <SignupTable rows={ordered} />
+        <SignupTable rows={ordered} remind={remind} />
       )}
     </section>
   )

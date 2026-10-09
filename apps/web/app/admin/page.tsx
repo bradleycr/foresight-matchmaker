@@ -7,6 +7,13 @@ import { CHALLENGES } from "@/lib/challenges/catalog"
 import { ProgrammeStatusTag } from "@/components/programme-status"
 import { SignupList } from "@/components/admin/signup-list"
 import { AdminLoginForm } from "@/components/admin/login-form"
+import { AutoNudgeToggle } from "@/components/admin/auto-nudge-toggle"
+import { OutreachPanel } from "@/components/admin/outreach-panel"
+import { autoNudgeByProgramme } from "@/lib/nudge/settings"
+import { loadOptOuts, loadSentKeys } from "@/lib/nudge/store"
+import { syncResendListingNudges } from "@/lib/nudge/resend-sync"
+import { durableEnabled } from "@/lib/db/durable-store"
+import { mailConfigured } from "@/lib/auth/mail"
 
 export const dynamic = "force-dynamic"
 
@@ -27,7 +34,19 @@ export default async function AdminHubPage({
   }
 
   await hydrateListings()
-  const signups = await collectSignupRows()
+  await syncResendListingNudges()
+  const [signups, autoNudge, sentKeys, optedOut] = await Promise.all([
+    collectSignupRows(),
+    autoNudgeByProgramme(),
+    loadSentKeys(),
+    loadOptOuts(),
+  ])
+  const remind = {
+    sentKeys: [...sentKeys],
+    optedOut: [...optedOut],
+    mailConfigured: mailConfigured(),
+    durable: durableEnabled(),
+  }
 
   return (
     <div className="py-6">
@@ -46,18 +65,28 @@ export default async function AdminHubPage({
                 <ProgrammeStatusTag challenge={challenge} t={t} />
               </p>
               <p className="mt-1 text-sm text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
-              <Link
-                href={`/admin/${challenge.slug}`}
-                className="mt-2 inline-block font-semibold underline underline-offset-2"
-              >
-                {t("admin.programme_report")}
-              </Link>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <AutoNudgeToggle
+                  challengeId={challenge.id}
+                  programmeName={t(`challenge.${challenge.id}.name`)}
+                  enabled={autoNudge[challenge.id]}
+                  durable={remind.durable}
+                />
+                <Link
+                  href={`/admin/${challenge.slug}`}
+                  className="inline-block font-semibold underline underline-offset-2"
+                >
+                  {t("admin.programme_report")}
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
       </section>
 
-      <SignupList signups={signups} t={t} />
+      <OutreachPanel signups={signups} sentKeys={remind.sentKeys} optedOut={remind.optedOut} />
+
+      <SignupList signups={signups} t={t} remind={remind} />
     </div>
   )
 }

@@ -56,6 +56,20 @@ describe("sendMail", () => {
     expect(body.from).toBe("Foresight Matchmaking <hello@foresightmatchmaker.app>")
     expect(body.to).toEqual(["ada@example.org"])
   })
+
+  it("returns quota and does not retry on 429", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test")
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      text: async () => "daily quota",
+      headers: new Headers(),
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    const result = await sendMail({ to: "ada@example.org", subject: "Hello", text: "Hi" })
+    expect(result).toEqual({ sent: false, reason: "quota" })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("sendMagicLink", () => {

@@ -1,3 +1,5 @@
+import { CHALLENGE_ID, challengeBySlug, type ChallengeId } from "@/lib/challenges/catalog"
+
 /**
  * Return-to path after sign-in. Only same-origin relative paths — never
  * protocol-relative or off-site URLs.
@@ -33,6 +35,28 @@ export function needsEmailVerify(_path: string | null): boolean {
 export function isRegisterPath(path: string | null): boolean {
   if (!path) return false
   return path === "/register" || path.startsWith("/register?")
+}
+
+/**
+ * Programme stamped onto a signup when they asked for a magic link from
+ * `/register?challenge=…` or a programme page. Directory browse URLs do
+ * not count — looking is not starting a listing.
+ */
+export function challengeIdFromPath(path: string | null): ChallengeId | null {
+  const dest = safeNextPath(path) ?? (path && path.startsWith("/") && !path.startsWith("//") ? path.slice(0, 200) : null)
+  if (!dest) return null
+  const qIndex = dest.indexOf("?")
+  const pathname = qIndex >= 0 ? dest.slice(0, qIndex) : dest
+  const query = qIndex >= 0 ? dest.slice(qIndex + 1) : ""
+  if (pathname === "/register") {
+    const raw = new URLSearchParams(query).get("challenge")
+    if (raw && CHALLENGE_ID.includes(raw as ChallengeId)) return raw as ChallengeId
+  }
+  const slugMatch = pathname.match(/^\/challenges\/([^/]+)\/?$/)
+  if (slugMatch?.[1]) {
+    return challengeBySlug(decodeURIComponent(slugMatch[1]))?.id ?? null
+  }
+  return null
 }
 
 export function isHerePath(path: string | null): boolean {

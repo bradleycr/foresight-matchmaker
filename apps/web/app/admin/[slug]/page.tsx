@@ -7,6 +7,14 @@ import { challengeBySlug } from "@/lib/challenges/catalog"
 import { SignupList } from "@/components/admin/signup-list"
 import { AdminLoginForm } from "@/components/admin/login-form"
 import { MetricsReport } from "@/components/admin/metrics-report"
+import { AutoNudgeToggle } from "@/components/admin/auto-nudge-toggle"
+import { NudgeBatchBar } from "@/components/admin/nudge-batch-bar"
+import { OutreachPanel } from "@/components/admin/outreach-panel"
+import { autoNudgeByProgramme } from "@/lib/nudge/settings"
+import { loadOptOuts, loadSentKeys } from "@/lib/nudge/store"
+import { syncResendListingNudges } from "@/lib/nudge/resend-sync"
+import { durableEnabled } from "@/lib/db/durable-store"
+import { mailConfigured } from "@/lib/auth/mail"
 
 export const dynamic = "force-dynamic"
 
@@ -33,7 +41,20 @@ export default async function ProgrammeAdminPage({
   }
 
   const qs = new URLSearchParams({ challenge: challenge.id })
-  const { metrics, signups } = await buildProgrammeReport(challenge.id)
+  await syncResendListingNudges()
+  const [{ metrics, signups }, autoNudge, sentKeys, optedOut] = await Promise.all([
+    buildProgrammeReport(challenge.id),
+    autoNudgeByProgramme(),
+    loadSentKeys(),
+    loadOptOuts(),
+  ])
+  const remind = {
+    challengeId: challenge.id,
+    sentKeys: [...sentKeys],
+    optedOut: [...optedOut],
+    mailConfigured: mailConfigured(),
+    durable: durableEnabled(),
+  }
 
   return (
     <div className="py-6">
@@ -55,7 +76,34 @@ export default async function ProgrammeAdminPage({
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("admin.report_body")}</p>
 
-      <SignupList signups={signups} t={t} exportHref={`/api/admin/signups?${qs}&format=csv`} />
+      <section className="mt-8 border border-rule-strong">
+        <h2 className="border-b-2 border-rule-strong bg-paper-shade px-3 py-1.5 font-listing text-base font-bold uppercase">
+          {t("admin.nudge_title")}
+        </h2>
+        <div className="px-3 py-3">
+          <p className="max-w-2xl text-sm leading-relaxed text-ink-soft">{t("admin.nudge_body")}</p>
+          <div className="mt-4">
+            <AutoNudgeToggle
+              challengeId={challenge.id}
+              programmeName={t(`challenge.${challenge.id}.name`)}
+              enabled={autoNudge[challenge.id]}
+              durable={remind.durable}
+            />
+          </div>
+          <NudgeBatchBar
+            challengeId={challenge.id}
+            signups={signups}
+            sentKeys={remind.sentKeys}
+            optedOut={remind.optedOut}
+            mailConfigured={remind.mailConfigured}
+            durable={remind.durable}
+          />
+        </div>
+      </section>
+
+      <OutreachPanel signups={signups} sentKeys={remind.sentKeys} optedOut={remind.optedOut} />
+
+      <SignupList signups={signups} t={t} exportHref={`/api/admin/signups?${qs}&format=csv`} remind={remind} />
       <MetricsReport metrics={metrics} t={t} />
     </div>
   )

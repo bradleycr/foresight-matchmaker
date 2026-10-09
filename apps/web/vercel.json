@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm --filter @rmm/web build"
+  "buildCommand": "cd ../.. && pnpm --filter @rmm/web build",
+  "crons": [
+    {
+      "path": "/api/cron/listing-nudges",
+      "schedule": "15 8 * * *"
+    }
+  ]
 }
