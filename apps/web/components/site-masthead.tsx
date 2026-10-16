@@ -64,6 +64,9 @@ export function SiteMasthead({
             <NavLink href="/me" className="hover:underline">
               {t("nav.me")}
             </NavLink>
+            <NavLink href="/account" className="hover:underline">
+              {t("nav.account")}
+            </NavLink>
             <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
           </>
         ) : signedIn ? (
@@ -73,6 +76,9 @@ export function SiteMasthead({
             </NavLink>
             <NavLink href="/register" className="hover:underline">
               {t("nav.register")}
+            </NavLink>
+            <NavLink href="/account" className="hover:underline">
+              {t("nav.account")}
             </NavLink>
             <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
           </>

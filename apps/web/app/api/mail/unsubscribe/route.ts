@@ -23,7 +23,7 @@ function page(title: string, body: string, status = 200): NextResponse {
     <h1 style="font-weight:normal;font-size:2rem;letter-spacing:-0.02em;text-transform:uppercase;">${title}</h1>
     <p style="font-family:Helvetica,Arial,sans-serif;font-size:1rem;line-height:1.5;">${body}</p>
     <p style="font-family:Helvetica,Arial,sans-serif;font-size:0.875rem;line-height:1.5;margin-top:1.5rem;">
-      <a href="https://foresightmatchmaker.app/me" style="color:${TEAL};">Sign in to manage email preferences</a>
+      <a href="https://foresightmatchmaker.app/account#email" style="color:${TEAL};">Account settings — turn programme emails back on</a>
     </p>
   </main>
 </body>
@@ -37,7 +37,7 @@ function page(title: string, body: string, status = 200): NextResponse {
 async function stopFromToken(token: string | null): Promise<NextResponse> {
   const email = decodeMailOptOutToken(token)
   if (!email) {
-    return page("This link is not valid", "Sign in to your profile to change email preferences, or reply to the email.", 400)
+    return page("This link is not valid", "Open Account settings to change email preferences, or reply to the email.", 400)
   }
   try {
     await recordMailOptOut(email, "unsubscribe_link")

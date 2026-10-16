@@ -7,8 +7,8 @@ import { DEFAULT_CONTACT_EMAIL } from "@/lib/contact"
 import { FailureReportActions } from "@/components/bug-report"
 
 /**
- * Programme-announcement mail preference on /me. Magic-link sign-in is
- * never gated here — only thank-you and future programme blasts.
+ * Account-wide programme-mail preference. Magic-link sign-in is never gated —
+ * only thank-you and future programme announcements.
  */
 export function MailPreferencePanel({ initialProgrammeEmails }: { initialProgrammeEmails: boolean }) {
   const t = useT()
@@ -43,15 +43,20 @@ export function MailPreferencePanel({ initialProgrammeEmails }: { initialProgram
   }
 
   return (
-    <section className="mt-10 border border-rule-strong p-4" aria-labelledby="mail-pref-heading">
+    <section
+      id="email"
+      className="border-2 border-ink bg-paper p-5"
+      aria-labelledby="mail-pref-heading"
+    >
       <h2 id="mail-pref-heading" className="font-listing text-xl font-bold uppercase tracking-tight">
         {t("me.mail_title")}
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("me.mail_body")}</p>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-teal">{t("account.scope_account")}</p>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("me.mail_body")}</p>
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         <Button
           type="button"
-          variant={programmeEmails ? "primary" : "ghost"}
+          variant={programmeEmails ? "primary" : "outline"}
           disabled={status === "working" || programmeEmails}
           onClick={() => void save(true)}
         >
@@ -59,13 +64,16 @@ export function MailPreferencePanel({ initialProgrammeEmails }: { initialProgram
         </Button>
         <Button
           type="button"
-          variant={!programmeEmails ? "primary" : "ghost"}
+          variant={!programmeEmails ? "primary" : "outline"}
           disabled={status === "working" || !programmeEmails}
           onClick={() => void save(false)}
         >
           {t("me.mail_off")}
         </Button>
       </div>
+      <p className="mt-3 text-sm font-semibold text-ink">
+        {programmeEmails ? t("account.mail_status_on") : t("account.mail_status_off")}
+      </p>
       {status === "saved" ? (
         <p role="status" className="mt-2 text-sm text-ink-soft">
           {programmeEmails ? t("me.mail_saved_on") : t("me.mail_saved_off")}

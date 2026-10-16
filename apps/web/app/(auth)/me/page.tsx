@@ -7,13 +7,12 @@ import {
 import { getT } from "@/lib/i18n/server"
 import { llmEnabled, llmReady } from "@/lib/llm/client"
 import { MeEditor } from "@/components/remmy/me-editor"
+import Link from "next/link"
 import { OutcomeReport } from "@/components/outcome-report"
-import { MailPreferencePanel } from "@/components/mail-preference-panel"
 import { SignOutButton } from "@/components/sign-out-button"
 import { DeleteAccountPanel } from "@/components/delete-account-panel"
 import { ProfileCompleteChoices } from "@/components/profile-complete-choices"
 import { getJointApplicationOutcome } from "@/lib/db/profiles"
-import { isMailOptedOut } from "@/lib/mail/optout-store"
 
 export const dynamic = "force-dynamic"
 
@@ -37,7 +36,6 @@ export default async function MePage({
   const { saved, created, outcome } = await searchParams
   const profile = live.profile
   const joint = getJointApplicationOutcome(profile.id) as "yes" | "no" | "not_yet" | null
-  const programmeEmails = !(await isMailOptedOut(live.session.email))
   const remmyConfigured = llmEnabled()
   const remmy = remmyConfigured ? await llmReady() : false
   const highlightOutcome = outcome === "1"
@@ -48,9 +46,18 @@ export default async function MePage({
     <div className="py-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("me.title")}</h1>
+          <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
+            {t("me.kicker")}
+          </p>
+          <h1 className="mt-2 font-listing text-3xl font-bold uppercase tracking-tight">{t("me.title")}</h1>
           <p className="mt-1 text-ink-soft">
             {profile.org_name} · {t("me.completeness", { pct: profile.completeness })}
+          </p>
+          <p className="mt-2 max-w-xl text-sm text-ink-soft">
+            {t("me.vs_account")}{" "}
+            <Link href="/account" className="font-semibold text-ink underline underline-offset-2">
+              {t("nav.account")}
+            </Link>
           </p>
         </div>
         <SignOutButton />
@@ -72,8 +79,6 @@ export default async function MePage({
           remmyMaintenance={remmyConfigured && !remmy}
         />
       </div>
-
-      <MailPreferencePanel initialProgrammeEmails={programmeEmails} />
 
       <DeleteAccountPanel profileId={profile.id} orgName={profile.org_name} privacyEmail={PRIVACY_EMAIL} />
     </div>
