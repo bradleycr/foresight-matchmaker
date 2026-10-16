@@ -232,6 +232,8 @@ const IMPORT_PREFIXES = [
   "matchmaker/nudges/",
   "matchmaker/nudge-optouts/",
   "matchmaker/nudge-settings/",
+  "matchmaker/mail-optouts/",
+  "matchmaker/thank-you-sent/",
 ] as const
 
 let blobImport: Promise<void> | null = null

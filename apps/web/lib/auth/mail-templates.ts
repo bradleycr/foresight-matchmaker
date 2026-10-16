@@ -96,6 +96,8 @@ export interface ListingNudgeCopy {
   body: string
   button: string
   ignore: string
+  /** Footer opt-out link label when `stopUrl` is set. */
+  stopLabel?: string
 }
 
 export function programmeName(id: string): string {
@@ -163,6 +165,7 @@ export function renderListingNudgeEmail(
   const href = escapeHtml(ctaUrl)
   const origin = publicOrigin()
   const stopHref = stopUrl ? escapeHtml(stopUrl) : ""
+  const stopLabel = copy.stopLabel ?? "Stop listing reminders"
   const lead = copy.deadlineLead
   const titleMargin = lead ? "14px 0 0 0" : "10px 0 0 0"
 
@@ -176,7 +179,7 @@ export function renderListingNudgeEmail(
     ctaUrl,
     "",
     copy.ignore,
-    ...(stopUrl ? ["", "Stop reminders:", stopUrl] : []),
+    ...(stopUrl ? ["", `${stopLabel}:`, stopUrl] : []),
     "",
     "Foresight Institute · foresight.org",
     origin,
@@ -235,7 +238,7 @@ export function renderListingNudgeEmail(
               ${
                 stopUrl
                   ? `<p style="margin:16px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.45;color:${INK_FAINT};">
-                <a href="${stopHref}" style="color:${TEAL};">Stop listing reminders</a>
+                <a href="${stopHref}" style="color:${TEAL};">${escapeHtml(stopLabel)}</a>
               </p>`
                   : ""
               }
@@ -288,6 +291,32 @@ export function renderProfileNudgeEmail(
       ignore: copy.ignore,
     },
     PROFILE_NUDGE_CTA,
+  )
+}
+
+/**
+ * Post-deadline thank-you for listed Recoding Medicine people. Asks them to
+ * mark whether a connection came through the directory, mentions future
+ * programmes, and carries a one-click unsubscribe for programme mail.
+ */
+export function renderThankYouRecordsEmail(unsubscribeUrl: string): {
+  subject: string
+  text: string
+  html: string
+} {
+  const cta = `${SITE}/signin?next=${encodeURIComponent("/me?outcome=1")}`
+  return renderListingNudgeEmail(
+    {
+      subject: "Thank you — one quick mark for our records",
+      preheader: "Did a connection come through Foresight Matchmaking? Future programmes are coming.",
+      title: "Thank you for listing",
+      body: "Thank you for creating a listing on Foresight Matchmaking for Recoding Medicine. The application window has closed. It would help our records enormously if you signed in and marked whether you found a partner or useful connection through this directory — one tap on your profile page. Foresight Matchmaking will likely host other programmes later; feel free to check back. If you do not want programme emails from us again, use the stop link below.",
+      button: "Mark a connection",
+      ignore: "Sign-in links still work when you request one. Programme announcements stop if you use the link below.",
+      stopLabel: "Stop programme emails",
+    },
+    cta,
+    unsubscribeUrl,
   )
 }
 

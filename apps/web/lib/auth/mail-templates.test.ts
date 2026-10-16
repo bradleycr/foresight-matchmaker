@@ -6,6 +6,7 @@ import {
   renderHiddenListingEmail,
   renderProfileNudgeEmail,
   renderProgrammeNudgeEmail,
+  renderThankYouRecordsEmail,
 } from "./mail-templates"
 
 describe("renderProfileNudgeEmail", () => {
@@ -55,6 +56,19 @@ describe("renderProgrammeNudgeEmail", () => {
     const mail = renderProgrammeNudgeEmail(rm, "unpublished", "https://example.org/stop")
     expect(mail.subject).toBe("Reminder: Recoding Medicine applications close 16 October")
     expect(mail.html).toContain("font-weight:bold")
+  })
+})
+
+describe("renderThankYouRecordsEmail", () => {
+  it("thanks listed people, asks for a connection mark, and carries programme unsubscribe", () => {
+    const stop = "https://foresightmatchmaker.app/api/mail/unsubscribe?t=demo"
+    const mail = renderThankYouRecordsEmail(stop)
+    expect(mail.subject).toContain("Thank you")
+    expect(mail.html).toContain("Mark a connection")
+    expect(mail.html).toContain("Stop programme emails")
+    expect(mail.html).toContain(stop)
+    expect(mail.html).toContain("outcome%3D1")
+    expect(mail.html).not.toContain("applications close")
   })
 })
 
