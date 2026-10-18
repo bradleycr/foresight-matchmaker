@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest"
-import { directoryHref, challengeBySlug, sessionUrl, programmeAutoNudge, challengeById } from "./catalog"
-import { browseDirectoryPath, visibleChallenges, isChallengeVisible } from "./visibility"
+import {
+  acceptsNewListings,
+  directoryHref,
+  challengeBySlug,
+  openChallenges,
+  sessionUrl,
+  programmeAutoNudge,
+  challengeById,
+} from "./catalog"
+import {
+  browseDirectoryPath,
+  registerableChallengeIdOf,
+  registerableChallengeIds,
+  visibleChallenges,
+  isChallengeVisible,
+} from "./visibility"
 
 describe("browseDirectoryPath", () => {
   it("sends a Recoding Medicine listing to that programme directory", () => {
@@ -32,8 +46,9 @@ describe("sessionUrl", () => {
 })
 
 describe("visibility", () => {
-  it("Recoding Medicine is always visible (status open)", () => {
+  it("Recoding Medicine stays visible as a closed archive", () => {
     expect(isChallengeVisible("recoding_medicine")).toBe(true)
+    expect(challengeById("recoding_medicine").status).toBe("closed")
   })
 
   it("AI Safety Berlin is visible in dev (NODE_ENV !== production)", () => {
@@ -46,6 +61,23 @@ describe("visibility", () => {
     expect(isChallengeVisible("ai_safety_berlin", unlock)).toBe(true)
     expect(isChallengeVisible("recoding_medicine", unlock)).toBe(false)
     expect(visibleChallenges(unlock).map((c) => c.id)).toEqual(["ai_safety_berlin"])
+  })
+})
+
+describe("acceptsNewListings", () => {
+  it("blocks Recoding Medicine after close", () => {
+    expect(acceptsNewListings("recoding_medicine")).toBe(false)
+    expect(openChallenges()).toEqual([])
+  })
+
+  it("does not offer closed programmes on register", () => {
+    expect(registerableChallengeIdOf("recoding_medicine")).toBeNull()
+    expect(registerableChallengeIds()).toEqual([])
+  })
+
+  it("offers a preview programme when it is visible and open", () => {
+    // ASB is preview, not open — still not registerable until flipped.
+    expect(acceptsNewListings("ai_safety_berlin")).toBe(false)
   })
 })
 

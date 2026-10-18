@@ -3,7 +3,7 @@
   "info": {
     "title": "Foresight Matchmaking",
     "version": "v1",
-    "description": "Headless contract for the Foresight Institute directory. Recoding Medicine is the first programme. Matching is deterministic (no LLM on the score). Contact details and dataset governance notes never appear in public payloads. Session cookie after magic-link sign-in; no API keys yet.",
+    "description": "Headless contract for the Foresight Institute directory across programmes (archives and open calls). Matching is deterministic (no LLM on the score). Contact details and dataset governance notes never appear in public payloads. Session cookie after magic-link sign-in; no API keys yet.",
     "contact": {
       "name": "Foresight Institute",
       "url": "https://foresight.org",

@@ -11,7 +11,6 @@ export async function SiteFooter() {
   const { t } = await getT()
   const programmes = visibleChallenges(await requestDemoUnlock())
   const inbox = contactEmail()
-  const closing = programmes.find((c) => c.deadlineLabel)
 
   return (
     <footer className="border-t-2 border-rule-strong py-8 text-sm text-ink-soft">
@@ -42,7 +41,7 @@ export async function SiteFooter() {
               </li>
             ))}
           </ul>
-          {closing ? <p className="mt-2">{t("footer.deadline")}</p> : null}
+          <p className="mt-2">{t("footer.programmes_note")}</p>
         </div>
 
         <div>

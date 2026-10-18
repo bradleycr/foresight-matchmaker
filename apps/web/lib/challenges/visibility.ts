@@ -1,5 +1,11 @@
 import { cookies } from "next/headers"
-import { CHALLENGES, DEFAULT_CHALLENGE_ID, challengeIdOf, directoryHref } from "./catalog"
+import {
+  CHALLENGES,
+  DEFAULT_CHALLENGE_ID,
+  acceptsNewListings,
+  challengeIdOf,
+  directoryHref,
+} from "./catalog"
 import type { ChallengeDef, ChallengeId } from "./catalog"
 import { parseDemoUnlock, DEMO_COOKIE, type DemoUnlock } from "./demo-unlock"
 
@@ -46,7 +52,9 @@ export function isChallengeVisible(id: ChallengeId, unlock: DemoUnlock | null = 
   if (!challenge) return false
   if (unlock?.solo) return id === unlock.programme
   if (unlock && id === unlock.programme) return true
-  return challenge.status === "open" || previewEnabled(id)
+  // Open and closed both stay on the public desk; closed is an archive.
+  if (challenge.status === "open" || challenge.status === "closed") return true
+  return previewEnabled(id)
 }
 
 /** Every programme this visitor may browse, in catalog order. */
@@ -71,6 +79,30 @@ export function visibleChallengeIdOf(
   if (isChallengeVisible(resolved, unlock)) return resolved
   const visible = visibleChallenges(unlock)
   return visible[0]?.id ?? DEFAULT_CHALLENGE_ID
+}
+
+/**
+ * Default programme for the register form: prefer one that still accepts
+ * listings. Closed archives stay browsable but are not offered for create.
+ */
+export function registerableChallengeIdOf(
+  id: string | undefined | null,
+  unlock: DemoUnlock | null = null,
+): ChallengeId | null {
+  const visible = visibleChallenges(unlock)
+  const open = visible.filter((c) => acceptsNewListings(c.id))
+  if (open.length === 0) return null
+  if (id) {
+    const resolved = challengeIdOf(id)
+    if (open.some((c) => c.id === resolved)) return resolved
+  }
+  return open[0]!.id
+}
+
+export function registerableChallengeIds(unlock: DemoUnlock | null = null): readonly ChallengeId[] {
+  return visibleChallenges(unlock)
+    .filter((c) => acceptsNewListings(c.id))
+    .map((c) => c.id)
 }
 
 /**

@@ -3,7 +3,14 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
-import { CHALLENGES, challengeBySlug, isApplicationChallenge, sessionUrl, type ChallengeDef } from "@/lib/challenges/catalog"
+import {
+  CHALLENGES,
+  acceptsNewListings,
+  challengeBySlug,
+  isApplicationChallenge,
+  sessionUrl,
+  type ChallengeDef,
+} from "@/lib/challenges/catalog"
 import { isChallengeVisible, requestDemoUnlock } from "@/lib/challenges/visibility"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { ListingCounts } from "@/components/listing-counts"
@@ -97,9 +104,9 @@ export default async function ChallengePage({
       {isApplicationChallenge(id) ? (
         <DirectoryDisclaimer
           className="mt-6"
-          applyHref={challenge.hostUrl}
-          applyNote={t(`challenge.${id}.host_note`)}
-          applyLabel={t(`challenge.${id}.host_link`)}
+          applyHref={acceptsNewListings(id) ? challenge.hostUrl : undefined}
+          applyNote={acceptsNewListings(id) ? t(`challenge.${id}.host_note`) : undefined}
+          applyLabel={acceptsNewListings(id) ? t(`challenge.${id}.host_link`) : undefined}
         />
       ) : null}
 
@@ -110,13 +117,22 @@ export default async function ChallengePage({
         >
           {t("challenge.cta_directory")}
         </Link>
-        <Link
-          href={live ? "/me" : `/register?challenge=${challenge.id}`}
-          className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
-        >
-          {t(live ? "nav.me" : "nav.register")}
-        </Link>
-        {isApplicationChallenge(id) ? (
+        {live ? (
+          <Link
+            href="/me"
+            className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
+          >
+            {t("nav.me")}
+          </Link>
+        ) : acceptsNewListings(id) ? (
+          <Link
+            href={`/register?challenge=${challenge.id}`}
+            className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
+          >
+            {t("nav.register")}
+          </Link>
+        ) : null}
+        {isApplicationChallenge(id) && challenge.status === "open" ? (
           <a
             href={challenge.hostUrl}
             className="inline-flex min-h-12 items-center border border-ink px-6 text-base font-semibold uppercase tracking-wide hover:bg-ink hover:text-paper"

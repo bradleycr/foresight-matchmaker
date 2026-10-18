@@ -11,8 +11,13 @@ import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
 import { MagicLinkNote } from "@/components/magic-link-note"
 import { OneListingNote } from "@/components/one-listing-note"
 import { challengeById, isApplicationChallenge } from "@/lib/challenges/catalog"
-import { requestDemoUnlock, visibleChallengeIdOf, visibleChallengeIds } from "@/lib/challenges/visibility"
+import {
+  registerableChallengeIdOf,
+  registerableChallengeIds,
+  requestDemoUnlock,
+} from "@/lib/challenges/visibility"
 import { isHerePath, ownedListingRedirect, safeNextPath } from "@/lib/auth/next-path"
+import Link from "next/link"
 
 /**
  * Add a listing. Email must be confirmed first; then Remmy or the form.
@@ -41,14 +46,37 @@ export default async function RegisterPage({
 
   const { t } = await getT()
   const unlock = await requestDemoUnlock()
-  const defaultChallengeId = visibleChallengeIdOf(challenge, unlock)
-  const challengeOptions = visibleChallengeIds(unlock)
+  const defaultChallengeId = registerableChallengeIdOf(challenge, unlock)
+  const challengeOptions = registerableChallengeIds(unlock)
   const afterCreateHref = isHerePath(safeNextPath(rawNext)) ? safeNextPath(rawNext)! : undefined
   const nextParams = new URLSearchParams()
   if (defaultChallengeId) nextParams.set("challenge", defaultChallengeId)
   if (afterCreateHref) nextParams.set("next", afterCreateHref)
   const nextQuery = nextParams.toString()
   const next = nextQuery ? `/register?${nextQuery}` : "/register"
+
+  if (!defaultChallengeId || challengeOptions.length === 0) {
+    return (
+      <div className="mx-auto max-w-lg py-16">
+        <h1 className="font-listing text-3xl font-bold uppercase tracking-tight">{t("register.title")}</h1>
+        <p className="mt-4 leading-relaxed text-ink-soft">{t("register.no_open_programmes")}</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/#programmes"
+            className="inline-flex min-h-11 items-center border border-ink bg-mark px-4 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
+          >
+            {t("nav.programmes")}
+          </Link>
+          <Link
+            href={session ? "/account" : "/signin?next=%2Faccount"}
+            className="inline-flex min-h-11 items-center border border-ink px-4 text-sm font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
+          >
+            {t("nav.account")}
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   if (!session) {
     const mode = magicLinkMode()

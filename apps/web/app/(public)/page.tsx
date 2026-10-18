@@ -3,8 +3,8 @@ import { getT } from "@/lib/i18n/server"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getSession } from "@/lib/auth/session"
 import { signInHref } from "@/lib/auth/next-path"
-import { browseDirectoryPath, requestDemoUnlock, visibleChallenges } from "@/lib/challenges/visibility"
-import { isApplicationChallenge } from "@/lib/challenges/catalog"
+import { browseDirectoryPath, registerableChallengeIdOf, requestDemoUnlock, visibleChallenges } from "@/lib/challenges/visibility"
+import { acceptsNewListings, isApplicationChallenge } from "@/lib/challenges/catalog"
 import { challengeTheme } from "@/lib/challenges/themes"
 import { ProgrammeStatusTag } from "@/components/programme-status"
 import { DirectoryDisclaimer } from "@/components/directory-disclaimer"
@@ -15,17 +15,14 @@ import { countVisibleProfilesByChallenge } from "@/lib/db/profiles"
 export const dynamic = "force-dynamic"
 
 /**
- * Foresight Matchmaking home: the platform, then the open programmes.
- * Recoding Medicine facts live on the challenge page, not here.
+ * Foresight Matchmaking home: the platform, then its programmes.
+ * Closed programmes remain as archives; only open ones take new listings.
  */
 export default async function LandingPage({
   searchParams,
 }: {
   searchParams: Promise<{ deleted?: string }>
 }) {
-  // The corpus pull and the session lookup do not depend on each other. Run
-  // in series they cost a cold isolate two round trips before first paint;
-  // concurrent hydrate calls dedupe on the in-flight promise.
   const corpus = hydrateListings()
   const [{ t }, { deleted }, live] = await Promise.all([getT(), searchParams, peekLiveSession()])
   const session = live ? live.session : await getSession()
@@ -33,13 +30,14 @@ export default async function LandingPage({
 
   const unlock = await requestDemoUnlock()
   const programmes = visibleChallenges(unlock)
+  const openId = registerableChallengeIdOf(null, unlock)
   const byChallenge = countVisibleProfilesByChallenge()
   const empty = { data_holder: 0, ai_team: 0, consortium: 0, individual: 0 }
   const directoryHref = session
     ? browseDirectoryPath(live?.profile.challenge_id, unlock)
     : signInHref("/directory")
-  const profileHref = live ? "/me" : `/register?challenge=${programmes[0]?.id ?? "recoding_medicine"}`
-  const profileLabel = live ? t("nav.me") : t("nav.register")
+  const profileHref = live ? "/me" : openId ? `/register?challenge=${openId}` : "/account"
+  const profileLabel = live ? t("nav.me") : openId ? t("nav.register") : t("nav.account")
 
   return (
     <div className="py-10">
@@ -47,10 +45,10 @@ export default async function LandingPage({
         <div role="status" className="mb-6 border border-ink bg-paper-shade px-3 py-2">
           <p>{t("landing.deleted")}</p>
           <Link
-            href="/register?deleted=1"
+            href={openId ? "/register?deleted=1" : "/account"}
             className="mt-2 inline-flex min-h-10 items-center font-semibold uppercase tracking-wide text-ink underline underline-offset-2 hover:no-underline"
           >
-            {t("landing.deleted_cta")} →
+            {openId ? t("landing.deleted_cta") : t("nav.account")} →
           </Link>
         </div>
       ) : null}
@@ -62,6 +60,12 @@ export default async function LandingPage({
       <p className="mt-4 max-w-2xl text-lg leading-relaxed">{t("landing.subhead")}</p>
 
       <DirectoryDisclaimer tone="quiet" className="mt-5" />
+
+      {!openId ? (
+        <p className="mt-5 max-w-2xl border border-rule-strong bg-paper-shade px-4 py-3 text-sm leading-relaxed text-ink-soft">
+          {t("landing.no_open_programmes")}
+        </p>
+      ) : null}
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
@@ -82,10 +86,12 @@ export default async function LandingPage({
         <h2 id="programmes-heading" className="border-b-2 border-teal pb-1 font-listing text-xl font-bold uppercase">
           {t("landing.programmes_title")}
         </h2>
+        <p className="mt-3 max-w-2xl text-sm text-ink-soft">{t("landing.programmes_body")}</p>
 
         <ul className="mt-6 grid gap-4">
           {programmes.map((challenge) => {
             const counts = byChallenge[challenge.id] ?? empty
+            const open = acceptsNewListings(challenge.id)
             return (
               <li key={challenge.id}>
                 <div
@@ -98,37 +104,47 @@ export default async function LandingPage({
                       <ProgrammeStatusTag challenge={challenge} t={t} />
                     </h3>
                     <p className="mt-2 max-w-xl text-ink-soft">{t(`challenge.${challenge.id}.blurb`)}</p>
-                    {/* Programmes that close show their deadline; standing ones show their rhythm. */}
                     <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
-                      {challenge.deadlineLabel
-                        ? t("landing.programme_deadline", { date: challenge.deadlineLabel })
-                        : t(`challenge.${challenge.id}.cadence`)}
+                      {challenge.status === "closed"
+                        ? t("landing.programme_closed_label")
+                        : challenge.deadlineLabel
+                          ? t("landing.programme_deadline", { date: challenge.deadlineLabel })
+                          : t(`challenge.${challenge.id}.cadence`)}
                     </p>
                     {kindCountTotal(counts) > 0 ? (
                       <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
-                        <div>
-                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.data_holder}</dd>{" "}
-                          <dt className="inline">{t("landing.count_data_holders")}</dt>
-                        </div>
-                        <div>
-                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.ai_team}</dd>{" "}
-                          <dt className="inline">{t("landing.count_ai_teams")}</dt>
-                        </div>
-                        <div>
-                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.consortium}</dd>{" "}
-                          <dt className="inline">{t("landing.count_consortia")}</dt>
-                        </div>
-                        <div>
-                          <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.individual}</dd>{" "}
-                          <dt className="inline">{t("landing.count_individuals")}</dt>
-                        </div>
+                        {isApplicationChallenge(challenge.id) ? (
+                          <>
+                            <div>
+                              <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.data_holder}</dd>{" "}
+                              <dt className="inline">{t("landing.count_data_holders")}</dt>
+                            </div>
+                            <div>
+                              <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.ai_team}</dd>{" "}
+                              <dt className="inline">{t("landing.count_ai_teams")}</dt>
+                            </div>
+                            <div>
+                              <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.consortium}</dd>{" "}
+                              <dt className="inline">{t("landing.count_consortia")}</dt>
+                            </div>
+                            <div>
+                              <dd className="tnum inline font-listing text-lg font-bold text-ink">{counts.individual}</dd>{" "}
+                              <dt className="inline">{t("landing.count_individuals")}</dt>
+                            </div>
+                          </>
+                        ) : (
+                          <div>
+                            <dd className="tnum inline font-listing text-lg font-bold text-ink">{kindCountTotal(counts)}</dd>{" "}
+                            <dt className="inline">{t("landing.count_people")}</dt>
+                          </div>
+                        )}
                       </dl>
                     ) : null}
                     <p className="mt-4 text-sm font-semibold uppercase tracking-wide underline underline-offset-2">
-                      {t("landing.programme_open")} →
+                      {open ? t("landing.programme_open") : t("landing.programme_view")} →
                     </p>
                   </Link>
-                  {isApplicationChallenge(challenge.id) ? (
+                  {isApplicationChallenge(challenge.id) && open ? (
                     <p className="mt-3 border-t border-rule pt-3 text-sm leading-snug text-ink-soft">
                       {t(`challenge.${challenge.id}.host_note`)}{" "}
                       <a

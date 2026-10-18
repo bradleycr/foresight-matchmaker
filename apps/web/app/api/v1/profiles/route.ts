@@ -2,11 +2,12 @@ import { NextRequest } from "next/server"
 import { ZodError } from "zod"
 import { toPublicProfile } from "@rmm/schema"
 import { profileInputSchema } from "@/lib/api/input"
-import { ok, zodError, badRequest, unauthorized, unavailable } from "@/lib/api/respond"
+import { ok, zodError, badRequest, unauthorized, unavailable, forbidden } from "@/lib/api/respond"
 import { getProfilesByEmail, markClaimed, saveProfile, slugFor } from "@/lib/db/profiles"
 import { persistListing, ensureOwnedListing, PERSIST_UNAVAILABLE_MESSAGE } from "@/lib/db/durable"
 import { createSession, getSession } from "@/lib/auth/session"
 import { backupProfileByEmail } from "@/lib/ops/profile-backup"
+import { acceptsNewListings, challengeIdOf } from "@/lib/challenges/catalog"
 
 export const dynamic = "force-dynamic"
 
@@ -55,10 +56,15 @@ export async function POST(req: NextRequest): Promise<Response> {
     throw e
   }
 
+  const challengeId = challengeIdOf(input.challenge_id)
+  if (!acceptsNewListings(challengeId)) {
+    return forbidden("This programme is not accepting new listings.")
+  }
+
   let profile
   try {
     profile = saveProfile(
-      { ...input, slug: slugFor(input.org_name), contact_email: session.email },
+      { ...input, challenge_id: challengeId, slug: slugFor(input.org_name), contact_email: session.email },
       { isNew: true },
     )
   } catch (e) {

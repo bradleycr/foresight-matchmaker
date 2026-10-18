@@ -3,11 +3,8 @@ import { cn } from "@/lib/utils"
 import type { ChallengeDef } from "@/lib/challenges/catalog"
 
 /**
- * Marks a programme that is built but not launched.
- *
- * A preview is only ever rendered to someone the visibility rules already
- * let in, so this is not a lock — it is the courtesy of telling a demo
- * audience that what they are looking at is not public yet.
+ * Status chip / notice for a programme card or programme page.
+ * Preview = not public yet. Closed = archive, no new listings.
  */
 
 /** Inline flag beside a programme's name in a list. */
@@ -20,22 +17,28 @@ export function ProgrammeStatusTag({
   t: T
   className?: string
 }) {
-  if (challenge.status !== "preview") return null
+  if (challenge.status === "open") return null
+
+  const label =
+    challenge.status === "closed" ? t("challenge.closed_tag") : t("challenge.preview_tag")
 
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center border border-dashed border-ink px-1.5 py-px align-middle",
-        "font-sans text-[10px] font-semibold uppercase leading-none tracking-[0.16em] text-ink-soft",
+        "inline-flex shrink-0 items-center border px-1.5 py-px align-middle",
+        "font-sans text-[10px] font-semibold uppercase leading-none tracking-[0.16em]",
+        challenge.status === "closed"
+          ? "border-rule-strong text-ink-soft"
+          : "border-dashed border-ink text-ink-soft",
         className,
       )}
     >
-      {t("challenge.preview_tag")}
+      {label}
     </span>
   )
 }
 
-/** Full-width explanation at the top of a preview programme's own pages. */
+/** Full-width explanation at the top of a preview or closed programme page. */
 export function ProgrammePreviewNotice({
   challenge,
   t,
@@ -45,19 +48,22 @@ export function ProgrammePreviewNotice({
   t: T
   className?: string
 }) {
-  if (challenge.status !== "preview") return null
+  if (challenge.status === "open") return null
+
+  const tag =
+    challenge.status === "closed" ? t("challenge.closed_tag") : t("challenge.preview_tag")
+  const note =
+    challenge.status === "closed"
+      ? t(`challenge.${challenge.id}.closed_note`)
+      : t("challenge.preview_note")
 
   return (
     <aside
       role="note"
       className={cn("border border-dashed border-ink bg-paper-shade px-4 py-3", className)}
     >
-      <p className="font-listing text-sm font-bold uppercase tracking-widest">
-        {t("challenge.preview_tag")}
-      </p>
-      <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-soft">
-        {t("challenge.preview_note")}
-      </p>
+      <p className="font-listing text-sm font-bold uppercase tracking-widest">{tag}</p>
+      <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-soft">{note}</p>
     </aside>
   )
 }

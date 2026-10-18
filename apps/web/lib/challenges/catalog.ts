@@ -17,11 +17,11 @@ export const PLATFORM = {
 } as const
 
 /**
- * `open` is listed for everyone. `preview` is built but not launched: it is
- * reachable only where previews are enabled, so a programme can be filled in
- * and demoed months before it goes public. Launching one is this single word.
+ * `open` — public and accepting new listings.
+ * `closed` — public archive; existing listings stay, no new ones.
+ * `preview` — built but not announced; only where previews / demo unlock allow.
  */
-export type ChallengeStatus = "open" | "preview"
+export type ChallengeStatus = "open" | "closed" | "preview"
 
 export interface ChallengeDef {
   id: ChallengeId
@@ -85,13 +85,13 @@ export const CHALLENGES: readonly ChallengeDef[] = [
   {
     id: "recoding_medicine",
     slug: "recoding-medicine",
-    status: "open",
+    status: "closed",
     host: "SPRIND",
     hostUrl: "https://www.sprind.org/taten/challenges/recoding-medicine",
     /** Application inbox for the programme — never shown as a directory contact. */
     hostEmail: "challenge@sprind.org",
-    deadlineLabel: "16 October 2026, 18:00 CET",
-    deadlineShort: "16 October",
+    deadlineLabel: "Closed 16 October 2026",
+    deadlineShort: "16 October 2026",
     autoNudge: false,
     calendarUrl: PLATFORM.lumaCalendarUrl,
     factsNamespace: "landing",
@@ -101,10 +101,8 @@ export const CHALLENGES: readonly ChallengeDef[] = [
   },
   {
     /**
-     * AI Safety Berlin — a standing community rather than a call for
-     * applications, so it has no deadline and its rooms recur. It coworks
-     * from the Æthos space in CIC Berlin, next door to Foresight's Berlin
-     * node. Preview until the October launch.
+     * AI Safety Berlin — standing community (coworking, lunch, talks).
+     * Preview until operators flip to `open` for public listings.
      */
     id: "ai_safety_berlin",
     slug: "ai-safety-berlin",
@@ -146,6 +144,16 @@ export function directoryHref(challengeId: ChallengeId): string {
 /** Recoding Medicine is a call for applications. Community programmes are not. */
 export function isApplicationChallenge(id: ChallengeId): boolean {
   return id === "recoding_medicine"
+}
+
+/** Can visitors publish a new listing into this programme right now? */
+export function acceptsNewListings(id: ChallengeId): boolean {
+  return challengeById(id).status === "open"
+}
+
+/** Programmes that currently accept new listings, in catalog order. */
+export function openChallenges(): readonly ChallengeDef[] {
+  return CHALLENGES.filter((c) => c.status === "open")
 }
 
 /** True unless the catalogue opts a programme out of the week-later drip. */
