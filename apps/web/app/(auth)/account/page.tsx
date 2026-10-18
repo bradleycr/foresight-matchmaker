@@ -52,6 +52,27 @@ export default async function AccountPage() {
         <MailPreferencePanel initialProgrammeEmails={programmeEmails} />
       </div>
 
+      <section className="mt-10" aria-labelledby="account-programmes">
+        <h2 id="account-programmes" className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
+          {t("account.programmes_title")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("account.programmes_body")}</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            href="/programmes"
+            className="inline-flex min-h-11 items-center border border-ink bg-mark px-4 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
+          >
+            {t("account.switch_programme")}
+          </Link>
+          <Link
+            href="/#programmes"
+            className="inline-flex min-h-11 items-center border border-ink px-4 text-sm font-semibold uppercase tracking-wide hover:bg-teal hover:text-paper"
+          >
+            {t("account.view_open_programmes")}
+          </Link>
+        </div>
+      </section>
+
       <section className="mt-10" aria-labelledby="account-listings">
         <h2 id="account-listings" className="border-b-2 border-rule-strong pb-1 font-listing text-xl font-bold uppercase">
           {t("account.listings_title")}
@@ -62,10 +83,10 @@ export default async function AccountPage() {
           <div className="mt-4 border border-rule-strong bg-paper-shade p-4">
             <p className="text-sm leading-relaxed">{t("account.listings_empty")}</p>
             <Link
-              href="/register"
+              href="/programmes"
               className="mt-3 inline-flex min-h-11 items-center border border-ink bg-mark px-4 text-sm font-semibold uppercase tracking-wide text-mark-ink hover:bg-ink hover:text-paper"
             >
-              {t("nav.register")}
+              {t("account.switch_programme")}
             </Link>
           </div>
         ) : (
@@ -82,12 +103,20 @@ export default async function AccountPage() {
                       {isActive ? ` · ${t("account.listing_active")}` : ""}
                     </p>
                   </div>
-                  <Link
-                    href="/me"
-                    className="text-sm font-semibold uppercase tracking-wide underline underline-offset-2"
-                  >
-                    {t("account.edit_listing")}
-                  </Link>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    <Link
+                      href={`/api/v1/desk?challenge=${challenge.id}&next=${encodeURIComponent("/me")}`}
+                      className="text-sm font-semibold uppercase tracking-wide underline underline-offset-2"
+                    >
+                      {t("account.edit_listing")}
+                    </Link>
+                    <Link
+                      href={`/api/v1/desk?challenge=${challenge.id}&next=${encodeURIComponent(`/directory?challenge=${challenge.id}`)}`}
+                      className="text-sm font-semibold uppercase tracking-wide underline underline-offset-2"
+                    >
+                      {t("account.open_directory")}
+                    </Link>
+                  </div>
                 </li>
               )
             })}

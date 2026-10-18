@@ -13,10 +13,13 @@ import { useT } from "@/lib/i18n/client"
  */
 export function SiteMasthead({
   directoryHref,
+  programmesHref = "/#programmes",
   signedIn,
   listed,
 }: {
   directoryHref: string
+  /** Signed-in → choose-desk screen; anonymous → homepage programmes. */
+  programmesHref?: string
   signedIn: boolean
   listed: boolean
 }) {
@@ -50,7 +53,7 @@ export function SiteMasthead({
         aria-label={t("nav.label")}
         className="flex flex-wrap gap-x-5 gap-y-1 border-t border-rule py-2 text-sm font-semibold uppercase tracking-wide"
       >
-        <NavLink href="/#programmes" className="hover:underline">
+        <NavLink href={programmesHref} className="hover:underline">
           {t("nav.programmes")}
         </NavLink>
         {listed ? (

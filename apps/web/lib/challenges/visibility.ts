@@ -108,15 +108,19 @@ export function registerableChallengeIds(unlock: DemoUnlock | null = null): read
 /**
  * Where Browse / Directory should land.
  *
- * Signed-in listers go to the programme on their listing. With a single
- * visible programme everyone else lands there too. Several visible
- * programmes and no listing yet → `/directory`, the chooser.
+ * Preference order: active desk cookie → listing's programme → sole
+ * visible programme → `/directory` chooser.
  */
 export function browseDirectoryPath(
   listingChallengeId?: string | null,
   unlock: DemoUnlock | null = null,
+  preferredChallengeId?: ChallengeId | null,
 ): string {
   const visible = visibleChallenges(unlock)
+  const preferred = preferredChallengeId
+    ? visible.find((c) => c.id === preferredChallengeId)
+    : undefined
+  if (preferred) return directoryHref(preferred.id)
   const listed = listingChallengeId
     ? visible.find((c) => c.id === listingChallengeId)
     : undefined

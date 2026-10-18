@@ -56,7 +56,7 @@ export default async function DirectoryPage({
             return (
               <li key={challenge.id}>
                 <Link
-                  href={directoryHref(challenge.id)}
+                  href={`/api/v1/desk?challenge=${challenge.id}&next=${encodeURIComponent(directoryHref(challenge.id))}`}
                   className="block border-2 border-rule-strong bg-paper p-5 hover:bg-paper-shade"
                   style={{ borderLeftWidth: "4px", borderLeftColor: challengeTheme(challenge.id).accent }}
                 >

@@ -21,6 +21,12 @@ describe("browseDirectoryPath", () => {
     expect(browseDirectoryPath("recoding_medicine")).toBe("/directory?challenge=recoding_medicine")
   })
 
+  it("prefers an active desk cookie over the listing programme", () => {
+    expect(browseDirectoryPath("recoding_medicine", null, "ai_safety_berlin")).toBe(
+      "/directory?challenge=ai_safety_berlin",
+    )
+  })
+
   it("falls back when there is no listing yet", () => {
     const visible = visibleChallenges()
     if (visible.length === 1) {

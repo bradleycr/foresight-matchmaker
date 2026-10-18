@@ -83,14 +83,16 @@ export function ownedListingRedirect(next?: string | null): string {
 
 /**
  * Where to send someone after they confirm a magic link.
- * Confirmed email, no listing yet → the form. Existing listing → /me
- * (unless they asked for another in-app page).
+ *
+ * Explicit `next` wins (except sending an existing listing back through
+ * /register). Otherwise they land on /programmes — pick a desk, then the
+ * masthead Directory / Matches / Listing links make sense for that choice.
  */
 export function afterClaimHref(profileId: string | null, next?: string | null): string {
   const dest = safeNextPath(next)
   if (profileId) {
     if (dest && !isRegisterPath(dest)) return dest
-    return "/me"
+    return "/programmes"
   }
-  return dest ?? "/register"
+  return dest ?? "/programmes"
 }

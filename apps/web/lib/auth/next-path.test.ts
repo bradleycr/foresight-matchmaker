@@ -81,10 +81,14 @@ describe("needsEmailVerify", () => {
 })
 
 describe("afterClaimHref", () => {
-  it("sends a confirmed address with no listing to the form", () => {
+  it("keeps an explicit register destination when they have no listing yet", () => {
     expect(afterClaimHref(null, "/register")).toBe("/register")
     expect(afterClaimHref(null, "/register?challenge=x")).toBe("/register?challenge=x")
-    expect(afterClaimHref(null)).toBe("/register")
+  })
+
+  it("sends a bare confirm to the programme desk chooser", () => {
+    expect(afterClaimHref(null)).toBe("/programmes")
+    expect(afterClaimHref("prof-1")).toBe("/programmes")
   })
 
   it("sends confirmed visitors to the directory they asked for, even without a listing yet", () => {
@@ -94,10 +98,9 @@ describe("afterClaimHref", () => {
     )
   })
 
-  it("sends an existing listing to /me, not back through register", () => {
-    expect(afterClaimHref("prof-1", "/register")).toBe("/me")
+  it("sends an existing listing to /programmes by default, not back through register", () => {
+    expect(afterClaimHref("prof-1", "/register")).toBe("/programmes")
     expect(afterClaimHref("prof-1", "/directory")).toBe("/directory")
-    expect(afterClaimHref("prof-1")).toBe("/me")
   })
 
   it("returns a room check-in after confirm", () => {
