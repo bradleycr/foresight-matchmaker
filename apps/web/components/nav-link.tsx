@@ -1,29 +1,30 @@
 "use client"
 
 import Link from "next/link"
-import { useLinkStatus } from "next/link"
 import { usePathname } from "next/navigation"
 import { Nanowheel } from "@/components/nanowheel"
 import { cn } from "@/lib/utils"
 
 /**
- * Header/footer Link. Pending navigation spins a nanowheel; text nav items
- * get an ink underline when active. The brand home link opts out — underlining
- * the whole masthead looked like stray rules.
+ * Header/footer Link.
+ *
+ * Active text nav: ink underline + a still nanowheel (Foresight chrome only).
+ * No click-flash spinner — that read as a mystery glyph that vanished.
  */
 export function NavLink({
   href,
   className,
   children,
-  showPending = true,
+  showMark = true,
   markActive = true,
   prefetch = true,
 }: {
   href: string
   className?: string
   children: React.ReactNode
-  showPending?: boolean
-  /** False for the logo/title block — never paint chrome underlines there. */
+  /** Show the nanowheel beside an active route. Off for the brand lockup. */
+  showMark?: boolean
+  /** Paint active styles. Off for the brand home link. */
   markActive?: boolean
   prefetch?: boolean
 }) {
@@ -42,16 +43,9 @@ export function NavLink({
       )}
     >
       {children}
-      {showPending ? <NavLinkPending /> : null}
+      {showMark && active ? <Nanowheel size="xs" className="opacity-90" /> : null}
     </Link>
   )
-}
-
-/** Spinning nanowheel while this link’s navigation is in flight. */
-function NavLinkPending() {
-  const { pending } = useLinkStatus()
-  if (!pending) return null
-  return <Nanowheel size="xs" spin className="opacity-90" />
 }
 
 /**

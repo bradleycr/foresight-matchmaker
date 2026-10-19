@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
 import { contactEmail } from "@/lib/contact"
 import { BugReportMailto } from "./bug-report"
+import { Nanowheel } from "./nanowheel"
 import { PartnerLogos } from "./partner-logos"
 import { PLATFORM } from "@/lib/challenges/catalog"
 import { requestDemoUnlock, visibleChallenges } from "@/lib/challenges/visibility"
@@ -16,7 +17,10 @@ export async function SiteFooter() {
     <footer className="border-t-2 border-rule-strong py-8 text-sm text-ink-soft">
       <div className="grid gap-8 sm:grid-cols-3">
         <div>
-          <h2 className="mb-2 font-semibold uppercase tracking-wide text-ink">{t("footer.platform")}</h2>
+          <h2 className="mb-2 flex items-center gap-2 font-semibold uppercase tracking-wide text-ink">
+            <Nanowheel size="sm" className="opacity-90" />
+            {t("footer.platform")}
+          </h2>
           <p className="leading-relaxed">{t("footer.platform_body")}</p>
           <p className="mt-2">
             <a

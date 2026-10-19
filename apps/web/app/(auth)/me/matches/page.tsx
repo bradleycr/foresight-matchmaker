@@ -13,7 +13,6 @@ import { enumLabel } from "@/lib/i18n/labels"
 import { llmEnabled } from "@/lib/llm/client"
 import type { MatchPayload } from "@/lib/api/types"
 import { Tag } from "@/components/ui/primitives"
-import { ProfileAvatar } from "@/components/nanowheel"
 import { MatchRationale } from "@/components/match-rationale"
 import { MatchesTabs } from "@/components/remmy/matches-tabs"
 import { CollapsedList } from "@/components/matches/collapsed-list"
@@ -119,7 +118,6 @@ function MatchRow({ match, polish, t }: { match: MatchPayload; polish: boolean; 
             >
               {match.score}
             </span>
-            <ProfileAvatar name={match.profile.org_name} size="md" className="mt-0.5" />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline gap-x-2">
                 <Link

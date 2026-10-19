@@ -3,7 +3,6 @@
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Tag } from "@/components/ui/primitives"
-import { ProfileAvatar } from "@/components/nanowheel"
 import type { GuideMatchCard } from "@/lib/remmy/hydrate-guide"
 
 /**
@@ -45,7 +44,6 @@ export function MatchShortlistPart({
                 <span className="tnum w-10 shrink-0 border-r-4 border-mark pr-2 text-right font-listing text-2xl font-bold leading-none">
                   {match.score}
                 </span>
-                <ProfileAvatar name={match.profile.org_name} size="sm" className="mt-0.5" />
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-baseline gap-x-2">
                     <span className="font-listing text-base font-bold uppercase leading-tight">

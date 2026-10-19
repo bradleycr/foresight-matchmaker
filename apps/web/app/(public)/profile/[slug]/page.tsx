@@ -5,7 +5,6 @@ import { getSession } from "@/lib/auth/session"
 import { getT } from "@/lib/i18n/server"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Tag } from "@/components/ui/primitives"
-import { ProfileAvatar } from "@/components/nanowheel"
 import { ProfileContact } from "@/components/profile-contact"
 import type { T } from "@/lib/i18n"
 import { challengeById, challengeIdOf } from "@/lib/challenges/catalog"
@@ -81,28 +80,22 @@ export default async function ProfilePage({ params }: Params) {
   return (
     <article className="max-w-3xl py-6">
       <header className="border-b-2 border-rule-strong pb-4">
-        <div className="flex items-start gap-4 sm:gap-5">
-          <ProfileAvatar name={profile.org_name} size="xl" className="mt-0.5 hidden sm:inline-flex" />
-          <ProfileAvatar name={profile.org_name} size="lg" className="mt-0.5 sm:hidden" />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <Tag>{enumLabel(t, "kind", profile.kind)}</Tag>
-              <Tag>
-                <a href={`/challenges/${challengeById(profile.challenge_id).slug}`} className="hover:underline">
-                  {enumLabel(t, "challenge", challengeIdOf(profile.challenge_id))}
-                </a>
-              </Tag>
-              <span className="text-sm text-ink-soft">
-                {profile.country} ·{" "}
-                {[enumLabel(t, "org_type", profile.org_type), profile.org_type_other].filter(Boolean).join(" — ")}
-              </span>
-            </div>
-            <h1 className="mt-2 font-listing text-3xl font-bold uppercase leading-tight tracking-tight sm:text-4xl">
-              {profile.org_name}
-            </h1>
-            <p className="mt-2 text-lg">{profile.one_liner}</p>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Tag>{enumLabel(t, "kind", profile.kind)}</Tag>
+          <Tag>
+            <a href={`/challenges/${challengeById(profile.challenge_id).slug}`} className="hover:underline">
+              {enumLabel(t, "challenge", challengeIdOf(profile.challenge_id))}
+            </a>
+          </Tag>
+          <span className="text-sm text-ink-soft">
+            {profile.country} ·{" "}
+            {[enumLabel(t, "org_type", profile.org_type), profile.org_type_other].filter(Boolean).join(" — ")}
+          </span>
         </div>
+        <h1 className="mt-2 font-listing text-3xl font-bold uppercase leading-tight tracking-tight sm:text-4xl">
+          {profile.org_name}
+        </h1>
+        <p className="mt-2 text-lg">{profile.one_liner}</p>
       </header>
 
       <p className="mt-4 leading-relaxed">{profile.summary}</p>

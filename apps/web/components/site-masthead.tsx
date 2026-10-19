@@ -1,19 +1,15 @@
 "use client"
 
 import { BetaBadge } from "./beta-badge"
-import { Nanowheel } from "./nanowheel"
+import { ForesightMark } from "./foresight-mark"
 import { LocaleSwitcher } from "./locale-switcher"
 import { NavLink } from "./nav-link"
 import { SignOutButton } from "./sign-out-button"
 import { useT } from "@/lib/i18n/client"
-import { PLATFORM } from "@/lib/challenges/catalog"
 
 /**
- * Masthead lockup: nanowheel + Matchmaker.
- *
- * The institute wordmark PNG already embeds the nanotube, so stacking that
- * PNG beside a second wheel muddled the mark. Here the nanowheel is the
- * clear product glyph; Foresight Institute sits as a quiet text credit.
+ * Masthead: institute wordmark + Matchmaker. The nanowheel is reserved for
+ * Foresight chrome (active nav, footer) — never beside partner org names.
  */
 export function SiteMasthead({
   directoryHref,
@@ -33,21 +29,15 @@ export function SiteMasthead({
       <div className="flex items-start justify-between gap-4 pt-5 pb-3">
         <NavLink
           href="/"
-          showPending={false}
+          showMark={false}
           markActive={false}
-          className="group flex min-w-0 flex-1 items-start gap-3.5 no-underline sm:items-center sm:gap-4"
+          className="group flex min-w-0 flex-1 flex-col items-start gap-3 no-underline sm:flex-row sm:items-center sm:gap-5"
         >
-          <Nanowheel
-            size="hero"
-            label="Foresight Matchmaking"
-            className="mt-0.5 size-14 shrink-0 sm:mt-0 sm:size-16"
-          />
-          <span className="min-w-0 pt-0.5">
-            <span className="block font-listing text-[11px] font-bold uppercase tracking-[0.18em] text-teal sm:text-xs">
-              {PLATFORM.operator}
-            </span>
-            <span className="mt-1.5 flex flex-wrap items-center gap-2.5">
-              <span className="font-listing text-3xl uppercase leading-none tracking-tight sm:text-4xl">
+          <ForesightMark className="h-8 sm:h-9" />
+          <span aria-hidden="true" className="hidden h-8 w-px shrink-0 bg-rule-strong sm:block" />
+          <span className="min-w-0">
+            <span className="flex items-center gap-2.5">
+              <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
                 {t("app.title")}
               </span>
               <BetaBadge>{t("app.beta")}</BetaBadge>
