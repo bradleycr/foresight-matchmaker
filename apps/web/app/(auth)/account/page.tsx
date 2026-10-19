@@ -8,6 +8,7 @@ import { hydrateListings } from "@/lib/db/durable"
 import { getProfilesByEmail } from "@/lib/db/profiles"
 import { isMailOptedOut } from "@/lib/mail/optout-store"
 import { MailPreferencePanel } from "@/components/mail-preference-panel"
+import { ProfileAvatar } from "@/components/nanowheel"
 import { SignOutButton } from "@/components/sign-out-button"
 import { signInHref } from "@/lib/auth/next-path"
 
@@ -95,13 +96,16 @@ export default async function AccountPage() {
               const challenge = challengeById(profile.challenge_id)
               const isActive = live?.profile.id === profile.id
               return (
-                <li key={profile.id} className="flex flex-wrap items-baseline justify-between gap-3 px-4 py-3">
-                  <div className="min-w-0">
+                <li key={profile.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <ProfileAvatar name={profile.org_name} size="sm" />
+                    <div className="min-w-0">
                     <p className="font-listing text-base font-bold uppercase leading-tight">{profile.org_name}</p>
                     <p className="mt-0.5 text-sm text-ink-soft">
                       {t(`challenge.${challenge.id}.name`)}
                       {isActive ? ` · ${t("account.listing_active")}` : ""}
                     </p>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1">
                     <Link

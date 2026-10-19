@@ -16,6 +16,7 @@ import type { DirectoryProfile } from "@/lib/api/types"
 import { useT } from "@/lib/i18n/client"
 import { enumLabel } from "@/lib/i18n/labels"
 import { Chip, Input, Select, Tag, chipClassName } from "@/components/ui/primitives"
+import { ProfileAvatar } from "@/components/nanowheel"
 import { directoryHref, isApplicationChallenge } from "@/lib/challenges/catalog"
 
 /**
@@ -261,8 +262,9 @@ export function DirectoryBrowser({
                     <li key={p.id} className="border-b border-rule">
                       <Link
                         href={`/profile/${p.slug}`}
-                        className="grid grid-cols-[1fr_auto] items-baseline gap-x-3 px-2 py-2 hover:bg-paper-shade"
+                        className="grid grid-cols-[auto_1fr_auto] items-center gap-x-3 px-2 py-2 hover:bg-paper-shade"
                       >
+                        <ProfileAvatar name={p.org_name} size="sm" />
                         <span className="min-w-0">
                           <span className="font-listing text-base font-bold uppercase leading-tight">
                             {p.org_name}

@@ -152,7 +152,36 @@
     }
   }
 
+  /*
+   * Nanowheel spin — Atlas’s pending / celebration language, slowed for
+   * chrome. Disabled entirely under reduced motion (opacity pulse only).
+   */
+  .nanowheel-spin {
+    animation: nanowheel-spin 1.35s linear infinite;
+    transform-origin: 50% 50%;
+  }
+
+  @keyframes nanowheel-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes nanowheel-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .nanowheel-spin {
+      animation: nanowheel-pulse 1.4s ease-in-out infinite;
+    }
+
     .nav-progress-bar {
       animation: none;
       transform: none;

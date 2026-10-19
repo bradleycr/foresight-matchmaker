@@ -12,6 +12,7 @@ import { OutcomeReport } from "@/components/outcome-report"
 import { SignOutButton } from "@/components/sign-out-button"
 import { DeleteAccountPanel } from "@/components/delete-account-panel"
 import { ProfileCompleteChoices } from "@/components/profile-complete-choices"
+import { ProfileAvatar } from "@/components/nanowheel"
 import { getJointApplicationOutcome } from "@/lib/db/profiles"
 
 export const dynamic = "force-dynamic"
@@ -45,20 +46,23 @@ export default async function MePage({
   return (
     <div className="py-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
-            {t("me.kicker")}
-          </p>
-          <h1 className="mt-2 font-listing text-3xl font-bold uppercase tracking-tight">{t("me.title")}</h1>
-          <p className="mt-1 text-ink-soft">
-            {profile.org_name} · {t("me.completeness", { pct: profile.completeness })}
-          </p>
-          <p className="mt-2 max-w-xl text-sm text-ink-soft">
-            {t("me.vs_account")}{" "}
-            <Link href="/account" className="font-semibold text-ink underline underline-offset-2">
-              {t("nav.account")}
-            </Link>
-          </p>
+        <div className="flex min-w-0 items-start gap-4">
+          <ProfileAvatar name={profile.org_name} size="lg" className="mt-1" />
+          <div className="min-w-0">
+            <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
+              {t("me.kicker")}
+            </p>
+            <h1 className="mt-2 font-listing text-3xl font-bold uppercase tracking-tight">{t("me.title")}</h1>
+            <p className="mt-1 text-ink-soft">
+              {profile.org_name} · {t("me.completeness", { pct: profile.completeness })}
+            </p>
+            <p className="mt-2 max-w-xl text-sm text-ink-soft">
+              {t("me.vs_account")}{" "}
+              <Link href="/account" className="font-semibold text-ink underline underline-offset-2">
+                {t("nav.account")}
+              </Link>
+            </p>
+          </div>
         </div>
         <SignOutButton />
       </div>

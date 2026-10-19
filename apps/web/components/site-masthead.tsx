@@ -2,6 +2,7 @@
 
 import { BetaBadge } from "./beta-badge"
 import { ForesightMark } from "./foresight-mark"
+import { ProfileAvatar } from "./nanowheel"
 import { LocaleSwitcher } from "./locale-switcher"
 import { NavLink } from "./nav-link"
 import { SignOutButton } from "./sign-out-button"
@@ -16,12 +17,15 @@ export function SiteMasthead({
   programmesHref = "/#programmes",
   signedIn,
   listed,
+  listingName,
 }: {
   directoryHref: string
   /** Signed-in → choose-desk screen; anonymous → homepage programmes. */
   programmesHref?: string
   signedIn: boolean
   listed: boolean
+  /** Org name for the signed-in chip — nanowheel + initials live on /me. */
+  listingName?: string | null
 }) {
   const t = useT()
 
@@ -65,7 +69,14 @@ export function SiteMasthead({
               {t("nav.matches")}
             </NavLink>
             <NavLink href="/me" className="hover:underline">
-              {t("nav.me")}
+              {listingName ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <ProfileAvatar name={listingName} size="xs" className="border-rule" />
+                  {t("nav.me")}
+                </span>
+              ) : (
+                t("nav.me")
+              )}
             </NavLink>
             <NavLink href="/account" className="hover:underline">
               {t("nav.account")}

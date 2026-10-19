@@ -26,6 +26,7 @@ export async function SiteHeader() {
       programmesHref={session ? "/programmes" : "/#programmes"}
       signedIn={Boolean(session)}
       listed={Boolean(live)}
+      listingName={live?.profile.org_name}
     />
   )
 }
