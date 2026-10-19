@@ -1,31 +1,30 @@
 "use client"
 
 import { BetaBadge } from "./beta-badge"
-import { ForesightMark } from "./foresight-mark"
-import { ProfileAvatar } from "./nanowheel"
+import { Nanowheel } from "./nanowheel"
 import { LocaleSwitcher } from "./locale-switcher"
 import { NavLink } from "./nav-link"
 import { SignOutButton } from "./sign-out-button"
 import { useT } from "@/lib/i18n/client"
+import { PLATFORM } from "@/lib/challenges/catalog"
 
 /**
- * Visible chrome for the masthead. Strings come from the client dictionary
- * so a language tap repaints this row immediately, before the RSC refresh.
+ * Masthead lockup: nanowheel + Matchmaker.
+ *
+ * The institute wordmark PNG already embeds the nanotube, so stacking that
+ * PNG beside a second wheel muddled the mark. Here the nanowheel is the
+ * clear product glyph; Foresight Institute sits as a quiet text credit.
  */
 export function SiteMasthead({
   directoryHref,
   programmesHref = "/#programmes",
   signedIn,
   listed,
-  listingName,
 }: {
   directoryHref: string
-  /** Signed-in → choose-desk screen; anonymous → homepage programmes. */
   programmesHref?: string
   signedIn: boolean
   listed: boolean
-  /** Org name for the signed-in chip — nanowheel + initials live on /me. */
-  listingName?: string | null
 }) {
   const t = useT()
 
@@ -35,13 +34,20 @@ export function SiteMasthead({
         <NavLink
           href="/"
           showPending={false}
-          className="group flex min-w-0 flex-1 flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5"
+          markActive={false}
+          className="group flex min-w-0 flex-1 items-start gap-3.5 no-underline sm:items-center sm:gap-4"
         >
-          <ForesightMark className="h-8 sm:h-9" />
-          <span aria-hidden="true" className="hidden h-8 w-px shrink-0 bg-rule-strong sm:block" />
-          <span className="min-w-0">
-            <span className="flex items-center gap-2.5">
-              <span className="block font-listing text-2xl uppercase leading-none tracking-tight sm:text-3xl">
+          <Nanowheel
+            size="hero"
+            label="Foresight Matchmaking"
+            className="mt-0.5 size-14 shrink-0 sm:mt-0 sm:size-16"
+          />
+          <span className="min-w-0 pt-0.5">
+            <span className="block font-listing text-[11px] font-bold uppercase tracking-[0.18em] text-teal sm:text-xs">
+              {PLATFORM.operator}
+            </span>
+            <span className="mt-1.5 flex flex-wrap items-center gap-2.5">
+              <span className="font-listing text-3xl uppercase leading-none tracking-tight sm:text-4xl">
                 {t("app.title")}
               </span>
               <BetaBadge>{t("app.beta")}</BetaBadge>
@@ -69,19 +75,15 @@ export function SiteMasthead({
               {t("nav.matches")}
             </NavLink>
             <NavLink href="/me" className="hover:underline">
-              {listingName ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <ProfileAvatar name={listingName} size="xs" className="border-rule" />
-                  {t("nav.me")}
-                </span>
-              ) : (
-                t("nav.me")
-              )}
+              {t("nav.me")}
             </NavLink>
             <NavLink href="/account" className="hover:underline">
               {t("nav.account")}
             </NavLink>
-            <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
+            <SignOutButton
+              className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide no-underline hover:underline"
+              variant="ghost"
+            />
           </>
         ) : signedIn ? (
           <>
@@ -94,7 +96,10 @@ export function SiteMasthead({
             <NavLink href="/account" className="hover:underline">
               {t("nav.account")}
             </NavLink>
-            <SignOutButton className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide underline-offset-4" variant="ghost" />
+            <SignOutButton
+              className="min-h-0 border-0 px-0 py-0 text-sm font-semibold uppercase tracking-wide no-underline hover:underline"
+              variant="ghost"
+            />
           </>
         ) : (
           <>
