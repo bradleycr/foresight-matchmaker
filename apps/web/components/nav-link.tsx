@@ -3,13 +3,14 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Nanowheel } from "@/components/nanowheel"
+import { isActiveHref } from "@/lib/nav/active-href"
 import { cn } from "@/lib/utils"
 
 /**
  * Header/footer Link.
  *
  * Active text nav: ink underline + a still nanowheel (Foresight chrome only).
- * No click-flash spinner — that read as a mystery glyph that vanished.
+ * Exact path only — `/me/matches` does not light “Your listing”.
  */
 export function NavLink({
   href,
@@ -46,17 +47,4 @@ export function NavLink({
       {showMark && active ? <Nanowheel size="xs" className="opacity-90" /> : null}
     </Link>
   )
-}
-
-/**
- * Route match for nav chrome. Hash-only home links (`/#programmes`) are never
- * “current” — they would otherwise light up on every visit to `/`.
- */
-function isActiveHref(pathname: string | null, href: string): boolean {
-  if (!pathname) return false
-  const hashAt = href.indexOf("#")
-  if (hashAt === 0 || (hashAt === 1 && href.startsWith("/#"))) return false
-  const path = (hashAt >= 0 ? href.slice(0, hashAt) : href).split("?")[0] ?? href
-  if (!path || path === "/") return pathname === "/"
-  return pathname === path || pathname.startsWith(`${path}/`)
 }

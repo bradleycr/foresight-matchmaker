@@ -16,8 +16,8 @@ export const dynamic = "force-dynamic"
 /**
  * Account settings — mailbox-level, not programme-level.
  *
- * A person may list under several programmes; email preferences and sign-in
- * belong to the account. Listing copy, matches, and visibility live on /me.
+ * Top: programmes and listings (what you came to do). Bottom: email
+ * preferences and sign-out (account hygiene).
  */
 export default async function AccountPage() {
   const session = await getSession()
@@ -31,25 +31,18 @@ export default async function AccountPage() {
 
   return (
     <div className="py-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
-            {t("account.kicker")}
-          </p>
-          <h1 className="mt-2 font-listing text-3xl font-bold uppercase tracking-tight">
-            {t("account.title")}
-          </h1>
-          <p className="mt-2 max-w-xl text-ink-soft">{t("account.intro")}</p>
-          <p className="mt-3 tnum text-sm text-ink-soft">
-            {t("account.signed_in_as")}{" "}
-            <span className="font-semibold text-ink">{session.email}</span>
-          </p>
-        </div>
-        <SignOutButton />
-      </div>
-
-      <div className="mt-8">
-        <MailPreferencePanel initialProgrammeEmails={programmeEmails} />
+      <div>
+        <p className="font-listing text-sm font-bold uppercase tracking-widest text-teal">
+          {t("account.kicker")}
+        </p>
+        <h1 className="mt-2 font-listing text-3xl font-bold uppercase tracking-tight">
+          {t("account.title")}
+        </h1>
+        <p className="mt-2 max-w-xl text-ink-soft">{t("account.intro")}</p>
+        <p className="mt-3 tnum text-sm text-ink-soft">
+          {t("account.signed_in_as")}{" "}
+          <span className="font-semibold text-ink">{session.email}</span>
+        </p>
       </div>
 
       <section className="mt-10" aria-labelledby="account-programmes">
@@ -124,7 +117,27 @@ export default async function AccountPage() {
         )}
       </section>
 
-      <p className="mt-10 max-w-2xl text-sm text-ink-soft">{t("account.vs_profile")}</p>
+      <p className="mt-8 max-w-2xl text-sm text-ink-soft">{t("account.vs_profile")}</p>
+
+      <section className="mt-12 border-t-2 border-rule-strong pt-8" aria-labelledby="account-mail">
+        <h2 id="account-mail" className="font-listing text-xl font-bold uppercase">
+          {t("account.mail_title")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("account.mail_body")}</p>
+        <div className="mt-4">
+          <MailPreferencePanel initialProgrammeEmails={programmeEmails} />
+        </div>
+      </section>
+
+      <section className="mt-10 border-t border-rule pt-8" aria-labelledby="account-session">
+        <h2 id="account-session" className="font-listing text-xl font-bold uppercase">
+          {t("account.session_title")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">{t("account.session_body")}</p>
+        <div className="mt-4">
+          <SignOutButton />
+        </div>
+      </section>
     </div>
   )
 }
