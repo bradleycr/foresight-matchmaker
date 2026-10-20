@@ -5,9 +5,10 @@ import { CHALLENGES, challengeBySlug, type ChallengeId } from "./catalog"
 /**
  * Secret link → cookie unlock for a preview programme.
  *
- * Production keeps preview programmes off the public desk. A signed cookie
- * lets you share one URL with a partner (e.g. AI Safety Berlin) so they can
- * walk the product without Recoding Medicine applicants seeing it.
+ * Only honoured when `NEXT_PUBLIC_PREVIEW_PROGRAMMES` enables that programme
+ * (local / pitch deploy). Production keeps previews off, ignores leftover
+ * cookies, and refuses `/api/demo/unlock` so the live desk never shows an
+ * unannounced programme or hides closed archives like Recoding Medicine.
  */
 
 export const DEMO_COOKIE = "mm_demo"

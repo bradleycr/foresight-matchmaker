@@ -15,7 +15,10 @@ import { parseDemoUnlock, DEMO_COOKIE, type DemoUnlock } from "./demo-unlock"
  * A programme marked `preview` in the catalog is finished enough to click
  * through but not announced. It shows up wherever previews are enabled and
  * is invisible — including by direct URL — everywhere else, so building the
- * next programme never disturbs the one currently taking applications.
+ * next programme never disturbs the live desk.
+ *
+ * Open and closed programmes are always public. Closed is an archive: browse
+ * and edit existing listings, no new ones (`acceptsNewListings` is false).
  *
  * Previews are on when `NEXT_PUBLIC_PREVIEW_PROGRAMMES` says so, and
  * otherwise default to on outside production. So:
@@ -23,10 +26,11 @@ import { parseDemoUnlock, DEMO_COOKIE, type DemoUnlock } from "./demo-unlock"
  *   local dev, `pnpm dev`      previews on   (nothing to configure)
  *   production                 previews off  (nothing to configure)
  *   demo/preview deployment    set NEXT_PUBLIC_PREVIEW_PROGRAMMES
- *   shared pitch link          signed `mm_demo` cookie (see demo-unlock.ts)
  *
- * Launching a programme for real is one word in the catalog — `preview` to
- * `open` — after which this module stops having an opinion about it.
+ * A signed `mm_demo` cookie can focus a pitch deploy (solo / also), but it
+ * never reveals a preview programme when previews are off — production stays
+ * clean even if someone still has an old unlock cookie. Solo hide of archives
+ * only applies while previews are actually enabled.
  *
  * The flag is `NEXT_PUBLIC_` because the directory filters and the profile
  * form are client components and must agree with the server about which
@@ -34,27 +38,58 @@ import { parseDemoUnlock, DEMO_COOKIE, type DemoUnlock } from "./demo-unlock"
  * down as props so the client never disagrees.
  */
 
-const SETTING = (process.env.NEXT_PUBLIC_PREVIEW_PROGRAMMES ?? "").trim().toLowerCase()
-
 const ALL_ON = new Set(["all", "1", "true", "on", "yes"])
 const ALL_OFF = new Set(["none", "0", "false", "off", "no"])
 
+function previewSetting(): string {
+  return (process.env.NEXT_PUBLIC_PREVIEW_PROGRAMMES ?? "").trim().toLowerCase()
+}
+
 /** Are previews of this specific programme enabled in this environment? */
-function previewEnabled(id: ChallengeId): boolean {
-  if (SETTING === "") return process.env.NODE_ENV !== "production"
-  if (ALL_ON.has(SETTING)) return true
-  if (ALL_OFF.has(SETTING)) return false
-  return SETTING.split(",").some((entry) => entry.trim() === id)
+export function previewEnabled(id: ChallengeId): boolean {
+  const setting = previewSetting()
+  if (setting === "") return process.env.NODE_ENV !== "production"
+  if (ALL_ON.has(setting)) return true
+  if (ALL_OFF.has(setting)) return false
+  return setting.split(",").some((entry) => entry.trim() === id)
+}
+
+/** True when this environment may show any preview programme at all. */
+export function previewsActive(): boolean {
+  const setting = previewSetting()
+  if (setting === "") return process.env.NODE_ENV !== "production"
+  if (ALL_OFF.has(setting)) return false
+  if (ALL_ON.has(setting)) return true
+  return setting.split(",").some((entry) => entry.trim().length > 0)
+}
+
+/**
+ * Unlock cookies only matter on desks where previews are turned on.
+ * Production (previews off) ignores them so a leftover pitch cookie cannot
+ * surface AI Safety Berlin or hide Recoding Medicine.
+ */
+function effectiveUnlock(unlock: DemoUnlock | null): DemoUnlock | null {
+  if (!unlock) return null
+  if (!previewEnabled(unlock.programme)) return null
+  return unlock
 }
 
 export function isChallengeVisible(id: ChallengeId, unlock: DemoUnlock | null = null): boolean {
   const challenge = CHALLENGES.find((c) => c.id === id)
   if (!challenge) return false
-  if (unlock?.solo) return id === unlock.programme
-  if (unlock && id === unlock.programme) return true
+
+  const active = effectiveUnlock(unlock)
+
   // Open and closed both stay on the public desk; closed is an archive.
-  if (challenge.status === "open" || challenge.status === "closed") return true
-  return previewEnabled(id)
+  if (challenge.status === "open" || challenge.status === "closed") {
+    if (active?.solo) return id === active.programme
+    return true
+  }
+
+  // Preview: env must allow it. Unlock alone is never enough.
+  if (!previewEnabled(id)) return false
+  if (active?.solo) return id === active.programme
+  return true
 }
 
 /** Every programme this visitor may browse, in catalog order. */

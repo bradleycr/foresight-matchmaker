@@ -3,7 +3,8 @@ import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth/session"
 import { peekLiveSession } from "@/lib/auth/live-session"
 import { getT } from "@/lib/i18n/server"
-import { challengeById } from "@/lib/challenges/catalog"
+import { challengeById, challengeIdOf } from "@/lib/challenges/catalog"
+import { isChallengeVisible, requestDemoUnlock } from "@/lib/challenges/visibility"
 import { hydrateListings } from "@/lib/db/durable"
 import { getProfilesByEmail } from "@/lib/db/profiles"
 import { isMailOptedOut } from "@/lib/mail/optout-store"
@@ -24,8 +25,11 @@ export default async function AccountPage() {
   if (!session) redirect(signInHref("/account"))
 
   await hydrateListings()
-  const live = await peekLiveSession()
-  const listings = getProfilesByEmail(session.email)
+  const [live, unlock] = await Promise.all([peekLiveSession(), requestDemoUnlock()])
+  // Hide listings for preview programmes when previews are off (live prod).
+  const listings = getProfilesByEmail(session.email).filter((profile) =>
+    isChallengeVisible(challengeIdOf(profile.challenge_id), unlock),
+  )
   const programmeEmails = !(await isMailOptedOut(session.email))
   const { t } = await getT()
 

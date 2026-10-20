@@ -63,10 +63,27 @@ describe("visibility", () => {
   })
 
   it("solo demo unlock hides Recoding Medicine for that browser", () => {
+    // In test/dev, previews are on — unlock may focus a pitch desk.
     const unlock = { programme: "ai_safety_berlin" as const, solo: true }
     expect(isChallengeVisible("ai_safety_berlin", unlock)).toBe(true)
     expect(isChallengeVisible("recoding_medicine", unlock)).toBe(false)
     expect(visibleChallenges(unlock).map((c) => c.id)).toEqual(["ai_safety_berlin"])
+  })
+
+  it("ignores unlock cookies when preview programmes are off", () => {
+    const previous = process.env.NEXT_PUBLIC_PREVIEW_PROGRAMMES
+    process.env.NEXT_PUBLIC_PREVIEW_PROGRAMMES = "off"
+    try {
+      const unlock = { programme: "ai_safety_berlin" as const, solo: true }
+      // Live desk: closed archive stays; preview programme stays hidden.
+      expect(isChallengeVisible("recoding_medicine", unlock)).toBe(true)
+      expect(isChallengeVisible("ai_safety_berlin", unlock)).toBe(false)
+      expect(visibleChallenges(unlock).map((c) => c.id)).toEqual(["recoding_medicine"])
+      expect(acceptsNewListings("recoding_medicine")).toBe(false)
+    } finally {
+      if (previous === undefined) delete process.env.NEXT_PUBLIC_PREVIEW_PROGRAMMES
+      else process.env.NEXT_PUBLIC_PREVIEW_PROGRAMMES = previous
+    }
   })
 })
 
