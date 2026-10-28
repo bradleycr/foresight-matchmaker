@@ -7,7 +7,8 @@ import { durableEnabled } from "@/lib/db/durable-store"
 import { planBerlinClaudeInvite, sendBerlinClaudeInvite } from "@/lib/mail/berlin-claude-invite"
 
 export const dynamic = "force-dynamic"
-export const maxDuration = 60
+/** Full Berlin cohort is ~50–70 sends; leave headroom for Resend latency. */
+export const maxDuration = 300
 
 /**
  * POST /api/admin/mail/berlin-invite

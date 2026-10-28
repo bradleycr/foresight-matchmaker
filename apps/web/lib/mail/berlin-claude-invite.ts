@@ -30,6 +30,7 @@ export interface BerlinInvitePlan {
   skipped_already_sent: number
   skipped_demo: number
   skipped_not_berlin: number
+  skipped_sprind: number
   sample?: string[]
 }
 
@@ -72,6 +73,14 @@ function looksLikeRecipient(email: string): boolean {
   return true
 }
 
+/** Challenge host team — never include in partner-facing blasts. */
+export function isSprindTeam(email: string, orgName?: string): boolean {
+  const e = email.trim().toLowerCase()
+  if (e.endsWith("@sprind.org") || e.endsWith("@sprind.de")) return true
+  if (orgName && /\bsprind\b/i.test(orgName)) return true
+  return false
+}
+
 /** Recoding Medicine + Berlin attending, minus opt-outs and already-sent. */
 export async function planBerlinClaudeInvite(opts?: {
   includeSample?: boolean
@@ -88,6 +97,7 @@ export async function planBerlinClaudeInvite(opts?: {
   let skipped_already_sent = 0
   let skipped_demo = 0
   let skipped_not_berlin = 0
+  let skipped_sprind = 0
 
   for (const profile of listProfiles()) {
     if (profile.challenge_id && profile.challenge_id !== "recoding_medicine") continue
@@ -98,6 +108,10 @@ export async function planBerlinClaudeInvite(opts?: {
     const email = profile.contact_email.trim().toLowerCase()
     if (!looksLikeRecipient(email)) {
       skipped_demo += 1
+      continue
+    }
+    if (isSprindTeam(email, profile.org_name)) {
+      skipped_sprind += 1
       continue
     }
     if (mailOptOuts.has(email) || nudgeOptOuts.has(email)) {
@@ -120,6 +134,7 @@ export async function planBerlinClaudeInvite(opts?: {
     skipped_already_sent,
     skipped_demo,
     skipped_not_berlin,
+    skipped_sprind,
   }
   if (opts?.includeSample) {
     plan.sample = recipients.slice(0, 3).map((r) => r.email.replace(/(.{2}).+(@.+)/, "$1…$2"))
@@ -156,6 +171,9 @@ export async function sendBerlinClaudeInvite(opts: {
     for (const email of allowSet) {
       if (queue.some((r) => r.email === email)) continue
       if (!looksLikeRecipient(email)) continue
+      // Explicit test addresses (e.g. bradley@foresight.org) may bypass the
+      // Berlin cohort filter, but never the SPRIND exclusion.
+      if (isSprindTeam(email)) continue
       extra.push({ email, org_name: "Test" })
     }
   }
