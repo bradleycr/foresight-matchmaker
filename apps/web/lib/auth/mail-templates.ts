@@ -331,7 +331,7 @@ export const BERLIN_CLAUDE_LINKS = {
 
 /**
  * Thank-you + invite for Recoding Medicine people who marked Berlin.
- * Multi-block body so event links stay clickable and readable in clients.
+ * Kept short: thanks, two events, calendar — no repeated pitch blocks.
  */
 export function renderBerlinClaudeInviteEmail(unsubscribeUrl: string): {
   subject: string
@@ -341,67 +341,74 @@ export function renderBerlinClaudeInviteEmail(unsubscribeUrl: string): {
   const links = BERLIN_CLAUDE_LINKS
   const subject = "Thank you — two free AI-for-science events in Berlin (4 & 7 Nov)"
   const preheader =
-    "Thanks for Recoding Medicine. Claude Conversation (4 Nov) and Impact Lab (7 Nov) at CIC Berlin — plus the Foresight Luma calendar."
+    "Thanks for Recoding Medicine. Claude Conversation (4 Nov) and Impact Lab (7 Nov) at CIC Berlin."
   const title = "Thank you from Foresight"
   const stopLabel = "Stop programme emails"
   const accountMail = links.accountMail
 
-  const paragraphs = [
-    "Thank you for taking part in the Recoding Medicine challenge through Foresight Matchmaking. We at Foresight wish you the best of luck with what comes next.",
-    "We also wanted to let you know about two upcoming free events in Berlin, co-hosted with the Claude Community, that may be of interest:",
-    "AI for science: two free events in Berlin for researchers (4 and 7 Nov, CIC Berlin).",
-    "Can AI help solve science's hardest problems, and what is left for scientists to do? The Claude Community and the Foresight Institute invite researchers from all fields and career stages, from PhD students to PIs, to two free events:",
-  ]
+  const thanks =
+    "Thank you for taking part in the Recoding Medicine challenge through Foresight Matchmaking. We wish you the best of luck with what comes next."
+  const bridge =
+    "Two free events in Berlin with the Claude Community and Foresight — open to researchers at every career stage. Come to either or both."
+  const sectionKicker = "AI for science · 4 & 7 Nov · CIC Berlin"
 
   const events = [
     {
-      when: "Wed, 4 Nov, 18:00–21:00 — Claude Conversation",
-      detail:
-        "An evening discussion in small groups about where AI already helps research, where it fails, and what worries us. No technical background needed.",
+      when: "Wed 4 Nov, 18:00–21:00",
+      name: "Claude Conversation",
+      detail: "Small-group evening on where AI helps research, where it fails, and what worries us. No technical background needed.",
       href: links.conversation,
-      label: "RSVP — Claude Conversation",
+      label: "RSVP",
     },
     {
-      when: "Sat, 7 Nov, 10:00–20:00 — Claude Impact Lab",
+      when: "Sat 7 Nov, 10:00–20:00",
+      name: "Claude Impact Lab",
       detail:
-        "A full-day build where scientists and AI engineers team up to turn real open research problems into working, open-source AI research loops. Bring a problem from your own work. Participants are selected by application.",
+        "Full-day build with scientists and AI engineers on real open research problems. Bring a problem from your work — by application.",
       href: links.impactLab,
-      label: "Apply — Claude Impact Lab",
+      label: "Apply",
     },
   ]
 
-  const closing = [
-    `The series is co-hosted by the Berlin AI Node of the Foresight Institute (${links.foresight}), a non-profit that has supported frontier science and technology for the benefit of life since 1986. You can come to either event or both.`,
-    `Follow the Foresight Luma calendar for more events and for openings of future programmes where Matchmaking may be used again: ${links.lumaCalendar}`,
-    `You can turn off programme emails any time in Account settings (${accountMail}), or use the one-click stop link below. Sign-in links still work if you need them.`,
-  ]
+  const closing =
+    `More Foresight events and future Matchmaking programmes: ${links.lumaCalendar}`
+  const hostNote = `Co-hosted with the Berlin AI Node of the Foresight Institute — ${links.foresight}`
 
   const text = [
     title,
     "",
-    ...paragraphs,
+    thanks,
     "",
-    ...events.flatMap((e) => [e.when, e.detail, e.href, ""]),
-    ...closing,
+    bridge,
     "",
-    `${stopLabel}:`,
-    unsubscribeUrl,
+    sectionKicker,
+    "",
+    ...events.flatMap((e) => [`${e.when} — ${e.name}`, e.detail, e.href, ""]),
+    hostNote,
+    closing,
+    "",
+    `Email preferences: ${accountMail}`,
+    `${stopLabel}: ${unsubscribeUrl}`,
     "",
     "Foresight Institute · foresight.org",
     SITE,
   ].join("\n")
 
-  const p = (content: string) =>
-    `<p style="margin:0 0 14px 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(content)}</p>`
-
   const eventBlock = events
     .map(
-      (e) => `
-              <p style="margin:18px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.45;color:${INK};font-weight:bold;">${escapeHtml(e.when)}</p>
-              <p style="margin:6px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(e.detail)}</p>
-              <p style="margin:8px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;">
-                <a href="${escapeHtml(e.href)}" style="color:${TEAL};font-weight:bold;">${escapeHtml(e.label)} →</a>
-              </p>`,
+      (e, index) => `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:${index === 0 ? "20px" : "28px"} 0 0 0;border-top:1px solid ${RULE};">
+                <tr>
+                  <td style="padding:16px 0 0 0;">
+                    <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:${TEAL};">${escapeHtml(e.when)}</p>
+                    <p style="margin:6px 0 0 0;font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1.2;color:${INK};">${escapeHtml(e.name)}</p>
+                    <p style="margin:10px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(e.detail)}</p>
+                    <p style="margin:12px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;">
+                      <a href="${escapeHtml(e.href)}" style="color:${TEAL};font-weight:bold;text-decoration:underline;">${escapeHtml(e.label)} →</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>`,
     )
     .join("")
 
@@ -429,14 +436,17 @@ export function renderBerlinClaudeInviteEmail(unsubscribeUrl: string): {
           <tr>
             <td style="padding:16px 32px 0 32px;">
               <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:${TEAL};">Foresight Matchmaking</p>
-              <h1 style="margin:10px 0 0 0;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.1;font-weight:normal;text-transform:uppercase;letter-spacing:-0.02em;color:${INK};">${escapeHtml(title)}</h1>
+              <h1 style="margin:10px 0 0 0;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;font-weight:normal;text-transform:uppercase;letter-spacing:-0.02em;color:${INK};">${escapeHtml(title)}</h1>
             </td>
           </tr>
           <tr>
-            <td style="padding:18px 32px 0 32px;">
-              ${paragraphs.map((line) => p(line)).join("")}
+            <td style="padding:20px 32px 0 32px;">
+              <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:${INK_SOFT};">${escapeHtml(thanks)}</p>
+              <p style="margin:16px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:${INK_SOFT};">${escapeHtml(bridge)}</p>
+              <p style="margin:28px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${TEAL};">${escapeHtml(sectionKicker)}</p>
               ${eventBlock}
-              ${closing.map((line) => p(line)).join("")}
+              <p style="margin:28px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(hostNote)}</p>
+              <p style="margin:12px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(closing)}</p>
             </td>
           </tr>
           <tr>
@@ -451,18 +461,16 @@ export function renderBerlinClaudeInviteEmail(unsubscribeUrl: string): {
             </td>
           </tr>
           <tr>
-            <td style="padding:16px 32px 0 32px;">
+            <td style="padding:20px 32px 0 32px;">
               <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.45;color:${INK_FAINT};">
-                Prefer to manage this in the app?
                 <a href="${escapeHtml(accountMail)}" style="color:${TEAL};">Account → email preferences</a>
-              </p>
-              <p style="margin:16px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.45;color:${INK_FAINT};">
+                &nbsp;·&nbsp;
                 <a href="${escapeHtml(unsubscribeUrl)}" style="color:${TEAL};">${escapeHtml(stopLabel)}</a>
               </p>
             </td>
           </tr>
           <tr>
-            <td style="padding:28px 32px 28px 32px;border-top:1px solid ${RULE};background:${PAPER_SHADE};">
+            <td style="padding:24px 32px 28px 32px;border-top:1px solid ${RULE};background:${PAPER_SHADE};">
               <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:${INK_SOFT};">Foresight Institute · independently operated directory</p>
               <p style="margin:6px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;">
                 <a href="${escapeHtml(SITE)}" style="color:${TEAL};">foresightmatchmaker.app</a>

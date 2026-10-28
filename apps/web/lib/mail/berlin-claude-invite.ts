@@ -187,7 +187,9 @@ export async function sendBerlinClaudeInvite(opts: {
       text: mail.text,
       html: mail.html,
       replyTo: "hello@foresightmatchmaker.app",
-      idempotencyKey: `thank-you/${BERLIN_CLAUDE_BLAST_ID}/${target.email}`,
+      // Bump the key suffix when the template body changes so Resend will
+      // deliver a fresh test instead of replaying the previous idempotent send.
+      idempotencyKey: `thank-you/${BERLIN_CLAUDE_BLAST_ID}/fmt2/${target.email}`,
       headers: {
         "List-Unsubscribe": `<${unsub}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
