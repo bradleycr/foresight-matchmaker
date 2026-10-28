@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 import { challengeById } from "@/lib/challenges/catalog"
 import {
+  BERLIN_CLAUDE_LINKS,
   PROFILE_NUDGE_CTA,
   RECODING_DEADLINE,
+  renderBerlinClaudeInviteEmail,
   renderHiddenListingEmail,
   renderProfileNudgeEmail,
   renderProgrammeNudgeEmail,
@@ -69,6 +71,28 @@ describe("renderThankYouRecordsEmail", () => {
     expect(mail.html).toContain(stop)
     expect(mail.html).toContain("outcome%3D1")
     expect(mail.html).not.toContain("applications close")
+  })
+})
+
+describe("renderBerlinClaudeInviteEmail", () => {
+  it("thanks Berlin Recoding Medicine people and links Claude events, Luma, and opt-out", () => {
+    const stop = "https://foresightmatchmaker.app/api/mail/unsubscribe?t=demo"
+    const mail = renderBerlinClaudeInviteEmail(stop)
+    expect(mail.subject).toContain("Berlin")
+    expect(mail.subject).toContain("4 & 7 Nov")
+    expect(mail.html).toContain("Recoding Medicine")
+    expect(mail.html).toContain("Claude Conversation")
+    expect(mail.html).toContain("Claude Impact Lab")
+    expect(mail.html).toContain(BERLIN_CLAUDE_LINKS.conversation)
+    expect(mail.html).toContain(BERLIN_CLAUDE_LINKS.impactLab)
+    expect(mail.html).toContain(BERLIN_CLAUDE_LINKS.lumaCalendar)
+    expect(mail.html).toContain(BERLIN_CLAUDE_LINKS.foresight)
+    expect(mail.html).toContain(BERLIN_CLAUDE_LINKS.accountMail)
+    expect(mail.html).toContain("Stop programme emails")
+    expect(mail.html).toContain(stop)
+    expect(mail.text).toContain(BERLIN_CLAUDE_LINKS.conversation)
+    expect(mail.text).toContain("Account settings")
+    expect(mail.html).toContain("Account → email preferences")
   })
 })
 

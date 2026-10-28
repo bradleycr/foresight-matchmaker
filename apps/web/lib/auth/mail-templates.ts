@@ -320,6 +320,167 @@ export function renderThankYouRecordsEmail(unsubscribeUrl: string): {
   )
 }
 
+/** Links shared in the Berlin Claude Community invite. */
+export const BERLIN_CLAUDE_LINKS = {
+  conversation: "https://luma.com/claude-c8ht",
+  impactLab: "https://luma.com/claude-wmbq",
+  foresight: "https://foresight.org/",
+  lumaCalendar: "https://luma.com/foresightinstitute",
+  accountMail: `${SITE}/account#email`,
+} as const
+
+/**
+ * Thank-you + invite for Recoding Medicine people who marked Berlin.
+ * Multi-block body so event links stay clickable and readable in clients.
+ */
+export function renderBerlinClaudeInviteEmail(unsubscribeUrl: string): {
+  subject: string
+  text: string
+  html: string
+} {
+  const links = BERLIN_CLAUDE_LINKS
+  const subject = "Thank you — two free AI-for-science events in Berlin (4 & 7 Nov)"
+  const preheader =
+    "Thanks for Recoding Medicine. Claude Conversation (4 Nov) and Impact Lab (7 Nov) at CIC Berlin — plus the Foresight Luma calendar."
+  const title = "Thank you from Foresight"
+  const stopLabel = "Stop programme emails"
+  const accountMail = links.accountMail
+
+  const paragraphs = [
+    "Thank you for taking part in the Recoding Medicine challenge through Foresight Matchmaking. We at Foresight wish you the best of luck with what comes next.",
+    "We also wanted to let you know about two upcoming free events in Berlin, co-hosted with the Claude Community, that may be of interest:",
+    "AI for science: two free events in Berlin for researchers (4 and 7 Nov, CIC Berlin).",
+    "Can AI help solve science's hardest problems, and what is left for scientists to do? The Claude Community and the Foresight Institute invite researchers from all fields and career stages, from PhD students to PIs, to two free events:",
+  ]
+
+  const events = [
+    {
+      when: "Wed, 4 Nov, 18:00–21:00 — Claude Conversation",
+      detail:
+        "An evening discussion in small groups about where AI already helps research, where it fails, and what worries us. No technical background needed.",
+      href: links.conversation,
+      label: "RSVP — Claude Conversation",
+    },
+    {
+      when: "Sat, 7 Nov, 10:00–20:00 — Claude Impact Lab",
+      detail:
+        "A full-day build where scientists and AI engineers team up to turn real open research problems into working, open-source AI research loops. Bring a problem from your own work. Participants are selected by application.",
+      href: links.impactLab,
+      label: "Apply — Claude Impact Lab",
+    },
+  ]
+
+  const closing = [
+    `The series is co-hosted by the Berlin AI Node of the Foresight Institute (${links.foresight}), a non-profit that has supported frontier science and technology for the benefit of life since 1986. You can come to either event or both.`,
+    `Follow the Foresight Luma calendar for more events and for openings of future programmes where Matchmaking may be used again: ${links.lumaCalendar}`,
+    `You can turn off programme emails any time in Account settings (${accountMail}), or use the one-click stop link below. Sign-in links still work if you need them.`,
+  ]
+
+  const text = [
+    title,
+    "",
+    ...paragraphs,
+    "",
+    ...events.flatMap((e) => [e.when, e.detail, e.href, ""]),
+    ...closing,
+    "",
+    `${stopLabel}:`,
+    unsubscribeUrl,
+    "",
+    "Foresight Institute · foresight.org",
+    SITE,
+  ].join("\n")
+
+  const p = (content: string) =>
+    `<p style="margin:0 0 14px 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(content)}</p>`
+
+  const eventBlock = events
+    .map(
+      (e) => `
+              <p style="margin:18px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.45;color:${INK};font-weight:bold;">${escapeHtml(e.when)}</p>
+              <p style="margin:6px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:${INK_SOFT};">${escapeHtml(e.detail)}</p>
+              <p style="margin:8px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;">
+                <a href="${escapeHtml(e.href)}" style="color:${TEAL};font-weight:bold;">${escapeHtml(e.label)} →</a>
+              </p>`,
+    )
+    .join("")
+
+  const html = `<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>${escapeHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:${PAPER};color:${INK};">
+  <div lang="en" dir="ltr" style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(preheader)}</div>
+  <table lang="en" dir="ltr" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER};">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:560px;max-width:560px;background:${PAPER};border:2px solid ${INK};">
+          <tr>
+            <td style="height:8px;line-height:8px;background:${MARK};font-size:0;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px 8px 32px;">
+              <img src="${LOGO}" alt="Foresight Institute" width="160" style="display:block;width:160px;height:auto;border:0;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 32px 0 32px;">
+              <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:${TEAL};">Foresight Matchmaking</p>
+              <h1 style="margin:10px 0 0 0;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.1;font-weight:normal;text-transform:uppercase;letter-spacing:-0.02em;color:${INK};">${escapeHtml(title)}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 32px 0 32px;">
+              ${paragraphs.map((line) => p(line)).join("")}
+              ${eventBlock}
+              ${closing.map((line) => p(line)).join("")}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px 8px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:${MARK};">
+                    <a href="${escapeHtml(links.lumaCalendar)}" style="display:inline-block;padding:14px 22px;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;color:${MARK_INK};">Foresight events calendar</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 32px 0 32px;">
+              <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.45;color:${INK_FAINT};">
+                Prefer to manage this in the app?
+                <a href="${escapeHtml(accountMail)}" style="color:${TEAL};">Account → email preferences</a>
+              </p>
+              <p style="margin:16px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.45;color:${INK_FAINT};">
+                <a href="${escapeHtml(unsubscribeUrl)}" style="color:${TEAL};">${escapeHtml(stopLabel)}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px 28px 32px;border-top:1px solid ${RULE};background:${PAPER_SHADE};">
+              <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:${INK_SOFT};">Foresight Institute · independently operated directory</p>
+              <p style="margin:6px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;">
+                <a href="${escapeHtml(SITE)}" style="color:${TEAL};">foresightmatchmaker.app</a>
+                ·
+                <a href="${escapeHtml(links.foresight)}" style="color:${TEAL};">foresight.org</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+
+  return { subject, text, html }
+}
+
 /** Published but Hidden — partners cannot see them in the directory. */
 export function renderHiddenListingEmail(): { subject: string; text: string; html: string } {
   const deadline = `Reminder: Recoding Medicine applications close ${RECODING_DEADLINE}.`
